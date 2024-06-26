@@ -3,7 +3,11 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "build-SettingsManager": "cd nova-components/SettingsManager && npm run dev",
+        "build-SettingsManager-prod": "cd nova-components/SettingsManager && npm run prod",
+        "build-settings-manager": "cd nova-components/SettingsManager && npm run dev",
+        "build-settings-manager-prod": "cd nova-components/SettingsManager && npm run prod"
     },
     "devDependencies": {
         "axios": "^1.6.4",
