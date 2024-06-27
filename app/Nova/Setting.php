@@ -19,7 +19,6 @@ class Setting extends Resource
             Text::make('Section')->sortable()->rules('required', 'max:255'),
             Text::make('Group')->sortable()->rules('required', 'max:255'),
             Text::make('Key')->sortable()->rules('required', 'max:255'),
-            Text::make('Scope')->sortable()->rules('required', 'max:255'),
             Textarea::make('Value')->rules('required'),
         ];
     }

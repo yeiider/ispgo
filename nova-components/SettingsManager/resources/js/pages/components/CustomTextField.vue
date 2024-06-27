@@ -12,8 +12,7 @@
                     :id="fieldId"
                     :placeholder="field.placeholder"
                     class="w-full form-control form-input form-control-bordered"
-                    :value="modelValue"
-                    @input="$emit('update:modelValue', $event.target.value)"
+
                 />
             </div>
         </div>
@@ -23,7 +22,6 @@
 <script>
 export default {
     props: {
-        modelValue: String,
         field: Object
     },
     computed: {

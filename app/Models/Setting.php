@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class Setting extends Model
 {
     use HasFactory;
-    protected $fillable = ['key', 'value', 'section','scope', 'group'];
+    protected $fillable = ['key', 'value', 'section', 'group'];
 }
