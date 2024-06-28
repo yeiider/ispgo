@@ -1,2 +1,14 @@
 /* Nova Tool CSS */
+.w-\[20\%\]{
+    width: 20%;
+}
+.w-\[75\%\]{
+    width: 75%;
+}
+.justify-evenly{
+    justify-content: space-evenly;
+}
+.p-\[15px\]{
+padding: 15px;
+}
 

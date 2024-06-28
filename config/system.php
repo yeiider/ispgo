@@ -9,6 +9,18 @@ return [
         "general" => [
             "setting" => [
                 "label" => "Web Setting",
+                "code" => "general"
+            ],
+            "company_status" => [
+                "field" => "select-field",
+                "label" => "Company Enabled?",
+                "options" => \Ispgo\SettingsManager\Source\Config\Yesno::getConfig()
+            ],
+            "company_type" => [
+                "field" => "select-field",
+                "label" => "Company Type",
+                "placeholder" => "Company Type",
+                "options" => \Ispgo\SettingsManager\Source\Config\CompanyType::getConfig()
             ],
             "company_name" => [
                 "field" => "text-field",
@@ -20,6 +32,12 @@ return [
                 "label" => "Company Description",
                 "placeholder" => "Company Description",
             ],
+            "schedule" => [
+                "field" => "text-field",
+                "label" => "Start time",
+                "placeholder" => "Company Address",
+            ],
+
             "company_address" => [
                 "field" => "text-field",
                 "label" => "Company Address",
@@ -31,12 +49,12 @@ return [
                 "placeholder" => "Company Telephone",
             ],
             "company_url" => [
-                "field" => "url-field",
+                "field" => "text-field",
                 "label" => "Web URL",
                 "placeholder" => "http://example.com",
             ],
             "company_email" => [
-                "field" => "text-email",
+                "field" => "text-field",
                 "label" => "Company Email",
                 "placeholder" => "Company Email",
             ],
@@ -56,9 +74,10 @@ return [
             "setting" => [
                 "label" => "General Email",
                 "class" => "form-control",
+                "code" => "general"
             ],
             "enabled" => [
-                "field" => "boolean",
+                "field" => "boolean-field",
                 "label" => "Enabled",
                 "placeholder" => "Enabled",
             ],
@@ -83,7 +102,7 @@ return [
                 "placeholder" => "Port",
             ],
             "password" => [
-                "field" => "text-field",
+                "field" => "password-field",
                 "label" => "Password",
                 "placeholder" => "Password",
             ],
