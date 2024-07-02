@@ -2,8 +2,14 @@
 
 namespace App\Providers;
 
+use App\Nova\Router;
+use App\Nova\Zone;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Ispgo\SettingsManager\SettingsManager;
+use Laravel\Nova\Dashboards\Main;
+use Laravel\Nova\Menu\MenuItem;
+use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
 
@@ -17,6 +23,23 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function boot()
     {
         parent::boot();
+        Nova::mainMenu(function (Request $request) {
+            return [
+                MenuSection::dashboard(Main::class)->icon('chart-bar'),
+
+                MenuSection::make('System Network', [
+                    MenuItem::resource(Router::class),
+                    MenuItem::resource(Zone::class),
+                ])->icon('server')->collapsable(),
+                MenuSection::make('Settings Manager')
+                    ->path('/settings-manager')
+                    ->icon('cog'),
+                /* MenuSection::make('Content', [
+                     MenuItem::resource(Series::class),
+                     MenuItem::resource(Release::class),
+                 ])->icon('document-text')->collapsable(),*/
+            ];
+        });
     }
 
     /**
@@ -27,9 +50,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     protected function routes()
     {
         Nova::routes()
-                ->withAuthenticationRoutes(default: true)
-                ->withPasswordResetRoutes()
-                ->register();
+            ->withAuthenticationRoutes(default: true)
+            ->withPasswordResetRoutes()
+            ->register();
     }
 
     /**

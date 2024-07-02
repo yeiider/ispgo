@@ -32,7 +32,7 @@ class SettingsManager extends Tool
     {
         return MenuSection::make('Settings Manager')
             ->path('/settings-manager')
-            ->icon('server');
+            ->icon('cog');
     }
     /**
      * Register the tool's routes.
