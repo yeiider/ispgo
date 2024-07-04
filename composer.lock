@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "01f1053109e1c21a9bbc3c094af9c386",
+    "content-hash": "60bf19b2878e1b8290f20e3332eb07c6",
     "packages": [
         {
             "name": "brick/math",
@@ -1341,7 +1341,7 @@
         },
         {
             "name": "ispgo/settings-manager",
-            "version": "dev-master",
+            "version": "dev-feature/network-system",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/SettingsManager",

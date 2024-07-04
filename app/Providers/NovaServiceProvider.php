@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Nova\Address;
+use App\Nova\Customer;
 use App\Nova\Router;
-use App\Nova\Zone;
+use App\Nova\TaxDetail;
+use Badinansoft\LanguageSwitch\LanguageSwitch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Ispgo\SettingsManager\SettingsManager;
@@ -23,14 +26,29 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function boot()
     {
         parent::boot();
+        Nova::userLocale(function () {
+            return match (app()->getLocale()) {
+                'en' => 'en-US',
+                'es' => 'es-CO',
+                default => null,
+            };
+        });
         Nova::mainMenu(function (Request $request) {
             return [
                 MenuSection::dashboard(Main::class)->icon('chart-bar'),
+                // customers
+                MenuSection::make('Customers', [
+                    MenuItem::resource(Customer::class),
+                    MenuItem::resource(Address::class),
+                    MenuItem::resource(TaxDetail::class),
+                    //MenuItem::resource(Zone::class),
+                ])->icon('users')->collapsable(),
 
                 MenuSection::make('System Network', [
                     MenuItem::resource(Router::class),
                     //MenuItem::resource(Zone::class),
                 ])->icon('server')->collapsable(),
+
                 MenuSection::make('Settings Manager')
                     ->path('/settings-manager')
                     ->icon('cog'),

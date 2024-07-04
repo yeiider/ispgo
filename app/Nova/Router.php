@@ -44,13 +44,13 @@ class Router extends Resource
         return [
             ID::make(__('ID'), 'id')->sortable(),
 
-            Select::make('Status', 'status')
+            Select::make(__('Status'), 'status')
                 ->options([
-                    'enabled' => 'Enabled',
-                    'disabled' => 'Disabled',
-                ])->default("enabled"),
+                    'enabled' => __('Enabled'),
+                    'disabled' => __('Disabled'),
+                ])->default("enabled")->hideFromIndex(),
 
-            Badge::make('status','status')->map([
+            Badge::make(__('Status'),'status')->map([
                 'enabled' => 'success',
                 'disabled' => 'danger',
             ])->icons([
