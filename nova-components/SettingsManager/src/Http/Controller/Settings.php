@@ -2,11 +2,8 @@
 
 namespace Ispgo\SettingsManager\Http\Controller;
 
-use App\Models\Setting;
-use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Country;
-use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Resource;
+use App\Models\CoreConfigData;
+use Ispgo\SettingsManager\App\SettingsManager\SettingsLoader;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
@@ -16,43 +13,35 @@ use Laravel\Nova\Fields\Email;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Select;
-use Ispgo\SettingsManager\Source\Config\CompanyType;
+use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Resource;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
 class Settings extends Resource
 {
-    public function settings($request): array
-    {
-        $params = $request->section ?? 'general';
-        $key = "system.{$params}";
-        $generalConfig = config('system');
-        $sectionsConfig = config($key);
-        $menusConfig = array_keys($generalConfig);
-        $menu = [];
-        foreach ($menusConfig as $menuConfig) {
-            $menu[$menuConfig] = $generalConfig[$menuConfig]["setting"];
-        }
-        return compact('sectionsConfig', 'menu', 'params');
-    }
-
     public function fields(NovaRequest $request): array
     {
-        $settingsData = $this->settings($request);
-        $sectionsConfig = $settingsData['sectionsConfig'];
-        $menu = $settingsData['menu'];
-        $params = $settingsData['params'];
-        $fields = [];
+        $params = $request->section ?? 'general';
+        $sectionsConfig = SettingsLoader::getSectionSettings($params);
 
-        // Obtener todos los settings de la base de datos para la sección actual
-        $existingSettings = Setting::where('section', $params)->get()->keyBy(function ($item) {
-            return $item['group'] . '.' . $item['key'];
+        // Obtener el menú de configuraciones
+        $settingMenu = SettingsLoader::getSettingsMenu();
+
+        // Obtener las configuraciones existentes
+        $existingSettings = CoreConfigData::all()->keyBy(function ($item) {
+            return $item['path'];
         });
+
+        $groups = [];
 
         foreach ($sectionsConfig as $groupKey => $group) {
             if ($groupKey === 'setting') {
                 continue;
             }
+
+            $groupFields = [];
+
             foreach ($group as $fieldKey => $field) {
                 if ($fieldKey === 'setting') {
                     continue;
@@ -62,8 +51,8 @@ class Settings extends Resource
                 $fieldPlaceholder = $field['placeholder'] ?? '';
                 $fieldType = $field['field'] ?? 'text-field';
 
-                // Construir la clave compuesta por el grupo y la clave del campo
-                $settingKey = $groupKey . '.' . $fieldKey;
+                // Construir la clave completa: section/group/field
+                $settingKey = "{$params}/{$groupKey}/{$fieldKey}";
 
                 // Obtener el valor del setting existente si está presente
                 $fieldValue = $existingSettings[$settingKey]->value ?? null;
@@ -92,7 +81,7 @@ class Settings extends Resource
                     case 'password-field':
                         $fieldInstance = Password::make($fieldLabel, $fieldKey);
                         break;
-                    case 'datatime-field':
+                    case 'datetime-field':
                         $fieldInstance = DateTime::make($fieldLabel, $fieldKey);
                         break;
                     case 'image-field':
@@ -107,11 +96,29 @@ class Settings extends Resource
                 if ($fieldPlaceholder) {
                     $fieldInstance->placeholder($fieldPlaceholder);
                 }
-                $fieldInstance->withMeta(["group" => $group['setting']['code'],"value" =>$fieldValue,  "group_label" => $group['setting']['label']]);
-                $fields[] = $fieldInstance;
+
+                // Asignar el valor existente al campo
+                if ($fieldValue !== null) {
+                    $fieldInstance->value($fieldValue);
+                }
+
+                $fieldInstance->withMeta([
+                    'group' => $group['setting']['code'],
+                    'group_label' => $group['setting']['label']
+                ]);
+
+                $groupFields[] = $fieldInstance;
             }
+
+            $groups[] = [
+                'label' => $group['setting']['label'],
+                'code' => $group['setting']['code'],
+                'class' => $group['setting']['class']??"",
+                'fields' => $groupFields,
+            ];
         }
-        return compact('fields', 'sectionsConfig', 'menu');
+
+        return compact('groups', 'settingMenu');
     }
 
     public function saveSetting(NovaRequest $request): \Illuminate\Http\JsonResponse
@@ -122,8 +129,8 @@ class Settings extends Resource
             $parseData = $this->parseData($fields, $section);
 
             foreach ($parseData as $group) {
-                Setting::updateOrCreate(
-                    ['section' => $section, 'group' => $group['group'], 'key' => $group['key']],
+                CoreConfigData::updateOrCreate(
+                    ['path' => "{$section}/{$group['group']}/{$group['key']}"],
                     ['value' => $group['value']]
                 );
             }
@@ -135,17 +142,19 @@ class Settings extends Resource
         }
     }
 
-    private function parseData(mixed $fields, string $section): array
+    private function parseData($fields, $section): array
     {
         $settings = [];
+
         foreach ($fields as $field) {
             $settings[] = [
-                "section" => $section,
-                "group" => $field["group"],
-                "key" => $field["attribute"],
-                "value" => $field["value"],
+                'section' => $section,
+                'group' => $field['group'],
+                'key' => $field['attribute'],
+                'value' => $field['value'],
             ];
         }
+
         return $settings;
     }
 }

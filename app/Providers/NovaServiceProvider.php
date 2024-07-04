@@ -29,7 +29,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make('System Network', [
                     MenuItem::resource(Router::class),
-                    MenuItem::resource(Zone::class),
+                    //MenuItem::resource(Zone::class),
                 ])->icon('server')->collapsable(),
                 MenuSection::make('Settings Manager')
                     ->path('/settings-manager')

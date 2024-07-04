@@ -188,7 +188,7 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       fields: [],
-      menu: [],
+      settingMenu: [],
       isOpen: []
     };
   },
@@ -218,7 +218,7 @@ __webpack_require__.r(__webpack_exports__);
       }
       Nova.request().get(url).then(function (response) {
         _this.fields = response.data.fields;
-        _this.menu = response.data.menu;
+        _this.settingMenu = response.data.settingMenu;
       });
     },
     updateFieldValue: function updateFieldValue(group, attribute, value) {
@@ -491,8 +491,8 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           key: index,
           "class": "mb-2"
         }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
-          href: "".concat($data.baseUrl, "/section/").concat(index),
-          "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(['w-full flex items-start p-[15px] rounded text-left text-gray-500 dark:text-gray-500 focus:outline-none focus:ring focus:ring-primary-200 dark:focus:ring-gray-600 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 font-bold dark:text-primary-500', $props.section === index ? 'bg-gray-200 dark:bg-gray-800 ' : ''])
+          href: "".concat($data.baseUrl, "/section/").concat(item.code),
+          "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(['w-full flex items-start p-[15px] rounded text-left text-gray-500 dark:text-gray-500 focus:outline-none focus:ring focus:ring-primary-200 dark:focus:ring-gray-600 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 font-bold dark:text-primary-500', $props.section === item.code ? 'bg-gray-200 dark:bg-gray-800 ' : ''])
         }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(item.label), 1 /* TEXT */)], 10 /* CLASS, PROPS */, _hoisted_2)]);
       }), 128 /* KEYED_FRAGMENT */))])];
     }),
@@ -553,7 +553,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     _: 1 /* STABLE */
   }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Menu, {
     "class": "w-[20%]",
-    menu: $data.menu,
+    menu: $data.settingMenu,
     section: $props.section
   }, null, 8 /* PROPS */, ["menu", "section"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", {
     onSubmit: _cache[2] || (_cache[2] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {

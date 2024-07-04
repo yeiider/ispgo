@@ -3,7 +3,7 @@
         <heading class="mb-6">Settings Manager</heading>
         <div class="flex justify-evenly">
             <Menu class="w-[20%]"
-                  :menu="menu"
+                  :menu="settingMenu"
                   :section="section"
             />
             <form @submit.prevent="saveSetting" class="w-[75%]">
@@ -64,7 +64,7 @@ export default {
     data() {
         return {
             fields: [],
-            menu: [],
+            settingMenu: [],
             isOpen: []
         };
     },
@@ -93,7 +93,7 @@ export default {
             }
             Nova.request().get(url).then(response => {
                 this.fields = response.data.fields;
-                this.menu = response.data.menu;
+                this.settingMenu = response.data.settingMenu;
             });
         },
         updateFieldValue(group, attribute, value) {
