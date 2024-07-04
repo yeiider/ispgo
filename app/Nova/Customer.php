@@ -38,7 +38,7 @@ class Customer extends Resource
                 ->sortable()
                 ->rules('required', 'max:20'),
             Text::make(__('Identity Document'), 'identity_document')->rules('required', 'max:100'),
-            Badge::make(__('Status'), 'status')->map([
+            Badge::make(__('Status'), 'customer_status')->map([
                 'active' => 'success',
                 'inactive' => 'danger',
                 'suspended' => 'info',
@@ -55,8 +55,9 @@ class Customer extends Resource
                 ])
                 ->sortable()->rules('required'),
             Textarea::make(__('Additional Notes'), 'additional_notes')->nullable(),
-            HasMany::make(__('Addresses'), 'addresses', Address::class),
             HasOne::make(__('Tax Details'), 'taxDetails', TaxDetail::class),
+            HasMany::make(__('Addresses'), 'addresses', Address::class),
+            HasMany::make(__('Services'), 'services', Address::class),
         ];
     }
 }

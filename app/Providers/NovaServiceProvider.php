@@ -4,13 +4,17 @@ namespace App\Providers;
 
 use App\Nova\Address;
 use App\Nova\Customer;
+use App\Nova\InternetPlan;
+use App\Nova\Invoice;
 use App\Nova\Router;
+use App\Nova\Service;
 use App\Nova\TaxDetail;
 use Badinansoft\LanguageSwitch\LanguageSwitch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Ispgo\SettingsManager\SettingsManager;
 use Laravel\Nova\Dashboards\Main;
+use Laravel\Nova\Menu\MenuGroup;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\Nova;
@@ -38,15 +42,19 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::dashboard(Main::class)->icon('chart-bar'),
                 // customers
                 MenuSection::make('Customers', [
-                    MenuItem::resource(Customer::class),
-                    MenuItem::resource(Address::class),
-                    MenuItem::resource(TaxDetail::class),
-                    //MenuItem::resource(Zone::class),
+                        MenuItem::resource(Customer::class),
+                        MenuItem::resource(Address::class),
+                        MenuItem::resource(TaxDetail::class),
+                        MenuItem::resource(Service::class)
                 ])->icon('users')->collapsable(),
+
+                MenuSection::make('Invoices', [
+                    MenuItem::resource(Invoice::class),
+                ])->icon('cash')->collapsable(),
 
                 MenuSection::make('System Network', [
                     MenuItem::resource(Router::class),
-                    //MenuItem::resource(Zone::class),
+                    MenuItem::resource(InternetPlan::class),
                 ])->icon('server')->collapsable(),
 
                 MenuSection::make('Settings Manager')

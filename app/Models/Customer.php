@@ -29,6 +29,11 @@ class Customer extends Model
         return $this->hasMany(Address::class);
     }
 
+    public function services()
+    {
+        return $this->hasMany(Service::class);
+    }
+
     public function taxDetails()
     {
         return $this->hasOne(TaxDetail::class);
