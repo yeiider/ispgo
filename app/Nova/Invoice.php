@@ -2,6 +2,8 @@
 
 namespace App\Nova;
 
+use Laravel\Nova\Fields\Badge;
+use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Number;
@@ -30,19 +32,28 @@ class Invoice extends Resource
 
             BelongsTo::make('Customer', 'customer', \App\Nova\Customer::class),
             BelongsTo::make('Service', 'service', \App\Nova\Service::class),
-            BelongsTo::make('User', 'user', \App\Nova\User::class),
 
-            Number::make('Subtotal', 'subtotal')->step(0.01),
-            Number::make('Tax', 'tax')->step(0.01),
-            Number::make('Total', 'total')->step(0.01),
-            Number::make('Amount', 'amount')->step(0.01),
+            Currency::make('Subtotal', 'subtotal')->step(0.01),
+            Currency::make('Tax', 'tax')->step(0.01),
+            Currency::make('Total', 'total')->step(0.01),
+            Currency::make('Amount', 'amount')->step(0.01),
+            Currency::make('Total Pay', 'total')->step(0.01),
             Date::make('Issue Date', 'issue_date'),
             Date::make('Due Date', 'due_date'),
             Select::make('Status', 'status')->options([
                 'paid' => 'Paid',
                 'unpaid' => 'Unpaid',
                 'overdue' => 'Overdue'
-            ])->displayUsingLabels(),
+            ])->displayUsingLabels()->hideFromIndex(),
+            Badge::make(__('Status'))->map([
+                'paid' => 'success',
+                'overdue' => 'danger',
+                'unpaid' => 'warning',
+            ])->icons([
+                'danger' => 'exclamation-circle',
+                'success' => 'check-circle',
+                'warning' => 'minus-circle',
+            ]),
             Text::make('Payment Method', 'payment_method'),
             Textarea::make('Notes', 'notes')->hideFromIndex(),
         ];
@@ -53,10 +64,11 @@ class Invoice extends Resource
         return [];
     }
 
-   /* public static function authorizedToCreate(Request $request)
+    public static function authorizedToCreate(Request $request)
     {
         return false;
     }
+
     public function authorizedToUpdate(Request $request)
     {
         return false;
@@ -65,6 +77,6 @@ class Invoice extends Resource
     public function authorizedToDelete(Request $request)
     {
         return false;
-    }*/
+    }
 
 }

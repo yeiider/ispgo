@@ -16,11 +16,12 @@ class CreateInvoicesTable extends Migration
             $table->decimal('subtotal', 8, 2);
             $table->decimal('tax', 8, 2);
             $table->decimal('total', 8, 2);
-            $table->decimal('amount', 8, 2);
+            $table->decimal('amount', 8, 2)->default(0); // Pagos recibidos
+            $table->decimal('outstanding_balance', 8, 2); // Saldo pendiente
             $table->date('issue_date');
             $table->date('due_date');
-            $table->enum('status', ['paid', 'unpaid', 'overdue'])->default('unpaid');
-            $table->string('payment_method');
+            $table->enum('status', ['paid', 'unpaid', 'overdue','canceled'])->default('unpaid');
+            $table->string('payment_method')->nullable(); // Método de pago puede ser nulo
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->foreign('service_id')->references('id')->on('services')->onDelete('restrict');

@@ -2,6 +2,8 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\GenerateInvoice;
+use App\Nova\Actions\UpdateCustomerStatus;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
@@ -43,7 +45,8 @@ class Service extends Resource
     protected function customerRouterFields()
     {
         return [
-            BelongsTo::make('Customer', 'customer', \App\Nova\Customer::class),
+            BelongsTo::make('Customer', 'customer', \App\Nova\Customer::class)
+                ->searchable(),
             BelongsTo::make('Router', 'router', \App\Nova\Router::class),
         ];
     }
@@ -54,7 +57,7 @@ class Service extends Resource
             BelongsTo::make('Internet Plan', 'internetPlan', \App\Nova\InternetPlan::class),
             Text::make('Service IP', 'service_ip')->sortable(),
             Text::make('Username Router', 'username_router'),
-            Text::make('Password Router', 'password_router'),
+            Text::make('Password Router', 'password_router')->hideFromIndex(),
             Select::make('Service Status', 'service_status')->options([
                 'active' => 'Active',
                 'inactive' => 'Inactive',
@@ -69,8 +72,8 @@ class Service extends Resource
             ])->icons([
                 'danger' => 'exclamation-circle',
                 'success' => 'check-circle',
-                'suspended' => 'status-offline',
-                'pending' => 'clock',
+                'info' => 'status-offline',
+                'warning' => 'clock',
             ]),
             Date::make('Activation Date', 'activation_date'),
             Date::make('Deactivation Date', 'deactivation_date'),
@@ -81,7 +84,7 @@ class Service extends Resource
     {
         return [
             Text::make('Support Contact', 'support_contact'),
-            Text::make('Service Location', 'service_location'),
+            Text::make('Service Location', 'service_location')->hideFromIndex(),
             Text::make('Billing Cycle', 'billing_cycle'),
             Number::make('Monthly Fee', 'monthly_fee')->step(0.01),
             Number::make('Overage Fee', 'overage_fee')->step(0.01),
@@ -92,19 +95,25 @@ class Service extends Resource
     protected function technicalInformationFields()
     {
         return [
-            Number::make('Bandwidth', 'bandwidth'),
-            Text::make('MAC Address', 'mac_address'),
+            Number::make('Bandwidth', 'bandwidth')->hideFromIndex(),
+            Text::make('MAC Address', 'mac_address')->hideFromIndex(),
             Date::make('Installation Date', 'installation_date'),
             Textarea::make('Service Notes', 'service_notes'),
-            Boolean::make('Static IP', 'static_ip'),
-            Number::make('Data Limit', 'data_limit'),
-            Date::make('Last Maintenance', 'last_maintenance'),
+            Boolean::make('Static IP', 'static_ip')->hideFromIndex(),
+            Number::make('Data Limit', 'data_limit')->hideFromIndex(),
+            Date::make('Last Maintenance', 'last_maintenance')->hideFromIndex(),
             Select::make('Service Priority', 'service_priority')->options([
                 'normal' => 'Normal',
                 'high' => 'High',
                 'critical' => 'Critical'
             ])->displayUsingLabels(),
-            Textarea::make('Service Contract', 'service_contract'),
+        ];
+    }
+
+    public function actions(NovaRequest $request)
+    {
+        return [
+            new GenerateInvoice(),
         ];
     }
 }

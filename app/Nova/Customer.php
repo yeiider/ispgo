@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use App\Models\DocumentType;
+use App\Nova\Actions\UpdateCustomerStatus;
 use App\Nova\Resource;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Badge;
@@ -13,12 +14,13 @@ use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Customer extends Resource
 {
     public static $model = \App\Models\Customer::class;
 
-    public static $title = 'email_address';
+    public static $title = 'full_name';
 
     public static $search = [
         'id', 'first_name', 'last_name', 'email_address', 'phone_number'
@@ -41,23 +43,30 @@ class Customer extends Resource
             Badge::make(__('Status'), 'customer_status')->map([
                 'active' => 'success',
                 'inactive' => 'danger',
-                'suspended' => 'info',
+                'suspended' => 'warning',
             ])->icons([
                 'danger' => 'exclamation-circle',
                 'success' => 'check-circle',
-                'suspended' => 'status-offline',
+                'warning' => 'status-offline',
             ]),
             Select::make(__('Customer Status'), 'customer_status')
                 ->options([
                     'active' => __('Active'),
                     'inactive' => __('Inactive'),
                     'suspended' => __('Suspended'),
-                ])
+                ])->hideFromIndex()
                 ->sortable()->rules('required'),
             Textarea::make(__('Additional Notes'), 'additional_notes')->nullable(),
             HasOne::make(__('Tax Details'), 'taxDetails', TaxDetail::class),
             HasMany::make(__('Addresses'), 'addresses', Address::class),
-            HasMany::make(__('Services'), 'services', Address::class),
+            HasMany::make(__('Services'), 'services', Service::class),
+        ];
+    }
+
+    public function actions(NovaRequest $request)
+    {
+        return [
+            new UpdateCustomerStatus,
         ];
     }
 }

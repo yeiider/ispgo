@@ -25,4 +25,18 @@ class CoreConfigData extends Model
     protected $attributes = [
         'scope' => 0,
     ];
+
+    /**
+     * Get the value of a configuration by path with a default scope_id of 0.
+     *
+     * @param string $path
+     * @param int $scopeId
+     * @return string|null
+     */
+    public static function getValueByPath(string $path, int $scopeId = 0): ?string
+    {
+        return self::where('path', $path)
+            ->where('scope_id', $scopeId)
+            ->value('value');
+    }
 }

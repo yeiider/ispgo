@@ -16,4 +16,8 @@ class InternetPlan extends Model
         'customer_rating', 'customer_reviews', 'service_compatibility', 'network_priority',
         'technical_support', 'additional_benefits', 'connection_type', 'status'
     ];
+    protected $casts = [
+        'promotion_end_date' => 'date',
+        'promotion_start_date' => 'date'
+    ];
 }

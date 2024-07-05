@@ -10,8 +10,13 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount',
+        'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
         'issue_date', 'due_date', 'status', 'payment_method', 'notes'
+    ];
+
+    protected $casts = [
+        "due_date" => "date",
+        "issue_date" => "date"
     ];
 
     public function service()
@@ -29,4 +34,19 @@ class Invoice extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function applyPayment($amount, $paymentMethod = "cash"): void
+    {
+        $this->amount += $amount;
+        $this->outstanding_balance = $this->total - $this->amount;
+        $this->payment_method = $paymentMethod;
+
+        if ($this->outstanding_balance <= 0) {
+            $this->status = 'paid';
+            $this->outstanding_balance = 0;
+        } else if ($this->due_date < now() && $this->outstanding_balance > 0) {
+            $this->status = 'overdue';
+        }
+
+        $this->save();
+    }
 }
