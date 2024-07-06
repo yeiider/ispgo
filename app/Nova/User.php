@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rules;
 use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\MorphToMany;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -62,6 +63,8 @@ class User extends Resource
                 ->onlyOnForms()
                 ->creationRules('required', Rules\Password::defaults())
                 ->updateRules('nullable', Rules\Password::defaults()),
+            MorphToMany::make('Roles', 'roles', \Sereny\NovaPermissions\Nova\Role::class),
+            MorphToMany::make('Permissions', 'permissions', \Sereny\NovaPermissions\Nova\Permission::class),
         ];
     }
 
@@ -107,5 +110,30 @@ class User extends Resource
     public function actions(NovaRequest $request)
     {
         return [];
+    }
+
+    public static function authorizedToCreate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('createUser');
+    }
+
+    public function authorizedToUpdate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('updateUser', $this->resource);
+    }
+
+    public function authorizedToDelete(Request $request)
+    {
+        return auth()->check() && $request->user()->can('deleteUser', $this->resource);
+    }
+
+    public static function authorizedToViewAny(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewAnyUser');
+    }
+
+    public function authorizedToView(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewUser', $this->resource);
     }
 }

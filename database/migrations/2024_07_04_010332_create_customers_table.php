@@ -17,8 +17,10 @@ class CreateCustomersTable extends Migration
             $table->string('email_address')->unique();
             $table->string('document_type',5);
             $table->string('identity_document',12);
-            $table->enum('customer_status',["active","inactive","suspended"])->default("active");
+            $table->enum('customer_status',["active","inactive"])->default("active");
             $table->text('additional_notes')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable(); // ID del usuario que creó el plan
+            $table->unsignedBigInteger('updated_by')->nullable(); // ID del usuario que actualizó el plan por última vez
             $table->timestamps();
         });
     }

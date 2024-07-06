@@ -4,6 +4,7 @@ namespace Ispgo\SettingsManager\Http\Middleware;
 
 use Laravel\Nova\Nova;
 use Ispgo\SettingsManager\SettingsManager;
+use Closure;
 
 class Authorize
 {
@@ -14,11 +15,15 @@ class Authorize
      * @param  \Closure(\Illuminate\Http\Request):mixed  $next
      * @return \Illuminate\Http\Response
      */
-    public function handle($request, $next)
+    public function handle($request, Closure $next)
     {
         $tool = collect(Nova::registeredTools())->first([$this, 'matchesTool']);
 
-        return optional($tool)->authorize($request) ? $next($request) : abort(403);
+        if ($tool && $this->userHasSettingPermission($request)) {
+            return $next($request);
+        }
+
+        return abort(403);
     }
 
     /**
@@ -30,5 +35,16 @@ class Authorize
     public function matchesTool($tool)
     {
         return $tool instanceof SettingsManager;
+    }
+
+    /**
+     * Determine whether the user has the 'setting' permission.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    protected function userHasSettingPermission($request)
+    {
+        return $request->user() && $request->user()->can('Setting');
     }
 }

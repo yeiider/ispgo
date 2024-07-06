@@ -19,6 +19,8 @@ class CreateAddressesTable extends Migration
             $table->enum('address_type',["billing","shipping"])->default("billing");
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
+            $table->unsignedBigInteger('created_by')->nullable(); // ID del usuario que creó el plan
+            $table->unsignedBigInteger('updated_by')->nullable(); // ID del usuario que actualizó el plan por última vez
             $table->timestamps();
         });
     }

@@ -7,6 +7,7 @@ use App\Events\CustomerStatusUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class Customer extends Model
 {
@@ -25,6 +26,8 @@ class Customer extends Model
         'identity_document',
         'customer_status',
         'additional_notes',
+        'created_by',
+        'updated_by',
     ];
 
     public function addresses()
@@ -44,7 +47,7 @@ class Customer extends Model
 
     public function getFullNameAttribute()
     {
-        return "{$this->first_name} {$this->last_name}";
+        return ucfirst("{$this->first_name} {$this->last_name}");
     }
 
     public function setFirstNameAttribute($value)
@@ -69,10 +72,14 @@ class Customer extends Model
         });
 
         static::created(function ($customer) {
+
+            $customer->created_by = Auth::id();
+            $customer->updated_by = Auth::id();
             event(new CustomerCreated($customer));
         });
         static::updating(function ($customer) {
             if ($customer->isDirty('customer_status')) {
+                $customer->updated_by = Auth::id();
                 event(new CustomerStatusUpdated($customer));
             }
         });

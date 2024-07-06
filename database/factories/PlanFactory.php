@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\InternetPlan;
+use App\Models\Plan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class InternetPlanFactory extends Factory
+class PlanFactory extends Factory
 {
-    protected $model = InternetPlan::class;
+    protected $model = Plan::class;
 
     public function definition()
     {
@@ -32,8 +32,11 @@ class InternetPlanFactory extends Factory
             'network_priority' => $this->faker->optional()->randomElement(['high', 'medium', 'low']),
             'technical_support' => $this->faker->optional()->text,
             'additional_benefits' => $this->faker->optional()->text,
+            'plan_type' => $this->faker->randomElement(['internet', 'television', 'telephonic']),
+            'modality_type' => $this->faker->randomElement(['prepaid', 'postpaid']),
             'connection_type' => $this->faker->randomElement(['Fiber Optic', 'ADSL', 'Satellite']),
-            'status' => $this->faker->randomElement(['Active', 'Inactive', 'Pending']),
+
+            'status' => $this->faker->randomElement(['active', 'inactive']),
         ];
     }
 }

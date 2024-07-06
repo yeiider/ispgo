@@ -66,17 +66,27 @@ class Invoice extends Resource
 
     public static function authorizedToCreate(Request $request)
     {
-        return false;
+        return auth()->check() && $request->user()->can('createInvoice');
     }
 
     public function authorizedToUpdate(Request $request)
     {
-        return false;
+        return auth()->check() && $request->user()->can('updateInvoice', $this->resource);
     }
 
     public function authorizedToDelete(Request $request)
     {
-        return false;
+        return auth()->check() && $request->user()->can('deleteInvoice', $this->resource);
+    }
+
+    public static function authorizedToViewAny(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewAnyInvoice');
+    }
+
+    public function authorizedToView(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewInvoice', $this->resource);
     }
 
 }

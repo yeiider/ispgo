@@ -46,4 +46,15 @@ class SettingsManager extends Tool
             ->prefix('/settings-manager')
             ->group(__DIR__.'/../routes/api.php');
     }
+
+    /**
+     * Determine if the tool is authorized to be used.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    public function authorize($request)
+    {
+        return $request->user() && $request->user()->can('Setting');
+    }
 }

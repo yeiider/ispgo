@@ -41,4 +41,30 @@ class Address extends Resource
             Number::make(__('Longitude'), 'longitude')->nullable()->step(0.0000001),
         ];
     }
+
+
+    public static function authorizedToCreate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('createAddress');
+    }
+
+    public function authorizedToUpdate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('updateAddress', $this->resource);
+    }
+
+    public function authorizedToDelete(Request $request)
+    {
+        return auth()->check() && $request->user()->can('deleteAddress', $this->resource);
+    }
+
+    public static function authorizedToViewAny(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewAnyAddress');
+    }
+
+    public function authorizedToView(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewAddress', $this->resource);
+    }
 }

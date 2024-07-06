@@ -20,7 +20,7 @@ class CustomerFactory extends Factory
             'email_address' => $this->faker->unique()->safeEmail,
             'document_type' => $this->faker->randomElement(['DNI', 'PAS', 'CE']),
             'identity_document' => $this->faker->unique()->numerify('##########'),
-            'customer_status' => $this->faker->randomElement(['active', 'inactive', 'suspended']),
+            'customer_status' => $this->faker->randomElement(['active', 'inactive']),
             'additional_notes' => $this->faker->text,
         ];
     }

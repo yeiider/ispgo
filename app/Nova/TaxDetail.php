@@ -5,7 +5,6 @@ namespace App\Nova;
 use App\Models\FiscalRegime;
 use App\Models\TaxIdentificationType;
 use App\Models\TaxpayerType;
-use App\Nova\Resource;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Select;
@@ -46,5 +45,30 @@ class TaxDetail extends Resource
                 ->sortable()
                 ->rules('required', 'max:255'),
         ];
+    }
+
+    public static function authorizedToCreate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('createTaxDetail');
+    }
+
+    public function authorizedToUpdate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('updateTaxDetail', $this->resource);
+    }
+
+    public function authorizedToDelete(Request $request)
+    {
+        return auth()->check() && $request->user()->can('deleteTaxDetail', $this->resource);
+    }
+
+    public static function authorizedToViewAny(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewAnyTaxDetail');
+    }
+
+    public function authorizedToView(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewTaxDetail', $this->resource);
     }
 }

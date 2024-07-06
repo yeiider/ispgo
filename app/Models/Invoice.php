@@ -11,7 +11,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date', 'status', 'payment_method', 'notes'
+        'issue_date', 'due_date', 'status', 'payment_method', 'notes','created_by', 'updated_by'
     ];
 
     protected $casts = [
@@ -48,5 +48,18 @@ class Invoice extends Model
         }
 
         $this->save();
+    }
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->created_by = Auth::id();
+            $model->updated_by = Auth::id();
+        });
+
+        static::updating(function ($model) {
+            $model->updated_by = Auth::id();
+        });
     }
 }

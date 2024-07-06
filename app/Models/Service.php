@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Invoice;
+use Illuminate\Support\Facades\Auth;
 
 class Service extends Model
 {
@@ -16,7 +17,8 @@ class Service extends Model
         'bandwidth', 'mac_address', 'installation_date', 'service_notes', 'contract_id',
         'support_contact', 'service_location', 'service_type', 'static_ip', 'data_limit',
         'last_maintenance', 'billing_cycle', 'monthly_fee', 'overage_fee', 'service_priority',
-        'assigned_technician', 'service_contract'
+        'assigned_technician', 'service_contract', 'created_by', 'updated_by',
+
     ];
 
     protected $casts = [
@@ -36,14 +38,33 @@ class Service extends Model
         return $this->belongsTo(Router::class);
     }
 
-    public function internetPlan()
+    public function getFullServiceNameAttribute()
     {
-        return $this->belongsTo(InternetPlan::class);
+        return "{$this->service_ip} - {$this->customer->full_name}";
+    }
+
+    public function Plan()
+    {
+        return $this->belongsTo(Plan::class);
     }
 
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->created_by = Auth::id();
+            $model->updated_by = Auth::id();
+        });
+
+        static::updating(function ($model) {
+            $model->updated_by = Auth::id();
+        });
     }
 
     public function generateInvoice($user_id, $notes = null): \App\Models\Invoice
@@ -70,4 +91,40 @@ class Service extends Model
 
         return $invoice;
     }
+
+    public function installations()
+    {
+        return $this->hasMany(ServiceAction::class);
+    }
+
+    public function createInstallation($technician_id = null, $action_date = null,$notes = null): ServiceAction
+    {
+        $action = new ServiceAction();
+        $action->service_id = $this->id;
+        $action->action_type = 'installation';
+        $action->action_date = $action_date??now();
+        $action->user_id = $technician_id;
+        $action->action_notes = $notes;
+        $action->status = 'pending';
+        $action->save();
+
+        return $action;
+    }
+
+
+    public function createUninstallation($technician_id = null, $action_date = null, $notes = null): ServiceAction
+    {
+        $action = new ServiceAction();
+        $action->service_id = $this->id;
+        $action->action_type = 'uninstallation';
+        $action->action_date = $action_date??now();
+        $action->user_id = $technician_id;
+        $action->action_notes = $notes;
+        $action->status = 'pending';
+        $action->save();
+
+        return $action;
+    }
+
+
 }

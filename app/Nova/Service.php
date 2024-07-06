@@ -2,8 +2,12 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\CreateActionsServiceInstall;
+use App\Nova\Actions\CreateActionsServiceUninstall;
 use App\Nova\Actions\GenerateInvoice;
-use App\Nova\Actions\UpdateCustomerStatus;
+use App\Nova\Filters\ServiceStatus;
+use App\Nova\Filters\ServiceType;
+use App\Nova\Lenses\TelephonicServiceLens;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
@@ -16,12 +20,13 @@ use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Resource;
+use Illuminate\Http\Request;
 
 class Service extends Resource
 {
     public static $model = \App\Models\Service::class;
 
-    public static $title = 'service_ip';
+    public static $title = 'full_service_name';
 
     public static $search = [
         'id', 'service_ip', 'username_router', 'service_status'
@@ -54,7 +59,7 @@ class Service extends Resource
     protected function serviceDetailsFields()
     {
         return [
-            BelongsTo::make('Internet Plan', 'internetPlan', \App\Nova\InternetPlan::class),
+            BelongsTo::make('Plan', 'Plan', \App\Nova\Plan::class),
             Text::make('Service IP', 'service_ip')->sortable(),
             Text::make('Username Router', 'username_router'),
             Text::make('Password Router', 'password_router')->hideFromIndex(),
@@ -62,13 +67,15 @@ class Service extends Resource
                 'active' => 'Active',
                 'inactive' => 'Inactive',
                 'suspended' => 'Suspended',
-                'pending' => 'Pending'
+                'pending' => 'Pending',
+                'free' => 'free'
             ])->displayUsingLabels(),
             Badge::make(__('Status'), 'service_status')->map([
                 'active' => 'success',
                 'inactive' => 'danger',
                 'suspended' => 'info',
                 'pending' => 'warning',
+                'free' => 'success',
             ])->icons([
                 'danger' => 'exclamation-circle',
                 'success' => 'check-circle',
@@ -96,6 +103,13 @@ class Service extends Resource
     {
         return [
             Number::make('Bandwidth', 'bandwidth')->hideFromIndex(),
+            Select::make(__('Connection Type'), 'connection_type')
+                ->options([
+                    'ftth' => __('Fiber Optic'),
+                    'adsl' => __('ADSL'),
+                    'satellite' => __('Satellite'),
+                ])
+                ->rules('required'),
             Text::make('MAC Address', 'mac_address')->hideFromIndex(),
             Date::make('Installation Date', 'installation_date'),
             Textarea::make('Service Notes', 'service_notes'),
@@ -114,6 +128,56 @@ class Service extends Resource
     {
         return [
             new GenerateInvoice(),
+            new CreateActionsServiceInstall(),
+            new CreateActionsServiceUninstall()
         ];
     }
+
+    /**
+     * Get the lenses available for the resource.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function lenses(NovaRequest $request)
+    {
+        return [
+
+        ];
+    }
+
+    public function filters(Request $request)
+    {
+        return [
+            new ServiceStatus(),
+            new ServiceType()
+        ];
+    }
+
+    public static function authorizedToCreate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('createService');
+    }
+
+    public function authorizedToUpdate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('updateService', $this->resource);
+    }
+
+    public function authorizedToDelete(Request $request)
+    {
+        return auth()->check() && $request->user()->can('deleteService', $this->resource);
+    }
+
+    public static function authorizedToViewAny(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewAnyService');
+    }
+
+    public function authorizedToView(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewService', $this->resource);
+    }
+
+
 }

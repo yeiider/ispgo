@@ -6,25 +6,27 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
-class TaxDetail extends Model
+class ServiceAction extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'customer_id',
-        'tax_identification_type',
-        'tax_identification_number',
-        'taxpayer_type',
-        'fiscal_regime',
-        'created_by',
-        'updated_by'
+        'service_id', 'action_type', 'action_date', 'action_notes', 'user_id', 'status', 'created_by',
+        'updated_by',
+    ];
+    protected $casts = [
+        'action_date' => 'datetime'
     ];
 
-    public function customer()
+    public function service()
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Service::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     protected static function boot()
     {
         parent::boot();

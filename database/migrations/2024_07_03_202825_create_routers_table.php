@@ -18,6 +18,8 @@ class CreateRoutersTable extends Migration
             $table->string('code')->unique();
             $table->string('name');
             $table->enum("status",['enabled','disabled'])->default("enabled");
+            $table->unsignedBigInteger('created_by')->nullable(); // ID del usuario que creó el plan
+            $table->unsignedBigInteger('updated_by')->nullable(); // ID del usuario que actualizó el plan por última vez
             $table->timestamps();
         });
     }

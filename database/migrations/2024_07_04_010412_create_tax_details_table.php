@@ -15,6 +15,8 @@ class CreateTaxDetailsTable extends Migration
             $table->string('tax_identification_number')->unique();
             $table->string('taxpayer_type');
             $table->string('fiscal_regime');
+            $table->unsignedBigInteger('created_by')->nullable(); // ID del usuario que creó el plan
+            $table->unsignedBigInteger('updated_by')->nullable(); // ID del usuario que actualizó el plan por última vez
             $table->timestamps();
         });
     }

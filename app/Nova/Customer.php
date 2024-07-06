@@ -4,6 +4,7 @@ namespace App\Nova;
 
 use App\Models\DocumentType;
 use App\Nova\Actions\UpdateCustomerStatus;
+use App\Nova\Filters\CustomerStatus;
 use App\Nova\Resource;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Badge;
@@ -46,14 +47,12 @@ class Customer extends Resource
                 'suspended' => 'warning',
             ])->icons([
                 'danger' => 'exclamation-circle',
-                'success' => 'check-circle',
-                'warning' => 'status-offline',
+                'success' => 'check-circle'
             ]),
             Select::make(__('Customer Status'), 'customer_status')
                 ->options([
                     'active' => __('Active'),
-                    'inactive' => __('Inactive'),
-                    'suspended' => __('Suspended'),
+                    'inactive' => __('Inactive')
                 ])->hideFromIndex()
                 ->sortable()->rules('required'),
             Textarea::make(__('Additional Notes'), 'additional_notes')->nullable(),
@@ -67,6 +66,38 @@ class Customer extends Resource
     {
         return [
             new UpdateCustomerStatus,
+        ];
+    }
+
+    public static function authorizedToCreate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('createCustomer');
+    }
+
+    public function authorizedToUpdate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('updateCustomer', $this->resource);
+    }
+
+    public function authorizedToDelete(Request $request)
+    {
+        return auth()->check() && $request->user()->can('deleteCustomer', $this->resource);
+    }
+
+    public static function authorizedToViewAny(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewAnyCustomer');
+    }
+
+    public function authorizedToView(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewCustomer', $this->resource);
+    }
+
+    public function filters(Request $request)
+    {
+        return [
+            new CustomerStatus,
         ];
     }
 }

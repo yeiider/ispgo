@@ -2,7 +2,10 @@
 
 namespace App\Nova;
 
+use App\Nova\Lenses\TelephonicPlanLens;
+use App\Nova\Lenses\TelevisionPlanLens;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
@@ -12,11 +15,12 @@ use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Image;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 
-class InternetPlan extends Resource
+class Plan extends Resource
 {
-    public static $model = \App\Models\InternetPlan::class;
+    public static $model = \App\Models\Plan::class;
 
     public static $title = 'name';
 
@@ -39,6 +43,35 @@ class InternetPlan extends Resource
     protected function basicInformationFields()
     {
         return [
+            Select::make(__('Status'))
+                ->options([
+                    'active' => __('Active'),
+                    'inactive' => __('Inactive')
+                ])->displayUsingLabels()->default('active')
+                ->rules('required')->hideFromIndex(),
+
+            Badge::make(__('Status'))->map([
+                'active' => 'success',
+                'inactive' => 'danger',
+            ])->icons([
+                'danger' => 'exclamation-circle',
+                'success' => 'check-circle',
+            ]),
+
+            Select::make(__('Modality Type'))
+                ->options([
+                    'postpaid' => __('Postpaid'),
+                    'prepaid' => __('Prepaid'),
+                ])->displayUsingLabels()->default('postpaid')->rules('required'),
+
+            Select::make(__('Plan Type'))
+                ->options([
+                    'internet' => __('Internet'),
+                    'television' => __('Television'),
+                    'telephonic' => __('Telephonic'),
+                ])->displayUsingLabels()->default('internet')->rules('required'),
+
+
             Text::make(__('Name'), 'name')
                 ->sortable()
                 ->rules('required', 'max:255'),
@@ -47,25 +80,21 @@ class InternetPlan extends Resource
                 ->rules('required'),
             Number::make(__('Download Speed'), 'download_speed')
                 ->sortable()
+                ->default(0)
                 ->rules('required')->help(__('specify speed in MG')),
             Number::make(__('Upload Speed'), 'upload_speed')
                 ->sortable()
+                ->default(0)
                 ->rules('required'),
             Boolean::make(__('Unlimited Data'), 'unlimited_data'),
-            Select::make(__('Connection Type'), 'connection_type')
+            Select::make(__('Service Type'), 'service_type')
                 ->options([
-                    'Fiber Optic' => __('Fiber Optic'),
-                    'ADSL' => __('ADSL'),
-                    'Satellite' => __('Satellite'),
+                    'ftth' => __('Fiber Optic'),
+                    'adsl' => __('ADSL'),
+                    'satellite' => __('Satellite'),
                 ])
                 ->rules('required'),
-            Select::make(__('Status'), 'status')
-                ->options([
-                    'Active' => __('Active'),
-                    'Inactive' => __('Inactive'),
-                    'Pending' => __('Pending'),
-                ])
-                ->rules('required'),
+
         ];
     }
 
@@ -73,27 +102,27 @@ class InternetPlan extends Resource
     {
         return [
             Textarea::make(__('Description'), 'description')
-                ->alwaysShow(),
+                ->alwaysShow()->hideFromIndex(),
             Number::make(__('Data Limit'), 'data_limit')
                 ->sortable()
                 ->nullable(),
             Text::make(__('Contract Period'), 'contract_period')
-                ->nullable(),
+                ->nullable()->hideFromIndex(),
             Textarea::make(__('Promotions'), 'promotions')
                 ->nullable()
-                ->alwaysShow(),
+                ->alwaysShow()->hideFromIndex(),
             Textarea::make(__('Extras Included'), 'extras_included')
                 ->nullable()
-                ->alwaysShow(),
+                ->alwaysShow()->hideFromIndex(),
             Textarea::make(__('Geographic Availability'), 'geographic_availability')
                 ->nullable()
-                ->alwaysShow(),
+                ->alwaysShow()->hideFromIndex(),
             Date::make(__('Promotion Start Date'), 'promotion_start_date')
                 ->nullable(),
             Date::make(__('Promotion End Date'), 'promotion_end_date')
                 ->nullable(),
             Image::make(__('Plan Image'), 'plan_image')
-                ->nullable(),
+                ->nullable()->hideFromIndex(),
         ];
     }
 
@@ -104,7 +133,7 @@ class InternetPlan extends Resource
                 ->nullable(),
             Textarea::make(__('Customer Reviews'), 'customer_reviews')
                 ->nullable()
-                ->alwaysShow(),
+                ->alwaysShow()->hideFromIndex(),
         ];
     }
 
@@ -123,5 +152,44 @@ class InternetPlan extends Resource
                 ->nullable()
                 ->alwaysShow(),
         ];
+    }
+
+    /**
+     * Get the lenses available for the resource.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function lenses(NovaRequest $request)
+    {
+        return [
+            new TelevisionPlanLens(),
+            new TelephonicPlanLens(),
+        ];
+    }
+
+    public static function authorizedToCreate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('createInternetPlan');
+    }
+
+    public function authorizedToUpdate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('updateInternetPlan', $this->resource);
+    }
+
+    public function authorizedToDelete(Request $request)
+    {
+        return auth()->check() && $request->user()->can('deleteInternetPlan', $this->resource);
+    }
+
+    public static function authorizedToViewAny(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewAnyInternetPlan');
+    }
+
+    public function authorizedToView(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewInternetPlan', $this->resource);
     }
 }

@@ -7,7 +7,7 @@ use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Text;
-
+use Illuminate\Http\Request;
 class Router extends Resource
 {
     /**
@@ -50,7 +50,7 @@ class Router extends Resource
                     'disabled' => __('Disabled'),
                 ])->default("enabled")->hideFromIndex(),
 
-            Badge::make(__('Status'),'status')->map([
+            Badge::make(__('Status'), 'status')->map([
                 'enabled' => 'success',
                 'disabled' => 'danger',
             ])->icons([
@@ -110,5 +110,30 @@ class Router extends Resource
     public function actions(NovaRequest $request)
     {
         return [];
+    }
+
+    public static function authorizedToCreate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('createRouter');
+    }
+
+    public function authorizedToUpdate(Request $request)
+    {
+        return auth()->check() && $request->user()->can('updateRouter', $this->resource);
+    }
+
+    public function authorizedToDelete(Request $request)
+    {
+        return auth()->check() && $request->user()->can('deleteRouter', $this->resource);
+    }
+
+    public static function authorizedToViewAny(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewAnyRouter');
+    }
+
+    public function authorizedToView(Request $request)
+    {
+        return auth()->check() && $request->user()->can('viewRouter', $this->resource);
     }
 }
