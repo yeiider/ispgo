@@ -2,6 +2,9 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\RegisterPayment;
+use App\Nova\Actions\RegisterPaymentPromise;
+use App\Nova\Filters\InvoiceStatusFilter;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\ID;
@@ -30,13 +33,14 @@ class Invoice extends Resource
         return [
             ID::make(__('ID'), 'id')->sortable(),
 
-            BelongsTo::make('Customer', 'customer', \App\Nova\Customer::class),
-            BelongsTo::make('Service', 'service', \App\Nova\Service::class),
+            BelongsTo::make('Customer', 'customer', \App\Nova\Customer::class)->searchable(),
+            BelongsTo::make('Service', 'service', \App\Nova\Service::class)->searchable(),
 
             Currency::make('Subtotal', 'subtotal')->step(0.01),
             Currency::make('Tax', 'tax')->step(0.01),
             Currency::make('Total', 'total')->step(0.01),
             Currency::make('Amount', 'amount')->step(0.01),
+            Currency::make('Discount', 'discount')->step(0.01),
             Currency::make('Total Pay', 'total')->step(0.01),
             Date::make('Issue Date', 'issue_date'),
             Date::make('Due Date', 'due_date'),
@@ -61,12 +65,22 @@ class Invoice extends Resource
 
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            new RegisterPayment(),
+            new RegisterPaymentPromise()
+        ];
+    }
+
+    public function filters(Request $request)
+    {
+        return [
+            new InvoiceStatusFilter(),
+        ];
     }
 
     public static function authorizedToCreate(Request $request)
     {
-        return auth()->check() && $request->user()->can('createInvoice');
+        return false;
     }
 
     public function authorizedToUpdate(Request $request)

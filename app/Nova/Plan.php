@@ -78,6 +78,8 @@ class Plan extends Resource
             Currency::make(__('Monthly Price'), 'monthly_price')
                 ->sortable()
                 ->rules('required'),
+            Currency::make(__('Overage Price'), 'overage_fee')
+                ->sortable(),
             Number::make(__('Download Speed'), 'download_speed')
                 ->sortable()
                 ->default(0)
@@ -170,26 +172,26 @@ class Plan extends Resource
 
     public static function authorizedToCreate(Request $request)
     {
-        return auth()->check() && $request->user()->can('createInternetPlan');
+        return auth()->check() && $request->user()->can('createPlan');
     }
 
     public function authorizedToUpdate(Request $request)
     {
-        return auth()->check() && $request->user()->can('updateInternetPlan', $this->resource);
+        return auth()->check() && $request->user()->can('updatePlan', $this->resource);
     }
 
     public function authorizedToDelete(Request $request)
     {
-        return auth()->check() && $request->user()->can('deleteInternetPlan', $this->resource);
+        return auth()->check() && $request->user()->can('deletePlan', $this->resource);
     }
 
     public static function authorizedToViewAny(Request $request)
     {
-        return auth()->check() && $request->user()->can('viewAnyInternetPlan');
+        return auth()->check() && $request->user()->can('viewAnyPlan');
     }
 
     public function authorizedToView(Request $request)
     {
-        return auth()->check() && $request->user()->can('viewInternetPlan', $this->resource);
+        return auth()->check() && $request->user()->can('viewPlan', $this->resource);
     }
 }

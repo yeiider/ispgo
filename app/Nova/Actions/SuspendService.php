@@ -7,37 +7,27 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
-use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class GenerateInvoice extends Action
+class SuspendService extends Action
 {
     use InteractsWithQueue, Queueable;
 
     /**
      * Perform the action on the given models.
      *
-     * @param \Laravel\Nova\Fields\ActionFields $fields
-     * @param \Illuminate\Support\Collection $models
+     * @param ActionFields $fields
+     * @param Collection $models
      * @return mixed
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $invoice = false;
         foreach ($models as $model) {
-            $invoice = $model->generateInvoice($fields->notes);
+            $model->suspend();
         }
-        if ($models->count() > 1) {
-            return ActionResponse::visit('/resources/invoices');
-        } else {
-            return ActionResponse::visit('/resources/invoices/'.$invoice->id);
-        }
-
-
+        return Action::message(__('Services successfully suspended'));
     }
-
 
     /**
      * Get the fields available on the action.
@@ -47,9 +37,6 @@ class GenerateInvoice extends Action
      */
     public function fields(NovaRequest $request)
     {
-        return [
-            Text::make('Notes')
-                ->nullable(),
-        ];
+        return [];
     }
 }

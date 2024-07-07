@@ -18,6 +18,11 @@ class TaxDetailFactory extends Factory
             'tax_identification_number' => $this->faker->unique()->numerify('##########'),
             'taxpayer_type' => $this->faker->randomElement(['individual', 'company']),
             'fiscal_regime' => $this->faker->randomElement(['general', 'simplified']),
+            'business_name' => $this->faker->name(),
+            'enable_billing' => $this->faker->boolean(),
+            'send_notifications' => $this->faker->boolean(),
+            'send_invoice' => $this->faker->boolean(),
+
         ];
     }
 }

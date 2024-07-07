@@ -2,13 +2,17 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\ActivateService;
 use App\Nova\Actions\CreateActionsServiceInstall;
 use App\Nova\Actions\CreateActionsServiceUninstall;
 use App\Nova\Actions\GenerateInvoice;
+use App\Nova\Actions\SuspendService;
 use App\Nova\Filters\ServiceStatus;
 use App\Nova\Filters\ServiceType;
 use App\Nova\Lenses\TelephonicServiceLens;
+use App\Nova\Lenses\TelevisionServiceLens;
 use Laravel\Nova\Fields\Badge;
+use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Number;
@@ -69,7 +73,7 @@ class Service extends Resource
                 'suspended' => 'Suspended',
                 'pending' => 'Pending',
                 'free' => 'free'
-            ])->displayUsingLabels(),
+            ])->displayUsingLabels()->hideFromIndex(),
             Badge::make(__('Status'), 'service_status')->map([
                 'active' => 'success',
                 'inactive' => 'danger',
@@ -93,8 +97,6 @@ class Service extends Resource
             Text::make('Support Contact', 'support_contact'),
             Text::make('Service Location', 'service_location')->hideFromIndex(),
             Text::make('Billing Cycle', 'billing_cycle'),
-            Number::make('Monthly Fee', 'monthly_fee')->step(0.01),
-            Number::make('Overage Fee', 'overage_fee')->step(0.01),
             Textarea::make('Service Contract', 'service_contract'),
         ];
     }
@@ -127,6 +129,8 @@ class Service extends Resource
     public function actions(NovaRequest $request)
     {
         return [
+            new ActivateService(),
+            new SuspendService(),
             new GenerateInvoice(),
             new CreateActionsServiceInstall(),
             new CreateActionsServiceUninstall()
@@ -142,7 +146,8 @@ class Service extends Resource
     public function lenses(NovaRequest $request)
     {
         return [
-
+            new TelephonicServiceLens(),
+            new TelevisionServiceLens()
         ];
     }
 

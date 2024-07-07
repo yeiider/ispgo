@@ -15,6 +15,7 @@ class CreatePlansTable extends Migration
             $table->integer('download_speed')->default(0);
             $table->integer('upload_speed')->default(0);
             $table->decimal('monthly_price', 8, 2);
+            $table->decimal('overage_fee', 8, 2)->nullable();
             $table->integer('data_limit')->nullable(); // In GB
             $table->boolean('unlimited_data')->default(false);
             $table->string('contract_period')->nullable();
@@ -33,7 +34,7 @@ class CreatePlansTable extends Migration
             $table->string('connection_type'); // Fiber Optic, ADSL, Satellite
             $table->enum('plan_type', ['internet', 'television', 'telephonic'])->default('internet'); // Fiber Optic, ADSL, Satellite
             $table->enum('modality_type', ['prepaid', 'postpaid'])->default('postpaid'); // Fiber Optic, ADSL, Satellite
-            $table->enum('status',['active','inactive']); // Active, Inactive
+            $table->enum('status', ['active', 'inactive']); // Active, Inactive
 
             $table->unsignedBigInteger('created_by')->nullable(); // ID del usuario que creó el plan
             $table->unsignedBigInteger('updated_by')->nullable(); // ID del usuario que actualizó el plan por última vez

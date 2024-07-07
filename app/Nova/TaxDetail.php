@@ -6,6 +6,7 @@ use App\Models\FiscalRegime;
 use App\Models\TaxIdentificationType;
 use App\Models\TaxpayerType;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
@@ -25,13 +26,18 @@ class TaxDetail extends Resource
     {
         return [
             ID::make()->sortable(),
+            Boolean::make('Enable Billing'),
             BelongsTo::make(__('Customer'), 'customer', Customer::class),
             Select::make(__('Fiscal Document'), 'tax_identification_type')
                 ->options(TaxIdentificationType::pluck('name', 'code')->toArray())
                 ->sortable()
                 ->rules('required', 'max:5'),
 
+
             Text::make(__('Tax Identification Number'), 'tax_identification_number')
+                ->sortable()
+                ->rules('required', 'max:255'),
+            Text::make(__('Business Name'), 'tax_identification_number')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
@@ -44,6 +50,8 @@ class TaxDetail extends Resource
                 ->options(FiscalRegime::pluck('name', 'code')->toArray())
                 ->sortable()
                 ->rules('required', 'max:255'),
+            Boolean::make('Send Notifications'),
+            Boolean::make('Send Invoice'),
         ];
     }
 

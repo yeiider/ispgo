@@ -3,11 +3,15 @@
 namespace App\Providers;
 
 use App\Nova\Address;
+use App\Nova\CreditNote;
 use App\Nova\Customer;
+use App\Nova\DailyInvoiceBalance;
 use App\Nova\Installation;
 use App\Nova\Lenses\TelephonicPlanLens;
 use App\Nova\Lenses\TelephonicServiceLens;
 use App\Nova\Lenses\TelevisionPlanLens;
+use App\Nova\Lenses\TelevisionServiceLens;
+use App\Nova\PaymentPromise;
 use App\Nova\Plan;
 use App\Nova\Invoice;
 use App\Nova\Lenses\InstallationsLens;
@@ -15,7 +19,7 @@ use App\Nova\Lenses\UninstallationsLens;
 use App\Nova\Router;
 use App\Nova\Service;
 use App\Nova\TaxDetail;
-use Badinansoft\LanguageSwitch\LanguageSwitch;
+use App\Nova\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Ispgo\SettingsManager\SettingsManager;
@@ -48,14 +52,16 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             return [
                 MenuSection::dashboard(Main::class)->icon('chart-bar'),
                 // customers
-                MenuSection::make('Customers & Services', [
-                    MenuGroup::make('All Customers', [
+                MenuSection::make(__('Customers & Services'), [
+                    MenuGroup::make(__('All Customers'), [
                         MenuItem::resource(Customer::class),
                         MenuItem::resource(Address::class),
                         MenuItem::resource(TaxDetail::class),
                     ]),
-                    MenuGroup::make('All Services', [
+                    MenuGroup::make(__('All Services'), [
                         MenuItem::resource(Service::class),
+                        MenuItem::lens(Service::class, TelephonicServiceLens::class),
+                        MenuItem::lens(Service::class, TelevisionServiceLens::class),
                         MenuItem::lens(Installation::class, InstallationsLens::class),
                         MenuItem::lens(Installation::class, UninstallationsLens::class),
                     ]),
@@ -63,9 +69,16 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 ])->icon('users')->collapsable(),
 
-                MenuSection::make('Invoices', [
+                MenuSection::make(__('Invoices'), [
                     MenuItem::resource(Invoice::class),
+                    MenuItem::resource(CreditNote::class),
+                    MenuItem::resource(PaymentPromise::class),
+                    MenuItem::resource(DailyInvoiceBalance::class),
                 ])->icon('cash')->collapsable(),
+
+                MenuSection::make(__('Tickets'), [
+                    MenuItem::resource(Ticket::class)
+                ])->icon('support')->collapsable(),
 
                 MenuSection::make('System Network', [
                     MenuItem::resource(Router::class),
@@ -74,7 +87,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::lens(Plan::class, TelevisionPlanLens::class),
                 ])->icon('server')->collapsable(),
 
-                MenuSection::make('Settings Manager')
+                MenuSection::make(__('Settings Manager'))
                     ->path('/settings-manager')
                     ->icon('cog')->canSee(function ($request) {
                         return $request->user() && $request->user()->can('Setting');

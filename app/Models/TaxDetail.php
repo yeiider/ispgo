@@ -16,6 +16,11 @@ class TaxDetail extends Model
         'tax_identification_number',
         'taxpayer_type',
         'fiscal_regime',
+        'business_name',
+        'enable_billing',
+        'send_notifications',
+        'send_invoice',
+        'business_name',
         'created_by',
         'updated_by'
     ];

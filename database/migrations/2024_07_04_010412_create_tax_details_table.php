@@ -15,6 +15,10 @@ class CreateTaxDetailsTable extends Migration
             $table->string('tax_identification_number')->unique();
             $table->string('taxpayer_type');
             $table->string('fiscal_regime');
+            $table->string('business_name'); // Razón social
+            $table->boolean('enable_billing')->default(false); // Habilitar facturación
+            $table->boolean('send_notifications')->default(false); // Enviar notificaciones
+            $table->boolean('send_invoice')->default(false); // Enviar notificaciones
             $table->unsignedBigInteger('created_by')->nullable(); // ID del usuario que creó el plan
             $table->unsignedBigInteger('updated_by')->nullable(); // ID del usuario que actualizó el plan por última vez
             $table->timestamps();

@@ -16,13 +16,15 @@ class CreateInvoicesTable extends Migration
             $table->decimal('subtotal', 10, 2);
             $table->decimal('tax', 10, 2);
             $table->decimal('total', 10, 2);
-            $table->decimal('amount', 10, 2)->default(0); // Pagos recibidos
+            $table->decimal('amount', 10, 2)->default(0);
+            $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('outstanding_balance', 10, 2); // Saldo pendiente
             $table->date('issue_date');
             $table->date('due_date');
-            $table->enum('status', ['paid', 'unpaid', 'overdue','canceled'])->default('unpaid');
+            $table->enum('status', ['paid', 'unpaid', 'overdue', 'canceled'])->default('unpaid');
             $table->string('payment_method')->nullable(); // Método de pago puede ser nulo
             $table->text('notes')->nullable();
+            $table->string('payment_support')->nullable();
             $table->unsignedBigInteger('created_by')->nullable(); // ID del usuario que creó el plan
             $table->unsignedBigInteger('updated_by')->nullable(); // ID del usuario que actualizó el plan por última vez
             $table->timestamps();

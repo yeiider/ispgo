@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Invoice;
 use Illuminate\Support\Facades\Auth;
 
 class Service extends Model
@@ -16,7 +15,7 @@ class Service extends Model
         'password_router', 'service_status', 'activation_date', 'deactivation_date',
         'bandwidth', 'mac_address', 'installation_date', 'service_notes', 'contract_id',
         'support_contact', 'service_location', 'service_type', 'static_ip', 'data_limit',
-        'last_maintenance', 'billing_cycle', 'monthly_fee', 'overage_fee', 'service_priority',
+        'last_maintenance', 'billing_cycle', 'service_priority',
         'assigned_technician', 'service_contract', 'created_by', 'updated_by',
 
     ];
@@ -67,20 +66,21 @@ class Service extends Model
         });
     }
 
-    public function generateInvoice($user_id, $notes = null): \App\Models\Invoice
+    public function generateInvoice($notes = null): \App\Models\Invoice
     {
-        $price = $this->monthly_fee ?? $this->internetPlan->monthly_price;
+        $price = $this->plan->monthly_price;
         $tax = $price * 0.19;
         $total = $price + $tax;
 
         $invoice = new Invoice();
         $invoice->service_id = $this->id;
         $invoice->customer_id = $this->customer_id;
-        $invoice->user_id = $user_id; // Asumiendo que el usuario autenticado está generando la factura
+        $invoice->user_id = Auth::id(); // Asumiendo que el usuario autenticado está generando la factura
         $invoice->subtotal = $price;
         $invoice->tax = $tax;
         $invoice->total = $total;
         $invoice->amount = 0;
+        $invoice->discount = 0;
         $invoice->outstanding_balance = $total;
         $invoice->issue_date = now();
         $invoice->due_date = now()->addDays(5);
@@ -97,12 +97,12 @@ class Service extends Model
         return $this->hasMany(ServiceAction::class);
     }
 
-    public function createInstallation($technician_id = null, $action_date = null,$notes = null): ServiceAction
+    public function createInstallation($technician_id = null, $action_date = null, $notes = null): ServiceAction
     {
         $action = new ServiceAction();
         $action->service_id = $this->id;
         $action->action_type = 'installation';
-        $action->action_date = $action_date??now();
+        $action->action_date = $action_date ?? now();
         $action->user_id = $technician_id;
         $action->action_notes = $notes;
         $action->status = 'pending';
@@ -117,7 +117,7 @@ class Service extends Model
         $action = new ServiceAction();
         $action->service_id = $this->id;
         $action->action_type = 'uninstallation';
-        $action->action_date = $action_date??now();
+        $action->action_date = $action_date ?? now();
         $action->user_id = $technician_id;
         $action->action_notes = $notes;
         $action->status = 'pending';
@@ -126,5 +126,16 @@ class Service extends Model
         return $action;
     }
 
+    public function suspend()
+    {
+        $this->service_status = 'suspended';
+        $this->save();
+    }
+
+    public function activate()
+    {
+        $this->service_status = 'active';
+        $this->save();
+    }
 
 }

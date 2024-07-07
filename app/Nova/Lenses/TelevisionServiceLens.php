@@ -2,18 +2,25 @@
 
 namespace App\Nova\Lenses;
 
+use Illuminate\Database\Eloquent\Builder;
 use Laravel\Nova\Fields\Badge;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Currency;
+use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Select;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\LensRequest;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Lenses\Lens;
 use Laravel\Nova\Nova;
 
-class TelephonicPlanLens extends Lens
+class TelevisionServiceLens extends Lens
 {
+    /**
+     * The columns that should be searched.
+     *
+     * @var array
+     */
+    public static $search = [];
 
     /**
      * Get the name of the lens.
@@ -23,27 +30,21 @@ class TelephonicPlanLens extends Lens
 
     public function name()
     {
-        return __('Telephonic Plan');
+        return __('Television Service');
     }
-
-    /**
-     * The columns that should be searched.
-     *
-     * @var array
-     */
-    public static $search = [];
 
     /**
      * Get the query builder / paginator for the lens.
      *
-     * @param \Laravel\Nova\Http\Requests\LensRequest $request
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param LensRequest $request
+     * @param  Builder  $query
      * @return mixed
      */
     public static function query(LensRequest $request, $query)
     {
         return $request->withOrdering($request->withFilters(
-            $query->where("plan_type", "telephonic")
+            $query->join("plans", "plans.id", "=", "services.plan_id")
+                ->where("plans.plan_type", "television")
         ));
     }
 
@@ -53,30 +54,30 @@ class TelephonicPlanLens extends Lens
      * @param NovaRequest $request
      * @return array
      */
-    public function fields(NovaRequest $request)
+    public function fields(NovaRequest $request): array
     {
         return [
-            ID::make(Nova::__('ID'), 'id')->sortable(), Badge::make(__('Status'))->map([
+            ID::make(Nova::__('ID'), 'id')->sortable(),
+            BelongsTo::make('Customer', 'customer', \App\Nova\Customer::class),
+            BelongsTo::make('Plan', 'Plan', \App\Nova\Plan::class),
+            Badge::make(__('Status'), 'service_status')->map([
                 'active' => 'success',
                 'inactive' => 'danger',
+                'suspended' => 'info',
+                'pending' => 'warning',
+                'free' => 'success',
             ])->icons([
                 'danger' => 'exclamation-circle',
                 'success' => 'check-circle',
+                'info' => 'status-offline',
+                'warning' => 'clock',
             ]),
-            Select::make(__('Modality Type'))
-                ->options([
-                    'postpaid' => __('Postpaid'),
-                    'prepaid' => __('Prepaid'),
-                ])->displayUsingLabels()->default('postpaid')->rules('required'),
-
-            Text::make(__('Name'), 'name')
-                ->sortable()
-                ->rules('required', 'max:255'),
             Currency::make(__('Monthly Price'), 'monthly_price')
                 ->sortable()
                 ->rules('required'),
+            Date::make('Activation Date', 'activation_date'),
+            Date::make('Deactivation Date', 'deactivation_date'),
         ];
-
     }
 
     /**
@@ -119,6 +120,6 @@ class TelephonicPlanLens extends Lens
      */
     public function uriKey()
     {
-        return 'telephonic-plan-lens';
+        return 'television-service';
     }
 }

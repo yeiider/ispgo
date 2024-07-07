@@ -2,6 +2,7 @@
 
 namespace App\Nova\Actions;
 
+use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -9,10 +10,9 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class GenerateInvoice extends Action
+class RegisterPayment extends Action
 {
     use InteractsWithQueue, Queueable;
 
@@ -25,19 +25,14 @@ class GenerateInvoice extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        $invoice = false;
         foreach ($models as $model) {
-            $invoice = $model->generateInvoice($fields->notes);
+            if ($model->status === Invoice::STATUS_PAID) {
+                return ActionResponse::danger('There are invoices that have already been paid!');
+            }
+            $model->applyPayment();
         }
-        if ($models->count() > 1) {
-            return ActionResponse::visit('/resources/invoices');
-        } else {
-            return ActionResponse::visit('/resources/invoices/'.$invoice->id);
-        }
-
-
+        return Action::message('Payment generated successfully!');
     }
-
 
     /**
      * Get the fields available on the action.
@@ -47,9 +42,6 @@ class GenerateInvoice extends Action
      */
     public function fields(NovaRequest $request)
     {
-        return [
-            Text::make('Notes')
-                ->nullable(),
-        ];
+        return [];
     }
 }

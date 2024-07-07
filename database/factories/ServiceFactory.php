@@ -35,8 +35,6 @@ class ServiceFactory extends Factory
             'data_limit' => $this->faker->optional()->numberBetween(50, 1000), // in GB
             'last_maintenance' => $this->faker->optional()->date,
             'billing_cycle' => $this->faker->optional()->randomElement(['Monthly', 'Bimonthly']),
-            'monthly_fee' => $this->faker->optional()->randomFloat(2, 10, 200),
-            'overage_fee' => $this->faker->optional()->randomFloat(2, 5, 50),
             'service_priority' => $this->faker->randomElement(['normal', 'high', 'critical']),
             'assigned_technician' => $this->faker->optional()->randomNumber(),
             'service_contract' => $this->faker->optional()->text,

@@ -34,8 +34,6 @@ return new class extends Migration
             $table->integer('data_limit')->nullable(); // In GB
             $table->date('last_maintenance')->nullable();
             $table->string('billing_cycle')->nullable(); // e.g., Monthly, Bimonthly
-            $table->decimal('monthly_fee', 8, 2)->nullable();
-            $table->decimal('overage_fee', 8, 2)->nullable();
             $table->enum('service_priority', ['normal', 'high', 'critical'])->default('normal');
             $table->unsignedBigInteger('assigned_technician')->nullable();
             $table->text('service_contract')->nullable();

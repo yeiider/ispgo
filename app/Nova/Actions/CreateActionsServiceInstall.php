@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
+use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Select;
@@ -27,8 +28,14 @@ class CreateActionsServiceInstall extends Action
      */
     public function handle(ActionFields $fields, Collection $models)
     {
+        $actions = false;
         foreach ($models as $model) {
-            $model->createInstallation($fields->technician,$fields->installation_date, $fields->note);
+            $actions = $model->createInstallation($fields->technician, $fields->installation_date, $fields->note);
+        }
+        if ($models->count() > 1) {
+            return ActionResponse::visit('/resources/installations/lens/installations');
+        } else {
+            return ActionResponse::visit('/resources/installations/' . $actions->id);
         }
     }
 

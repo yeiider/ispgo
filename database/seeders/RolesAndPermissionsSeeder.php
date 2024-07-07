@@ -26,11 +26,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'Service',
             'TaxDetail',
             'Router',
-            'InternetPlan',
+            'Plan',
             'User',
             'Role',
             'Permission',
-            'Installation'
+            'Installation',
+            'CreditNote',
+            'PaymentPromise',
+            'Ticket'
             // Otros modelos que necesiten permisos
         ]);
         Permission::create(['group' => "System Setting", 'name' => 'Setting']);
@@ -43,6 +46,7 @@ class RolesAndPermissionsSeeder extends Seeder
             Permission::create(['group' => $item, 'name' => 'delete' . $item]);
             Permission::create(['group' => $item, 'name' => 'destroy' . $item]);
         });
+        Permission::create(['group' => "invoice", 'name' => 'ViewDailyInvoiceBalance']);
 
         // Crear un rol Super-Admin y asignar todos los permisos
 
