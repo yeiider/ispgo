@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Service;
-use App\Models\Customer;
-use App\Models\Plan;
+use App\Models\Customers\Customer;
+use App\Models\Services\Plan;
+use App\Models\Services\Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ServiceFactory extends Factory

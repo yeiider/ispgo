@@ -19,8 +19,6 @@ return new class extends Migration {
             $table->enum('status', ['open', 'in_progress', 'resolved', 'closed'])->default('open');
             $table->string('title');
             $table->text('description');
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('closed_at')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->text('resolution_notes')->nullable();

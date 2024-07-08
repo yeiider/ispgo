@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Plan;
+use App\Models\Services\Plan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PlanFactory extends Factory

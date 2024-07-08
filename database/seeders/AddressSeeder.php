@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customers\Address;
 use Illuminate\Database\Seeder;
-use App\Models\Address;
 use Illuminate\Support\Facades\DB;
 
 class AddressSeeder extends Seeder

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('telephone')->nullable();
             $table->unsignedBigInteger('created_by')->nullable(); // ID del usuario que creó el plan
             $table->unsignedBigInteger('updated_by')->nullable(); // ID del usuario que actualizó el plan por última vez
             $table->rememberToken();

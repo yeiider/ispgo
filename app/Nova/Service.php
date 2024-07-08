@@ -2,33 +2,32 @@
 
 namespace App\Nova;
 
-use App\Nova\Actions\ActivateService;
-use App\Nova\Actions\CreateActionsServiceInstall;
-use App\Nova\Actions\CreateActionsServiceUninstall;
-use App\Nova\Actions\GenerateInvoice;
-use App\Nova\Actions\SuspendService;
+use App\Nova\Actions\Service\ActivateService;
+use App\Nova\Actions\Service\CreateActionsServiceInstall;
+use App\Nova\Actions\Service\CreateActionsServiceUninstall;
+use App\Nova\Actions\Service\GenerateInvoice;
+use App\Nova\Actions\Service\SuspendService;
 use App\Nova\Filters\ServiceStatus;
 use App\Nova\Filters\ServiceType;
 use App\Nova\Lenses\TelephonicServiceLens;
 use App\Nova\Lenses\TelevisionServiceLens;
+use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Badge;
-use Laravel\Nova\Fields\Currency;
-use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Number;
-use Laravel\Nova\Fields\Date;
-use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\Date;
+use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Resource;
-use Illuminate\Http\Request;
 
 class Service extends Resource
 {
-    public static $model = \App\Models\Service::class;
+    public static $model = \App\Models\Services\Service::class;
 
     public static $title = 'full_service_name';
 
@@ -54,7 +53,7 @@ class Service extends Resource
     protected function customerRouterFields()
     {
         return [
-            BelongsTo::make('Customer', 'customer', \App\Nova\Customer::class)
+            BelongsTo::make('Customer', 'customer', Customers\Customer::class)
                 ->searchable(),
             BelongsTo::make('Router', 'router', \App\Nova\Router::class),
         ];

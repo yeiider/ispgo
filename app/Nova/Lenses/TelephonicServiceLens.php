@@ -58,7 +58,7 @@ class TelephonicServiceLens extends Lens
     {
         return [
             ID::make(Nova::__('ID'), 'id')->sortable(),
-            BelongsTo::make('Customer', 'customer', \App\Nova\Customer::class),
+            BelongsTo::make('Customer', 'customer', \App\Nova\Customers\Customer::class),
             BelongsTo::make('Plan', 'Plan', \App\Nova\Plan::class),
             Badge::make(__('Status'), 'service_status')->map([
                 'active' => 'success',

@@ -6,21 +6,21 @@ use App\Nova\Lenses\TelephonicPlanLens;
 use App\Nova\Lenses\TelevisionPlanLens;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Badge;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Currency;
+use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Image;
+use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
-use Laravel\Nova\Fields\Number;
-use Laravel\Nova\Fields\Boolean;
-use Laravel\Nova\Fields\Select;
-use Laravel\Nova\Fields\Date;
-use Laravel\Nova\Fields\Image;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 
 class Plan extends Resource
 {
-    public static $model = \App\Models\Plan::class;
+    public static $model = \App\Models\Services\Plan::class;
 
     public static $title = 'name';
 

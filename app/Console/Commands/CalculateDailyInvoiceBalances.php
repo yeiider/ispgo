@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Invoice;
+use App\Models\Invoice\Invoice;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class CalculateDailyInvoiceBalances extends Command
 {

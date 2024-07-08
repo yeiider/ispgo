@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\TaxDetail;
-use App\Models\Customer;
+use App\Models\Customers\Customer;
+use App\Models\Customers\TaxDetail;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TaxDetailFactory extends Factory

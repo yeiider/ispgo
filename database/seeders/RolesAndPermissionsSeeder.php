@@ -33,7 +33,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'Installation',
             'CreditNote',
             'PaymentPromise',
-            'Ticket'
+            'Ticket',
+            'Product',
+            'Supplier',
+            'Category',
+            'Warehouse'
             // Otros modelos que necesiten permisos
         ]);
         Permission::create(['group' => "System Setting", 'name' => 'Setting']);

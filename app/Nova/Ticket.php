@@ -3,16 +3,15 @@
 namespace App\Nova;
 
 use App\Models\User;
+use App\Nova\Customers\Customer;
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\BelongsTo;
-use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Textarea;
-use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\File;
-use Laravel\Nova\Fields\Boolean;
-
+use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Ticket extends Resource
@@ -111,7 +110,7 @@ class Ticket extends Resource
                 ->onlyOnDetail()
                 ->sortable(),
 
-            Select::make('Technician')
+            Select::make('Technician','user_id')
                 ->options($technicians)
                 ->displayUsingLabels(),
 

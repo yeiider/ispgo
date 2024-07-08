@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customers\TaxDetail;
 use Illuminate\Database\Seeder;
-use App\Models\TaxDetail;
 use Illuminate\Support\Facades\DB;
 
 class TaxDetailSeeder extends Seeder

@@ -2,24 +2,29 @@
 
 namespace App\Providers;
 
-use App\Nova\Address;
-use App\Nova\CreditNote;
-use App\Nova\Customer;
-use App\Nova\DailyInvoiceBalance;
+use App\Nova\Customers\Address;
+use App\Nova\Customers\Customer;
+use App\Nova\Customers\TaxDetail;
 use App\Nova\Installation;
+use App\Nova\Inventory\Category;
+use App\Nova\Inventory\Product;
+use App\Nova\Inventory\Supplier;
+use App\Nova\Inventory\Warehouse;
+use App\Nova\Invoice\CreditNote;
+use App\Nova\Invoice\DailyInvoiceBalance;
+use App\Nova\Invoice\Invoice;
+use App\Nova\Invoice\PaymentPromise;
+use App\Nova\Lenses\InstallationsLens;
 use App\Nova\Lenses\TelephonicPlanLens;
 use App\Nova\Lenses\TelephonicServiceLens;
 use App\Nova\Lenses\TelevisionPlanLens;
 use App\Nova\Lenses\TelevisionServiceLens;
-use App\Nova\PaymentPromise;
-use App\Nova\Plan;
-use App\Nova\Invoice;
-use App\Nova\Lenses\InstallationsLens;
 use App\Nova\Lenses\UninstallationsLens;
+use App\Nova\Plan;
 use App\Nova\Router;
 use App\Nova\Service;
-use App\Nova\TaxDetail;
 use App\Nova\Ticket;
+use App\NovaPermissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Ispgo\SettingsManager\SettingsManager;
@@ -29,7 +34,6 @@ use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
-use App\NovaPermissions;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -79,6 +83,13 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('Tickets'), [
                     MenuItem::resource(Ticket::class)
                 ])->icon('support')->collapsable(),
+
+                MenuSection::make(__('Inventory'), [
+                    MenuItem::resource(Warehouse::class),
+                    MenuItem::resource(Category::class),
+                    MenuItem::resource(Product::class),
+                    MenuItem::resource(Supplier::class),
+                ])->icon('clipboard-list')->collapsable(),
 
                 MenuSection::make('System Network', [
                     MenuItem::resource(Router::class),

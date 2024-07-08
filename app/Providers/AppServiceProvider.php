@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Nova\Customer;
+use App\Nova\Customers\Customer;
 use App\Policies\CustomerPolicy;
 use Illuminate\Support\ServiceProvider;
 

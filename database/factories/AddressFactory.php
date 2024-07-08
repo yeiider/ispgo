@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Address;
-use App\Models\Customer;
+use App\Models\Customers\Address;
+use App\Models\Customers\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AddressFactory extends Factory

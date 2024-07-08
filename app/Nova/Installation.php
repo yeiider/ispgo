@@ -3,14 +3,14 @@
 namespace App\Nova;
 
 
-use Illuminate\Http\Request;
 use App\Nova\Lenses\InstallationsLens;
 use App\Nova\Lenses\UninstallationsLens;
-use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Date;
+use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Date;
+use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Installation extends Resource
@@ -20,7 +20,7 @@ class Installation extends Resource
      *
      * @var string
      */
-    public static $model = \App\Models\ServiceAction::class;
+    public static $model = \App\Models\Services\ServiceAction::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.

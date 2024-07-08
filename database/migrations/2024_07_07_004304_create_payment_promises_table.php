@@ -16,6 +16,7 @@ class CreatePaymentPromisesTable extends Migration
             $table->decimal('amount', 10, 2); // Monto de la promesa de pago
             $table->date('promise_date'); // Fecha en que se realizará el pago
             $table->text('notes')->nullable();
+            $table->enum('status',['pending','fulfilled','cancelled'])->default('pending'); // Agrega un campo de estado con valor predeterminado 'pending'
             $table->timestamps();
             $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('restrict');

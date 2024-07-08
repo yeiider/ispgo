@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Customers\Customer;
+use App\Models\Services\Service;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +20,7 @@ class Ticket extends Model
         'status',
         'title',
         'description',
-        'assigned_to',
+        'user_id',
         'resolution_notes',
         'attachments',
         'contact_method',
