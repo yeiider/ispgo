@@ -5,6 +5,7 @@ namespace App\Nova\Customers;
 use App\Models\Customers\DocumentType;
 use App\Nova\Actions\UpdateCustomerStatus;
 use App\Nova\Filters\CustomerStatus;
+use App\Nova\Metrics\NewCustomers;
 use App\Nova\Resource;
 use App\Nova\Service;
 use Illuminate\Http\Request;
@@ -99,6 +100,19 @@ class Customer extends Resource
     {
         return [
             new CustomerStatus,
+        ];
+    }
+
+    /**
+     * Get the cards available for the resource.
+     *
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
+     */
+    public function cards(NovaRequest $request)
+    {
+        return [
+            new NewCustomers
         ];
     }
 }
