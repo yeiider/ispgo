@@ -5,6 +5,10 @@ namespace App\Providers;
 use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
+use App\Nova\Finance\CashRegister;
+use App\Nova\Finance\Expense;
+use App\Nova\Finance\Income;
+use App\Nova\Finance\Transaction;
 use App\Nova\Installation;
 use App\Nova\Inventory\Category;
 use App\Nova\Inventory\Product;
@@ -78,6 +82,12 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(CreditNote::class),
                     MenuItem::resource(PaymentPromise::class),
                     MenuItem::resource(DailyInvoiceBalance::class),
+                ])->icon('cash')->collapsable(),
+                MenuSection::make(__('Finances'), [
+                    MenuItem::resource(CashRegister::class),
+                    MenuItem::resource(Income::class),
+                    MenuItem::resource(Expense::class),
+                    MenuItem::resource(Transaction::class),
                 ])->icon('cash')->collapsable(),
 
                 MenuSection::make(__('Tickets'), [
