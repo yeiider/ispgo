@@ -48,6 +48,8 @@ import CustomTextareaField from '../components/CustomTextareaField.vue';
 import Menu from "../components/Menu.vue";
 
 export default {
+
+
     props: {
         section: {
             type: String,
