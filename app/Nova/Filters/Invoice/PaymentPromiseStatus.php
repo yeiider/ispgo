@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Nova\Filters;
+namespace App\Nova\Filters\Invoice;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;

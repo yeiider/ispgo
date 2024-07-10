@@ -3,8 +3,10 @@
 namespace App\Nova\Invoice;
 
 use App\Nova\Actions\Invoice\RegisterPaymentByPromise;
-use App\Nova\Filters\PaymentPromiseStatus;
+use App\Nova\Customers\Customer;
+use App\Nova\Filters\Invoice\PaymentPromiseStatus;
 use App\Nova\Resource;
+use App\Nova\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Nova\Fields\Badge;
@@ -50,9 +52,9 @@ class PaymentPromise extends Resource
     {
         return [
             ID::make()->sortable(),
-            BelongsTo::make('Invoice')->searchable(),
-            BelongsTo::make('Customer')->searchable(),
-            BelongsTo::make('User')->default(Auth::id())->readonly(),
+            BelongsTo::make('Invoice','invoice',Invoice::class)->searchable(),
+            BelongsTo::make('Customer','customer',Customer::class)->searchable(),
+            BelongsTo::make('User','user',User::class)->default(Auth::id())->readonly(),
             Currency::make('Amount')->step(0.01)->rules('required', 'numeric', 'min:0'),
             Badge::make(__('Status'))->map([
                 'pending' => 'warning',

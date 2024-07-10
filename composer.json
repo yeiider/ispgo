@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "hansschouten/laravel-pagebuilder": "^0.30.0",
         "ispgo/settings-manager": "@dev",
         "laravel/framework": "^11.9",
         "laravel/nova": "^4.0",
@@ -54,7 +55,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "hansschouten/laravel-pagebuilder"
+            ]
         }
     },
     "config": {

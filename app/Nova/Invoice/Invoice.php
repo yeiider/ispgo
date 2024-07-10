@@ -5,7 +5,7 @@ namespace App\Nova\Invoice;
 use App\Nova\Actions\Invoice\RegisterPayment;
 use App\Nova\Actions\Invoice\RegisterPaymentPromise;
 use App\Nova\Customers;
-use App\Nova\Filters\InvoiceStatusFilter;
+use App\Nova\Filters\Invoice\InvoiceStatusFilter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\DestructiveAction;

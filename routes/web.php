@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\CustomerAuthController;
+use HansSchouten\LaravelPageBuilder\LaravelPageBuilder;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+// Rutas de Nova
+Route::middleware(['nova'])->prefix('nova')->group(function () {
+    \Laravel\Nova\Nova::routes();
 });
 
+// Rutas de autenticación de clientes
 Route::prefix('customer')->group(function () {
     Route::get('register', [CustomerAuthController::class, 'showRegistrationForm'])->name('customer.register');
     Route::post('register', [CustomerAuthController::class, 'register']);
@@ -25,3 +28,32 @@ Route::prefix('customer')->group(function () {
         });
     });
 });
+
+// Rutas del Page Builder para manejar assets y uploads
+Route::any(config('pagebuilder.general.assets_url') . '{any}', function() {
+    $builder = new LaravelPageBuilder(config('pagebuilder'));
+    $builder->handlePageBuilderAssetRequest();
+})->where('any', '.*');
+
+Route::any(config('pagebuilder.general.uploads_url') . '{any}', function() {
+    $builder = new LaravelPageBuilder(config('pagebuilder'));
+    $builder->handleUploadedFileRequest();
+})->where('any', '.*');
+
+// Rutas del Page Builder para el website manager
+if (config('pagebuilder.website_manager.use_website_manager')) {
+    Route::any(config('pagebuilder.website_manager.url') . '{any}', function() {
+        $builder = new LaravelPageBuilder(config('pagebuilder'));
+        $builder->handleRequest();
+    })->where('any', '.*');
+}
+
+// Ruta catch-all para manejar todas las demás solicitudes y resolver páginas dinámicas del Page Builder
+Route::any('/{any}', function() {
+    $builder = new LaravelPageBuilder(config('pagebuilder'));
+    $hasPageReturned = $builder->handlePublicRequest();
+
+    if (request()->path() === '/' && !$hasPageReturned) {
+        $builder->getWebsiteManager()->renderWelcomePage();
+    }
+})->where('any', '.*');

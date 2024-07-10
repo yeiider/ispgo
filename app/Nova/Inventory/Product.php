@@ -9,6 +9,7 @@ use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Image;
+use Laravel\Nova\Fields\Markdown;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
@@ -52,7 +53,7 @@ class Product extends Resource
             Currency::make('Cost Price')
                 ->sortable()
                 ->rules('required', 'numeric'),
-            Textarea::make('Description')
+            Markdown::make('Description')
                 ->hideFromIndex(),
             Text::make('Reference')
                 ->sortable()
