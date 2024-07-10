@@ -1,13 +1,13 @@
 <?php
 
-namespace Ispgo\SettingsManager;
+namespace Ispgo\Ckeditor;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Http\Middleware\Authenticate;
 use Laravel\Nova\Nova;
-use Ispgo\SettingsManager\Http\Middleware\Authorize;
+use Ispgo\Ckeditor\Http\Middleware\Authorize;
 
 class ToolServiceProvider extends ServiceProvider
 {
@@ -16,7 +16,7 @@ class ToolServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot(): void
+    public function boot()
     {
         $this->app->booted(function () {
             $this->routes();
@@ -31,18 +31,18 @@ class ToolServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function routes(): void
+    protected function routes()
     {
         if ($this->app->routesAreCached()) {
             return;
         }
 
-        Nova::router(['nova', Authenticate::class, Authorize::class], 'settings-manager')
-            ->group(__DIR__ . '/../routes/inertia.php');
+        Nova::router(['nova', Authenticate::class, Authorize::class], 'ckeditor')
+            ->group(__DIR__.'/../routes/inertia.php');
 
         Route::middleware(['nova', Authorize::class])
-            ->prefix('/settings-manager')
-            ->group(__DIR__ . '/../routes/api.php');
+            ->prefix('/ckeditor')
+            ->group(__DIR__.'/../routes/api.php');
     }
 
     /**

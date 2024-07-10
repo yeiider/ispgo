@@ -1,28 +1,27 @@
 <?php
 
-namespace Ispgo\SettingsManager;
+namespace Ispgo\Ckeditor;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Ispgo\Ckeditor\Http\Middleware\Authorize;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Http\Middleware\Authenticate;
 use Laravel\Nova\Nova;
-use Ispgo\SettingsManager\Http\Middleware\Authorize;
 
-class ToolServiceProvider extends ServiceProvider
+class FieldServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
      *
      * @return void
      */
-    public function boot(): void
+    public function boot()
     {
-        $this->app->booted(function () {
-            $this->routes();
-        });
+        $this->routes();
         Nova::serving(function (ServingNova $event) {
-            //
+            Nova::script('ckeditor', __DIR__ . '/../dist/js/field.js');
+            Nova::style('ckeditor', __DIR__ . '/../dist/css/field.css');
         });
     }
 
@@ -31,17 +30,17 @@ class ToolServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function routes(): void
+    protected function routes()
     {
         if ($this->app->routesAreCached()) {
             return;
         }
 
-        Nova::router(['nova', Authenticate::class, Authorize::class], 'settings-manager')
+        Nova::router(['nova', Authenticate::class, Authorize::class], 'ckeditor')
             ->group(__DIR__ . '/../routes/inertia.php');
 
         Route::middleware(['nova', Authorize::class])
-            ->prefix('/settings-manager')
+            ->prefix('/ckeditor')
             ->group(__DIR__ . '/../routes/api.php');
     }
 

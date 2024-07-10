@@ -14,7 +14,8 @@
         "laravel/framework": "^11.9",
         "laravel/nova": "^4.0",
         "laravel/tinker": "^2.9",
-        "sereny/nova-permissions": "^1.6"
+        "sereny/nova-permissions": "^1.6",
+        "ispgo/ckeditor": "@dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

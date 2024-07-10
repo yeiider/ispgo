@@ -9,10 +9,15 @@
         "build-settings-manager": "cd nova-components/SettingsManager && npm run dev",
         "build-settings-manager-prod": "cd nova-components/SettingsManager && npm run prod",
         "build-router": "cd nova-components/Router && npm run dev",
-        "build-router-prod": "cd nova-components/Router && npm run prod"
+        "build-router-prod": "cd nova-components/Router && npm run prod",
+        "build-Ckeditor": "cd nova-components/Ckeditor && npm run dev",
+        "build-Ckeditor-prod": "cd nova-components/Ckeditor && npm run prod",
+        "build-ckeditor": "cd nova-components/Ckeditor && npm run dev",
+        "build-ckeditor-prod": "cd nova-components/Ckeditor && npm run prod"
     },
     "devDependencies": {
         "axios": "^1.6.4",
+        "ckeditor5": "^42.0.0",
         "laravel-vite-plugin": "^1.0",
         "vite": "^5.0"
     },
