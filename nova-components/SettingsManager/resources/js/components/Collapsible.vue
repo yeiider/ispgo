@@ -2,7 +2,7 @@
   <div>
     <button
       @click="toggle"
-      :class="`bg-blue-500 text-left px-4 py-4 rounded w-full flex justify-between ${isOpen ? 'is-open': ''}`"
+      :class="`bg-blue-500 text-left px-4 py-4 rounded w-full flex justify-between ${isOpen ? 'is-open font-bold': ''}`"
       type="button"
     >
       <span>{{ title }}</span>

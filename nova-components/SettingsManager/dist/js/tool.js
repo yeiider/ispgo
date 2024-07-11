@@ -502,7 +502,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[0] || (_cache[0] = function () {
       return $options.toggle && $options.toggle.apply($options, arguments);
     }),
-    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)("bg-blue-500 text-left px-4 py-4 rounded w-full flex justify-between ".concat($data.isOpen ? 'is-open' : '')),
+    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)("bg-blue-500 text-left px-4 py-4 rounded w-full flex justify-between ".concat($data.isOpen ? 'is-open font-bold' : '')),
     type: "button"
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.title), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ArrowDown, {
     "class": "arrow"
