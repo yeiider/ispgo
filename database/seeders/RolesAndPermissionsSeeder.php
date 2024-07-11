@@ -37,8 +37,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'Product',
             'Supplier',
             'Category',
-            'Warehouse'
-            // Otros modelos que necesiten permisos
+            'Warehouse',
+            'CashRegister',
+            'Expense',
+            'Income',
+            'Transaction'
         ]);
         Permission::create(['group' => "System Setting", 'name' => 'Setting']);
         $collection->each(function ($item) {

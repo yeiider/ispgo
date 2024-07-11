@@ -2,6 +2,9 @@
 
 namespace App\Models\Invoice;
 
+use App\Events\InvoiceCreated;
+use App\Events\InvoicePaid;
+use App\Events\InvoiceUpdateStatus;
 use App\Models\Customers\Customer;
 use App\Models\Services\Service;
 use App\Models\User;
@@ -64,9 +67,11 @@ class Invoice extends Model
         }
 
         $this->save();
+        event(new InvoicePaid($this));
     }
 
-    public function createPromisePayment($date,$notes=null)
+
+    public function createPromisePayment($date, $notes = null)
     {
         return PaymentPromise::create([
             'invoice_id' => $this->id,
@@ -91,10 +96,15 @@ class Invoice extends Model
         static::creating(function ($model) {
             $model->created_by = Auth::id();
             $model->updated_by = Auth::id();
+            event(new InvoiceCreated($model));
         });
 
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
+            $model->updated_by = Auth::id();
+            if ($model->isDirty('status')) {
+                event(new InvoiceUpdateStatus($model));
+            }
         });
     }
 

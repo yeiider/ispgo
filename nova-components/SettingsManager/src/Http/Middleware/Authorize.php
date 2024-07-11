@@ -2,6 +2,8 @@
 
 namespace Ispgo\SettingsManager\Http\Middleware;
 
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Laravel\Nova\Nova;
 use Ispgo\SettingsManager\SettingsManager;
 use Closure;
@@ -11,9 +13,9 @@ class Authorize
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request):mixed  $next
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @param  \Closure(Request):mixed  $next
+     * @return Response
      */
     public function handle($request, Closure $next)
     {
@@ -40,7 +42,7 @@ class Authorize
     /**
      * Determine whether the user has the 'setting' permission.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return bool
      */
     protected function userHasSettingPermission($request)

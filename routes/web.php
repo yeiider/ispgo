@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\CustomerAuthController;
+use HansSchouten\LaravelPageBuilder\LaravelPageBuilder;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+// Rutas de Nova
+Route::middleware(['nova'])->prefix('nova')->group(function () {
+    \Laravel\Nova\Nova::routes();
 });
 
+// Rutas de autenticación de clientes
 Route::prefix('customer')->group(function () {
     Route::get('register', [CustomerAuthController::class, 'showRegistrationForm'])->name('customer.register');
     Route::post('register', [CustomerAuthController::class, 'register']);
@@ -25,3 +28,5 @@ Route::prefix('customer')->group(function () {
         });
     });
 });
+
+

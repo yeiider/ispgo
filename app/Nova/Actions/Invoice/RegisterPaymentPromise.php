@@ -32,8 +32,8 @@ class RegisterPaymentPromise extends Action
             }
             $promise = $model->createPromisePayment($fields->date_to_make_payment, $fields->notes);
             if ($promise) {
-                $model->status = 'paid'; // Asumiendo que el campo es 'status' en lugar de 'paid'
-                $model->save();
+                $model->service->service_status = 'active'; // Asumiendo que el campo es 'status' en lugar de 'paid'
+                $model->service->save();
             }
         }
         if ($models->count() > 1) {

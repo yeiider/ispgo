@@ -5,7 +5,11 @@ namespace App\Nova\Invoice;
 use App\Nova\Actions\Invoice\RegisterPayment;
 use App\Nova\Actions\Invoice\RegisterPaymentPromise;
 use App\Nova\Customers;
-use App\Nova\Filters\InvoiceStatusFilter;
+use App\Nova\Filters\Invoice\InvoiceStatusFilter;
+use App\Nova\Metrics\Invoice\InvoicesStatus;
+use App\Nova\Metrics\Invoice\MonthlyRevenue;
+use App\Nova\Metrics\Invoice\OutstandingBalance;
+use App\Nova\Metrics\Invoice\TotalRevenue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\DestructiveAction;
@@ -87,7 +91,21 @@ class Invoice extends Resource
         ];
     }
 
-
+    /**
+     * Get the cards available for the resource.
+     *
+     * @param NovaRequest $request
+     * @return array
+     */
+    public function cards(NovaRequest $request)
+    {
+        return [
+            new InvoicesStatus(),
+            new OutstandingBalance(),
+            new TotalRevenue(),
+          //  new MonthlyRevenue()
+        ];
+    }
     public static function authorizedToCreate(Request $request)
     {
         return false;

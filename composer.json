@@ -9,11 +9,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "hansschouten/laravel-pagebuilder": "^0.30.0",
         "ispgo/settings-manager": "@dev",
         "laravel/framework": "^11.9",
         "laravel/nova": "^4.0",
         "laravel/tinker": "^2.9",
-        "sereny/nova-permissions": "^1.6"
+        "sereny/nova-permissions": "^1.6",
+        "ispgo/ckeditor": "@dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -54,7 +56,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "hansschouten/laravel-pagebuilder"
+            ]
         }
     },
     "config": {

@@ -46,7 +46,7 @@ class CreditNote extends Resource
     {
         return [
             ID::make()->sortable(),
-            BelongsTo::make('Invoice')->searchable(),
+            BelongsTo::make('Invoice','invoice',Invoice::class)->searchable(),
             BelongsTo::make('User')->default(Auth::id())->readonly(),
             Currency::make('Amount')->step(0.01)->rules('required', 'numeric', 'min:0'),
             Date::make('Issue Date')->rules('required', 'date'),

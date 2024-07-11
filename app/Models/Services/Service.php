@@ -2,6 +2,7 @@
 
 namespace App\Models\Services;
 
+use App\Events\ServiceUpdateStatus;
 use App\Models\Customers\Customer;
 use App\Models\Invoice\Invoice;
 use App\Models\Router;
@@ -64,9 +65,13 @@ class Service extends Model
             $model->updated_by = Auth::id();
         });
 
-        static::updating(function ($model) {
-            $model->updated_by = Auth::id();
+        static::updating(function ($service) {
+            if ($service->isDirty('service_status')) {
+                $service->updated_by = Auth::id();
+                event(new ServiceUpdateStatus($service));
+            }
         });
+
     }
 
     public function generateInvoice($notes = null): \App\Models\Invoice\Invoice

@@ -9,6 +9,7 @@ use App\Nova\Metrics\NewCustomers;
 use App\Nova\Resource;
 use App\Nova\Service;
 use Illuminate\Http\Request;
+use Ispgo\Ckeditor\Ckeditor;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\HasMany;
@@ -57,7 +58,7 @@ class Customer extends Resource
                     'inactive' => __('Inactive')
                 ])->hideFromIndex()
                 ->sortable()->rules('required'),
-            Textarea::make(__('Additional Notes'), 'additional_notes')->nullable(),
+            Ckeditor::make(__('Additional Notes'), 'additional_notes')->nullable(),
             HasOne::make(__('Tax Details'), 'taxDetails', TaxDetail::class),
             HasMany::make(__('Addresses'), 'addresses', Address::class),
             HasMany::make(__('Services'), 'services', Service::class),
@@ -106,7 +107,7 @@ class Customer extends Resource
     /**
      * Get the cards available for the resource.
      *
-     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @param NovaRequest $request
      * @return array
      */
     public function cards(NovaRequest $request)

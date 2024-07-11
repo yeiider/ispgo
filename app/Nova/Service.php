@@ -109,8 +109,7 @@ class Service extends Resource
                     'ftth' => __('Fiber Optic'),
                     'adsl' => __('ADSL'),
                     'satellite' => __('Satellite'),
-                ])
-                ->rules('required'),
+                ]),
             Text::make('MAC Address', 'mac_address')->hideFromIndex(),
             Date::make('Installation Date', 'installation_date'),
             Textarea::make('Service Notes', 'service_notes'),

@@ -5,6 +5,10 @@ namespace App\Providers;
 use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
+use App\Nova\Finance\CashRegister;
+use App\Nova\Finance\Expense;
+use App\Nova\Finance\Income;
+use App\Nova\Finance\Transaction;
 use App\Nova\Installation;
 use App\Nova\Inventory\Category;
 use App\Nova\Inventory\Product;
@@ -20,6 +24,7 @@ use App\Nova\Lenses\TelephonicServiceLens;
 use App\Nova\Lenses\TelevisionPlanLens;
 use App\Nova\Lenses\TelevisionServiceLens;
 use App\Nova\Lenses\UninstallationsLens;
+use App\Nova\PageBuilder\Pages;
 use App\Nova\Plan;
 use App\Nova\Router;
 use App\Nova\Service;
@@ -78,11 +83,21 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(CreditNote::class),
                     MenuItem::resource(PaymentPromise::class),
                     MenuItem::resource(DailyInvoiceBalance::class),
+                ])->icon('archive')->collapsable(),
+                MenuSection::make(__('Finances'), [
+                    MenuItem::resource(CashRegister::class),
+                    MenuItem::resource(Income::class),
+                    MenuItem::resource(Expense::class),
+                    MenuItem::resource(Transaction::class),
                 ])->icon('cash')->collapsable(),
 
                 MenuSection::make(__('Tickets'), [
                     MenuItem::resource(Ticket::class)
                 ])->icon('support')->collapsable(),
+
+                MenuSection::make(__('Content'), [
+                    MenuItem::resource(Pages::class)
+                ])->icon('desktop-computer')->collapsable(),
 
                 MenuSection::make(__('Inventory'), [
                     MenuItem::resource(Warehouse::class),
