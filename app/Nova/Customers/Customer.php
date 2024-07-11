@@ -58,7 +58,7 @@ class Customer extends Resource
                     'inactive' => __('Inactive')
                 ])->hideFromIndex()
                 ->sortable()->rules('required'),
-            Ckeditor::make(__('Additional Notes'), 'additional_notes')->nullable(),
+            Textarea::make(__('Additional Notes'), 'additional_notes')->nullable(),
             HasOne::make(__('Tax Details'), 'taxDetails', TaxDetail::class),
             HasMany::make(__('Addresses'), 'addresses', Address::class),
             HasMany::make(__('Services'), 'services', Service::class),

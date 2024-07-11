@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
+use App\Nova\EmailTemplate;
 use App\Nova\Finance\CashRegister;
 use App\Nova\Finance\Expense;
 use App\Nova\Finance\Income;
@@ -96,7 +97,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 ])->icon('support')->collapsable(),
 
                 MenuSection::make(__('Content'), [
-                    MenuItem::resource(Pages::class)
+                    MenuItem::resource(Pages::class),
+                    MenuItem::resource(EmailTemplate::class)
                 ])->icon('desktop-computer')->collapsable(),
 
                 MenuSection::make(__('Inventory'), [

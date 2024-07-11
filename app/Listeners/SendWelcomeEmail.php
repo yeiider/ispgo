@@ -13,8 +13,7 @@ class SendWelcomeEmail
     public function handle(CustomerCreated $event): void
     {
         $customer = $event->customer;
-
         // Enviar el correo electrónico de bienvenida
-      //  Mail::to($customer->email_address)->send(new WelcomeMail($customer));
+        Mail::to($customer->email_address)->send(new WelcomeMail($customer));
     }
 }
