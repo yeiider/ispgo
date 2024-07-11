@@ -2,14 +2,20 @@
 
 namespace App\Nova\Customers;
 
+use App\Mail\DynamicEmail;
 use App\Models\Customers\DocumentType;
+use App\Models\EmailTemplate;
 use App\Nova\Actions\UpdateCustomerStatus;
 use App\Nova\Filters\CustomerStatus;
 use App\Nova\Metrics\NewCustomers;
 use App\Nova\Resource;
 use App\Nova\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 use Ispgo\Ckeditor\Ckeditor;
+use Laravel\Nova\Actions\Action;
+use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\HasMany;
@@ -69,6 +75,12 @@ class Customer extends Resource
     {
         return [
             new UpdateCustomerStatus,
+            Action::using(__('Send Email'), function (ActionFields $fields, Collection $models) {
+                $model = $models->first();
+                $data = $model;
+                $template = EmailTemplate::find(3); // ID de la plantilla de bienvenida
+                Mail::to($model->email_address)->send(new DynamicEmail($data, $template));
+            })->showInline()
         ];
     }
 
