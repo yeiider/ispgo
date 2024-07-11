@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col gap-5">
-    <template v-for="field in fields" :key="field.attribute">
+    <template v-for="field in fields" :key="field.uniqueKey">
       <component
         :is="render(field.component)"
-        :id="field.attribute"
+        :id="field.uniqueKey"
         :value="field.value"
         :field="field"
         :label="field.name"
@@ -54,7 +54,3 @@ export default {
 }
 </script>
 
-
-<style scoped>
-
-</style>
