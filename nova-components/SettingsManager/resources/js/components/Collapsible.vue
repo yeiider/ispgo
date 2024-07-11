@@ -2,22 +2,30 @@
   <div>
     <button
       @click="toggle"
-      class="bg-blue-500 text-left px-4 py-2 rounded w-full"
+      :class="`bg-blue-500 text-left px-4 py-4 rounded w-full flex justify-between ${isOpen ? 'is-open': ''}`"
       type="button"
     >
-      {{ title }}
+      <span>{{ title }}</span>
+      <ArrowDown class="arrow"/>
     </button>
-    <div v-show="isOpen" class="mt-4 p-4 border rounded bg-gray-100">
-      <slot></slot>
-    </div>
+    <Transition>
+      <div v-show="isOpen" class="mt-4 p-4 border rounded bg-gray-100 collapse-content">
+        <slot></slot>
+      </div>
+    </Transition>
   </div>
 </template>
 <script>
+import ArrowDown from './icons/ArrowDown.vue'
+
 export default {
   name: "Collapsible",
   props: {
     title: String,
     isDefaultOpen: Boolean,
+  },
+  components: {
+    ArrowDown
   },
   data() {
     return {
@@ -36,7 +44,20 @@ export default {
 }
 </script>
 
-
 <style scoped>
 
+button .arrow {
+  transition: all 300ms;
+}
+
+button.is-open .arrow {
+  transform: rotate(-184deg);
+}
+
+.v-enter-active,
+.v-leave-active,
+.v-enter-from,
+.v-leave-to {
+  transition: all 500ms ease;
+}
 </style>
