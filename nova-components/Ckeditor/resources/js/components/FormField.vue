@@ -11,8 +11,40 @@
 
 <script>
 import CKEditor from '@ckeditor/ckeditor5-vue';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {DependentFormField, HandlesValidationErrors} from 'laravel-nova';
+import {
+    ClassicEditor,
+    AccessibilityHelp,
+    Autoformat,
+    AutoLink,
+    Autosave,
+    Bold,
+    Code,
+    CodeBlock,
+    Essentials,
+    GeneralHtmlSupport,
+    Heading,
+    HtmlEmbed,
+    Italic,
+    Link,
+    Paragraph,
+    SelectAll,
+    ShowBlocks,
+    Table,
+    TableCaption,
+    TableCellProperties,
+    TableColumnResize,
+    TableProperties,
+    TableToolbar,
+    TextPartLanguage,
+    TextTransformation,
+    Undo,
+    FileRepository,
+    Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload,
+    CKFinderUploadAdapter,
+    MediaEmbed
+} from 'ckeditor5';
+import 'ckeditor5/ckeditor5.css';
 
 export default {
     mixins: [DependentFormField, HandlesValidationErrors],
@@ -29,8 +61,68 @@ export default {
             value: this.field.value || '',
             editor: ClassicEditor,
             editorConfig: {
+
                 extraPlugins: [this.MyCustomUploadAdapterPlugin],
-                // Otros ajustes de configuración
+                plugins: [
+                    ClassicEditor,
+                    AccessibilityHelp,
+                    Autoformat,
+                    AutoLink,
+                    Autosave,
+                    Bold,
+                    Code,
+                    CodeBlock,
+                    Essentials,
+                    GeneralHtmlSupport,
+                    Heading,
+                    HtmlEmbed,
+                    Italic,
+                    Link,
+                    Paragraph,
+                    SelectAll,
+                    ShowBlocks,
+                    Table,
+                    TableCaption,
+                    TableCellProperties,
+                    TableColumnResize,
+                    TableProperties,
+                    TableToolbar,
+                    TextPartLanguage,
+                    TextTransformation,
+                    Undo,
+                    FileRepository,
+                    Image,
+                    ImageCaption,
+                    ImageStyle,
+                    ImageToolbar,
+                    ImageUpload,
+                    CKFinderUploadAdapter,
+                    MediaEmbed
+                ],
+                toolbar: {
+                    items: [
+                        'undo',
+                        'redo',
+                        '|',
+                        'showBlocks',
+                        'selectAll',
+                        '|',
+                        'heading',
+                        '|',
+                        'bold',
+                        'italic',
+                        'code',
+                        '|',
+                        'link',
+                        'insertImage',
+                        'insertTable',
+                        'codeBlock',
+                        'htmlEmbed',
+                        '|',
+                        'accessibilityHelp'
+                    ],
+                    shouldNotGroupWhenFull: true
+                },
             }
         };
     },

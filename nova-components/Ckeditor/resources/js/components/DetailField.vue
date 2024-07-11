@@ -1,5 +1,6 @@
 <template>
-    <PanelItem :field="field" />
+    <PanelItem :field="field">
+    </PanelItem>
 </template>
 
 <script>

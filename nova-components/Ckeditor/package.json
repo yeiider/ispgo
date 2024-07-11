@@ -19,7 +19,13 @@
     "vue-loader": "^16.8.3"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-basic-styles": "^42.0.0",
     "@ckeditor/ckeditor5-build-classic": "^42.0.0",
+    "@ckeditor/ckeditor5-core": "^42.0.0",
+    "@ckeditor/ckeditor5-essentials": "^42.0.0",
+    "@ckeditor/ckeditor5-image": "^42.0.0",
+    "@ckeditor/ckeditor5-paragraph": "^42.0.0",
+    "@ckeditor/ckeditor5-ui": "^42.0.0",
     "@ckeditor/ckeditor5-vue": "^6.0.0"
   }
 }
