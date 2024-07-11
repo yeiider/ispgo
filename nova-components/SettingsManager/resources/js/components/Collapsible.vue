@@ -16,11 +16,12 @@
 export default {
   name: "Collapsible",
   props: {
-    title: String
+    title: String,
+    isDefaultOpen: Boolean,
   },
   data() {
     return {
-      isOpen: false,
+      isOpen: this.isDefaultOpen,
     };
   },
   mounted() {

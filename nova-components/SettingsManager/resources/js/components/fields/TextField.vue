@@ -10,6 +10,7 @@
       <div class="space-y-1">
         <input
           :id="field.uniqueKey"
+          :value="field.value"
           @input="updateValue($event.target.value)"
           class="w-full form-control form-input form-control-bordered"
           :placeholder="field.placeholder"

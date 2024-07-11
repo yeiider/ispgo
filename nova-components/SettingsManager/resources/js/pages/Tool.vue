@@ -7,9 +7,7 @@
             :section="section"
       />
       <form @submit.prevent="saveSetting" class="w-[75%]">
-
         <card>
-
           <!--<template v-for="(field, fieldIndex) in fields" :key="field.uniqueKey">
             <component
               :is="getFieldComponent(field.component)"
@@ -20,8 +18,10 @@
           </template> -->
 
           <template v-for="(group, groupIndex) in groups" :key="groupIndex">
-            <Collapsible :title="group.label">
-              <DefaultField :fields="group.fields" />
+            <Collapsible :title="group.label" :isDefaultOpen="groupIndex === 0">
+              <DefaultField
+                :fields="group.fields"
+              />
             </Collapsible>
           </template>
 
@@ -57,7 +57,6 @@ import CustomTextareaField from '../components/CustomTextareaField.vue';
 import Menu from "../components/Menu.vue";
 import Collapsible from "../components/Collapsible.vue"
 import DefaultField from "../components/fields/DefaultField.vue";
-
 
 export default {
   props: {
@@ -116,8 +115,8 @@ export default {
         }
       });
     },
-    updateFieldValue(group, attribute, value) {
 
+    updateHandler(group, attribute, value) {
       const field = this.fields.find(f => f.group === group && f.attribute === attribute);
       if (field) {
         field.value = value;
