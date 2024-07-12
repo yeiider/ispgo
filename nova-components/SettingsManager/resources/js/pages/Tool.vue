@@ -1,7 +1,7 @@
 <template>
   <div class="relative" dusk="settings-index-component">
     <heading class="mb-6">Settings Manager</heading>
-    <div class="flex justify-evenly">
+    <div class="flex justify-evenly items-start">
       <Menu class="w-[20%]"
             :menu="settingMenu"
             :section="section"

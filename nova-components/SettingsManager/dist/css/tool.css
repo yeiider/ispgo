@@ -517,3 +517,7 @@ video {
 padding: 15px;
 }
 
+.items-start {
+    align-items: start;
+}
+

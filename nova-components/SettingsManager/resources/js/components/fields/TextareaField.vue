@@ -12,7 +12,7 @@
           :id="id"
           :value="value"
           @input="updateValue($event.target.value)"
-          class="w-full form-control form-input form-control-bordered"
+          class="w-full form-control form-input form-control-bordered py-2"
         />
       </div>
     </div>
