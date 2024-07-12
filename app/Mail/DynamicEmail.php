@@ -24,26 +24,14 @@ class DynamicEmail extends Mailable
     {
         $engine = new \App\Services\TemplateEngine($this->template, $this->data);
         $content = $engine->renderContentOnly(); // Renderiza solo el contenido
-
         // Procesar el asunto
-        $subject = $this->replaceVariables($this->template->subject, $this->data);
+        $subject = $engine->replaceVariables($this->template->subject);
 
-        // Depuración del contenido y el asunto
-        dd($content, $subject);
-
-        return $this->view('layouts.email')
+        return $this->view('emails.default')
             ->with([
                 'content' => $content,
                 'styles' => $this->template->styles,
             ])
             ->subject($subject);
-    }
-
-    private function replaceVariables($text, $data)
-    {
-        foreach ($data as $key => $value) {
-            $text = str_replace("{{ $key }}", $value, $text);
-        }
-        return $text;
     }
 }

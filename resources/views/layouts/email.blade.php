@@ -5,14 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+        }
+        .header, .footer {
+            background-color: #ffffff;
+            text-align: center;
+            padding: 10px 0;
+        }
+        .header img {
+            max-width: 100px;
+        }
+        .footer p {
+            font-size: 12px;
+            color: #999999;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #00b0ff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
        @yield('styles')
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="header">
-        <img src="{{ asset('logo.png') }}" alt="Logo">
-    </div>
 
     @yield('content')
 

@@ -77,9 +77,8 @@ class Customer extends Resource
             new UpdateCustomerStatus,
             Action::using(__('Send Email'), function (ActionFields $fields, Collection $models) {
                 $model = $models->first();
-                $data = $model;
                 $template = EmailTemplate::find(3); // ID de la plantilla de bienvenida
-                Mail::to($model->email_address)->send(new DynamicEmail($data, $template));
+                Mail::to($model->email_address)->send(new DynamicEmail(["customer" => $model], $template));
             })->showInline()
         ];
     }
