@@ -9,7 +9,7 @@
       <ArrowDown class="arrow"/>
     </button>
     <Transition>
-      <div v-show="isOpen" class="mt-4 p-4 border rounded bg-gray-100 collapse-content">
+      <div v-show="isOpen" class="mt-4 p-4 border rounded collapse-content">
         <slot></slot>
       </div>
     </Transition>
@@ -46,7 +46,7 @@ export default {
 
 <style scoped>
 
-button .arrow {
+button, button .arrow {
   transition: all 300ms;
 }
 
