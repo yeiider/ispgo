@@ -5,6 +5,7 @@
                 <label v-if="field.label" :for="field.name" class="field-label">{{ field.label }}</label>
                 <ckeditor :editor="editor" v-model="value" :config="editorConfig" @input="handleChange"></ckeditor>
             </div>
+
         </template>
     </DefaultField>
 </template>
