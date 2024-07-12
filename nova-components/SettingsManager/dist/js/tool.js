@@ -494,7 +494,7 @@ var _withScopeId = function _withScopeId(n) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.pushScopeId)("data-v-12405422"), n = n(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.popScopeId)(), n;
 };
 var _hoisted_1 = {
-  "class": "mt-4 p-4 border rounded bg-gray-100 collapse-content"
+  "class": "mt-4 p-4 border rounded collapse-content"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_ArrowDown = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("ArrowDown");
@@ -1177,7 +1177,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\nbutton .arrow[data-v-12405422] {\n  transition: all 300ms;\n}\nbutton.is-open .arrow[data-v-12405422] {\n  transform: rotate(-184deg);\n}\n.v-enter-active[data-v-12405422],\n.v-leave-active[data-v-12405422],\n.v-enter-from[data-v-12405422],\n.v-leave-to[data-v-12405422] {\n  transition: all 500ms ease;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\nbutton[data-v-12405422], button .arrow[data-v-12405422] {\n  transition: all 300ms;\n}\nbutton.is-open .arrow[data-v-12405422] {\n  transform: rotate(-184deg);\n}\n.v-enter-active[data-v-12405422],\n.v-leave-active[data-v-12405422],\n.v-enter-from[data-v-12405422],\n.v-leave-to[data-v-12405422] {\n  transition: all 500ms ease;\n}\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
