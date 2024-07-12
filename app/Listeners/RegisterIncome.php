@@ -14,12 +14,12 @@ class RegisterIncome
      */
     public function handle(InvoicePaid $event): void
     {
-         Income::create([
+         /**Income::create([
              "description" => ,
              "amount" => ,
              "date" => ,
              "category" =>,
              "customer_id" =>
-         ]);
+         ]);**/
     }
 }
