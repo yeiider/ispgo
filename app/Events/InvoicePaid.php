@@ -15,7 +15,7 @@ class InvoicePaid
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private Invoice $invoice;
+    public Invoice $invoice;
 
     /**
      * Create a new event instance.

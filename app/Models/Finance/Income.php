@@ -12,16 +12,11 @@ class Income extends Model
     use HasFactory;
 
     protected $fillable = [
-        'description', 'amount', 'date', 'payment_method', 'category', 'customer_id', 'invoice_id'
+        'description', 'amount', 'date', 'payment_method', 'category'
     ];
 
-    public function invoice()
-    {
-        return $this->belongsTo(Invoice::class);
-    }
+    protected $casts = [
+        'date' => 'date'
+    ];
 
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
 }

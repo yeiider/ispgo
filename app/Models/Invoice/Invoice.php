@@ -54,7 +54,6 @@ class Invoice extends Model
 
     public function applyPayment($amount = null, $paymentMethod = "cash"): void
     {
-
         $this->amount += $amount ?? $this->total;
         $this->outstanding_balance = $this->total - $this->amount;
         $this->payment_method = $paymentMethod;
@@ -69,7 +68,6 @@ class Invoice extends Model
         $this->save();
         event(new InvoicePaid($this));
     }
-
 
     public function createPromisePayment($date, $notes = null)
     {
@@ -89,6 +87,34 @@ class Invoice extends Model
         $this->save();
     }
 
+    public function applyDiscountWithoutTax(float $discount)
+    {
+        $this->discount = $discount;
+        $subtotal = $this->subtotal - $discount;
+        $tax = $subtotal * 0.19;
+        $total = $subtotal + $tax;
+
+        $this->subtotal = $subtotal;
+        $this->tax = $tax;
+        $this->total = $total;
+        $this->outstanding_balance = $total - $this->amount;
+        $this->save();
+    }
+
+    public function applyDiscountWithTax(float $discount)
+    {
+        $this->discount = $discount;
+        $total = $this->total - $discount;
+        $subtotal = $total / 1.19;
+        $tax = $total - $subtotal;
+
+        $this->subtotal = $subtotal;
+        $this->tax = $tax;
+        $this->total = $total;
+        $this->outstanding_balance = $total - $this->amount;
+        $this->save();
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -100,7 +126,6 @@ class Invoice extends Model
         });
 
         static::updating(function ($model) {
-            $model->updated_by = Auth::id();
             $model->updated_by = Auth::id();
             if ($model->isDirty('status')) {
                 event(new InvoiceUpdateStatus($model));
@@ -134,6 +159,5 @@ class Invoice extends Model
                 'total_revenue' => $totalRevenue,
             ]);
         }
-
     }
 }

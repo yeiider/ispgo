@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^2.2",
         "hansschouten/laravel-pagebuilder": "^0.30.0",
         "intervention/image": "^3.7",
         "ispgo/ckeditor": "@dev",

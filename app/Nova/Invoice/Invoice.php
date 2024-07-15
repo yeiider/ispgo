@@ -2,6 +2,8 @@
 
 namespace App\Nova\Invoice;
 
+use App\Nova\Actions\ApplyDiscount;
+use App\Nova\Actions\DownloadInvoicePdf;
 use App\Nova\Actions\Invoice\RegisterPayment;
 use App\Nova\Actions\Invoice\RegisterPaymentPromise;
 use App\Nova\Customers;
@@ -78,6 +80,8 @@ class Invoice extends Resource
         return [
             (new RegisterPayment())->showInline(),
             (new RegisterPaymentPromise())->showInline(),
+            (new ApplyDiscount())->showInline(),
+            (new DownloadInvoicePdf())->showInline(),
             DestructiveAction::using(__('Cancel invoice'), function (ActionFields $fields, Collection $models) {
                 $models->each->canceled();
             })->showInline()

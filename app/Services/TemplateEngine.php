@@ -88,16 +88,6 @@ class TemplateEngine
         return $this->data[$this->template->entity]?->{$expression} ?? "{{ $expression }}";
     }
 
-    protected function getDynamicVariables(): array
-    {
-
-        return [
-            'first_name' => 'Juan',
-            'full_name' => 'Juan Pérez',
-            'email' => 'juan.perez@example.com',
-            // Añadir más variables dinámicas según sea necesario
-        ];
-    }
 
     protected function parseParameters($parameterString)
     {
