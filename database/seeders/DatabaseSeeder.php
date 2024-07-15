@@ -20,6 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call(TaxDetailSeeder::class);
         $this->call(PlanSeeder::class);
         $this->call(ServiceSeeder::class);
-
+        $this->call(TemplateEmailSeeder::class);
     }
 }
