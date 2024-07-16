@@ -15,8 +15,6 @@ class CreateIncomesTable extends Migration
             $table->date('date');
             $table->string('payment_method');
             $table->string('category');
-            $table->foreignId('customer_id')->constrained();
-            $table->foreignId('invoice_id')->constrained();
             $table->timestamps();
         });
     }
