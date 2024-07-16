@@ -370,7 +370,6 @@ __webpack_require__.r(__webpack_exports__);
         _this.settingMenu = response.data.settingMenu;
         if (response.data && "groups" in response.data && response.data.groups.length) {
           _this.groups = response.data.groups;
-          console.log(response.data);
         }
       });
     },
@@ -386,7 +385,13 @@ __webpack_require__.r(__webpack_exports__);
           fieldToUpdate.value = value;
         }
       });
-      console.log(this.groups);
+      var _fields = [];
+      this.groups.forEach(function (group) {
+        group.fields.forEach(function (field) {
+          _fields.push(field);
+        });
+      });
+      this.fields = _fields;
     },
     saveSetting: function saveSetting() {
       var _this$section,
@@ -917,7 +922,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "w-[75%]"
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_card, null, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("<template v-for=\"(field, fieldIndex) in fields\" :key=\"field.uniqueKey\">\n            <component\n              :is=\"getFieldComponent(field.component)\"\n              :field=\"field\"\n              :fieldname=\"section\"\n              @input=\"updateFieldValue(field.group, field.attribute, $event)\"\n            ></component>\n          </template> "), ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.groups, function (group, groupIndex) {
+      return [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($data.groups, function (group, groupIndex) {
         return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(_component_Collapsible, {
           key: groupIndex,
           title: group.label,

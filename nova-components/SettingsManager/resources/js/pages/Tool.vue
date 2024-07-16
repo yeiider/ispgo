@@ -8,15 +8,6 @@
       />
       <form @submit.prevent="saveSetting" class="w-[75%]">
         <card>
-          <!--<template v-for="(field, fieldIndex) in fields" :key="field.uniqueKey">
-            <component
-              :is="getFieldComponent(field.component)"
-              :field="field"
-              :fieldname="section"
-              @input="updateFieldValue(field.group, field.attribute, $event)"
-            ></component>
-          </template> -->
-
           <template v-for="(group, groupIndex) in groups" :key="groupIndex">
             <Collapsible :title="group.label" :isDefaultOpen="groupIndex === 0">
               <DefaultField
@@ -87,11 +78,9 @@ export default {
       }
 
       Nova.request().get(url).then(response => {
-
         this.settingMenu = response.data.settingMenu;
         if (response.data && "groups" in response.data && response.data.groups.length) {
           this.groups = response.data.groups;
-          console.log(response.data)
         }
       });
     },
@@ -104,8 +93,16 @@ export default {
         }
       });
 
-      console.log(this.groups)
+      let _fields = [];
+      this.groups.forEach(group => {
+        group.fields.forEach(field => {
+          _fields.push(field);
+        })
+      });
+      this.fields = _fields;
     },
+
+
 
     saveSetting(continueEditing = false) {
       Nova.request().post('/settings-manager/settings/save', {
