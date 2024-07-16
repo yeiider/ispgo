@@ -6,29 +6,31 @@
         <span v-if="field.required" class="text-red-500 text-sm">*</span>
       </label>
     </div>
-    <div class="w-full space-y-2 px-6 md:px-8 @md/modal:px-8 md:w-3/5 @md/modal:w-3/5">
-      <div class="space-y-1">
-        <input
-          type="file"
-          :id="id"
-          :name="field.attribute"
-          @input="updateValue($event.target.files)"/>
-      </div>
+    <div class="w-full space-y-2 px-6 md:px-8 @md/modal:px-8 md:w-3/5 @md/modal:w-3/5 flex">
+      <input
+        type="checkbox"
+        :id="field.uniqueKey"
+        :name="field.attribute"
+        @input="updateValue($event.target.value)"
+        :checked="checked"
+        :disabled="readOnly"
+      />
     </div>
   </div>
 </template>
-
 <script>
 export default {
+  name: "BooleanField",
   props: {
-    label: String,
-    id: String,
     field: Object
   },
   methods: {
     updateValue(value) {
+      value = value === 'on';
       this.$emit('input', {key: this.field.uniqueKey, value});
     }
   }
 }
 </script>
+
+

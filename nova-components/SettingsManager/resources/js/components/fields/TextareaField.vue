@@ -11,6 +11,7 @@
         <textarea
           :id="id"
           :value="value"
+          :name="field.attribute"
           @input="updateValue($event.target.value)"
           class="w-full form-control form-input form-control-bordered py-2"
         />
@@ -29,7 +30,7 @@ export default {
   },
   methods: {
     updateValue(value) {
-      this.$emit('input', value)
+      this.$emit('input', {key: this.field.uniqueKey, value});
     }
   }
 }

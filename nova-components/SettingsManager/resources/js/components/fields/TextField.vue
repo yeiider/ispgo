@@ -11,6 +11,7 @@
         <input
           :id="field.uniqueKey"
           :value="field.value"
+          :name="field.attribute"
           @input="updateValue($event.target.value)"
           class="w-full form-control form-input form-control-bordered"
           :placeholder="field.placeholder"
@@ -27,7 +28,7 @@ export default {
   },
   methods: {
     updateValue(value) {
-      this.$emit('input', value);
+      this.$emit('input', {key: this.field.uniqueKey, value});
     }
   }
 }

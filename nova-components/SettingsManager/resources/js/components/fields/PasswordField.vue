@@ -9,20 +9,22 @@
     <div class="w-full space-y-2 px-6 md:px-8 @md/modal:px-8 md:w-3/5 @md/modal:w-3/5">
       <div class="space-y-1">
         <input
-          type="file"
-          :id="id"
+          :id="field.uniqueKey"
+          :value="field.value"
+          @input="updateValue($event.target.value)"
+          class="w-full form-control form-input form-control-bordered"
+          type="password"
+          :placeholder="field.placeholder"
           :name="field.attribute"
-          @input="updateValue($event.target.files)"/>
+        />
       </div>
     </div>
   </div>
 </template>
-
 <script>
 export default {
+  name: "PasswordField",
   props: {
-    label: String,
-    id: String,
     field: Object
   },
   methods: {
@@ -32,3 +34,5 @@ export default {
   }
 }
 </script>
+
+

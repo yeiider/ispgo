@@ -11,7 +11,7 @@ export default {
   props: ['value', 'label', 'id'],
   methods: {
     updateValue(value) {
-      this.$emit('input', value);
+      this.$emit('input', {key: this.field.uniqueKey, value});
     }
   }
 }
