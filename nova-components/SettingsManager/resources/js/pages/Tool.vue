@@ -8,19 +8,11 @@
       />
       <form @submit.prevent="saveSetting" class="w-[75%]">
         <card>
-          <!--<template v-for="(field, fieldIndex) in fields" :key="field.uniqueKey">
-            <component
-              :is="getFieldComponent(field.component)"
-              :field="field"
-              :fieldname="section"
-              @input="updateFieldValue(field.group, field.attribute, $event)"
-            ></component>
-          </template> -->
-
           <template v-for="(group, groupIndex) in groups" :key="groupIndex">
             <Collapsible :title="group.label" :isDefaultOpen="groupIndex === 0">
               <DefaultField
                 :fields="group.fields"
+                @update-field="updateFieldValue"
               />
             </Collapsible>
           </template>
@@ -50,10 +42,7 @@
 </template>
 
 <script>
-import CustomTextField from '../components/CustomTextField.vue';
-import CustomBooleanField from '../components/CustomBooleanField.vue';
-import CustomSelectField from '../components/CustomSelectField.vue';
-import CustomTextareaField from '../components/CustomTextareaField.vue';
+
 import Menu from "../components/Menu.vue";
 import Collapsible from "../components/Collapsible.vue"
 import DefaultField from "../components/fields/DefaultField.vue";
@@ -67,10 +56,6 @@ export default {
   },
   components: {
     Menu,
-    CustomTextField,
-    CustomTextareaField,
-    CustomSelectField,
-    CustomBooleanField,
     Collapsible,
     DefaultField
   },
@@ -86,20 +71,6 @@ export default {
     this.fetchSettings();
   },
   methods: {
-    getFieldComponent(fieldType) {
-      switch (fieldType) {
-        case 'boolean-field':
-          return 'CustomBooleanField';
-        case 'text-field':
-          return 'CustomTextField';
-        case 'textarea-field':
-          return 'CustomTextareaField';
-        case 'select-field':
-          return 'CustomSelectField';
-        default:
-          return 'CustomTextField';
-      }
-    },
     fetchSettings() {
       let url = '/settings-manager/settings';
       if (this.section) {
@@ -107,22 +78,32 @@ export default {
       }
 
       Nova.request().get(url).then(response => {
-        this.fields = response.data.fields;
         this.settingMenu = response.data.settingMenu;
         if (response.data && "groups" in response.data && response.data.groups.length) {
-          this.groups =  response.data.groups;
-          console.log(this.groups)
+          this.groups = response.data.groups;
         }
       });
     },
+    updateFieldValue({key, value}) {
+      console.log(key, value)
+      this.groups.forEach(group => {
+        const fieldToUpdate = group.fields.find(field => field.uniqueKey === key);
+        if (fieldToUpdate) {
+          fieldToUpdate.value = value;
+        }
+      });
 
-    updateHandler(group, attribute, value) {
-      const field = this.fields.find(f => f.group === group && f.attribute === attribute);
-      if (field) {
-        field.value = value;
-      }
-      console.log(`Group: ${group}, Attribute: ${attribute}, Value: ${value}`);
+      let _fields = [];
+      this.groups.forEach(group => {
+        group.fields.forEach(field => {
+          _fields.push(field);
+        })
+      });
+      this.fields = _fields;
     },
+
+
+
     saveSetting(continueEditing = false) {
       Nova.request().post('/settings-manager/settings/save', {
         fields: this.fields,

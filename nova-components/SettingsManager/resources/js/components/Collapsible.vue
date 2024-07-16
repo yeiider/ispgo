@@ -32,9 +32,6 @@ export default {
       isOpen: this.isDefaultOpen,
     };
   },
-  mounted() {
-    console.log(this.title)
-  },
 
   methods: {
     toggle() {
@@ -58,6 +55,6 @@ button.is-open .arrow {
 .v-leave-active,
 .v-enter-from,
 .v-leave-to {
-  transition: all 500ms ease;
+  transition: all 300ms ease;
 }
 </style>

@@ -11,6 +11,7 @@
         <select
           :id="id"
           :value="value"
+          :name="field.attribute"
           @change="updateValue($event.target.value)"
           class="w-full form-control form-input form-control-bordered"
         >
@@ -40,7 +41,7 @@ export default {
   },
   methods: {
     updateValue(value) {
-      this.$emit('input', value);
+      this.$emit('input', {key: this.field.uniqueKey, value});
     }
   }
 }
