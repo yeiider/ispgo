@@ -20,6 +20,7 @@ import FileField from "./FileField.vue";
 import BooleanField from './BooleanField.vue';
 import PasswordField from './PasswordField.vue';
 import DateField from './DateField.vue'
+import DatetimeField from './DatetimeField.vue'
 
 export default {
   name: "DefaultField",
@@ -34,6 +35,7 @@ export default {
     'boolean-field': BooleanField,
     'password-field': PasswordField,
     'date-field': DateField,
+    'datetime-field': DatetimeField
 
   },
   data() {
@@ -46,6 +48,7 @@ export default {
         'boolean-field',
         'password-field',
         'date-field',
+        'datetime-field'
       ]
     }
   },

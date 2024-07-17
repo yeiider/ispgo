@@ -6,45 +6,32 @@
         <span v-if="field.required" class="text-red-500 text-sm">*</span>
       </label>
     </div>
-    <div class="w-full space-y-2 px-6 md:px-8 @md/modal:px-8 md:w-3/5 @md/modal:w-3/5 flex">
-      <input
-        type="checkbox"
-        :id="field.uniqueKey"
-        :name="field.attribute"
-        @input="updateValue($event.target.checked)"
-        :checked="checked"
-      />
+    <div class="w-full space-y-2 px-6 md:px-8 @md/modal:px-8 md:w-3/5 @md/modal:w-3/5">
+      <div class="space-y-1">
+        <input
+          :id="field.uniqueKey"
+          :value="field.value"
+          @input="updateValue($event.target.value)"
+          class="w-full form-control form-input form-control-bordered"
+          type="datetime-local"
+          :name="field.attribute"
+        />
+      </div>
     </div>
   </div>
 </template>
 <script>
 export default {
-  name: "BooleanField",
+  name: "DatetimeField",
   props: {
     field: Object
   },
-
-  data() {
-    return {
-      checked: parseInt(this.field.value)
-    }
-  },
-
   methods: {
     updateValue(value) {
-      this.checked = value;
       this.$emit('input', {key: this.field.uniqueKey, value});
     }
   }
 }
 </script>
-
-<style scoped>
-input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--colors-primary-500);
-}
-</style>
 
 

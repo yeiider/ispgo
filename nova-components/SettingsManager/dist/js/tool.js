@@ -130,6 +130,33 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/fields/DatetimeField.vue?vue&type=script&lang=js":
+/*!**************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/fields/DatetimeField.vue?vue&type=script&lang=js ***!
+  \**************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  name: "DatetimeField",
+  props: {
+    field: Object
+  },
+  methods: {
+    updateValue: function updateValue(value) {
+      this.$emit('input', {
+        key: this.field.uniqueKey,
+        value: value
+      });
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/fields/DefaultField.vue?vue&type=script&lang=js":
 /*!*************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/fields/DefaultField.vue?vue&type=script&lang=js ***!
@@ -147,6 +174,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _BooleanField_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./BooleanField.vue */ "./resources/js/components/fields/BooleanField.vue");
 /* harmony import */ var _PasswordField_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./PasswordField.vue */ "./resources/js/components/fields/PasswordField.vue");
 /* harmony import */ var _DateField_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./DateField.vue */ "./resources/js/components/fields/DateField.vue");
+/* harmony import */ var _DatetimeField_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./DatetimeField.vue */ "./resources/js/components/fields/DatetimeField.vue");
+
 
 
 
@@ -166,11 +195,12 @@ __webpack_require__.r(__webpack_exports__);
     'file-field': _FileField_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
     'boolean-field': _BooleanField_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
     'password-field': _PasswordField_vue__WEBPACK_IMPORTED_MODULE_5__["default"],
-    'date-field': _DateField_vue__WEBPACK_IMPORTED_MODULE_6__["default"]
+    'date-field': _DateField_vue__WEBPACK_IMPORTED_MODULE_6__["default"],
+    'datetime-field': _DatetimeField_vue__WEBPACK_IMPORTED_MODULE_7__["default"]
   },
   data: function data() {
     return {
-      fieldTypes: ['select-field', 'text-field', 'textarea-field', 'file-field', 'boolean-field', 'password-field', 'date-field']
+      fieldTypes: ['select-field', 'text-field', 'textarea-field', 'file-field', 'boolean-field', 'password-field', 'date-field', 'datetime-field']
     };
   },
   methods: {
@@ -563,7 +593,7 @@ var _hoisted_4 = {
 var _hoisted_5 = {
   "class": "w-full space-y-2 px-6 md:px-8 @md/modal:px-8 md:w-3/5 @md/modal:w-3/5 flex"
 };
-var _hoisted_6 = ["id", "name", "checked", "disabled"];
+var _hoisted_6 = ["id", "name", "checked"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "for": $props.field.uniqueKey,
@@ -575,8 +605,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onInput: _cache[0] || (_cache[0] = function ($event) {
       return $options.updateValue($event.target.checked);
     }),
-    checked: $data.checked,
-    disabled: _ctx.readOnly
+    checked: $data.checked
   }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_6)])]);
 }
 
@@ -612,7 +641,7 @@ var _hoisted_5 = {
 var _hoisted_6 = {
   "class": "space-y-1"
 };
-var _hoisted_7 = ["id", "value", "placeholder", "name"];
+var _hoisted_7 = ["id", "value", "name"];
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "for": $props.field.uniqueKey,
@@ -625,7 +654,55 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }),
     "class": "w-full form-control form-input form-control-bordered",
     type: "date",
-    placeholder: $props.field.placeholder,
+    name: $props.field.attribute
+  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_7)])])]);
+}
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/fields/DatetimeField.vue?vue&type=template&id=b32d34d8":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/fields/DatetimeField.vue?vue&type=template&id=b32d34d8 ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* binding */ render)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "vue");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue__WEBPACK_IMPORTED_MODULE_0__);
+
+var _hoisted_1 = {
+  "class": "space-y-2 md:flex @md/modal:flex md:flex-row @md/modal:flex-row md:space-y-0 @md/modal:space-y-0 py-5"
+};
+var _hoisted_2 = {
+  "class": "w-full px-6 md:mt-2 @md/modal:mt-2 md:px-8 @md/modal:px-8 md:w-1/5 @md/modal:w-1/5"
+};
+var _hoisted_3 = ["for"];
+var _hoisted_4 = {
+  key: 0,
+  "class": "text-red-500 text-sm"
+};
+var _hoisted_5 = {
+  "class": "w-full space-y-2 px-6 md:px-8 @md/modal:px-8 md:w-3/5 @md/modal:w-3/5"
+};
+var _hoisted_6 = {
+  "class": "space-y-1"
+};
+var _hoisted_7 = ["id", "value", "name"];
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+    "for": $props.field.uniqueKey,
+    "class": "inline-block leading-tight space-x-1"
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.field.name), 1 /* TEXT */), $props.field.required ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_4, "*")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 8 /* PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    id: $props.field.uniqueKey,
+    value: $props.field.value,
+    onInput: _cache[0] || (_cache[0] = function ($event) {
+      return $options.updateValue($event.target.value);
+    }),
+    "class": "w-full form-control form-input form-control-bordered",
+    type: "datetime-local",
     name: $props.field.attribute
   }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_7)])])]);
 }
@@ -1719,6 +1796,33 @@ if (false) {}
 
 /***/ }),
 
+/***/ "./resources/js/components/fields/DatetimeField.vue":
+/*!**********************************************************!*\
+  !*** ./resources/js/components/fields/DatetimeField.vue ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _DatetimeField_vue_vue_type_template_id_b32d34d8__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./DatetimeField.vue?vue&type=template&id=b32d34d8 */ "./resources/js/components/fields/DatetimeField.vue?vue&type=template&id=b32d34d8");
+/* harmony import */ var _DatetimeField_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DatetimeField.vue?vue&type=script&lang=js */ "./resources/js/components/fields/DatetimeField.vue?vue&type=script&lang=js");
+/* harmony import */ var _home_juan_jose_Documentos_ispgo_v1_nova_components_SettingsManager_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+
+
+
+
+;
+const __exports__ = /*#__PURE__*/(0,_home_juan_jose_Documentos_ispgo_v1_nova_components_SettingsManager_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_DatetimeField_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_DatetimeField_vue_vue_type_template_id_b32d34d8__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/components/fields/DatetimeField.vue"]])
+/* hot reload */
+if (false) {}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__exports__);
+
+/***/ }),
+
 /***/ "./resources/js/components/fields/DefaultField.vue":
 /*!*********************************************************!*\
   !*** ./resources/js/components/fields/DefaultField.vue ***!
@@ -1995,6 +2099,21 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/fields/DatetimeField.vue?vue&type=script&lang=js":
+/*!**********************************************************************************!*\
+  !*** ./resources/js/components/fields/DatetimeField.vue?vue&type=script&lang=js ***!
+  \**********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_DatetimeField_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_DatetimeField_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./DatetimeField.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/fields/DatetimeField.vue?vue&type=script&lang=js");
+ 
+
+/***/ }),
+
 /***/ "./resources/js/components/fields/DefaultField.vue?vue&type=script&lang=js":
 /*!*********************************************************************************!*\
   !*** ./resources/js/components/fields/DefaultField.vue?vue&type=script&lang=js ***!
@@ -2171,6 +2290,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   render: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_DateField_vue_vue_type_template_id_42bbe141__WEBPACK_IMPORTED_MODULE_0__.render)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_DateField_vue_vue_type_template_id_42bbe141__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./DateField.vue?vue&type=template&id=42bbe141 */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/fields/DateField.vue?vue&type=template&id=42bbe141");
+
+
+/***/ }),
+
+/***/ "./resources/js/components/fields/DatetimeField.vue?vue&type=template&id=b32d34d8":
+/*!****************************************************************************************!*\
+  !*** ./resources/js/components/fields/DatetimeField.vue?vue&type=template&id=b32d34d8 ***!
+  \****************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_DatetimeField_vue_vue_type_template_id_b32d34d8__WEBPACK_IMPORTED_MODULE_0__.render)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_DatetimeField_vue_vue_type_template_id_b32d34d8__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./DatetimeField.vue?vue&type=template&id=b32d34d8 */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/fields/DatetimeField.vue?vue&type=template&id=b32d34d8");
 
 
 /***/ }),

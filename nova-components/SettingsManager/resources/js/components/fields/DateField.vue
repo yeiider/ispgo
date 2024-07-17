@@ -14,9 +14,7 @@
           @input="updateValue($event.target.value)"
           class="w-full form-control form-input form-control-bordered"
           type="date"
-          :placeholder="field.placeholder"
           :name="field.attribute"
-
         />
       </div>
     </div>
