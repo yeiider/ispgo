@@ -11,7 +11,7 @@
         type="checkbox"
         :id="field.uniqueKey"
         :name="field.attribute"
-        @input="updateValue($event.target.value)"
+        @input="updateValue($event.target.checked)"
         :checked="checked"
         :disabled="readOnly"
       />
@@ -24,9 +24,16 @@ export default {
   props: {
     field: Object
   },
+
+  data() {
+    return {
+      checked: parseInt(this.field.value)
+    }
+  },
+
   methods: {
     updateValue(value) {
-      value = value === 'on';
+      this.checked = value;
       this.$emit('input', {key: this.field.uniqueKey, value});
     }
   }

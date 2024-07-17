@@ -85,9 +85,14 @@ __webpack_require__.r(__webpack_exports__);
   props: {
     field: Object
   },
+  data: function data() {
+    return {
+      checked: parseInt(this.field.value)
+    };
+  },
   methods: {
     updateValue: function updateValue(value) {
-      value = value === 'on';
+      this.checked = value;
       this.$emit('input', {
         key: this.field.uniqueKey,
         value: value
@@ -568,9 +573,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     id: $props.field.uniqueKey,
     name: $props.field.attribute,
     onInput: _cache[0] || (_cache[0] = function ($event) {
-      return $options.updateValue($event.target.value);
+      return $options.updateValue($event.target.checked);
     }),
-    checked: _ctx.checked,
+    checked: $data.checked,
     disabled: _ctx.readOnly
   }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_6)])]);
 }
