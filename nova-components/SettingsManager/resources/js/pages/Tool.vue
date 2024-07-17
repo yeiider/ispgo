@@ -110,10 +110,11 @@ export default {
         section: this.section ?? 'general'
       }).then(response => {
         this.fetchSettings();
+        console.log(response)
         if (response.success) {
-          alert(response.message)
+          alert(response)
         } else {
-          alert(response.message)
+          alert(response)
         }
         if (!continueEditing) {
           // Lógica para salir del modo de edición si no se desea continuar editando.

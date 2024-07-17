@@ -14,13 +14,13 @@ return [
             "company_status" => [
                 "field" => "select-field",
                 "label" => "Company Enabled?",
-                "options" => \Ispgo\SettingsManager\Source\Config\Yesno::getConfig()
+                "options" => \Ispgo\SettingsManager\Source\Config\Yesno::class
             ],
             "company_type" => [
                 "field" => "select-field",
                 "label" => "Company Type",
                 "placeholder" => "Company Type",
-                "options" => \Ispgo\SettingsManager\Source\Config\CompanyType::getConfig()
+                "options" => \Ispgo\SettingsManager\Source\Config\CompanyType::class
             ],
             "company_name" => [
                 "field" => "text-field",
@@ -107,5 +107,45 @@ return [
                 "placeholder" => "Password",
             ],
         ]
-    ]
+    ],
+    "customer" => [
+        "setting" => [
+            "label" => "Customer",
+            "class" => "form-control",
+        ],
+        "general" => [
+            "setting" => [
+                "label" => "General Customer",
+                "class" => "form-control",
+                "code" => "general"
+            ],
+            "allow_login" => [
+                "field" => "boolean-field",
+                "label" => "Allow login",
+                "placeholder" => "Allow login",
+            ],
+            "allow_payment_as_a_guest" => [
+                "field" => "boolean-field",
+                "label" => "Allow Payment As A Guest",
+                "placeholder" => "Allow Payment As A Guest",
+            ],
+            "send_welcome_email" => [
+                "field" => "boolean-field",
+                "label" => "Send Welcome Email",
+                "placeholder" => "Send Welcome Email",
+            ],
+            "email_creation_confirmation" => [
+                "field" => "boolean-field",
+                "label" => "Email Creation Confirmation",
+                "placeholder" => "Email Creation Confirmation",
+            ],
+            "template" => [
+                "field" => "select-field",
+                "label" => "Company Enabled?",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+        ]
+    ],
+
+
 ];

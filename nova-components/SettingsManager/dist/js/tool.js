@@ -467,10 +467,11 @@ __webpack_require__.r(__webpack_exports__);
         section: (_this$section = this.section) !== null && _this$section !== void 0 ? _this$section : 'general'
       }).then(function (response) {
         _this2.fetchSettings();
+        console.log(response);
         if (response.success) {
-          alert(response.message);
+          alert(response);
         } else {
-          alert(response.message);
+          alert(response);
         }
         if (!continueEditing) {
           // Lógica para salir del modo de edición si no se desea continuar editando.

@@ -65,7 +65,7 @@ class Settings extends Resource
                         break;
                     case 'select-field':
                         $fieldInstance = Select::make($fieldLabel, $fieldKey)->options(
-                            array_column($field['options'], 'value', 'label')
+                            array_column($field['options']::getConfig(),'label','value')
                         );
                         break;
                     case 'textarea-field':

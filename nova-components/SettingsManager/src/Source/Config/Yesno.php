@@ -10,8 +10,8 @@ class Yesno implements ConfigProviderInterface
     static public function getConfig(): array
     {
         return [
-            ["label" => "1", "value" => "Yes"],
-            ["label" => "0", "value" => "No"],
+            ["label" => "Yes", "value" => "1"],
+            ["label" => "No", "value" => "0"],
         ];
     }
 }
