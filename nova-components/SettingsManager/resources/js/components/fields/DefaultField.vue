@@ -19,6 +19,7 @@ import TextareaField from "./TextareaField.vue";
 import FileField from "./FileField.vue";
 import BooleanField from './BooleanField.vue';
 import PasswordField from './PasswordField.vue';
+import DateField from './DateField.vue'
 
 export default {
   name: "DefaultField",
@@ -31,7 +32,8 @@ export default {
     'textarea-field': TextareaField,
     'file-field': FileField,
     'boolean-field': BooleanField,
-    'password-field': PasswordField
+    'password-field': PasswordField,
+    'date-field': DateField,
 
   },
   data() {
@@ -42,7 +44,8 @@ export default {
         'textarea-field',
         'file-field',
         'boolean-field',
-        'password-field'
+        'password-field',
+        'date-field',
       ]
     }
   },
