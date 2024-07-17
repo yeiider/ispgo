@@ -5,6 +5,8 @@ namespace Ispgo\SettingsManager\Http\Controller;
 use App\Models\CoreConfigData;
 use Ispgo\SettingsManager\App\SettingsManager\SettingsLoader;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\Country;
+use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\URL;
@@ -84,6 +86,9 @@ class Settings extends Resource
                     case 'datetime-field':
                         $fieldInstance = DateTime::make($fieldLabel, $fieldKey);
                         break;
+                    case 'date-field':
+                        $fieldInstance = Date::make($fieldLabel, $fieldKey);
+                        break;
                     case 'image-field':
                         $fieldInstance = Image::make($fieldLabel, $fieldKey);
                         break;
@@ -99,7 +104,7 @@ class Settings extends Resource
 
                 // Asignar el valor existente al campo
                 if ($fieldValue !== null) {
-                    $fieldInstance->value($fieldValue);
+                    $fieldInstance->withMeta(["value" => $fieldValue]);
                 }
 
                 $fieldInstance->withMeta([
@@ -113,7 +118,7 @@ class Settings extends Resource
             $groups[] = [
                 'label' => $group['setting']['label'],
                 'code' => $group['setting']['code'],
-                'class' => $group['setting']['class']??"",
+                'class' => $group['setting']['class'] ?? "",
                 'fields' => $groupFields,
             ];
         }

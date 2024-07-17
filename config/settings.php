@@ -33,7 +33,7 @@ return [
                 "placeholder" => "Company Description",
             ],
             "schedule" => [
-                "field" => "text-field",
+                "field" => "date-field",
                 "label" => "Start time",
                 "placeholder" => "Company Address",
             ],

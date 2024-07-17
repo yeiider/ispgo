@@ -23,7 +23,7 @@ class CoreConfigData extends Model
      * @var int
      */
     protected $attributes = [
-        'scope' => 0,
+        'scope_id' => 0,
     ];
 
     /**
