@@ -20,3 +20,7 @@ padding: 15px;
 .items-start {
     align-items: start;
 }
+
+.mb-1 {
+   margin-bottom: 5px;
+}

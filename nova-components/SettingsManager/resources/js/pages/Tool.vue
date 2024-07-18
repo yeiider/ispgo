@@ -7,17 +7,18 @@
             :section="section"
       />
       <form @submit.prevent="saveSetting" class="w-[75%]">
-        <card>
-          <template v-for="(group, groupIndex) in groups" :key="groupIndex">
+
+        <template v-for="(group, groupIndex) in groups" :key="groupIndex">
+          <card class="mb-1">
             <Collapsible :title="group.label" :isDefaultOpen="groupIndex === 0">
               <DefaultField
                 :fields="group.fields"
                 @update-field="updateFieldValue"
               />
             </Collapsible>
-          </template>
+          </card>
+        </template>
 
-        </card>
         <div
           class="flex flex-col md:flex-row md:items-center justify-center md:justify-end space-y-2 md:space-y-0 md:space-x-3 mt-2 pt-2">
           <button type="button"
@@ -101,7 +102,6 @@ export default {
       });
       this.fields = _fields;
     },
-
 
 
     saveSetting(continueEditing = false) {
