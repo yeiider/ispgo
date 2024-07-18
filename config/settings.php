@@ -134,18 +134,58 @@ return [
                 "label" => "Send Welcome Email",
                 "placeholder" => "Send Welcome Email",
             ],
-            "email_creation_confirmation" => [
-                "field" => "boolean-field",
-                "label" => "Email Creation Confirmation",
-                "placeholder" => "Email Creation Confirmation",
-            ],
-            "template" => [
+            "send_welcome_email_template" => [
                 "field" => "select-field",
-                "label" => "Company Enabled?",
+                "label" => "Send Welcome Email Template",
                 "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ],
+            "email_confirmation_account_confirmation" => [
+                "field" => "boolean-field",
+                "label" => "Email Account Confirmation",
+            ],
+            "email_confirmation_account_template" => [
+                "field" => "select-field",
+                "label" => "Email confirmation Account Template",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "allow_requesting_a_new_service" => [
+                "field" => "boolean-field",
+                "label" => "Allow Requesting New Service",
+                "placeholder" => "Allow Requesting New Service",
+            ],
+            "save_payment_methods" => [
+                "field" => "boolean-field",
+                "label" => "Save Payment Methods",
+                "placeholder" => "Save Payment Methods",
+            ],
+            "allow_customer_registration" => [
+                "field" => "boolean-field",
+                "label" => "Allow Customer Registration",
+                "placeholder" => "Allow Customer Registration",
+            ],
+        ],
+
+        "security" => [
+            "setting" => [
+                "label" => "Recaptcha",
+                "class" => "form-control",
+                "code" => "general"
+            ],
+            "api_key" => [
+                "field" => "text-field",
+                "label" => "Api key",
+                "placeholder" => "Api key",
+            ],
+            "show_in_sign_in" => [
+                "field" => "boolean-field",
+                "label" => "Show In Sign In",
+                "placeholder" => "Show In Sign In",
+            ],
+            "show_in_sign_up" => [
+                "field" => "boolean-field",
+                "label" => "Show In Sign Up",
+                "placeholder" => "Show In Sign Up",
+            ]
         ]
     ],
-
-
 ];
