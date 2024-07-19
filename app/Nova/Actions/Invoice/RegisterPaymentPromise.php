@@ -2,6 +2,7 @@
 
 namespace App\Nova\Actions\Invoice;
 
+use App\Settings\InvoiceProviderConfig;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
@@ -32,8 +33,9 @@ class RegisterPaymentPromise extends Action
             }
             $promise = $model->createPromisePayment($fields->date_to_make_payment, $fields->notes);
             if ($promise) {
-                $model->service->service_status = 'active'; // Asumiendo que el campo es 'status' en lugar de 'paid'
-                $model->service->save();
+                if (InvoiceProviderConfig::enableServiceByPaymentPromise()){
+                    $model->service->service_status->activate();
+                }
             }
         }
         if ($models->count() > 1) {
