@@ -162,4 +162,26 @@ class Settings extends Resource
 
         return $settings;
     }
+
+    public function uploadFiles(NovaRequest $request)
+    {
+
+
+        try {
+            $file = $request->files->all();
+            if (!empty($file)) {
+                $uploadedFiles = [];
+                foreach ($file as $fieldName => $files) {
+                    foreach ($files as $file) {
+                        $uploadedFiles[] = $file->store('uploads');
+                    }
+                }
+            }
+
+        } catch (\Exception $exception) {
+
+        }
+
+
+    }
 }

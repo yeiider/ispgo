@@ -46,3 +46,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+select.form-input {
+  appearance: auto;
+}
+</style>
+

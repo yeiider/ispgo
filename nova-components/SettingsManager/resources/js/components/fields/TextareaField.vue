@@ -35,3 +35,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+  textarea {
+    min-height: 140px;
+  }
+</style>
