@@ -22,7 +22,6 @@ class InvoicePaid
      */
     public function __construct(Invoice $invoice)
     {
-
         $this->invoice = $invoice;
     }
 

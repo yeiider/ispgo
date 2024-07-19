@@ -188,4 +188,51 @@ return [
             ]
         ]
     ],
+    "invoice" => [
+        "setting" => [
+            "label" => "Invoices",
+            "class" => "form-control",
+        ],
+        "general" => [
+            "setting" => [
+                "label" => "General Invoice",
+                "class" => "form-control",
+                "code" => "general"
+            ],
+            "enable_service_when_paying" => [
+                "field" => "boolean-field",
+                "label" => "Enable Service when paying",
+            ],
+            "enable_service_by_payment_promise" => [
+                "field" => "boolean-field",
+                "label" => "Enable service if a promise is created",
+            ],
+            "enable_partial_payment" => [
+                "field" => "boolean-field",
+                "label" => "Enable partial payment",
+            ],
+            "send_email_when_paying" => [
+                "field" => "boolean-field",
+                "label" => "Send Email when paying",
+            ],
+            "email_template_paying" => [
+                "field" => "select-field",
+                "label" => "Email template Paying",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "send_email_create_invoice" => [
+                "field" => "boolean-field",
+                "label" => "Send Email when creating invoice",
+            ],
+            "email_template_created_invoice" => [
+                "field" => "select-field",
+                "label" => "Send Email when creating invoice",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "attach_invoice" => [
+                "field" => "boolean-field",
+                "label" => "Attach PDF invoice",
+            ],
+        ]
+    ]
 ];

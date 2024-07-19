@@ -2,12 +2,13 @@
 
 namespace App\Providers;
 
-use App\Nova\Customers\Customer;
+use App\Events\InvoicePaid;
+use App\Listeners\AfterPayingInvoice;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Event;
 
 class AppServiceProvider extends ServiceProvider
 {
-
 
 
     /**
@@ -15,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+
     }
 
     /**

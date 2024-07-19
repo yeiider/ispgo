@@ -27,6 +27,16 @@ class Invoice extends Model
         "issue_date" => "date"
     ];
 
+    public function getFullNameAttribute()
+    {
+        return ucfirst("{$this->customer->first_name} {$this->customer->last_name}");
+    }
+
+    public function getEmailAddressAttribute()
+    {
+        return $this->customer->email_address;
+    }
+
     public function creditNotes()
     {
         return $this->hasMany(CreditNote::class);
