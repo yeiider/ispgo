@@ -7,6 +7,7 @@
         :value="field.value"
         :field="field"
         :label="field.name"
+        :section="section"
         @input="handleFieldUpdate"
       />
     </template>
@@ -25,7 +26,8 @@ import DatetimeField from './DatetimeField.vue'
 export default {
   name: "DefaultField",
   props: {
-    fields: Object
+    fields: Object,
+    section: String
   },
   components: {
     'select-field': SelectField,

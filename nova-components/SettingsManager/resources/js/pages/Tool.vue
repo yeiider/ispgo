@@ -13,6 +13,7 @@
             <Collapsible :title="group.label" :isDefaultOpen="groupIndex === 0">
               <DefaultField
                 :fields="group.fields"
+                :section="section"
                 @update-field="updateFieldValue"
               />
             </Collapsible>
