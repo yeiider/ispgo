@@ -191,7 +191,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "DefaultField",
   props: {
-    fields: Object
+    fields: Object,
+    section: String
   },
   components: {
     'select-field': _SelectField_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
@@ -260,24 +261,31 @@ var FilePond = vue_filepond__WEBPACK_IMPORTED_MODULE_0___default()((filepond_plu
   props: {
     label: String,
     id: String,
-    field: Object
+    field: Object,
+    section: String
   },
+  mounted: function mounted() {},
   data: function data() {
     return {
       files: ["cat.jpeg"],
+      section: this.section,
+      value: this.field.value,
       server: {
         process: function process(fieldName, file, metadata, load, error, progress) {
           var fileKey = ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, function (c) {
             return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
           });
           var formData = new FormData();
-          formData.append(fieldName, file, file.name);
+          console.log(file);
+          formData.append('file', file, file.name);
           formData.append('fileKey', fileKey);
+          formData.append('fieldName', fieldName);
           Nova.request().post('/settings-manager/settings/upload', formData, {
             onUploadProgress: function onUploadProgress(event) {
               progress(event.lengthComputable, event.loaded, event.total);
             }
           }).then(function (response) {
+            console.log(response);
             load(response.data.fileKey);
           })["catch"](function (err) {
             error('Something went wrong');
@@ -806,8 +814,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       value: field.value,
       field: field,
       label: field.name,
+      section: $props.section,
       onInput: $options.handleFieldUpdate
-    }, null, 40 /* PROPS, NEED_HYDRATION */, ["id", "value", "field", "label", "onInput"]);
+    }, null, 40 /* PROPS, NEED_HYDRATION */, ["id", "value", "field", "label", "section", "onInput"]);
   }), 128 /* KEYED_FRAGMENT */))]);
 }
 
@@ -844,7 +853,8 @@ var _hoisted_5 = {
 var _hoisted_6 = {
   "class": "space-y-1"
 };
-var _hoisted_7 = {
+var _hoisted_7 = ["id", "name", "value"];
+var _hoisted_8 = {
   id: "app"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -852,16 +862,24 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "for": $props.field.uniqueKey,
     "class": "inline-block leading-tight space-x-1"
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.field.name), 1 /* TEXT */), $props.field.required ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_4, "*")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 8 /* PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("<input\n          type=\"file\"\n          :id=\"id\"\n          :name=\"field.attribute\"\n          @input=\"updateValue($event.target.files)\"/>"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_file_pond, {
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.field.name), 1 /* TEXT */), $props.field.required ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_4, "*")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 8 /* PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "file",
+    id: $props.id,
+    name: $props.field.attribute,
+    value: $props.field.value,
+    onInput: _cache[0] || (_cache[0] = function ($event) {
+      return $options.updateValue($event.target.files);
+    })
+  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_7), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_file_pond, {
     name: $props.field.attribute,
     ref: "pond",
-    "label-idle": "Drop files here...",
-    "allow-multiple": true,
-    "accepted-file-types": "image/jpeg, image/png",
+    "label-idle": "Drop file here...",
+    "allow-multiple": false,
+    "accepted-file-types": $props.field.acceptedTypes,
     server: _ctx.server,
     files: _ctx.files,
     onInit: $options.handleFilePondInit
-  }, null, 8 /* PROPS */, ["name", "server", "files", "onInit"])])])])]);
+  }, null, 8 /* PROPS */, ["name", "accepted-file-types", "server", "files", "onInit"])])])])]);
 }
 
 /***/ }),
@@ -1189,8 +1207,9 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
             return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_DefaultField, {
               fields: group.fields,
+              section: $props.section,
               onUpdateField: $options.updateFieldValue
-            }, null, 8 /* PROPS */, ["fields", "onUpdateField"])];
+            }, null, 8 /* PROPS */, ["fields", "section", "onUpdateField"])];
           }),
           _: 2 /* DYNAMIC */
         }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["title", "isDefaultOpen"])];

@@ -19,6 +19,7 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Resource;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class Settings extends Resource
 {
@@ -65,7 +66,7 @@ class Settings extends Resource
                         break;
                     case 'select-field':
                         $fieldInstance = Select::make($fieldLabel, $fieldKey)->options(
-                            array_column($field['options']::getConfig(),'label','value')
+                            array_column($field['options']::getConfig(), 'label', 'value')
                         );
                         break;
                     case 'textarea-field':
@@ -163,25 +164,37 @@ class Settings extends Resource
         return $settings;
     }
 
-    public function uploadFiles(NovaRequest $request)
+    public function uploadFiles(NovaRequest $request):  \Illuminate\Http\JsonResponse
     {
 
 
-        try {
-            $file = $request->files->all();
-            if (!empty($file)) {
-                $uploadedFiles = [];
-                foreach ($file as $fieldName => $files) {
-                    foreach ($files as $file) {
-                        $uploadedFiles[] = $file->store('uploads');
-                    }
-                }
+        //Don't forget to import the Storage facade at the top of your script
+        $binaryFile = $request->get('file');
+        $fileKey = $request->get('fileKey');
+        $fieldName = $request->input('fieldName');
+
+        if ($binaryFile) {
+            // Check if uploads directory exists and if not create it
+            if (!Storage::exists('uploads')) {
+                Storage::makeDirectory('uploads');
             }
 
-        } catch (\Exception $exception) {
+            // Define the file name and path. In this case, the file is being stored in the 'uploads' directory
+            $fileName = time() . '_' . $fieldName;
+            $filePath = 'uploads/' . $fileName;
 
+            // Decode the binary data and store the file
+            Storage::put($filePath, base64_decode($binaryFile));
+
+            // Update or create a new record in CoreConfigData with the $key
+            // and store the path of the stored file
+            return response()->json( [
+                'success' => true,
+                'filePath' => $filePath,
+            ]);
         }
-
-
+        return response()->json([
+            'success' => false,
+        ]);
     }
 }

@@ -8,19 +8,21 @@
     </div>
     <div class="w-full space-y-2 px-6 md:px-8 @md/modal:px-8 md:w-3/5 @md/modal:w-3/5">
       <div class="space-y-1">
-        <!--<input
+        <input
           type="file"
           :id="id"
           :name="field.attribute"
-          @input="updateValue($event.target.files)"/>-->
+          :value="field.value"
+          @input="updateValue($event.target.files)"/>
+
 
         <div id="app">
           <file-pond
             :name="field.attribute"
             ref="pond"
-            label-idle="Drop files here..."
-            v-bind:allow-multiple="true"
-            accepted-file-types="image/jpeg, image/png"
+            label-idle="Drop file here..."
+            v-bind:allow-multiple="false"
+            :accepted-file-types="field.acceptedTypes"
             :server="server"
             v-bind:files="files"
             v-on:init="handleFilePondInit"
@@ -49,11 +51,17 @@ export default {
   props: {
     label: String,
     id: String,
-    field: Object
+    field: Object,
+    section: String
+  },
+  mounted() {
+
   },
   data: function () {
     return {
       files: ["cat.jpeg"],
+      section: this.section,
+      value: this.field.value,
 
       server: {
         process(fieldName,
@@ -78,8 +86,10 @@ export default {
           )
 
           let formData = new FormData();
-          formData.append(fieldName, file, file.name);
+          console.log(file)
+          formData.append('file', file, file.name);
           formData.append('fileKey', fileKey);
+          formData.append('fieldName', fieldName)
 
           Nova.request().post('/settings-manager/settings/upload', formData, {
             onUploadProgress: (event) => {
@@ -87,6 +97,7 @@ export default {
             },
           })
             .then((response) => {
+              console.log(response)
               load(response.data.fileKey);
             })
             .catch((err) => {
