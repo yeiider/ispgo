@@ -9,6 +9,7 @@ Route::middleware(['nova'])->prefix('nova')->group(function () {
     \Laravel\Nova\Nova::routes();
 });
 
+Route::get('checkout', [\App\Http\Controllers\Checkout::class, 'index'])->name('checkout.index');
 // Rutas de autenticación de clientes
 Route::prefix('customer')->group(function () {
     Route::get('register', [CustomerAuthController::class, 'showRegistrationForm'])->name('customer.register');
@@ -23,7 +24,7 @@ Route::prefix('customer')->group(function () {
     Route::post('password/reset', [CustomerAuthController::class, 'reset'])->name('customer.password.update');
 
     Route::middleware('auth.customer')->group(function () {
-        Route::get('dashboard', function (){
+        Route::get('dashboard', function () {
             return view('customer.dashboard');
         });
     });
