@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\CustomerAuthController;
+use App\Http\Controllers\PaymentController;
 use HansSchouten\LaravelPageBuilder\LaravelPageBuilder;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +12,15 @@ Route::middleware(['nova'])->prefix('nova')->group(function () {
 });
 
 Route::get('checkout', [\App\Http\Controllers\Checkout::class, 'index'])->name('checkout.index');
+Route::get('/payment/configurations', [PaymentController::class, 'getPaymentConfigurations']);
+
+
+Route::get('/payment/payu/confirmation', [\App\Http\Controllers\Payments\Payu::class, 'confirmation'])->name('payu.confirmation');
+Route::get('/payment/payu/response', [\App\Http\Controllers\Payments\Payu::class, 'response'])->name('payu.response');
+Route::post('/payment/payu/signature', [\App\Http\Controllers\Payments\Payu::class, 'signature'])->name('payu.signature');
+
+Route::get('/invoice/search', [InvoiceController::class, 'search']);
+
 // Rutas de autenticación de clientes
 Route::prefix('customer')->group(function () {
     Route::get('register', [CustomerAuthController::class, 'showRegistrationForm'])->name('customer.register');

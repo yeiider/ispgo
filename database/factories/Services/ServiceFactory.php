@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Services;
 
+use App\Models\Customers\Address;
 use App\Models\Customers\Customer;
 use App\Models\Services\Plan;
 use App\Models\Services\Service;
@@ -29,7 +30,7 @@ class ServiceFactory extends Factory
             'service_notes' => $this->faker->optional()->text,
             'contract_id' => $this->faker->optional()->randomNumber(),
             'support_contact' => $this->faker->optional()->phoneNumber,
-            'service_location' => $this->faker->optional()->address,
+            'service_location' => null,
             'service_type' => $this->faker->optional()->randomElement(["ftth", "adsl", "satellite"]),
             'static_ip' => $this->faker->boolean,
             'data_limit' => $this->faker->optional()->numberBetween(50, 1000), // in GB

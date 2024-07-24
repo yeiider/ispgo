@@ -58,7 +58,7 @@ class Customer extends Model
 
     public function getFullNameAttribute()
     {
-        return ucfirst("{$this->first_name} {$this->last_name}");
+        return ucwords("{$this->first_name} {$this->last_name}");
     }
 
     public function setFirstNameAttribute($value)

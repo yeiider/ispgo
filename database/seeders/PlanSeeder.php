@@ -14,6 +14,6 @@ class PlanSeeder extends Seeder
         Plan::truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        Plan::factory()->count(10)->create();
+        Plan::factory()->count(4)->create();
     }
 }

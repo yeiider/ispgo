@@ -7,6 +7,7 @@ use App\Nova\Actions\Service\CreateActionsServiceInstall;
 use App\Nova\Actions\Service\CreateActionsServiceUninstall;
 use App\Nova\Actions\Service\GenerateInvoice;
 use App\Nova\Actions\Service\SuspendService;
+use App\Nova\Customers\Address;
 use App\Nova\Filters\ServiceStatus;
 use App\Nova\Filters\ServiceType;
 use App\Nova\Lenses\TelephonicServiceLens;
@@ -94,7 +95,7 @@ class Service extends Resource
     {
         return [
             Text::make('Support Contact', 'support_contact'),
-            Text::make('Service Location', 'service_location')->hideFromIndex(),
+            BelongsTo::make('Service Location', 'address',Address::class)->hideFromIndex()->searchable(),
             Text::make('Billing Cycle', 'billing_cycle'),
             Textarea::make('Service Contract', 'service_contract'),
         ];
@@ -104,12 +105,7 @@ class Service extends Resource
     {
         return [
             Number::make('Bandwidth', 'bandwidth')->hideFromIndex(),
-            Select::make(__('Connection Type'), 'connection_type')
-                ->options([
-                    'ftth' => __('Fiber Optic'),
-                    'adsl' => __('ADSL'),
-                    'satellite' => __('Satellite'),
-                ]),
+
             Text::make('MAC Address', 'mac_address')->hideFromIndex(),
             Date::make('Installation Date', 'installation_date'),
             Textarea::make('Service Notes', 'service_notes'),

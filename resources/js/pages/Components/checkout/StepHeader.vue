@@ -16,14 +16,15 @@ export default {
     return {
       steps: [
         {number: 1, title: 'Referencia'},
-        {number: 2, title: 'Detalle'},
-        {number: 3, title: 'Metodo de pago'},
-        {number: 4, title: 'Resumen'}
+        {number: 2, title: 'Metodo de pago'},
+        {number: 3, title: 'Resumen'}
       ]
     };
   },
   methods: {
     changeStep(step) {
+      if (step>this.currentStep)
+        return
       this.$emit('changeStep', step);
     }
   }

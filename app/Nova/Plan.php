@@ -89,13 +89,7 @@ class Plan extends Resource
                 ->default(0)
                 ->rules('required'),
             Boolean::make(__('Unlimited Data'), 'unlimited_data'),
-            Select::make(__('Service Type'), 'service_type')
-                ->options([
-                    'ftth' => __('Fiber Optic'),
-                    'adsl' => __('ADSL'),
-                    'satellite' => __('Satellite'),
-                ])
-                ->rules('required'),
+
 
         ];
     }

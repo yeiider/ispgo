@@ -3,6 +3,7 @@
 namespace App\Models\Services;
 
 use App\Events\ServiceUpdateStatus;
+use App\Models\Customers\Address;
 use App\Models\Customers\Customer;
 use App\Models\Invoice\Invoice;
 use App\Models\Router;
@@ -39,6 +40,11 @@ class Service extends Model
     public function router()
     {
         return $this->belongsTo(Router::class);
+    }
+
+    public function address()
+    {
+        return $this->belongsTo(Address::class,'service_location','id');
     }
 
     public function getFullServiceNameAttribute()

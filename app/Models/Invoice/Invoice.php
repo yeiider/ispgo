@@ -19,13 +19,14 @@ class Invoice extends Model
     const STATUS_PAID = "paid";
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support'
+        'issue_date', 'due_date', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id'
     ];
 
     protected $casts = [
         "due_date" => "date",
         "issue_date" => "date"
     ];
+    protected $appends = ['full_name', 'email_address'];
 
     public function getFullNameAttribute()
     {
@@ -35,6 +36,11 @@ class Invoice extends Model
     public function getEmailAddressAttribute()
     {
         return $this->customer->email_address;
+    }
+
+    public function getProductAttribute()
+    {
+        return $this->service->plan->name;
     }
 
     public function creditNotes()
@@ -60,6 +66,22 @@ class Invoice extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public static function findByDniOrInvoiceId($input)
+    {
+        return self::whereHas('customer', function ($query) use ($input) {
+            $query->where('identity_document', $input);
+        })->orWhere('increment_id', $input)->first();
+    }
+
+    protected static function generateIncrementId()
+    {
+        // Generar un increment_id único. Puedes ajustar la lógica según tus necesidades.
+        $lastInvoice = self::orderBy('id', 'desc')->first();
+        $lastId = $lastInvoice ? intval($lastInvoice->id) : 0;
+        $incrementId = str_pad($lastId + 1, 10, '0', STR_PAD_LEFT);
+        return $incrementId;
     }
 
     public function applyPayment($amount = null, $paymentMethod = "cash"): void
@@ -132,6 +154,7 @@ class Invoice extends Model
         static::creating(function ($model) {
             $model->created_by = Auth::id();
             $model->updated_by = Auth::id();
+            $model->increment_id = self::generateIncrementId();
             event(new InvoiceCreated($model));
         });
 

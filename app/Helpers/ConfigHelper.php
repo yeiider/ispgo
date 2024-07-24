@@ -23,4 +23,23 @@ class ConfigHelper
             return CoreConfigData::getValueByPath($path, $scopeId);
         });
     }
+
+    /**
+     * Get payment methods from configuration
+     *
+     * This method fetches the payment methods that have been defined in the "settings.payment"
+     * configuration. The methods are returned in an array format.
+     *
+     * @return array An array of payment methods
+     */
+    public static function getPaymentsMethods(): array
+    {
+        $paymentsConfig = config('settings.payment', []);
+
+        // Filter out any keys that are not payment methods (e.g., "setting" key)
+        return array_filter(array_keys($paymentsConfig), function ($key) {
+            return $key !== 'setting';
+        });
+    }
+
 }

@@ -235,6 +235,80 @@ return [
             ],
         ]
     ],
-
-
+    "payment" => [
+        "setting" => [
+            "label" => "Payment",
+            "class" => "form-control",
+        ],
+        "payu" => [
+            "setting" => [
+                "label" => "PayU Settings",
+                "class" => "form-control",
+                "code" => "payu"
+            ],
+            "enabled" => [
+                "field" => "boolean-field",
+                "label" => "Enabled",
+                "placeholder" => "Enabled",
+            ],
+            "api_key" => [
+                "field" => "text-field",
+                "label" => "API Key",
+                "placeholder" => "API Key",
+            ],
+            "api_login" => [
+                "field" => "text-field",
+                "label" => "API Login",
+                "placeholder" => "API Login",
+            ],
+            "merchant_id" => [
+                "field" => "text-field",
+                "label" => "Merchant ID",
+                "placeholder" => "Merchant ID",
+            ],
+            "account_id" => [
+                "field" => "text-field",
+                "label" => "Account ID",
+                "placeholder" => "Account ID",
+            ],
+            "url_confirmation" => [
+                "field" => "text-field",
+                "label" => "URL Confirmation",
+                "placeholder" => "URL Confirmation",
+            ],
+            "url_response" => [
+                "field" => "text-field",
+                "label" => "URL Response",
+                "placeholder" => "URL Response",
+            ],
+            "env" => [
+                "field" => "select-field",
+                "label" => "Environment",
+                "placeholder" => "Environment",
+                "options" => \App\Settings\Config\Sources\PayuEnvironment::class,
+            ],
+        ],
+        'wompi' => [
+            'setting' => [
+                'label' => 'Wompi Settings',
+                'class' => 'form-control',
+                'code' => 'wompi',
+            ],
+            'enabled' => [
+                'field' => 'boolean-field',
+                'label' => 'Enabled',
+                'placeholder' => 'Enabled',
+            ],
+            'public_key' => [
+                'field' => 'text-field',
+                'label' => 'Public Key',
+                'placeholder' => 'Public Key',
+            ],
+            'widget_url' => [
+                'field' => 'text-field',
+                'label' => 'Widget URL',
+                'placeholder' => 'Widget URL',
+            ],
+        ],
+    ],
 ];

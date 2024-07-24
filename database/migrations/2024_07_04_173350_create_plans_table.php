@@ -31,7 +31,7 @@ class CreatePlansTable extends Migration
             $table->string('network_priority')->nullable();
             $table->text('technical_support')->nullable();
             $table->text('additional_benefits')->nullable();
-            $table->string('connection_type'); // Fiber Optic, ADSL, Satellite
+            $table->string('connection_type')->nullable(); // Fiber Optic, ADSL, Satellite
             $table->enum('plan_type', ['internet', 'television', 'telephonic'])->default('internet'); // Fiber Optic, ADSL, Satellite
             $table->enum('modality_type', ['prepaid', 'postpaid'])->default('postpaid'); // Fiber Optic, ADSL, Satellite
             $table->enum('status', ['active', 'inactive']); // Active, Inactive

@@ -29,6 +29,11 @@ class Address extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function getAddressNameAttribute()
+    {
+        return "{$this->address} - {$this->customer->full_name}";
+    }
+
     protected static function boot()
     {
         parent::boot();

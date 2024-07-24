@@ -15,10 +15,10 @@ class Address extends Resource
 {
     public static $model = \App\Models\Customers\Address::class;
 
-    public static $title = 'address';
+    public static $title = 'address_name';
 
     public static $search = [
-        'id', 'address', 'city', 'state_province', 'postal_code', 'country'
+        'id', 'address', 'city', 'state_province', 'postal_code', 'country','address_name'
     ];
 
     public function fields(Request $request)

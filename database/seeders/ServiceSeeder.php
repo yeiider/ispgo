@@ -14,6 +14,6 @@ class ServiceSeeder extends Seeder
         Service::truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        Service::factory()->count(100)->create();
+        Service::factory()->count(10)->create();
     }
 }

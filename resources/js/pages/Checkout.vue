@@ -1,31 +1,40 @@
 <template>
-  <div class="flex flex-col w-full sm:w-1/2 m-auto mt-5 items-center p-6 bg-background rounded-lg shadow-lg">
-    <StepHeader :currentStep="currentStep" @changeStep="changeStep" />
-    <FormSection v-if="currentStep === 1" @nextStep="nextStep" />
-    <AuthenticationSection v-if="currentStep === 2" @nextStep="nextStep" />
-    <AuthorizationSection v-if="currentStep === 3" @nextStep="nextStep" />
-    <ResultSection v-if="currentStep === 4" />
+  <div
+    class="relative flex flex-col w-full sm:w-1/2 m-auto mt-[8%] items-center p-6 bg-background rounded-lg shadow-lg">
+    <Spinner :isVisible="isLoading"/>
+    <StepHeader :currentStep="currentStep" @changeStep="changeStep"/>
+    <Reference v-if="currentStep === 1" @nextStep="nextStep" @invoiceFound="setInvoice" @loading="setLoading"/>
+    <PaymentMethods v-if="currentStep === 2" :methods="paymentMethods" :invoice="invoice" @nextStep="nextStep" @loading="setLoading"/>
+    <ResultSection v-if="currentStep === 3"/>
+    <Summary :invoice="invoice" :showInvoice="showInvoice"/>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue';
+import {ref, onMounted} from 'vue';
+import axios from 'axios';
 import StepHeader from './Components/checkout/StepHeader.vue';
-import FormSection from './Components/checkout/FormSection.vue';
-import AuthenticationSection from './Components/checkout/AuthenticationSection.vue';
-import AuthorizationSection from './Components/checkout/AuthorizationSection.vue';
+import Reference from './Components/checkout/Reference.vue';
+import PaymentMethods from './Components/checkout/PaymentMethods.vue';
 import ResultSection from './Components/checkout/ResultSection.vue';
+import Summary from './Components/checkout/Summary.vue';
+import Spinner from './Components/Spinner.vue';
 
 export default {
   components: {
+    Summary,
     StepHeader,
-    FormSection,
-    AuthenticationSection,
-    AuthorizationSection,
-    ResultSection
+    Reference,
+    PaymentMethods,
+    ResultSection,
+    Spinner
   },
   setup() {
     const currentStep = ref(1);
+    const paymentMethods = ref([]);
+    const invoice = ref({});
+    const showInvoice = ref(false);
+    const isLoading = ref(false);
 
     const changeStep = (step) => {
       currentStep.value = step;
@@ -35,7 +44,29 @@ export default {
       currentStep.value++;
     };
 
-    return { currentStep, changeStep, nextStep };
+    const setInvoice = (invoiceData) => {
+      invoice.value = invoiceData;
+      if (invoiceData)
+        showInvoice.value = true;
+    };
+
+    const setLoading = (loading) => {
+      isLoading.value = loading;
+    };
+
+    onMounted(async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('/payment/configurations');
+        paymentMethods.value = response.data;
+      } catch (error) {
+        console.error('Error fetching payment methods:', error);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return {currentStep, changeStep, nextStep, paymentMethods, invoice, setInvoice, isLoading, setLoading,showInvoice};
   }
 };
 </script>

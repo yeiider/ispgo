@@ -41,7 +41,7 @@ class Invoice extends Resource
     {
         return [
             ID::make(__('ID'), 'id')->sortable(),
-
+            Text::make('Increment Id')->readonly(),
             BelongsTo::make('Customer', 'customer', Customers\Customer::class)->searchable()->readonly(),
             BelongsTo::make('Service', 'service', \App\Nova\Service::class)->searchable()->readonly(),
 
