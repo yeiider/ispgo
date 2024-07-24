@@ -187,6 +187,14 @@ class Settings extends Resource
         ], 400);
     }
 
+    /**
+     * Deletes a file from the public/uploads directory.
+     *
+     * @param NovaRequest $request The NovaRequest instance.
+     * @param string $file The name of the file to be deleted.
+     *
+     * @return \Illuminate\Http\JsonResponse The JSON response indicating the result of the operation.
+     */
     public function deleteFiles(NovaRequest $request, string $file): \Illuminate\Http\JsonResponse
     {
         $disk = Storage::disk('public');
