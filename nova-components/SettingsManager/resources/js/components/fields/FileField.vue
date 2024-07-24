@@ -8,13 +8,6 @@
     </div>
     <div class="w-full space-y-2 px-6 md:px-8 @md/modal:px-8 md:w-3/5 @md/modal:w-3/5">
       <div class="space-y-1">
-        <input
-          type="file"
-          :id="id"
-          :name="field.attribute"
-          :value="field.value"
-          @input="updateValue($event.target.files)"/>
-
 
         <div id="app">
           <file-pond
@@ -46,6 +39,7 @@ const FilePond = vueFilePond(
   FilePondPluginFileValidateType,
   FilePondPluginImagePreview
 );
+var self;
 
 export default {
   props: {
@@ -55,13 +49,21 @@ export default {
     section: String
   },
   mounted() {
-
+    self = this;
+    let value = this.field.value;
+    if (value) {
+      this.files = [{
+        source: value,
+        options: {
+          type: 'local',
+        }
+      }]
+    }
   },
   data: function () {
     return {
-      files: ["cat.jpeg"],
+      files: [],
       section: this.section,
-      value: this.field.value,
 
       server: {
         process(fieldName,
@@ -71,25 +73,8 @@ export default {
                 error,
                 progress) {
 
-          let fileKey = (
-            [1e7] +
-            -1e3 +
-            -4e3 +
-            -8e3 +
-            -1e11
-          ).replace(/[018]/g, (c) =>
-            (
-              c ^
-              (crypto.getRandomValues(new Uint8Array(1))[0] &
-                (15 >> (c / 4)))
-            ).toString(16),
-          )
-
           let formData = new FormData();
-          console.log(file)
           formData.append('file', file, file.name);
-          formData.append('fileKey', fileKey);
-          formData.append('fieldName', fieldName)
 
           Nova.request().post('/settings-manager/settings/upload', formData, {
             onUploadProgress: (event) => {
@@ -97,15 +82,44 @@ export default {
             },
           })
             .then((response) => {
-              console.log(response)
-              load(response.data.fileKey);
+
+              if (response.status === 200 && response.data) {
+                if (self) {
+                  self.updateValue(response.data.url);
+                  load(response.data.url);
+                }
+              }
             })
             .catch((err) => {
               error('Something went wrong');
             });
         },
+
+        remove(source, load) {
+
+          let fileName = source.replace("/storage/uploads/", "");
+          console.log(fileName)
+
+          Nova.request().delete(`/settings-manager/settings/deleteFile/${fileName}`)
+            .then((response) => {
+              if (response.status === 200) {
+                load();
+                self.updateValue(null);
+              }
+            })
+            .catch((err) => {
+              console.log('Error deleting file:', err);
+            });
+        },
+
         load(source, load) {
-          console.log(source, load)
+          fetch(source)
+            .then(response => response.blob())
+            .then(blob => {
+              let file = new File([blob], "", blob);
+              load(file);
+            })
+            .catch(error => console.error(`Error in fetch: ${error}`));
         }
       }
     };
@@ -120,8 +134,6 @@ export default {
 
     handleFilePondInit: function () {
       console.log("FilePond has initialized");
-
-      // FilePond instance methods are available on `this.$refs.pond`
     },
   }
 }

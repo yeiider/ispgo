@@ -257,6 +257,7 @@ __webpack_require__.r(__webpack_exports__);
 
 // Create component
 var FilePond = vue_filepond__WEBPACK_IMPORTED_MODULE_0___default()((filepond_plugin_file_validate_type__WEBPACK_IMPORTED_MODULE_3___default()), (filepond_plugin_image_preview__WEBPACK_IMPORTED_MODULE_4___default()));
+var self;
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
     label: String,
@@ -264,35 +265,62 @@ var FilePond = vue_filepond__WEBPACK_IMPORTED_MODULE_0___default()((filepond_plu
     field: Object,
     section: String
   },
-  mounted: function mounted() {},
+  mounted: function mounted() {
+    self = this;
+    var value = this.field.value;
+    if (value) {
+      this.files = [{
+        source: value,
+        options: {
+          type: 'local'
+        }
+      }];
+    }
+  },
   data: function data() {
     return {
-      files: ["cat.jpeg"],
+      files: [],
       section: this.section,
-      value: this.field.value,
       server: {
         process: function process(fieldName, file, metadata, load, error, progress) {
-          var fileKey = ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, function (c) {
-            return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
-          });
           var formData = new FormData();
-          console.log(file);
           formData.append('file', file, file.name);
-          formData.append('fileKey', fileKey);
-          formData.append('fieldName', fieldName);
           Nova.request().post('/settings-manager/settings/upload', formData, {
             onUploadProgress: function onUploadProgress(event) {
               progress(event.lengthComputable, event.loaded, event.total);
             }
           }).then(function (response) {
-            console.log(response);
-            load(response.data.fileKey);
+            if (response.status === 200 && response.data) {
+              if (self) {
+                self.updateValue(response.data.url);
+                load(response.data.url);
+              }
+            }
           })["catch"](function (err) {
             error('Something went wrong');
           });
         },
+        remove: function remove(source, load) {
+          var fileName = source.replace("/storage/uploads/", "");
+          console.log(fileName);
+          Nova.request()["delete"]("/settings-manager/settings/deleteFile/".concat(fileName)).then(function (response) {
+            if (response.status === 200) {
+              load();
+              self.updateValue(null);
+            }
+          })["catch"](function (err) {
+            console.log('Error deleting file:', err);
+          });
+        },
         load: function load(source, _load) {
-          console.log(source, _load);
+          fetch(source).then(function (response) {
+            return response.blob();
+          }).then(function (blob) {
+            var file = new File([blob], "", blob);
+            _load(file);
+          })["catch"](function (error) {
+            return console.error("Error in fetch: ".concat(error));
+          });
         }
       }
     };
@@ -309,8 +337,6 @@ var FilePond = vue_filepond__WEBPACK_IMPORTED_MODULE_0___default()((filepond_plu
     },
     handleFilePondInit: function handleFilePondInit() {
       console.log("FilePond has initialized");
-
-      // FilePond instance methods are available on `this.$refs.pond`
     }
   }
 });
@@ -512,7 +538,6 @@ __webpack_require__.r(__webpack_exports__);
     updateFieldValue: function updateFieldValue(_ref) {
       var key = _ref.key,
         value = _ref.value;
-      console.log(key, value);
       this.groups.forEach(function (group) {
         var fieldToUpdate = group.fields.find(function (field) {
           return field.uniqueKey === key;
@@ -853,8 +878,7 @@ var _hoisted_5 = {
 var _hoisted_6 = {
   "class": "space-y-1"
 };
-var _hoisted_7 = ["id", "name", "value"];
-var _hoisted_8 = {
+var _hoisted_7 = {
   id: "app"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
@@ -862,15 +886,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "for": $props.field.uniqueKey,
     "class": "inline-block leading-tight space-x-1"
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.field.name), 1 /* TEXT */), $props.field.required ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_4, "*")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 8 /* PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    type: "file",
-    id: $props.id,
-    name: $props.field.attribute,
-    value: $props.field.value,
-    onInput: _cache[0] || (_cache[0] = function ($event) {
-      return $options.updateValue($event.target.files);
-    })
-  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_7), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_file_pond, {
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($props.field.name), 1 /* TEXT */), $props.field.required ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_4, "*")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 8 /* PROPS */, _hoisted_3)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_file_pond, {
     name: $props.field.attribute,
     ref: "pond",
     "label-idle": "Drop file here...",
