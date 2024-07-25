@@ -164,37 +164,48 @@ class Settings extends Resource
         return $settings;
     }
 
-    public function uploadFiles(NovaRequest $request):  \Illuminate\Http\JsonResponse
+    /**
+     * Upload files to the server.
+     *
+     * @param NovaRequest $request The request object.
+     *
+     * @return \Illuminate\Http\JsonResponse The JSON response.
+     */
+    public function uploadFiles(NovaRequest $request): \Illuminate\Http\JsonResponse
     {
-
-
-        //Don't forget to import the Storage facade at the top of your script
-        $binaryFile = $request->get('file');
-        $fileKey = $request->get('fileKey');
-        $fieldName = $request->input('fieldName');
-
-        if ($binaryFile) {
-            // Check if uploads directory exists and if not create it
-            if (!Storage::exists('uploads')) {
-                Storage::makeDirectory('uploads');
-            }
-
-            // Define the file name and path. In this case, the file is being stored in the 'uploads' directory
-            $fileName = time() . '_' . $fieldName;
-            $filePath = 'uploads/' . $fileName;
-
-            // Decode the binary data and store the file
-            Storage::put($filePath, base64_decode($binaryFile));
-
-            // Update or create a new record in CoreConfigData with the $key
-            // and store the path of the stored file
-            return response()->json( [
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $path = $file->store('uploads', 'public');
+            return response()->json([
                 'success' => true,
-                'filePath' => $filePath,
+                'url' => Storage::url($path)
             ]);
         }
         return response()->json([
             'success' => false,
-        ]);
+            'error' => 'No se ha podido cargar la imagen.'
+        ], 400);
+    }
+
+    /**
+     * Deletes a file from the public/uploads directory.
+     *
+     * @param NovaRequest $request The NovaRequest instance.
+     * @param string $file The name of the file to be deleted.
+     *
+     * @return \Illuminate\Http\JsonResponse The JSON response indicating the result of the operation.
+     */
+    public function deleteFiles(NovaRequest $request, string $file): \Illuminate\Http\JsonResponse
+    {
+        $disk = Storage::disk('public');
+        if (!$disk->exists('uploads/' . $file)) {
+            return response()->json(['success' => false, 'error' => 'File not found.']);
+        }
+
+        if (!$disk->delete('uploads/' . $file)) {
+            return response()->json(['success' => false, 'error' => 'File could not be deleted.']);
+        }
+
+        return response()->json(['success' => true, 'message' => 'File deleted successfully.']);
     }
 }

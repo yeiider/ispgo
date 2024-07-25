@@ -87,7 +87,6 @@ export default {
       });
     },
     updateFieldValue({key, value}) {
-      console.log(key, value)
       this.groups.forEach(group => {
         const fieldToUpdate = group.fields.find(field => field.uniqueKey === key);
         if (fieldToUpdate) {
