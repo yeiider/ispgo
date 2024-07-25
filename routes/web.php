@@ -15,9 +15,16 @@ Route::get('checkout', [\App\Http\Controllers\Checkout::class, 'index'])->name('
 Route::get('/payment/configurations', [PaymentController::class, 'getPaymentConfigurations']);
 
 
+//Payu
 Route::get('/payment/payu/confirmation', [\App\Http\Controllers\Payments\Payu::class, 'confirmation'])->name('payu.confirmation');
 Route::get('/payment/payu/response', [\App\Http\Controllers\Payments\Payu::class, 'response'])->name('payu.response');
 Route::post('/payment/payu/signature', [\App\Http\Controllers\Payments\Payu::class, 'signature'])->name('payu.signature');
+
+//Wompi
+Route::post('/payment/wompi/signature', [\App\Http\Controllers\Payments\Wompi::class, 'signature'])->name('wompi.signature');
+Route::post('/payment/wompi/confirmation', [\App\Http\Controllers\Payments\Wompi::class, 'confirmation'])->name('wompi.confirmation');
+
+
 
 Route::get('/invoice/search', [InvoiceController::class, 'search']);
 /*

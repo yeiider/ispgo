@@ -4,7 +4,7 @@ namespace App\Settings\Config\Sources;
 
 use Ispgo\SettingsManager\Source\ConfigProviderInterface;
 
-class PayuEnvironment implements ConfigProviderInterface
+class Environment implements ConfigProviderInterface
 {
 
     static public function getConfig(): array
