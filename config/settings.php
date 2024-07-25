@@ -285,7 +285,7 @@ return [
                 "field" => "select-field",
                 "label" => "Environment",
                 "placeholder" => "Environment",
-                "options" => \App\Settings\Config\Sources\PayuEnvironment::class,
+                "options" => \App\Settings\Config\Sources\Environment::class,
             ],
         ],
         'wompi' => [
@@ -299,15 +299,46 @@ return [
                 'label' => 'Enabled',
                 'placeholder' => 'Enabled',
             ],
+            "env" => [
+                "field" => "select-field",
+                "label" => "Environment",
+                "placeholder" => "Environment",
+                "options" => \App\Settings\Config\Sources\Environment::class,
+            ],
+            'public_key_sandbox' => [
+                'field' => 'text-field',
+                'label' => 'Public Key',
+                'placeholder' => 'Public Key',
+            ],
+            'integrity_sandbox' => [
+                'field' => 'text-field',
+                'label' => 'Integrity',
+                'placeholder' => 'Integrity',
+            ],
             'public_key' => [
                 'field' => 'text-field',
                 'label' => 'Public Key',
                 'placeholder' => 'Public Key',
             ],
-            'widget_url' => [
+            'integrity' => [
                 'field' => 'text-field',
-                'label' => 'Widget URL',
-                'placeholder' => 'Widget URL',
+                'label' => 'Integrity',
+                'placeholder' => 'Integrity',
+            ],
+            'url_status_sandbox' => [
+                'field' => 'text-field',
+                'label' => 'Status Url',
+                'placeholder' => 'Status Url',
+            ],
+            'url_status' => [
+                'field' => 'text-field',
+                'label' => 'Status Url',
+                'placeholder' => 'Status Url',
+            ],
+            'confirmation_url' => [
+                'field' => 'text-field',
+                'label' => 'Confirmation URL',
+                'placeholder' => 'Confirmation URL',
             ],
         ],
     ],

@@ -9,5 +9,6 @@
 </head>
 <body>
 @inertia
+<script type="text/javascript" src="https://checkout.wompi.co/widget.js"></script>
 </body>
 </html>

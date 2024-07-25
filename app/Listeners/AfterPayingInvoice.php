@@ -42,7 +42,7 @@ class AfterPayingInvoice
     private function sendEmail(Invoice $invoice): void
     {
         if (InvoiceProviderConfig::sendEmailByPaying()) {
-            $emailTemplateId = $this->invoiceProviderConfig->emailTemplatePaying();
+            $emailTemplateId = InvoiceProviderConfig::emailTemplatePaying();
             $emailTemplate = EmailTemplate::find($emailTemplateId);
 
             if (!$emailTemplate) {
