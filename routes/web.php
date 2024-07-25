@@ -20,7 +20,7 @@ Route::get('/payment/payu/response', [\App\Http\Controllers\Payments\Payu::class
 Route::post('/payment/payu/signature', [\App\Http\Controllers\Payments\Payu::class, 'signature'])->name('payu.signature');
 
 Route::get('/invoice/search', [InvoiceController::class, 'search']);
-
+/*
 // Rutas de autenticación de clientes
 Route::prefix('customer')->group(function () {
     Route::get('register', [CustomerAuthController::class, 'showRegistrationForm'])->name('customer.register');
@@ -38,6 +38,15 @@ Route::prefix('customer')->group(function () {
         Route::get('dashboard', function () {
             return view('customer.dashboard');
         });
+    });
+});*/
+
+
+Route::middleware(['auth', 'web'])->group(function () {
+    Route::prefix('customer')->group(function () {
+        Route::get('/account', function () {
+            return view('customer.dashboard');
+        })->name('account');
     });
 });
 
