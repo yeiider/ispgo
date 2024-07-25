@@ -42,12 +42,10 @@ Route::prefix('customer')->group(function () {
 });*/
 
 
-Route::middleware(['auth', 'web'])->group(function () {
-    Route::prefix('customer')->group(function () {
-        Route::get('/account', function () {
-            return view('customer.dashboard');
-        })->name('account');
-    });
+Route::prefix('customer')->group(function () {
+    Route::get('/account', function () {
+        return view('customer.dashboard');
+    })->name('account');
 });
 
 

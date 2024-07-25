@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'pagebuilder/assets/*',
             'pagebuilder/uploads/*',
             '/admin/*'
-        ]);
+        ])->alias([]);
 
     })
     ->withExceptions(function (Exceptions $exceptions) {

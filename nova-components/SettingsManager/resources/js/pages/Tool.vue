@@ -48,6 +48,7 @@
 import Menu from "../components/Menu.vue";
 import Collapsible from "../components/Collapsible.vue"
 import DefaultField from "../components/fields/DefaultField.vue";
+import {data} from "autoprefixer";
 
 export default {
   props: {
@@ -110,11 +111,10 @@ export default {
         section: this.section ?? 'general'
       }).then(response => {
         this.fetchSettings();
-        console.log(response)
-        if (response.success) {
-          alert(response)
+        if (response.data.success) {
+          Nova.success(response.data.message);
         } else {
-          alert(response)
+          Nova.error('It failed!')
         }
         if (!continueEditing) {
           // Lógica para salir del modo de edición si no se desea continuar editando.
