@@ -21,9 +21,9 @@ Route::get('/payment/payu/response', [\App\Http\Controllers\Payments\Payu::class
 Route::post('/payment/payu/signature', [\App\Http\Controllers\Payments\Payu::class, 'signature'])->name('payu.signature');
 
 //Wompi
-Route::post('/payment/wompi/signature', [\App\Http\Controllers\Payments\Wompi::class, 'signature'])->name('wompi.signature');
-Route::get('/payment/wompi/confirmation', [\App\Http\Controllers\Payments\Wompi::class, 'confirmation'])->name('wompi.confirmation');
-Route::post('/payment/handlewompievent', [\App\Http\Controllers\Payments\Wompi::class, 'handlewompievent'])->name('wompi.handlewompievent');
+Route::post('/payment/wompi/signature', [\App\Http\Controllers\Payments\WompiController::class, 'signature'])->name('wompi.signature');
+Route::get('/payment/wompi/confirmation', [\App\Http\Controllers\Payments\WompiController::class, 'confirmation'])->name('wompi.confirmation');
+Route::post('/payment/handlewompievent', [\App\Http\Controllers\Payments\WompiController::class, 'handlewompievent'])->name('wompi.handlewompievent');
 
 
 Route::get('/invoice/search', [InvoiceController::class, 'search']);
