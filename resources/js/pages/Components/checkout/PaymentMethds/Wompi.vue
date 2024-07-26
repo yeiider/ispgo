@@ -55,7 +55,7 @@ export default {
       }
     },
     calculateAmountInCents(amount) {
-      return parseInt(parseInt(amount).toString() + '0000');
+      return parseInt(parseInt(amount).toString() + '00');
     },
     createFormAndSubmit(signature) {
       const invoice = this.invoice.invoice;
@@ -86,8 +86,7 @@ export default {
 
       checkout.open((result) => {
         const transaction = result.transaction;
-        console.log("Transaction ID: ", transaction.id);
-        console.log("Transaction object: ", transaction);
+        window.location.href = `${this.method.confirmation_url}?id=${transaction.id}`
       });
     }
   }

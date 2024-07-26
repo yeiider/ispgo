@@ -307,12 +307,12 @@ return [
             ],
             'public_key_sandbox' => [
                 'field' => 'text-field',
-                'label' => 'Public Key',
+                'label' => 'Public Key Sandbox',
                 'placeholder' => 'Public Key',
             ],
             'integrity_sandbox' => [
                 'field' => 'text-field',
-                'label' => 'Integrity',
+                'label' => 'Integrity Sandbox',
                 'placeholder' => 'Integrity',
             ],
             'public_key' => [
@@ -327,7 +327,17 @@ return [
             ],
             'url_status_sandbox' => [
                 'field' => 'text-field',
-                'label' => 'Status Url',
+                'label' => 'Status Url Sandbox',
+                'placeholder' => 'Status Url',
+            ],
+            'event_secret_sandbox' => [
+                'field' => 'text-field',
+                'label' => 'Event Secret Sandbox',
+                'placeholder' => 'Status Url',
+            ],
+            'event_secret' => [
+                'field' => 'text-field',
+                'label' => 'Event Secret Sandbox',
                 'placeholder' => 'Status Url',
             ],
             'url_status' => [

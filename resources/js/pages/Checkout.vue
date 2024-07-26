@@ -4,14 +4,16 @@
     <Spinner :isVisible="isLoading"/>
     <StepHeader :currentStep="currentStep" @changeStep="changeStep"/>
     <Reference v-if="currentStep === 1" @nextStep="nextStep" @invoiceFound="setInvoice" @loading="setLoading"/>
-    <PaymentMethods v-if="currentStep === 2" :methods="paymentMethods" :invoice="invoice" @nextStep="nextStep" @loading="setLoading"/>
-    <ResultSection v-if="currentStep === 3"/>
+    <PaymentMethods v-if="currentStep === 2" :methods="paymentMethods" :invoice="invoice" @nextStep="nextStep"
+                    @loading="setLoading"/>
+    <ResultSection v-if="currentStep === 3" :transaction="payment"/>
     <Summary :invoice="invoice" :showInvoice="showInvoice"/>
   </div>
 </template>
 
 <script>
 import {ref, onMounted} from 'vue';
+import {usePage} from '@inertiajs/inertia-vue3'; // Importa usePage de Inertia
 import axios from 'axios';
 import StepHeader from './Components/checkout/StepHeader.vue';
 import Reference from './Components/checkout/Reference.vue';
@@ -37,6 +39,8 @@ export default {
     const isLoading = ref(false);
 
     const changeStep = (step) => {
+      if (currentStep.value === 3)
+        return;
       currentStep.value = step;
     };
 
@@ -46,16 +50,24 @@ export default {
 
     const setInvoice = (invoiceData) => {
       invoice.value = invoiceData;
-      if (invoiceData)
+      if (invoiceData) {
         showInvoice.value = true;
+      }
     };
 
     const setLoading = (loading) => {
       isLoading.value = loading;
     };
 
+    // Accede a las props desde usePage
+    const {props} = usePage();
+    const payment = ref(props.value.payment || null);
+
     onMounted(async () => {
       setLoading(true);
+      if (payment.value) {
+        currentStep.value = 3;
+      }
       try {
         const response = await axios.get('/payment/configurations');
         paymentMethods.value = response.data;
@@ -66,7 +78,18 @@ export default {
       }
     });
 
-    return {currentStep, changeStep, nextStep, paymentMethods, invoice, setInvoice, isLoading, setLoading,showInvoice};
+    return {
+      currentStep,
+      changeStep,
+      nextStep,
+      paymentMethods,
+      invoice,
+      setInvoice,
+      isLoading,
+      setLoading,
+      showInvoice,
+      payment
+    };
   }
 };
 </script>

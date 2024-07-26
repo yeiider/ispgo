@@ -19,12 +19,13 @@ class Invoice extends Model
     const STATUS_PAID = "paid";
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id'
+        'issue_date', 'due_date', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information'
     ];
 
     protected $casts = [
-        "due_date" => "date",
-        "issue_date" => "date"
+        "due_date" => 'date',
+        "issue_date" => 'date',
+        "additional_information" => 'array'
     ];
     protected $appends = ['full_name', 'email_address'];
 
@@ -84,9 +85,15 @@ class Invoice extends Model
         return $incrementId;
     }
 
-    public function applyPayment($amount = null, $paymentMethod = "cash"): void
+    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = []): void
     {
-        $this->amount += $amount ?? $this->total;
+
+        $amount = $amount ?? $this->total;
+        if ($amount > $this->total - $this->amount) {
+            throw new \Exception('El monto pagado no puede ser mayor que el adeudado.');
+        }
+
+        $this->amount += $amount;
         $this->outstanding_balance = $this->total - $this->amount;
         $this->payment_method = $paymentMethod;
 
@@ -97,9 +104,11 @@ class Invoice extends Model
             $this->status = 'overdue';
         }
 
+        $this->additional_information = $additional;
         $this->save();
         event(new InvoicePaid($this));
     }
+
 
     public function createPromisePayment($date, $notes = null)
     {

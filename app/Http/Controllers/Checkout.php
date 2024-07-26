@@ -9,6 +9,13 @@ class Checkout extends Controller
 {
     public function index(): \Inertia\Response
     {
-        return Inertia::render('Checkout');
+        $props = [];
+        $payment = session('payment_data');
+        if ($payment) {
+            $props = ["payment" => $payment];
+        }
+        session()->forget('payment_data');
+
+        return Inertia::render('Checkout', $props);
     }
 }

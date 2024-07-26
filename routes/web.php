@@ -22,8 +22,8 @@ Route::post('/payment/payu/signature', [\App\Http\Controllers\Payments\Payu::cla
 
 //Wompi
 Route::post('/payment/wompi/signature', [\App\Http\Controllers\Payments\Wompi::class, 'signature'])->name('wompi.signature');
-Route::post('/payment/wompi/confirmation', [\App\Http\Controllers\Payments\Wompi::class, 'confirmation'])->name('wompi.confirmation');
-
+Route::get('/payment/wompi/confirmation', [\App\Http\Controllers\Payments\Wompi::class, 'confirmation'])->name('wompi.confirmation');
+Route::post('/payment/handlewompievent', [\App\Http\Controllers\Payments\Wompi::class, 'handlewompievent'])->name('wompi.handlewompievent');
 
 
 Route::get('/invoice/search', [InvoiceController::class, 'search']);
@@ -47,7 +47,6 @@ Route::prefix('customer')->group(function () {
         });
     });
 });*/
-
 
 Route::prefix('customer')->group(function () {
     Route::get('/account', function () {
