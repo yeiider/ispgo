@@ -9,13 +9,20 @@ class Checkout extends Controller
 {
     public function index(): \Inertia\Response
     {
-        $props = [];
-        $payment = session('payment_data');
-        if ($payment) {
-            $props = ["payment" => $payment];
-        }
-        session()->forget('payment_data');
+        return Inertia::render('Checkout', $this->getConfig());
+    }
 
-        return Inertia::render('Checkout', $props);
+    private function getConfig(): array
+    {
+        $payment = session('payment_data');
+        session()->forget('payment_data');
+        return [
+            'config' => [
+                'currency' => config('nova.currency'),
+                'currencySymbol' => null,
+            ]
+            ,
+            'payment' => $payment
+        ];
     }
 }

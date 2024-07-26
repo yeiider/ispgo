@@ -40,7 +40,7 @@ class WompiController extends Controller
         $reference = $request->input('reference');
         $amount = $request->input('amount');
         $apikey = \App\PaymentMethods\Wompi::getIntegrity();
-        $currency = "COP";
+        $currency = config('nova.currency');
 
         $stringToSign = "$reference$amount$currency$apikey";
         $signature = hash('sha256', $stringToSign);
@@ -87,7 +87,7 @@ class WompiController extends Controller
     {
         $invoice = Invoice::where("increment_id", $data["reference"])->firstOrFail();
         $amount = $data["amount"];
-        $invoice->applyPayment($amount, 'wompi', $data);
+        $invoice->applyPayment($amount, $data['payment_method_type'], $data);
     }
 
     private function registerPayingByEvents(array $eventData): void
@@ -95,6 +95,6 @@ class WompiController extends Controller
         $transaction = $eventData['transaction'];
         $invoice = Invoice::where("increment_id", $transaction["reference"])->firstOrFail();
         $amount = $transaction["amount_in_cents"] / 100;
-        $invoice->applyPayment($amount, 'wompi', $eventData);
+        $invoice->applyPayment($amount, $transaction['payment_method_type'], $eventData);
     }
 }

@@ -9,6 +9,7 @@
 
 <script>
 import axios from 'axios';
+import { inject } from 'vue';
 
 export default {
   name: 'PaymentMethod',
@@ -21,6 +22,10 @@ export default {
       type: Object,
       required: true
     }
+  },
+  setup() {
+    const config = inject('config');
+    return { config };
   },
   methods: {
     async handleClick() {
@@ -59,7 +64,7 @@ export default {
         referenceCode: invoice.increment_id,
         accountId: this.method.account_id,
         description: "Pago de factura",
-        currency: 'COP',
+        currency: this.config.currency,
         amount: invoice.total,
         tax: invoice.tax,
         taxReturnBase: invoice.subtotal,

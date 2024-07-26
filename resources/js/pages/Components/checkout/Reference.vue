@@ -23,7 +23,7 @@
       <div class="text-center mb-5">
         <p class="mb-2"><strong>Nombre del Cliente:</strong> {{ invoice.customer_name }}</p>
         <p class="mb-2"><strong>Producto:</strong> {{ invoice.product }}</p>
-        <p class="mb-2"><strong>Total a Pagar:</strong> ${{ invoice.total }}</p>
+        <p class="mb-2"><strong>Total a Pagar:</strong> {{ formatPrice(invoice.total) }}</p>
         <p class="mb-2"><strong>Fecha Límite de Pago:</strong> {{ new Date(invoice.due_date).toLocaleDateString() }}</p>
       </div>
       <button type="button" @click="confirmPayment"
@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import {onMounted, ref} from 'vue';
+import {inject, onMounted, ref} from 'vue';
 import axios from 'axios';
 
 export default {
@@ -43,6 +43,8 @@ export default {
     const reference = ref('');
     const showReferenceForm = ref(true);
     const invoice = ref(null);
+    const formatPrice = inject('formatPrice');
+
     const handleSubmit = async () => {
       emit('loading', true);
       try {
@@ -69,7 +71,7 @@ export default {
       emit('nextStep');
     };
 
-    return { reference, handleSubmit, showReferenceForm, invoice, confirmPayment };
+    return { reference, handleSubmit, showReferenceForm, invoice, confirmPayment,formatPrice };
   },
 
   mounted() {

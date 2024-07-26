@@ -9,6 +9,7 @@
 
 <script>
 import axios from 'axios';
+import { inject } from 'vue';
 
 export default {
   name: 'Wompi',
@@ -21,6 +22,10 @@ export default {
       type: Object,
       required: true
     }
+  },
+  setup() {
+    const config = inject('config');
+    return { config };
   },
   methods: {
     async handleClick() {
@@ -60,7 +65,7 @@ export default {
     createFormAndSubmit(signature) {
       const invoice = this.invoice.invoice;
       const checkout = new WidgetCheckout({
-        currency: 'COP',
+        currency: this.config.currency,
         amountInCents: this.calculateAmountInCents(invoice.total),
         reference: invoice.increment_id,
         publicKey: this.method.public_key,

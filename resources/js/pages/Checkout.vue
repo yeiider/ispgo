@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import {ref, onMounted} from 'vue';
+import {ref, onMounted, provide} from 'vue';
 import {usePage} from '@inertiajs/inertia-vue3'; // Importa usePage de Inertia
 import axios from 'axios';
 import StepHeader from './Components/checkout/StepHeader.vue';
@@ -39,8 +39,7 @@ export default {
     const isLoading = ref(false);
 
     const changeStep = (step) => {
-      if (currentStep.value === 3)
-        return;
+      if (currentStep.value === 3) return;
       currentStep.value = step;
     };
 
@@ -62,6 +61,21 @@ export default {
     // Accede a las props desde usePage
     const {props} = usePage();
     const payment = ref(props.value.payment || null);
+    const config = props.value.config;
+
+    // Agregar el método formatPrice a la configuración
+    const formatPrice = (price) => {
+      if (config.currencySymbol) {
+        return `${config.currencySymbol}${price}`;
+      }else{
+        return `${config.currency} ${price}`;
+
+      }
+    };
+
+    // Proveer la configuración y la función formatPrice a los componentes hijos
+    provide('config', config);
+    provide('formatPrice', formatPrice);
 
     onMounted(async () => {
       setLoading(true);

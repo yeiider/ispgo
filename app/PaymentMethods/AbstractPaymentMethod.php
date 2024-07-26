@@ -9,6 +9,7 @@ use App\Helpers\ConfigHelper;
 abstract class AbstractPaymentMethod implements PaymentMethodInterface
 {
     protected $config;
+    protected $currency;
 
     public function __construct(array $config)
     {
