@@ -8,19 +8,8 @@ return [
         ],
         "general" => [
             "setting" => [
-                "label" => "Web Setting",
+                "label" => "General Information",
                 "code" => "general"
-            ],
-            "company_status" => [
-                "field" => "select-field",
-                "label" => "Company Enabled?",
-                "options" => \Ispgo\SettingsManager\Source\Config\Yesno::class
-            ],
-            "company_type" => [
-                "field" => "select-field",
-                "label" => "Company Type",
-                "placeholder" => "Company Type",
-                "options" => \Ispgo\SettingsManager\Source\Config\CompanyType::class
             ],
             "company_name" => [
                 "field" => "text-field",
@@ -31,11 +20,6 @@ return [
                 "field" => "textarea-field",
                 "label" => "Company Description",
                 "placeholder" => "Company Description",
-            ],
-            "schedule" => [
-                "field" => "date-field",
-                "label" => "Start time",
-                "placeholder" => "Company Address",
             ],
 
             "company_address" => [
@@ -62,6 +46,49 @@ return [
                 "field" => "image-field",
                 "label" => "Company Logo",
                 "placeholder" => "Company Logo",
+            ]
+        ],
+        "billing_cycle" => [
+            "setting" => [
+                "label" => "Billing Cycle Configuration",
+                "code" => "billing_cycle"
+            ],
+            "billing_date" => [
+                "field" => "select-field",
+                "label" => "Billing Date",
+                "options" => \App\Settings\Config\Sources\DaysOfMonth::class
+            ],
+            "cut_off_date" => [
+                "field" => "select-field",
+                "label" => "Cut-Off Date",
+                "options" => \App\Settings\Config\Sources\DaysOfMonth::class
+            ],
+            "payment_due_date" => [
+                "field" => "select-field",
+                "label" => "Payment Due Date",
+                "options" => \App\Settings\Config\Sources\DaysOfMonth::class
+            ],
+            "automatic_cut_off" => [
+                "field" => "boolean-field",
+                "label" => "Automatic Cut-Off",
+            ],
+            "automatic_invoice_generation" => [
+                "field" => "boolean-field",
+                "label" => "Automatic Invoice Generation",
+            ],
+            "send_payment_reminders" => [
+                "field" => "boolean-field",
+                "label" => "Send Payment Reminders",
+            ],
+            "late_fee_percentage" => [
+                "field" => "text-field",
+                "label" => "Late Fee Percentage",
+                "placeholder" => "Enter percentage",
+            ],
+            "grace_period_days" => [
+                "field" => "text-field",
+                "label" => "Grace Period (Days)",
+                "placeholder" => "Enter number of days",
             ]
         ]
     ],
