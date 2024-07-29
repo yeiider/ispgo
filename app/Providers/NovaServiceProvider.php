@@ -12,6 +12,7 @@ use App\Nova\Finance\Income;
 use App\Nova\Finance\Transaction;
 use App\Nova\Installation;
 use App\Nova\Inventory\Category;
+use App\Nova\Inventory\EquipmentAssignment;
 use App\Nova\Inventory\Product;
 use App\Nova\Inventory\Supplier;
 use App\Nova\Inventory\Warehouse;
@@ -106,6 +107,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Category::class),
                     MenuItem::resource(Product::class),
                     MenuItem::resource(Supplier::class),
+                    MenuItem::resource(EquipmentAssignment::class),
                 ])->icon('clipboard-list')->collapsable(),
 
                 MenuSection::make('System Network', [
