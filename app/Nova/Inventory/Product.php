@@ -12,7 +12,6 @@ use Laravel\Nova\Fields\Image;
 use Laravel\Nova\Fields\Markdown;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Product extends Resource
@@ -29,21 +28,22 @@ class Product extends Resource
     {
         return [
             ID::make()->sortable(),
-            Boolean::make('Status')
+            Boolean::make('Enable for Sales?.', 'status')
                 ->sortable()
-                ->rules('required')->default(true),
+                ->rules('required')->default(false),
             Text::make('Name')
                 ->sortable()
                 ->rules('required', 'max:255'),
             Text::make('SKU')
                 ->sortable()
                 ->rules('required', 'max:255'),
+            Number::make('Qty')->default(0)
+                ->sortable()
+                ->rules('required', 'max:255'),
             Text::make('Brand')
                 ->sortable()
                 ->rules('nullable', 'max:255'),
-            Image::make('Image')
-                ->sortable()
-                ->rules('nullable', 'max:255'),
+            Image::make('Image')->path('inventory/img'),
             Currency::make('Price')
                 ->sortable()
                 ->rules('required', 'numeric'),
@@ -59,12 +59,10 @@ class Product extends Resource
                 ->sortable()
                 ->rules('nullable', 'max:255'),
             Number::make('Taxes')
-                ->sortable()
-                ->rules('required', 'numeric'),
+                ->sortable(),
 
             Text::make('URL Key')
-                ->sortable()
-                ->rules('required', 'max:255'),
+                ->sortable(),
             BelongsTo::make('Warehouse')
                 ->sortable(),
             BelongsTo::make('Category')
