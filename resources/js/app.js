@@ -5,7 +5,11 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 createInertiaApp({
     resolve: name => {
+        //const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
+        //return pages[`./Pages/${name}.vue`]
+
         return import(`./pages/${name}.vue`).then(module => module.default);
+
     },
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })

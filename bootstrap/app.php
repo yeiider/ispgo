@@ -16,8 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'pagebuilder/assets/*',
             'pagebuilder/uploads/*',
             '/admin/*'
-        ])->alias([]);
-
+        ])->alias([])->web(append: [
+            \App\Http\Middleware\HandleInertiaRequests::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

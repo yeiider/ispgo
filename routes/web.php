@@ -1,10 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\InvoiceController;
-use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\PaymentController;
-use HansSchouten\LaravelPageBuilder\LaravelPageBuilder;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Customer\AuthController;
+use App\Http\Controllers\Customer\DashboardController;
 
 // Rutas de Nova
 Route::middleware(['nova'])->prefix('nova')->group(function () {
@@ -48,11 +48,9 @@ Route::prefix('customer')->group(function () {
     });
 });*/
 
-Route::prefix('customer')->group(function () {
-    Route::get('/account', function () {
-        return view('customer.dashboard');
-    })->name('account');
+Route::middleware('guest:customer')->prefix('customer')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegistrationForm']);
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 });
-
-
-
