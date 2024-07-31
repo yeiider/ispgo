@@ -50,7 +50,8 @@ Route::prefix('customer')->group(function () {
 
 Route::middleware('guest:customer')->prefix('customer')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm']);
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->name('customer.login');
     Route::get('/register', [AuthController::class, 'showRegistrationForm']);
-    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/orders', [DashboardController::class, 'orders'])->name('orders');
 });

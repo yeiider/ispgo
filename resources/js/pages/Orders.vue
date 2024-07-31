@@ -1,16 +1,15 @@
 <script setup>
+
 import Layout from "./Components/Customer/Layout.vue";
 
-defineProps({ sidebar: Object })
+const props = defineProps({sidebar: Object})
 
 </script>
 
 <template>
-  <Layout>
-    {{JSON.stringify(sidebar)}}
+  <Layout :sidebar="sidebar">
   </Layout>
 </template>
-
 
 <style scoped>
 
