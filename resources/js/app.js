@@ -5,12 +5,10 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 createInertiaApp({
     resolve: name => {
-        const pages = import.meta.glob('./Pages/**/*.vue', {eager: true})
-        const page = pages[`./Pages/${name}.vue`];
-        if (page) {
-            return page;
-        }
-        return import(`./pages/${name}.vue`).then(module => module.default);
+        const pages = import.meta.glob('./pages/**/*.vue', { eager: true })
+        return pages[`./pages/${name}.vue`]
+
+        //return import(`./pages/${name}.vue`).then(module => module.default);
     },
     setup({el, App, props, plugin}) {
         createApp({render: () => h(App, props)})
@@ -18,4 +16,9 @@ createInertiaApp({
             .use(VueSweetalert2)
             .mount(el);
     },
+    progress: {
+        color: '#29d',
+        includeCSS: true,
+        showSpinner: false,
+    }
 });

@@ -9,7 +9,7 @@ const href = window.location.href;
   <div v-if="sidebar" class="flex h-screen flex-col justify-between border-e bg-white">
     <div class="px-4 py-6">
       <div class="flex justify-center">
-        <a href="/" style="">
+        <a href="/public" style="">
           <span style="height:32px; width:auto;" class="flex justify-center mb-2">
             <svg style="height:100%; width:auto" class="w-full h-full fill-current text-zinc-900"
                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 26" fill="none">

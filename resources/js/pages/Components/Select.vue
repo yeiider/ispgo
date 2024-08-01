@@ -2,10 +2,18 @@
 import {onMounted, ref} from "vue";
 
 defineProps({
-  type: String,
+  options: {
+    type: Array,
+    default: [],
+    validator: (options) => options.every(option => typeof option === 'object'),
+  },
   name: String,
   label: String,
   id: String,
+  required: {
+    type: Boolean,
+    default: false
+  },
   modelValue: String
 });
 
@@ -72,17 +80,21 @@ onMounted(updateFocusState);
         </label>
 
         <div data-model="email" class="mt-1.5 w-full rounded-md shadow-sm auth-component-input-container">
-          <input data-auth="email-input" required="required"
-                 :id="id"
-                 :name="name"
-                 :type="type"
-                 @focus="onFocus()"
-                 @blur="onBlur()"
-                 @change="onChange"
-                 :value="modelValue"
-                 @input="updateValue"
-                 ref="inputRef"
-                 class="auth-component-input appearance-none flex w-full h-11 px-3.5 text-sm bg-white border rounded-md border-gray-300 ring-offset-background placeholder:text-gray-500 focus:outline-none focus:border-0 focus:ring-2 focus:ring-[#0ea5e9] disabled:cursor-not-allowed disabled:opacity-50 ">
+          <select
+            :id="id"
+            :name="name"
+            :required="required"
+            @focus="onFocus()"
+            @blur="onBlur()"
+            @change="onChange"
+            :value="modelValue"
+            @input="updateValue"
+            ref="inputRef"
+            class=" flex w-full h-11 px-3.5 text-sm bg-white border rounded-md border-gray-300 ring-offset-background placeholder:text-gray-500 focus:outline-none focus:border-0 focus:ring-2 focus:ring-[#0ea5e9] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value>Select an option</option>
+            <option v-for="option in options" :value="option.value" :key="option.value">{{ option.label }}</option>
+          </select>
         </div>
       </div>
     </div>

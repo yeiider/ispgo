@@ -1,5 +1,5 @@
 <script setup>
-import Layout from "./Components/Customer/Layout.vue";
+import Layout from "./Layouts/Dashboard.vue";
 
 const props = defineProps({sidebar: Object})
 

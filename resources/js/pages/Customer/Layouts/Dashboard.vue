@@ -1,5 +1,5 @@
 <script setup>
-import Sidebar from "./Sidebar.vue";
+import Sidebar from "../Components/Sidebar.vue";
 defineProps({ sidebar: Object })
 </script>
 

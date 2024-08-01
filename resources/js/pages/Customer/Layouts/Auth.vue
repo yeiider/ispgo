@@ -1,3 +1,9 @@
+<script setup>
+  defineProps({
+    title: String
+  })
+</script>
+
 <template>
   <div id="auth-login" class="relative w-full h-full">
     <main id="auth-main-content"
@@ -26,14 +32,3 @@
   </div>
 </template>
 
-<script>
-  export default {
-    props: {
-      title: String
-    }
-  }
-</script>
-
-<style scoped>
-
-</style>
