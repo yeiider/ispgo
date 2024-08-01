@@ -19,9 +19,7 @@ class ConfigHelper
         $cacheKey = "config_{$path}_{$scopeId}";
 
         // Check if the value is in cache
-        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($path, $scopeId) {
-            return CoreConfigData::getValueByPath($path, $scopeId);
-        });
+        return CoreConfigData::getValueByPath($path, $scopeId);
     }
 
     /**

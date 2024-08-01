@@ -92,49 +92,6 @@ return [
             ]
         ]
     ],
-    "email_server" => [
-        "setting" => [
-            "label" => "Email Server",
-            "class" => "form-control",
-        ],
-        "general" => [
-            "setting" => [
-                "label" => "General Email",
-                "class" => "form-control",
-                "code" => "general"
-            ],
-            "enabled" => [
-                "field" => "boolean-field",
-                "label" => "Enabled",
-                "placeholder" => "Enabled",
-            ],
-            "host" => [
-                "field" => "text-field",
-                "label" => "Host Name",
-                "placeholder" => "Hostname",
-            ],
-            "security" => [
-                "field" => "text-field",
-                "label" => "Security",
-                "placeholder" => "Security",
-            ],
-            "username" => [
-                "field" => "text-field",
-                "label" => "Username",
-                "placeholder" => "Username",
-            ],
-            "port" => [
-                "field" => "text-field",
-                "label" => "Port",
-                "placeholder" => "Port",
-            ],
-            "password" => [
-                "field" => "password-field",
-                "label" => "Password",
-                "placeholder" => "Password",
-            ],
-        ]
-    ],
     "customer" => [
         "setting" => [
             "label" => "Customer",
@@ -379,4 +336,50 @@ return [
             ],
         ],
     ],
+
+    "notifications" => [
+        "setting" => [
+            "label" => "Notifications",
+            "class" => "form-control",
+        ],
+        "email_settings" => [
+            "setting" => [
+                "label" => "General Email",
+                "class" => "form-control",
+                "code" => "general"
+            ],
+            "enabled" => [
+                "field" => "boolean-field",
+                "label" => "Enabled",
+                "placeholder" => "Enabled",
+            ],
+            "host" => [
+                "field" => "text-field",
+                "label" => "Host Name",
+                "placeholder" => "Hostname",
+            ],
+            "security" => [
+                "field" => "text-field",
+                "label" => "Security",
+                "placeholder" => "Security",
+            ],
+            "username" => [
+                "field" => "text-field",
+                "label" => "Username",
+                "placeholder" => "Username",
+            ],
+            "port" => [
+                "field" => "text-field",
+                "label" => "Port",
+                "placeholder" => "Port",
+            ],
+            "password" => [
+                "field" => "password-field",
+                "label" => "Password",
+                "placeholder" => "Password",
+            ],
+        ],
+        "wiivo" => \Ispgo\Wiivo\SettingWiivo::getSetting()
+    ],
+
 ];

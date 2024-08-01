@@ -2,6 +2,7 @@
 
 namespace App\Nova\Inventory;
 
+use App\Nova\Filters\Inventory\EquipmentAssignmentStatus;
 use App\Nova\Resource;
 use App\Nova\User;
 use Laravel\Nova\Fields\ID;
@@ -81,7 +82,9 @@ class EquipmentAssignment extends Resource
      */
     public function filters(Request $request)
     {
-        return [];
+        return [
+            new EquipmentAssignmentStatus
+        ];
     }
 
     /**

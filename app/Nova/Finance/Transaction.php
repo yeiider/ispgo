@@ -31,7 +31,7 @@ class Transaction extends Resource
             Text::make('Type')->sortable(),
             Text::make('Payment Method')->sortable(),
             Text::make('Category')->sortable(),
-            BelongsTo::make('Cash Register', 'cashRegister', CashRegister::class)->sortable(),
+            BelongsTo::make('Cash Register', 'cashRegister', CashRegister::class)->searchable(),
         ];
     }
 }

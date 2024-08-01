@@ -1,0 +1,12 @@
+{
+    "name": "ispgo/wiivo",
+    "description": "Módulo Wiivo para ISP",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Ispgo\\Wiivo\\": "src/"
+        }
+    },
+    "require": {}
+}

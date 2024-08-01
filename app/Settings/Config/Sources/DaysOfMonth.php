@@ -10,7 +10,7 @@ class DaysOfMonth implements ConfigProviderInterface
     static public function getConfig(): array
     {
         $options = [];
-        for ($day = 1; $day <= 31; $day++) {
+        for ($day = 1; $day <= 30; $day++) {
             $options[] = [
                 'value' => $day,
                 'label' => "Día $day de cada mes",

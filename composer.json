@@ -15,6 +15,7 @@
         "intervention/image": "^3.7",
         "ispgo/ckeditor": "@dev",
         "ispgo/settings-manager": "@dev",
+        "ispgo/wiivo": "@dev",
         "laravel/framework": "^11.9",
         "laravel/nova": "^4.0",
         "laravel/passport": "^12.0",
@@ -88,6 +89,10 @@
         "1": {
             "type": "path",
             "url": "./nova-components/Ckeditor"
+        },
+        "2": {
+            "type": "path",
+            "url": "./packages/ispgo/wiivo"
         }
     }
 }
