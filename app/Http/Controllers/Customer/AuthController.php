@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customers\Customer;
 use App\Settings\Config\Sources\DocumentType;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\{Request, RedirectResponse};
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -34,7 +36,7 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email_address', 'password');
         if (Auth::guard('customer')->attempt($credentials)) {
-            return redirect()->intended(route('customer.dashboard'));
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([
@@ -65,6 +67,24 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        $request->validate([
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email_address' => 'required|string|email|max:255|unique:customers',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
 
+        $customer = Customer::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'document_type' => $request->document_type,
+            'identity_document' => $request->identity_document,
+            'email_address' => $request->email_address,
+            'password' => Hash::make($request->password),
+        ]);
+
+        Auth::guard('customer')->login($customer);
+
+        return redirect()->route('dashboard');
     }
 }

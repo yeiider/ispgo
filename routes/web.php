@@ -53,6 +53,12 @@ Route::middleware('guest:customer')->prefix('customer')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('customer.login');
     Route::get('/register', [AuthController::class, 'showRegisterForm']);
     Route::post('/register', [AuthController::class, 'register'])->name('customer.register');
+
+});
+
+
+Route::middleware('auth:customer')->prefix('customer')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/orders', [DashboardController::class, 'orders'])->name('orders');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('customer.logout');
 });

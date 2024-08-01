@@ -2,12 +2,13 @@
 
 import Layout from "./Layouts/Dashboard.vue";
 
-defineProps({sidebar: Object})
+defineProps({sidebar: Object, customer: Object})
 
 </script>
 
 <template>
-  <Layout :sidebar="sidebar">
+  <Layout :sidebar="sidebar" :customer="customer">
+    <h1 class="text-3xl font-semibold text-slate-950">My orders</h1>
   </Layout>
 </template>
 

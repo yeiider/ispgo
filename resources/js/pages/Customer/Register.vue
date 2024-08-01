@@ -11,7 +11,8 @@ const form = useForm({
   document_type: null,
   identity_document: null,
   email_address: null,
-  password: null
+  password: null,
+  password_confirmation: null,
 });
 
 const submit = () => {
@@ -78,6 +79,15 @@ defineProps({
         label="Password"
         id="password"
         name="password"
+      />
+
+      <Input
+        v-model="form.password_confirmation"
+        type="password"
+        :required="true"
+        label="Confirm Password"
+        id="password_confirmation"
+        name="password_confirmation"
       />
 
       <Button

@@ -9,11 +9,11 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Dashboard');
+        return Inertia::render('Customer/Dashboard');
     }
 
     public function orders()
     {
-        return Inertia::render('Orders');
+        return Inertia::render('Customer/Orders');
     }
 }
