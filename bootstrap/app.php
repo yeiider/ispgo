@@ -15,7 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'pagebuilder/assets/*',
             'pagebuilder/uploads/*',
-            '/admin/*'
+            '/admin/*',
+            '/wiivo/api/handleWebhook'
         ])->alias([])->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
