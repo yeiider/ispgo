@@ -5,7 +5,7 @@ use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\AuthController;
 use App\Http\Controllers\Customer\DashboardController;
-
+use App\Http\Controllers\Customer\TicketsController;
 // Rutas de Nova
 Route::middleware(['nova'])->prefix('nova')->group(function () {
     \Laravel\Nova\Nova::routes();
@@ -61,4 +61,5 @@ Route::middleware('auth:customer')->prefix('customer')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/orders', [DashboardController::class, 'orders'])->name('orders');
     Route::get('/logout', [AuthController::class, 'logout'])->name('customer.logout');
+    Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets');
 });

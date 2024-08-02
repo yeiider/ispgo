@@ -11,7 +11,3 @@ defineProps({sidebar: Object, customer: Object})
     <h1 class="text-3xl font-semibold text-slate-950">My orders</h1>
   </Layout>
 </template>
-
-<style scoped>
-
-</style>

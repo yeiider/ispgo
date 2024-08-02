@@ -1,7 +1,6 @@
 <script setup>
 import Layout from "./Layouts/Dashboard.vue";
-
-const props = defineProps({sidebar: Object, customer: Object})
+defineProps({sidebar: Object, customer: Object})
 
 </script>
 

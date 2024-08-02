@@ -18,49 +18,54 @@ class Customer implements ConfigProviderInterface
 
         return [
             'customer' => $customer,
+            'sidebar' => self::getSideBar()
+        ];
+    }
+
+    static function getSideBar(): array
+    {
+        return [
+
+            'app_name' => config('app.name'),
+
+            'url_logout' => route('customer.logout'),
             'sidebar' => [
-                'app_name' => config('app.name'),
+                [
+                    'code' => "my_account",
+                    'url' => route('dashboard'),
+                    'title' => __('My Account'),
+                ],
+                [
+                    'code' => 'my_orders',
+                    'url' => route('orders'),
+                    'title' => __('My Orders'),
+                ],
+                [
+                    'code' => 'tickets',
+                    'url' => route('tickets'),
+                    'title' => __('Tickets'),
+                ],
+                [
+                    'code' => 'payments',
+                    'url' => '',//route('customer.addresses'),
+                    'title' => __('Payments'),
+                ],
+                [
+                    'code' => 'invoices',
+                    'url' => '',
+                    'title' => __('Invoices'),
+                ],
+                [
+                    'code' => 'address_book',
+                    'url' => '',//route('customer.addresses'),
+                    'title' => __('Address Book'),
+                ],
 
-                'url_logout' => route('customer.logout'),
-                'links' => [
-                    [
-                        'code' => "my_account",
-                        'url' => route('dashboard'),
-                        'title' => __('My Account'),
-                        'is_active' => true,
-                    ],
-                    [
-                        'code' => 'my_orders',
-                        'url' => route('orders'),
-                        'title' => __('My Orders'),
-                        'is_active' => false,
-                    ],
-                    [
-                        'code' => 'payments',
-                        'url' => '',//route('customer.addresses'),
-                        'title' => __('Payments'),
-                        'is_active' => false,
-                    ],
-                    [
-                        'code' => 'invoices',
-                        'url' => '',
-                        'title' => __('Invoices'),
-                        'is_active' => false,
-                    ],
-                    [
-                        'code' => 'address_book',
-                        'url' => '',//route('customer.addresses'),
-                        'title' => __('Address Book'),
-                        'is_active' => false,
-                    ],
-
-                    [
-                        'code' => 'account_information',
-                        'url' => '',//route('customer.addresses'),
-                        'title' => __('Account information'),
-                        'is_active' => false,
-                    ],
-                ]
+                [
+                    'code' => 'account_information',
+                    'url' => '',//route('customer.addresses'),
+                    'title' => __('Account information'),
+                ],
             ]
         ];
     }
