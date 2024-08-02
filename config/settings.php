@@ -294,16 +294,27 @@ return [
                 'label' => 'Public Key Sandbox',
                 'placeholder' => 'Public Key',
             ],
-            'integrity_sandbox' => [
-                'field' => 'text-field',
-                'label' => 'Integrity Sandbox',
-                'placeholder' => 'Integrity',
-            ],
             'public_key' => [
                 'field' => 'text-field',
                 'label' => 'Public Key',
                 'placeholder' => 'Public Key',
             ],
+            'private_key_sandbox' => [
+                'field' => 'text-field',
+                'label' => 'Public Key Sandbox',
+                'placeholder' => 'Public Key',
+            ],
+            'private_key' => [
+                'field' => 'text-field',
+                'label' => 'Public Key',
+                'placeholder' => 'Public Key',
+            ],
+            'integrity_sandbox' => [
+                'field' => 'text-field',
+                'label' => 'Integrity Sandbox',
+                'placeholder' => 'Integrity',
+            ],
+
             'integrity' => [
                 'field' => 'text-field',
                 'label' => 'Integrity',

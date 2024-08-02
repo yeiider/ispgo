@@ -27,7 +27,7 @@ class Wiivo extends Controller
         // Obtener o crear una nueva sesión para el cliente
         $session = SessionChatBot::firstOrCreate(
             ['chat_id' => $chatId, 'user_id' => $userId],
-            ['current_option' => null, 'message_history' => '', 'interaction_history' => json_encode([])]
+            ['current_option' => null, 'message_history' => '', 'interaction_history' => []]
         );
 
         if ($session->wasRecentlyCreated) {
@@ -42,24 +42,28 @@ class Wiivo extends Controller
                     ['id' => 'tik', 'text' => 'Crear ticket']
                 ]
             ];
-            $this->sendMessage($menuPayload);
+            $response = $this->sendMessage($menuPayload);
+            return response()->json(['status' => 'success', 'response' => $response]);
+
         }
 
-        // Identificar la opción seleccionada por el cliente
-        $selectedOption = substr($body, 0, 1);
 
+        // Identificar la opción seleccionada por el cliente
+        $selectedOption = trim($body);
+        if (!$session->current_option) {
+            $session->current_option = $selectedOption;
+        }
         // Actualizar la sesión con la opción seleccionada
-        $session->current_option = $selectedOption;
         $session->message_history .= "\n" . $body;
 
         // Actualizar el historial de interacciones
-        $interactionHistory = json_decode($session->interaction_history, true);
+        $interactionHistory = $session->interaction_history ?? [];
         $interactionHistory[] = [
             'timestamp' => now()->toDateTimeString(),
             'message' => $body,
-            'option' => $selectedOption
+            'option' => count($interactionHistory)+1
         ];
-        $session->interaction_history = json_encode($interactionHistory);
+        $session->interaction_history = $interactionHistory;
 
         // Actualizar la marca de tiempo de la sesión
         $session->touch();
@@ -67,14 +71,12 @@ class Wiivo extends Controller
         $session->save();
 
         try {
-            $processor = ProcessChatFactory::getProcessor($selectedOption);
-            $response = $processor->processMessage($body);
-
+            $processor = ProcessChatFactory::getProcessor($session->current_option);
+            $response = $processor->processMessage($body,$interactionHistory);
+            $messagePayload = $response;
+            $messagePayload['phone'] = $phone;
             // Enviar respuesta al cliente
-            $messagePayload = [
-                'phone' => $phone,
-                'message' => $response
-            ];
+
             $this->sendMessage($messagePayload);
 
             return response()->json(['status' => 'success', 'response' => $response]);
@@ -87,7 +89,7 @@ class Wiivo extends Controller
      * @throws ConnectionException
      * @throws \Exception
      */
-    private function sendMessage($payload): void
+    private function sendMessage($payload)
     {
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
@@ -98,6 +100,6 @@ class Wiivo extends Controller
             throw new \Exception('Error al enviar el mensaje: ' . $response->body());
         }
 
-        $response->json();
+        return $response->json();
     }
 }

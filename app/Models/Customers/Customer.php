@@ -4,6 +4,7 @@ namespace App\Models\Customers;
 
 use App\Events\CustomerCreated;
 use App\Events\CustomerStatusUpdated;
+use App\Models\Invoice\Invoice;
 use App\Models\Services\Service;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -45,6 +46,11 @@ class Customer extends Authenticatable
     public function addresses()
     {
         return $this->hasMany(Address::class);
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
     }
 
     public function services()
@@ -102,4 +108,16 @@ class Customer extends Authenticatable
         return $query->where('customer_status', 'active');
         //how use $activeCustomers = Customer::active()->get();
     }
+
+    public static function findByIdentityDocument($identityDocument)
+    {
+        return self::where('identity_document', $identityDocument)->first();
+    }
+
+    public function getLastInvoice()
+    {
+        return $this->invoices()->orderBy('created_at', 'desc')->first();
+    }
+
+
 }

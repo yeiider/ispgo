@@ -19,6 +19,6 @@ class SessionChatBot extends Model
     ];
 
     protected $casts = [
-        'message_history' => 'array'
+        'interaction_history' => 'array'
     ];
 }
