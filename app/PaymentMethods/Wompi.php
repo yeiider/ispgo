@@ -3,14 +3,16 @@
 namespace App\PaymentMethods;
 
 use App\Helpers\ConfigHelper;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 
 class Wompi extends AbstractPaymentMethod
 {
     const PATH = "payment/wompi/";
     private string $payment_code = "wompi";
     private string $component = "Wompi";
-
-
 
     public function getConfiguration(): array
     {
@@ -41,6 +43,14 @@ class Wompi extends AbstractPaymentMethod
         return ConfigHelper::getConfigValue(self::PATH . 'public_key');
     }
 
+    public static function getPrivateKey(): string
+    {
+        if (self::getEnvironment() === 'sandbox') {
+            return ConfigHelper::getConfigValue(self::PATH . 'private_key_sandbox');
+        }
+        return ConfigHelper::getConfigValue(self::PATH . 'private_key');
+    }
+
     public static function getIntegrity(): string
     {
         if (self::getEnvironment() === 'sandbox') {
@@ -62,7 +72,7 @@ class Wompi extends AbstractPaymentMethod
         return ConfigHelper::getConfigValue(self::PATH . 'confirmation_url');
     }
 
-    public static function getSecretEvents():string
+    public static function getSecretEvents(): string
     {
         if (self::getEnvironment() === 'sandbox') {
             return ConfigHelper::getConfigValue(self::PATH . 'event_secret_sandbox');
@@ -93,5 +103,49 @@ class Wompi extends AbstractPaymentMethod
             ],
             'redirect_url' => $data['redirect_url'] ?? null,
         ];
+    }
+
+    public static function generatedLinkPayment($invoice)
+    {
+        $expires_at = Carbon::now('UTC')->addHours(3)->format('Y-m-d\TH:i:s');
+
+        $payload = [
+            "name" => "Invoice",
+            "description" => "Pago de factura",
+            "single_use" => false,
+            "collect_shipping" => false,
+            "currency" => config('nova.currency'),
+            "amount_in_cents" => intval($invoice->total) * 100,
+            "expires_at" => $expires_at,
+            "redirect_url" => self::getConfirmationUrl(),
+            "image_url" => null,
+            "sku" => $invoice->increment_id,
+        ];
+
+        $client = new Client();
+        $url = self::getEnvironment() === 'sandbox' ? 'https://sandbox.wompi.co/v1/payment_links' : 'https://production.wompi.co/v1/payment_links';
+
+        try {
+            $response = $client->post($url, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . self::getPrivateKey(),
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $payload,
+            ]);
+
+            $responseBody = json_decode($response->getBody()->getContents(), true);
+            return $responseBody;
+
+        } catch (RequestException $e) {
+            if ($e->hasResponse()) {
+                $errorResponse = json_decode($e->getResponse()->getBody()->getContents(), true);
+                // Manejo de errores según la respuesta de Wompi
+                throw $e;
+            } else {
+                throw new \Exception('Error al realizar la solicitud: ' . $e->getMessage());
+            }
+        } catch (GuzzleException $e) {
+        }
     }
 }

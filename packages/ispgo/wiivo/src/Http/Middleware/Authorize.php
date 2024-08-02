@@ -24,26 +24,26 @@ class Authorize
         $chatId = $request->input('data.chat.id');
         $userId = $request->input('data.from');
         if ($userId === "573207753755@c.us") {
+            $session = SessionChatBot::where('chat_id', $chatId)->where('user_id', $userId)->first();
+
+            if ($session) {
+                // Verificar si la sesión ha expirado
+                $lastActivity = Carbon::parse($session->updated_at);
+                $now = Carbon::now();
+
+                if ($now->diffInMinutes($lastActivity) > 5) {
+                    // La sesión ha expirado
+                    $session->delete();
+                }
+            }
             return $next($request);
         } else {
             return response()->json(['status' => 'error', 'message' => 'La sesión ha expirado.'])->setStatusCode(400);
         }
 
         // Obtener la sesión del cliente
-        $session = SessionChatBot::where('chat_id', $chatId)->where('user_id', $userId)->first();
 
-        if ($session) {
-            // Verificar si la sesión ha expirado
-            $lastActivity = Carbon::parse($session->updated_at);
-            $now = Carbon::now();
 
-            if ($now->diffInMinutes($lastActivity) > 5) {
-                // La sesión ha expirado
-                return response()->json(['status' => 'error', 'message' => 'La sesión ha expirado.']);
-            }
-        }
-
-        return $next($request);
     }
 
 
