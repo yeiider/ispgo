@@ -357,12 +357,7 @@ return [
             "setting" => [
                 "label" => "General Email",
                 "class" => "form-control",
-                "code" => "general"
-            ],
-            "enabled" => [
-                "field" => "boolean-field",
-                "label" => "Enabled",
-                "placeholder" => "Enabled",
+                "code" => "email_settings"
             ],
             "host" => [
                 "field" => "text-field",
@@ -370,9 +365,10 @@ return [
                 "placeholder" => "Hostname",
             ],
             "security" => [
-                "field" => "text-field",
+                "field" => "select-field",
                 "label" => "Security",
                 "placeholder" => "Security",
+                "options" => \App\Settings\Config\Sources\EmailSecurity::class,
             ],
             "username" => [
                 "field" => "text-field",

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\UserAssignedToTicket;
 use App\Models\Customers\Customer;
 use App\Models\Services\Service;
 use Illuminate\Database\Eloquent\Builder;
@@ -92,5 +93,25 @@ class Ticket extends Model
         } else {
             $this->attributes['closed_at'] = null;
         }
+    }
+
+    /**
+     * Assign a user to the ticket.
+     *
+     * @param int|User $user
+     * @return void
+     */
+    public function assignUser(User|int $user): void
+    {
+        if ($user instanceof User) {
+            $this->user_id = $user->id;
+        } else {
+            $this->user_id = $user;
+        }
+
+        $this->save();
+
+        event(new UserAssignedToTicket($this));
+
     }
 }
