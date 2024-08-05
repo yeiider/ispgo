@@ -393,4 +393,67 @@ return [
         "wiivo" => \Ispgo\Wiivo\SettingWiivo::getSetting()
     ],
 
+    "support" => [
+        "setting" => [
+            "label" => "Support",
+            "class" => "form-control",
+        ],
+        "ticket_settings" => [
+            "setting" => [
+                "label" => "Ticket Settings",
+                "class" => "form-control",
+                "code" => "ticket_settings"
+            ],
+            "allow_create_ticket" => [
+                "field" => "boolean-field",
+                "label" => "Allow Clients to Create Tickets",
+                "placeholder" => "Allow Clients to Create Tickets",
+            ],
+            "notify_client" => [
+                "field" => "boolean-field",
+                "label" => "Notify Client",
+                "placeholder" => "Notify Client",
+            ],
+            "ticket_priority" => [
+                "field" => "select-field",
+                "label" => "Default Ticket Priority",
+                "options" => \App\Settings\Config\Sources\TicketPriority::class,
+            ],
+            "ticket_status" => [
+                "field" => "select-field",
+                "label" => "Default Ticket Status",
+                "options" => \App\Settings\Config\Sources\TicketStatus::class,
+            ],
+            "notify_technician" => [
+                "field" => "boolean-field",
+                "label" => "Notify Technician",
+                "placeholder" => "Notify Technician",
+            ],
+            "allow_client_close_ticket" => [
+                "field" => "boolean-field",
+                "label" => "Allow Clients to Close Tickets",
+                "placeholder" => "Allow Clients to Close Tickets",
+            ],
+            "notify_by_email" => [
+                "field" => "boolean-field",
+                "label" => "Notify by Email",
+                "placeholder" => "Notify by Email",
+            ],
+            "email_template_client" => [
+                "field" => "select-field",
+                "label" => "Email Template for Client Notification",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_technician" => [
+                "field" => "select-field",
+                "label" => "Email Template for Technician Notification",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_change_status" => [
+                "field" => "select-field",
+                "label" => "Email Template for Change Status",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+        ],
+    ],
 ];

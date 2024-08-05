@@ -3,7 +3,10 @@
 namespace App\Nova;
 
 use App\Models\User;
+use App\Nova\Actions\AssignmentTickets;
 use App\Nova\Customers\Customer;
+use App\Nova\Filters\PriorityTickets;
+use App\Nova\Filters\StatusTickets;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
@@ -110,7 +113,7 @@ class Ticket extends Resource
                 ->onlyOnDetail()
                 ->sortable(),
 
-            Select::make('Technician','user_id')
+            Select::make('Technician', 'user_id')
                 ->options($technicians)
                 ->displayUsingLabels(),
 
@@ -146,7 +149,10 @@ class Ticket extends Resource
      */
     public function filters(Request $request)
     {
-        return [];
+        return [
+            new StatusTickets,
+            new PriorityTickets,
+        ];
     }
 
     /**
@@ -166,8 +172,10 @@ class Ticket extends Resource
      * @param Request $request
      * @return array
      */
-    public function actions(Request $request)
+    public function actions(Request $request): array
     {
-        return [];
+        return [
+            (new AssignmentTickets())->showInline(),
+        ];
     }
 }
