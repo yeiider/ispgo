@@ -25,11 +25,9 @@ class Customer implements ConfigProviderInterface
     static function getSideBar(): array
     {
         return [
-
             'app_name' => config('app.name'),
-
             'url_logout' => route('customer.logout'),
-            'sidebar' => [
+            'links' => [
                 [
                     'code' => "my_account",
                     'url' => route('dashboard'),
