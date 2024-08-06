@@ -38,7 +38,7 @@ class TaxDetail extends Resource
             Text::make(__('Tax Identification Number'), 'tax_identification_number')
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Text::make(__('Business Name'), 'tax_identification_number')
+            Text::make(__('Business Name'), 'business_name')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
