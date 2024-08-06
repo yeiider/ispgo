@@ -65,6 +65,17 @@ class User extends Authenticatable
         return self::role('technician')->get();
     }
 
+    /**
+     * Get all users with the 'technician' role.
+     *
+     * @return Collection
+     */
+    public static function createInvoiceUsers()
+    {
+        return self::permission('createInvoice')->get();
+    }
+
+
     protected static function boot()
     {
         parent::boot();

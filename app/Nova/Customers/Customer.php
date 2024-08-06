@@ -43,7 +43,7 @@ class Customer extends Resource
             Text::make(__('First Name'), 'first_name')->sortable()->rules('required', 'max:100'),
             Text::make(__('Last Name'), 'last_name')->sortable()->rules('required', 'max:100'),
             Date::make(__('Date of Birth'), 'date_of_birth')->nullable(),
-            Text::make(__('Phone Number'), 'phone_number')->nullable(),
+            Text::make(__('Phone Number'), 'phone_number')->rules('required','max:12'),
             Text::make(__('Email Address'), 'email_address')->sortable()->rules('required', 'email', 'max:100'),
             Select::make(__('Document Type'), 'document_type')
                 ->options(DocumentType::pluck('name', 'code')->toArray())

@@ -7,6 +7,8 @@ use App\Models\Customers\Address;
 use App\Models\Customers\Customer;
 use App\Models\Invoice\Invoice;
 use App\Models\Router;
+use App\Settings\GeneralProviderConfig;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +24,6 @@ class Service extends Model
         'support_contact', 'service_location', 'service_type', 'static_ip', 'data_limit',
         'last_maintenance', 'billing_cycle', 'service_priority',
         'assigned_technician', 'service_contract', 'created_by', 'updated_by',
-
     ];
 
     protected $casts = [
@@ -44,7 +45,7 @@ class Service extends Model
 
     public function address()
     {
-        return $this->belongsTo(Address::class,'service_location','id');
+        return $this->belongsTo(Address::class, 'service_location', 'id');
     }
 
     public function getFullServiceNameAttribute()
@@ -52,7 +53,7 @@ class Service extends Model
         return "{$this->service_ip} - {$this->customer->full_name}";
     }
 
-    public function Plan()
+    public function plan()
     {
         return $this->belongsTo(Plan::class);
     }
@@ -77,10 +78,9 @@ class Service extends Model
                 event(new ServiceUpdateStatus($service));
             }
         });
-
     }
 
-    public function generateInvoice($notes = null): \App\Models\Invoice\Invoice
+    public function generateInvoice($notes = null): Invoice
     {
         $price = $this->plan->monthly_price;
         $tax = $price * 0.19;
@@ -89,7 +89,10 @@ class Service extends Model
         $invoice = new Invoice();
         $invoice->service_id = $this->id;
         $invoice->customer_id = $this->customer_id;
-        $invoice->user_id = Auth::id(); // Asumiendo que el usuario autenticado está generando la factura
+
+        // Usar el usuario autenticado o el usuario por defecto
+        $invoice->user_id = Auth::id() ?? GeneralProviderConfig::getDefaultUser();
+
         $invoice->subtotal = $price;
         $invoice->tax = $tax;
         $invoice->total = $total;
@@ -97,7 +100,22 @@ class Service extends Model
         $invoice->discount = 0;
         $invoice->outstanding_balance = $total;
         $invoice->issue_date = now();
-        $invoice->due_date = now()->addDays(5);
+
+        // Obtener el día de vencimiento configurado
+        $dueDate = GeneralProviderConfig::getPaymentDueDate();
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+
+        // Si la fecha de vencimiento es menor que la fecha actual, se pasa al siguiente mes
+        if ($dueDate < now()->day) {
+            $dueMonth = ($currentMonth == 12) ? 1 : $currentMonth + 1;
+            $dueYear = ($currentMonth == 12) ? $currentYear + 1 : $currentYear;
+        } else {
+            $dueMonth = $currentMonth;
+            $dueYear = $currentYear;
+        }
+
+        $invoice->due_date = Carbon::create($dueYear, $dueMonth, $dueDate, 0, 0, 0);
         $invoice->status = 'unpaid';
         $invoice->payment_method = null;
         $invoice->notes = $notes;
@@ -116,7 +134,6 @@ class Service extends Model
         $action = new ServiceAction();
         $action->service_id = $this->id;
         $action->action_type = 'installation';
-        $action->action_date = $action_date ?? now();
         $action->user_id = $technician_id;
         $action->action_notes = $notes;
         $action->status = 'pending';
@@ -125,13 +142,11 @@ class Service extends Model
         return $action;
     }
 
-
     public function createUninstallation($technician_id = null, $action_date = null, $notes = null): ServiceAction
     {
         $action = new ServiceAction();
         $action->service_id = $this->id;
         $action->action_type = 'uninstallation';
-        $action->action_date = $action_date ?? now();
         $action->user_id = $technician_id;
         $action->action_notes = $notes;
         $action->status = 'pending';
@@ -152,4 +167,8 @@ class Service extends Model
         $this->save();
     }
 
+    public static function getAllActiveServicesForInvoiceMonthly()
+    {
+        return self::where('service_status', '!=', 'free')->get();
+    }
 }

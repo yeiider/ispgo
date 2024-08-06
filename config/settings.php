@@ -68,6 +68,7 @@ return [
                 "label" => "Payment Due Date",
                 "options" => \App\Settings\Config\Sources\DaysOfMonth::class
             ],
+
             "automatic_cut_off" => [
                 "field" => "boolean-field",
                 "label" => "Automatic Cut-Off",
@@ -89,6 +90,13 @@ return [
                 "field" => "text-field",
                 "label" => "Grace Period (Days)",
                 "placeholder" => "Enter number of days",
+            ],
+            "default_user" => [
+                "field" => "select-field",
+                "label" => "User default",
+                "placeholder" => "User default",
+                "options" => \App\Settings\Config\Sources\Users::class
+
             ]
         ]
     ],
