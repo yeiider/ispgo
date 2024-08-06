@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
@@ -151,9 +152,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     protected function gate()
     {
         Gate::define('viewNova', function ($user) {
-            return in_array($user->email, [
-                //
-            ]);
+            $allowedEmails = User::pluck('email')->toArray();
+            return in_array($user->email, $allowedEmails);
         });
     }
 
