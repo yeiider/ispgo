@@ -21,7 +21,7 @@ class GeneratedInvoice implements ShouldQueue
      *
      * @var string|null
      */
-    public $queue = 'invoice_notifications';
+    public $queue = 'redis';
 
     /**
      * The number of times the job may be attempted.

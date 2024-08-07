@@ -18,7 +18,7 @@ class Address extends Resource
     public static $title = 'address_name';
 
     public static $search = [
-        'id', 'address', 'city', 'state_province', 'postal_code', 'country','address_name'
+        'id', 'address', 'city', 'state_province', 'postal_code', 'country'
     ];
 
     public function fields(Request $request)
