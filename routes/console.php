@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+use Ispgo\Wiivo\Model\SessionChatBot;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -33,3 +34,7 @@ if ($cutOffDate < $billingDate) {
 $cutOffDate = Carbon::create($scheduleYear, $scheduleMonth, $cutOffDate);
 
 Schedule::command('services:suspend_monthly')->monthlyOn($cutOffDate->day, '00:00');
+Schedule::call(function (){
+    $cutoffTime = Carbon::now()->subMinutes(\Ispgo\Wiivo\WiivoConfigProvider::getSessionLife());
+    SessionChatBot::where('updated_at', '<', $cutoffTime)->delete();
+})->everyMinute();
