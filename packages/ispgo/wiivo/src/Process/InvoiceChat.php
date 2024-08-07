@@ -24,7 +24,7 @@ class InvoiceChat extends ProcessChat
             1 => $this->templateDocument,
             2 => $this->getTemplateInvoice($interactions),
             3 => $this->getLinkPago($interactions),
-            default => "❌ Esta opcion no esta disponible intente de nuevo. 🙏"
+            default => ["message" => "❌ Esta opcion no esta disponible intente de nuevo. 🙏"]
         };
     }
 

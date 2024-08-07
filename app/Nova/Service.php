@@ -116,7 +116,7 @@ class Service extends Resource
                 'normal' => 'Normal',
                 'high' => 'High',
                 'critical' => 'Critical'
-            ])->displayUsingLabels(),
+            ])->displayUsingLabels()->default('normal'),
         ];
     }
 
