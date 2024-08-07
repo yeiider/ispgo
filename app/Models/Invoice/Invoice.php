@@ -164,9 +164,10 @@ class Invoice extends Model
             $model->created_by = Auth::id();
             $model->updated_by = Auth::id();
             $model->increment_id = self::generateIncrementId();
+        });
+        static::created(function ($model) {
             event(new InvoiceCreated($model));
         });
-
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
             if ($model->isDirty('status')) {

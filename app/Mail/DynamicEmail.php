@@ -16,11 +16,10 @@ class DynamicEmail extends Mailable
     protected $template;
     protected $mailConfig;
 
-    public function __construct($data, EmailTemplate $template, $mailConfig)
+    public function __construct($data, EmailTemplate $template)
     {
         $this->data = $data;
         $this->template = $template;
-        $this->mailConfig = $mailConfig;
     }
 
     public function build()

@@ -15,15 +15,11 @@ class InvoiceCreated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private Invoice $invoice;
-
     /**
      * Create a new event instance.
      */
-    public function __construct(Invoice $invoice)
+    public function __construct(public Invoice $invoice)
     {
-
-        $this->invoice = $invoice;
     }
 
 }

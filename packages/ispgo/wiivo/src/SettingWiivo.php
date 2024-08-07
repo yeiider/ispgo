@@ -51,13 +51,43 @@ class SettingWiivo
                 ],
                 "pay_by_whatsapp" => [
                     "field" => "boolean-field",
-                    "label" => "pay by whatsapp",
+                    "label" => "Pay by whatsapp",
                     "placeholder" => "pay by whatsapp",
                 ],
-                "create_ticket" => [
+                /*"create_ticket" => [
                     "field" => "boolean-field",
                     "label" => "Create Ticket",
                     "placeholder" => "Create Ticket",
+                ],*/
+                "notify_payment" => [
+                    "field" => "boolean-field",
+                    "label" => "Notificar Payment",
+                    "placeholder" => "Notificar Payment",
+                ],
+                "notify_payment_template" => [
+                    "field" => "textarea-field",
+                    "label" => "Notificar Payment Template",
+                    "placeholder" => "Notificar Payment Template",
+                ],
+                "notify_invoice" => [
+                    "field" => "boolean-field",
+                    "label" => "Notify Invoice",
+                ],
+                "notify_invoice_template" => [
+                    "field" => "textarea-field",
+                    "label" => "Notificar Invoice Template",
+                    "placeholder" => "Notificar Invoice Template",
+                ],
+                "env" => [
+                    "field" => "select-field",
+                    "label" => "Environment",
+                    "placeholder" => "Environment",
+                    "options" => \App\Settings\Config\Sources\Environment::class,
+                ],
+                "telephone_test" => [
+                    "field" => "text-field",
+                    "label" => "Telephone Prefix",
+                    "placeholder" => "+57",
                 ],
             ];
     }

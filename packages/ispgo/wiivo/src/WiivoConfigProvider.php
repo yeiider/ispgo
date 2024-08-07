@@ -36,6 +36,26 @@ class WiivoConfigProvider
         return self::getValue('welcome_message');
     }
 
+    public static function getNotifyPayment(): ?bool
+    {
+        return self::getValue('notify_payment');
+    }
+
+    public static function getNotifyPaymentTemplate(): ?string
+    {
+        return self::getValue('notify_payment_template');
+    }
+
+    public static function getNotifyInvoice(): ?bool
+    {
+        return self::getValue('notify_invoice');
+    }
+
+    public static function getNotifyInvoiceTemplate(): ?string
+    {
+        return self::getValue('notify_invoice_template');
+    }
+
     public static function getCheckInvoice(): ?bool
     {
         return self::getValue('check_invoice');
@@ -49,6 +69,16 @@ class WiivoConfigProvider
     public static function getCreateTicket(): ?bool
     {
         return self::getValue('create_ticket');
+    }
+
+    public static function getEnv(): ?string
+    {
+        return self::getValue('env');
+    }
+
+    public static function getTelephoneTest(): ?array
+    {
+        return explode(',', self::getValue('telephone_test'));
     }
 
     private static function getValue($field): ?string

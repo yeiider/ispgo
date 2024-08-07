@@ -12,9 +12,36 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
 use App\Exceptions\EmailTemplateNotFoundException;
 
-class AfterPayingInvoice
+class AfterPayingInvoice implements ShouldQueue
 {
     use InteractsWithQueue;
+    /**
+     * The name of the queue the job should be sent to.
+     *
+     * @var string|null
+     */
+    public $queue = 'payment_notifications';
+
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
+     * The number of seconds the job can run before timing out.
+     *
+     * @var int
+     */
+    public $timeout = 120;
+
+    /**
+     * The number of seconds to delay the job.
+     *
+     * @var int
+     */
+    public $delay = 10;
 
     private InvoiceProviderConfig $invoiceProviderConfig;
 
