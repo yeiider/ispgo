@@ -30,7 +30,7 @@ class Authorize
         if ($environment === "sandbox") {
             // Permitir solo los chatIds que están en el array de chatsId
             if (!in_array($chatId, $chatsId)) {
-                return response()->json(['error' => 'Unauthorized.'], 403);
+                return response()->json(['message' => 'No hay session.']);
             }
         }
 
