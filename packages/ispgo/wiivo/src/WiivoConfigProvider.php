@@ -26,9 +26,10 @@ class WiivoConfigProvider
         return self::getValue('telephone_prefix');
     }
 
-    public static function getSessionLife(): ?string
+    public static function getSessionLife(): ?int
     {
-        return self::getValue('session_life');
+        $life = self::getValue('session_life');
+        return is_numeric($life) ? $life : 5;
     }
 
     public static function getWelcomeMessage(): ?string

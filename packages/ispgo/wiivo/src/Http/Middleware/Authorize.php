@@ -30,19 +30,17 @@ class Authorize
         if ($environment === "sandbox") {
             // Permitir solo los chatIds que están en el array de chatsId
             if (!in_array($chatId, $chatsId)) {
-                return response()->json(['error' => 'Unauthorized.'], 403);
+                return response()->json(['message' => 'No hay session.']);
             }
         }
 
         $session = SessionChatBot::where('chat_id', $chatId)->where('user_id', $userId)->first();
 
         if ($session) {
-            // Verificar si la sesión ha expirado
             $lastActivity = Carbon::parse($session->updated_at);
             $now = Carbon::now();
 
             if ($now->diffInMinutes($lastActivity) > 5) {
-                // La sesión ha expirado
                 $session->delete();
             }
         }
