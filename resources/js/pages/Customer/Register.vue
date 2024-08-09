@@ -100,7 +100,7 @@ defineProps({
       <span class="opacity-[47%]">Already have an account? </span>
       <a class="underline cursor-pointer opacity-[67%] hover:opacity-[80%]" data-auth="register-link"
          href="/customer/login">
-        Sign up
+        Sign in
       </a>
     </div>
   </LayoutAuth>

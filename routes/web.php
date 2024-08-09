@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\AuthController;
 use App\Http\Controllers\Customer\DashboardController;
 use App\Http\Controllers\Customer\TicketsController;
+use App\Http\Middleware\AllowLogin;
+use App\Http\Middleware\AllowCustomerRegistration;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
 // Rutas de Nova
 Route::middleware(['nova'])->prefix('nova')->group(function () {
     \Laravel\Nova\Nova::routes();
@@ -27,39 +32,36 @@ Route::post('/payment/handlewompievent', [\App\Http\Controllers\Payments\WompiCo
 
 
 Route::get('/invoice/search', [InvoiceController::class, 'search']);
-/*
-// Rutas de autenticación de clientes
-Route::prefix('customer')->group(function () {
-    Route::get('register', [CustomerAuthController::class, 'showRegistrationForm'])->name('customer.register');
-    Route::post('register', [CustomerAuthController::class, 'register']);
-    Route::get('login', [CustomerAuthController::class, 'showLoginForm'])->name('customer.login');
-    Route::post('login', [CustomerAuthController::class, 'login']);
-    Route::post('logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
 
-    Route::get('password/reset', [CustomerAuthController::class, 'showLinkRequestForm'])->name('customer.password.request');
-    Route::post('password/email', [CustomerAuthController::class, 'sendResetLinkEmail'])->name('customer.password.email');
-    Route::get('password/reset/{token}', [CustomerAuthController::class, 'showResetForm'])->name('customer.password.reset');
-    Route::post('password/reset', [CustomerAuthController::class, 'reset'])->name('customer.password.update');
-
-    Route::middleware('auth.customer')->group(function () {
-        Route::get('dashboard', function () {
-            return view('customer.dashboard');
-        });
-    });
-});*/
-
-Route::middleware('guest:customer')->prefix('customer')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLoginForm']);
-    Route::post('/login', [AuthController::class, 'login'])->name('customer.login');
-    Route::get('/register', [AuthController::class, 'showRegisterForm']);
-    Route::post('/register', [AuthController::class, 'register'])->name('customer.register');
-
+//Customer routes
+Route::middleware(\App\Http\Middleware\RedirectIfCustomer::class)->prefix('customer')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->middleware(AllowLogin::class);
+    Route::post('/login', [AuthController::class, 'login'])->name('customer.login')->middleware(AllowLogin::class);
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->middleware(AllowCustomerRegistration::class);
+    Route::post('/register', [AuthController::class, 'register'])->name('customer.register')->middleware(AllowCustomerRegistration::class);
 });
 
 
-Route::middleware('auth:customer')->prefix('customer')->group(function () {
+Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('customer')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/orders', [DashboardController::class, 'orders'])->name('orders');
     Route::get('/logout', [AuthController::class, 'logout'])->name('customer.logout');
     Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets');
 });
+
+
+Route::get('/email/verify', function () {
+    return Inertia::render('Customer/VerifyEmail', [
+        'status' => session('status')
+    ]);
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Foundation\Auth\EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/home');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
