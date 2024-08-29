@@ -47,7 +47,7 @@ onMounted(() => {
     </div>
 
     <div class="sticky inset-x-0 bottom-0 border-t border-gray-100">
-      <div class="flex justify-between items-center gap-2 bg-white p-4 hover:bg-gray-50">
+      <div class="flex justify-between flex-wrap lg:flex-nowrap items-center gap-2 bg-white p-4 hover:bg-gray-50">
         <p class="text-xs">
           <strong class="block font-medium">{{ fullName }}</strong>
           <span> {{ customer?.email_address }} </span>

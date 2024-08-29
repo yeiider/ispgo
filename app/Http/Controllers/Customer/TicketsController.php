@@ -15,7 +15,7 @@ class TicketsController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Customer/Tickets', [
+        return Inertia::render('Customer/Tickets/Index', [
             'tickets' => Ticket::where('customer_id', $this->getCustomerId())
                 ->orderBy('created_at', 'desc')
                 ->paginate(15)
@@ -34,5 +34,10 @@ class TicketsController extends Controller
     private function getCustomerId(): int|string|null
     {
         return Auth::guard('customer')->id();
+    }
+
+    public function create()
+    {
+        return Inertia::render('Customer/Tickets/Create', []);
     }
 }

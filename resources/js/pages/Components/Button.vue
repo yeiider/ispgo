@@ -15,8 +15,8 @@
 <template>
   <button
     :type="type"
-    class="auth-component-button px-4 py-2.5 text-sm font-medium rounded-md opacity-[95%] hover:opacity-100 focus:ring-2 focus:ring-offset-2 cursor-pointer inline-flex items-center w-full justify-center disabled:opacity-50 hover:font-semibold focus:outline-none"
-    style=" color:#ffffff; background-color:#0ea5e9;"
+    class="component-button px-4 py-2.5 text-sm font-medium rounded-md opacity-[95%] hover:opacity-100 focus:ring-2 focus:ring-offset-2 cursor-pointer inline-flex items-center w-full justify-center disabled:opacity-50 hover:font-semibold focus:outline-none"
+    style="color:#ffffff; background-color:#0ea5e9;"
     :disabled="isLoading"
   >
     <svg v-if="isLoading" aria-hidden="true" role="status" class="inline w-4 h-4 me-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">

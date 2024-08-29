@@ -1,12 +1,12 @@
 <script setup>
 
-import Layout from "./Layouts/Dashboard.vue";
+import Layout from "../Layouts/Dashboard.vue";
 import {onMounted, ref} from "vue";
-import Pagination from "./../Components/Pagination.vue"
+import Pagination from "../../Components/Pagination.vue"
 
 const props = defineProps({sidebar: Object, customer: Object, tickets: Object})
 const _pagination = ref({});
-onMounted(()=> {
+onMounted(() => {
   const _customer = props.customer;
   const {data, ...rest} = _customer;
   _pagination.value = rest;
@@ -15,7 +15,15 @@ onMounted(()=> {
 
 <template>
   <Layout :sidebar="sidebar" :customer="customer">
-    <h1 class="text-3xl font-semibold text-slate-950">Tickets</h1>
+    <div class="flex flex-wrap md:flex-nowrap justify-between">
+      <h1 class="text-3xl font-semibold text-slate-950">Tickets</h1>
+      <div class="actions">
+        <a
+          href="/customer/tickets/create/"
+          class="component-button px-4 py-2.5 text-sm font-medium rounded-md opacity-[95%] hover:opacity-100 focus:ring-2 focus:ring-offset-2 cursor-pointer inline-flex items-center w-full justify-center disabled:opacity-50 hover:font-semibold focus:outline-none">Create
+          tickets</a>
+      </div>
+    </div>
     <div class="flex flex-col">
       <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -49,7 +57,7 @@ onMounted(()=> {
               </tr>
               </tbody>
             </table>
-            <Pagination :pagination="_pagination" />
+            <Pagination :pagination="_pagination"/>
           </div>
         </div>
       </div>
