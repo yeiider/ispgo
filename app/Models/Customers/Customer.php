@@ -113,6 +113,18 @@ class Customer extends Authenticatable
     {
         return self::where('identity_document', $identityDocument)->first();
     }
+    public static function searchCustomersWithInvoices($input)
+    {
+        return self::where(function ($query) use ($input) {
+            $query->where('identity_document', 'LIKE', "%{$input}%")
+                ->orWhere('first_name', 'LIKE', "%{$input}%");
+        })
+            ->with(['invoices' => function ($query) {
+                $query->where('status', 'unpaid'); // Filtrar solo facturas no pagadas
+            }])
+            ->get();
+    }
+
 
     public function getLastInvoice()
     {

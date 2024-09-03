@@ -6,12 +6,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\AuthController;
 use App\Http\Controllers\Customer\DashboardController;
 use App\Http\Controllers\Customer\TicketsController;
+
 // Rutas de Nova
 Route::middleware(['nova'])->prefix('nova')->group(function () {
     \Laravel\Nova\Nova::routes();
 });
 
 Route::get('checkout', [\App\Http\Controllers\Checkout::class, 'index'])->name('checkout.index');
+Route::middleware([])->prefix('admin')->group(function () {
+    Route::get('pos', [\App\Http\Controllers\Pos::class, 'index'])->name('admin.pos');
+});
+
 Route::get('/payment/configurations', [PaymentController::class, 'getPaymentConfigurations']);
 
 
@@ -27,26 +32,8 @@ Route::post('/payment/handlewompievent', [\App\Http\Controllers\Payments\WompiCo
 
 
 Route::get('/invoice/search', [InvoiceController::class, 'search']);
-/*
-// Rutas de autenticación de clientes
-Route::prefix('customer')->group(function () {
-    Route::get('register', [CustomerAuthController::class, 'showRegistrationForm'])->name('customer.register');
-    Route::post('register', [CustomerAuthController::class, 'register']);
-    Route::get('login', [CustomerAuthController::class, 'showLoginForm'])->name('customer.login');
-    Route::post('login', [CustomerAuthController::class, 'login']);
-    Route::post('logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
+Route::get('/customer/search', [\App\Http\Controllers\Api\CustomerApi::class, 'search']);
 
-    Route::get('password/reset', [CustomerAuthController::class, 'showLinkRequestForm'])->name('customer.password.request');
-    Route::post('password/email', [CustomerAuthController::class, 'sendResetLinkEmail'])->name('customer.password.email');
-    Route::get('password/reset/{token}', [CustomerAuthController::class, 'showResetForm'])->name('customer.password.reset');
-    Route::post('password/reset', [CustomerAuthController::class, 'reset'])->name('customer.password.update');
-
-    Route::middleware('auth.customer')->group(function () {
-        Route::get('dashboard', function () {
-            return view('customer.dashboard');
-        });
-    });
-});*/
 
 Route::middleware('guest:customer')->prefix('customer')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm']);

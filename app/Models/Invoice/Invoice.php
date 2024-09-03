@@ -76,9 +76,23 @@ class Invoice extends Model
         })->orWhere('increment_id', $input)->first();
     }
 
+    public static function searchInvoice($input)
+    {
+        return self::where('status', 'unpaid') // Filtrar primero por estado
+        ->where(function ($query) use ($input) {
+            $query->whereHas('customer', function ($query) use ($input) {
+                $query->where('identity_document', 'LIKE', "%{$input}%")
+                    ->orWhere('first_name', 'LIKE', "%{$input}%");
+            })
+                ->orWhere('increment_id', 'LIKE', "%{$input}%");
+        })
+            ->get();
+    }
+
+
+
     protected static function generateIncrementId()
     {
-        // Generar un increment_id único. Puedes ajustar la lógica según tus necesidades.
         $lastInvoice = self::orderBy('id', 'desc')->first();
         $lastId = $lastInvoice ? intval($lastInvoice->id) : 0;
         $incrementId = str_pad($lastId + 1, 10, '0', STR_PAD_LEFT);
