@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Customer;
+namespace App\Http\Controllers\CustomerAccount;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customers\Customer;
@@ -12,8 +12,8 @@ use Inertia\Inertia;
 
 class AuthController extends Controller
 {
-    private const LOGIN_FORM_PATH = 'Customer/Login';
-    private const REGISTer_FORM_PATH = 'Customer/Register';
+    private const LOGIN_FORM_PATH = 'CustomerAccount/Authentication/Login';
+    private const REGISTer_FORM_PATH = 'CustomerAccount/Authentication/Register';
 
     /**
      * Display the login form.
@@ -36,7 +36,7 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email_address', 'password');
         if (Auth::guard('customer')->attempt($credentials)) {
-            return redirect()->intended(route('dashboard'));
+            return redirect()->intended(route('index'));
         }
 
         return back()->withErrors([
@@ -87,6 +87,6 @@ class AuthController extends Controller
         $customer->sendEmailVerificationNotification();
 
 
-        return redirect()->route('dashboard');
+        return redirect()->route('index');
     }
 }

@@ -15,7 +15,7 @@
 <template>
   <button
     :type="type"
-    class="component-button px-4 py-2.5 text-sm font-medium rounded-md opacity-[95%] hover:opacity-100 focus:ring-2 focus:ring-offset-2 cursor-pointer inline-flex items-center w-full justify-center disabled:opacity-50 hover:font-semibold focus:outline-none"
+    class="component-button px-4 py-2.5 text-sm font-medium rounded-md opacity-[95%] hover:opacity-100 focus:ring-2 focus:ring-offset-2 cursor-pointer inline-flex items-center justify-center disabled:opacity-50 hover:font-semibold focus:outline-none"
     style="color:#ffffff; background-color:#0ea5e9;"
     :disabled="isLoading"
   >

@@ -9,7 +9,7 @@ class RedirectIfCustomer
     public function handle($request, Closure $next, $guard = 'customer')
     {
         if (Auth::guard($guard)->check()) {
-            return redirect()->route('dashboard');
+            return redirect()->route('index');
         }
 
         return $next($request);

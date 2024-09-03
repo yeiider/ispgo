@@ -1,9 +1,9 @@
 <script setup>
-import LayoutAuth from "./Layouts/Auth.vue";
-import Input from "./../Components/Input.vue";
+import LayoutAuth from "../Layouts/Auth.vue";
+import Input from "../../Components/Input.vue";
 import {useForm} from "@inertiajs/inertia-vue3";
-import Select from "../Components/Select.vue";
-import Button from "./../Components/Button.vue"
+import Select from "../../Components/Select.vue";
+import Button from "../../Components/Button.vue"
 
 const form = useForm({
   first_name: null,
@@ -92,7 +92,8 @@ defineProps({
 
       <Button
         :is-loading="form.processing"
-        type="submit">
+        type="submit"
+        class="w-full">
         Continue
       </Button>
     </form>

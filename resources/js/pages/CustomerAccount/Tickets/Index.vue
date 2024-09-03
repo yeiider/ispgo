@@ -4,7 +4,15 @@ import Layout from "../Layouts/Dashboard.vue";
 import {onMounted, ref} from "vue";
 import Pagination from "../../Components/Pagination.vue"
 
-const props = defineProps({sidebar: Object, customer: Object, tickets: Object})
+const props = defineProps({
+  sidebar: Object,
+  customer: Object,
+  tickets: Object,
+  ticketCreateUrl: {
+    type: String,
+    required: true
+  }
+})
 const _pagination = ref({});
 onMounted(() => {
   const _customer = props.customer;
@@ -19,7 +27,7 @@ onMounted(() => {
       <h1 class="text-3xl font-semibold text-slate-950">Tickets</h1>
       <div class="actions">
         <a
-          href="/customer/tickets/create/"
+          :href="ticketCreateUrl"
           class="component-button px-4 py-2.5 text-sm font-medium rounded-md opacity-[95%] hover:opacity-100 focus:ring-2 focus:ring-offset-2 cursor-pointer inline-flex items-center w-full justify-center disabled:opacity-50 hover:font-semibold focus:outline-none">Create
           tickets</a>
       </div>
