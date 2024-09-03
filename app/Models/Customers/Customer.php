@@ -6,14 +6,17 @@ use App\Events\CustomerCreated;
 use App\Events\CustomerStatusUpdated;
 use App\Models\Invoice\Invoice;
 use App\Models\Services\Service;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Customer extends Authenticatable
+class Customer extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory;
+    use Notifiable; 
 
     protected $casts = [
         'date_of_birth' => 'date',

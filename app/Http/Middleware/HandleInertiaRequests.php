@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Settings\Config\Sources\Customer;
+use App\Settings\Config\Sources\CustomerAccount;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -36,7 +36,7 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $customer = Customer::getConfig();
+        $customer = CustomerAccount::getConfig();
 
         return array_merge(parent::share($request), $customer);
     }

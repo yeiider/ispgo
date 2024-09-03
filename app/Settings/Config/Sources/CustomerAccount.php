@@ -2,10 +2,11 @@
 
 namespace App\Settings\Config\Sources;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Ispgo\SettingsManager\Source\ConfigProviderInterface;
 
-class Customer implements ConfigProviderInterface
+class CustomerAccount implements ConfigProviderInterface
 {
     static public function getConfig(): array
     {
@@ -15,6 +16,10 @@ class Customer implements ConfigProviderInterface
         }
 
         $customer = \App\Models\Customers\Customer::findOrFail($auth->getAuthIdentifier());
+
+        $date = new \DateTime($customer->date_of_birth);
+        $customer->date_of_birth_formatted = $date->format('Y-m-d');
+
 
         return [
             'customer' => $customer,
@@ -30,7 +35,7 @@ class Customer implements ConfigProviderInterface
             'links' => [
                 [
                     'code' => "my_account",
-                    'url' => route('dashboard'),
+                    'url' => route('index'),
                     'title' => __('My Account'),
                 ],
                 [

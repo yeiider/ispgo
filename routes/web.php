@@ -1,11 +1,16 @@
 <?php
 
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\CustomerAccount\CustomerController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Customer\AuthController;
-use App\Http\Controllers\Customer\DashboardController;
-use App\Http\Controllers\Customer\TicketsController;
+use App\Http\Controllers\CustomerAccount\AuthController;
+use App\Http\Controllers\CustomerAccount\DashboardController;
+use App\Http\Controllers\CustomerAccount\TicketsController;
+use App\Http\Middleware\AllowLogin;
+use App\Http\Middleware\AllowCustomerRegistration;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 // Rutas de Nova
 Route::middleware(['nova'])->prefix('nova')->group(function () {
@@ -41,12 +46,31 @@ Route::middleware('guest:customer')->prefix('customer')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm']);
     Route::post('/register', [AuthController::class, 'register'])->name('customer.register');
 
-});
-
-
-Route::middleware('auth:customer')->prefix('customer')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('customer-account')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('index');
     Route::get('/orders', [DashboardController::class, 'orders'])->name('orders');
     Route::get('/logout', [AuthController::class, 'logout'])->name('customer.logout');
     Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets');
+    Route::get('/tickets/create', [TicketsController::class, 'create'])->name('tickets.create');
+    Route::get('/customer/edit', [CustomerController::class, 'edit'])->name('customer.edit');
+    Route::put('/customer/update', [CustomerController::class, 'update'])->name('customer.update');
 });
+
+
+Route::get('/email/verify', function () {
+    return Inertia::render('Customer/VerifyEmail', [
+        'status' => session('status')
+    ]);
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Foundation\Auth\EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/home');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+

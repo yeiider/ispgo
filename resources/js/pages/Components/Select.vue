@@ -77,6 +77,7 @@ onMounted(updateFocusState);
                :class="{'top-0 -translate-y-1 ml-2 text-xs auth-component-input-label-focused text-[#0ea5e9] font-bold' : isFocusedOrFilled, 'top-[16px] ml-2.5 text-[15px] text-gray-500' : !isFocusedOrFilled }"
                class="block absolute px-1.5 py-0 font-normal leading-normal bg-white duration-300 ease-out cursor-text auth-component-input dark:text-gray-300">
           {{ label }}
+          <span v-if="required" class="text-red-500">*</span>
         </label>
 
         <div data-model="email" class="mt-1.5 w-full rounded-md shadow-sm auth-component-input-container">

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Customer;
+namespace App\Http\Controllers\CustomerAccount;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TicketResource;
@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Request;
 
 class TicketsController extends Controller
 {
-    public function index()
+    public function index(): \Inertia\Response
     {
-        return Inertia::render('Customer/Tickets', [
+        return Inertia::render('CustomerAccount/Tickets/Index', [
             'tickets' => Ticket::where('customer_id', $this->getCustomerId())
                 ->orderBy('created_at', 'desc')
                 ->paginate(15)
@@ -28,11 +28,17 @@ class TicketsController extends Controller
                     'contact_method' => $ticket->contact_method,
                     'closed_at' => $ticket->closed_at,
                 ]),
+            'ticketCreateUrl' => route('tickets.create'),
         ]);
     }
 
     private function getCustomerId(): int|string|null
     {
         return Auth::guard('customer')->id();
+    }
+
+    public function create(): \Inertia\Response
+    {
+        return Inertia::render('CustomerAccount/Tickets/Create', []);
     }
 }

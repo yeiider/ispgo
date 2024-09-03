@@ -1,9 +1,9 @@
 <script setup>
-import LayoutAuth from "./Layouts/Auth.vue";
-import Input from "./../Components/Input.vue";
+import LayoutAuth from "../Layouts/Auth.vue";
+import Input from "../../Components/Input.vue";
 import {useForm} from "@inertiajs/inertia-vue3";
-import Select from "../Components/Select.vue";
-import Button from "./../Components/Button.vue"
+import Select from "../../Components/Select.vue";
+import Button from "../../Components/Button.vue"
 
 const form = useForm({
   first_name: null,
@@ -92,7 +92,8 @@ defineProps({
 
       <Button
         :is-loading="form.processing"
-        type="submit">
+        type="submit"
+        class="w-full">
         Continue
       </Button>
     </form>
@@ -100,7 +101,7 @@ defineProps({
       <span class="opacity-[47%]">Already have an account? </span>
       <a class="underline cursor-pointer opacity-[67%] hover:opacity-[80%]" data-auth="register-link"
          href="/customer/login">
-        Sign up
+        Sign in
       </a>
     </div>
   </LayoutAuth>
