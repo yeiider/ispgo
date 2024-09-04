@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DailyBox;
 use App\Models\Invoice\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -52,5 +53,31 @@ class InvoiceController extends Controller
             "address" => $invoice->service->address
         ];
 
+    }
+
+    public function registerPayment(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'paymentReference' => 'required|string',
+            'paymentMethod' => 'required|string'
+        ]);
+        /**
+         * @var $invoiceModel Invoice
+         **/
+        try {
+            $reference = $request->input('paymentReference');
+            $invoiceModel = Invoice::findByDniOrInvoiceId($reference);
+            if ($invoiceModel) {
+                $invoiceModel->applyPayment(notes: $request->input('note'));
+                DailyBox::updateAmount($request->input('todaytBox')['id'],$invoiceModel->amount);
+                return response()->json(['message' => 'Payment registered successfully', 'data' => $invoiceModel, 'status' => 200]);
+            } else {
+                return response()->json(['message' => 'Invoice not found'], 404);
+            }
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Invoice not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 }

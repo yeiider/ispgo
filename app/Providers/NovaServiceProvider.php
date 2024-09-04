@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Nova\Box;
 use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
+use App\Nova\DailyBox;
 use App\Nova\EmailTemplate;
 use App\Nova\Finance\CashRegister;
 use App\Nova\Finance\Expense;
@@ -92,6 +94,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Income::class),
                     MenuItem::resource(Expense::class),
                     MenuItem::resource(Transaction::class),
+                    MenuItem::resource(Box::class),
+                    MenuItem::resource(DailyBox::class),
                 ])->icon('cash')->collapsable(),
 
                 MenuSection::make(__('Tickets'), [

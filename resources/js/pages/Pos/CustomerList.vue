@@ -25,7 +25,7 @@
             <div>Fecha de Pago: {{ new Date(invoice.due_date).toLocaleDateString() }}</div>
             <div>Increment ID: <b>{{ invoice.increment_id }}</b></div>
           </div>
-          <button @click="selectInvoice(invoice)" class=" p-2 m-5" title="Processar">
+          <button @click="selectInvoice(invoice,customer)" class=" p-2 m-5" title="Processar">
             <span class="inline-block shrink-0 w-6 h-6"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></span>
           </button>
         </div>
@@ -38,7 +38,7 @@
 <script setup>
 import {inject, ref} from 'vue';
 const props = defineProps(['customers']);
-const emit = defineEmits(['invoiceSelected']);
+const emit = defineEmits(['invoiceSelected','customerSelected']);
 const formatPrice = inject('formatPrice');
 
 const openCustomerIds = ref([]);
@@ -55,8 +55,9 @@ const isOpen = (customerId) => {
   return openCustomerIds.value.includes(customerId);
 };
 
-const selectInvoice = (invoice) => {
+const selectInvoice = (invoice,customer) => {
   emit('invoiceSelected', invoice);
+  emit('customerSelected', customer);
 };
 </script>
 

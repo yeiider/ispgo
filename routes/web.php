@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerAccount\AuthController;
 use App\Http\Controllers\CustomerAccount\DashboardController;
 use App\Http\Controllers\CustomerAccount\TicketsController;
-use App\Http\Middleware\AllowLogin;
-use App\Http\Middleware\AllowCustomerRegistration;
+use App\Http\Controllers\Api\BoxApi;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -18,8 +17,9 @@ Route::middleware(['nova'])->prefix('nova')->group(function () {
 });
 
 Route::get('checkout', [\App\Http\Controllers\Checkout::class, 'index'])->name('checkout.index');
-Route::middleware([])->prefix('admin')->group(function () {
+Route::middleware([\App\Http\Middleware\CheckUserBox::class])->prefix('admin')->group(function () {
     Route::get('pos', [\App\Http\Controllers\Pos::class, 'index'])->name('admin.pos');
+    Route::post('/daily-boxes/create', [BoxApi::class, 'createDailyBox']);
 });
 
 Route::get('/payment/configurations', [PaymentController::class, 'getPaymentConfigurations']);
@@ -37,6 +37,7 @@ Route::post('/payment/handlewompievent', [\App\Http\Controllers\Payments\WompiCo
 
 
 Route::get('/invoice/search', [InvoiceController::class, 'search']);
+Route::post('/invoice/apply-payment', [InvoiceController::class, 'registerPayment']);
 Route::get('/customer/search', [\App\Http\Controllers\Api\CustomerApi::class, 'search']);
 
 
@@ -45,6 +46,7 @@ Route::middleware('guest:customer')->prefix('customer')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('customer.login');
     Route::get('/register', [AuthController::class, 'showRegisterForm']);
     Route::post('/register', [AuthController::class, 'register'])->name('customer.register');
+});
 
 Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('customer-account')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');

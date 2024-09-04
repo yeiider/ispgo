@@ -90,7 +90,6 @@ class Invoice extends Model
     }
 
 
-
     protected static function generateIncrementId()
     {
         $lastInvoice = self::orderBy('id', 'desc')->first();
@@ -99,10 +98,13 @@ class Invoice extends Model
         return $incrementId;
     }
 
-    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = []): void
+    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null): void
     {
 
         $amount = $amount ?? $this->total;
+        if ( $this->status === 'paid'){
+            throw new \Exception('La factura ya ha sido pagada');
+        }
         if ($amount > $this->total - $this->amount) {
             throw new \Exception('El monto pagado no puede ser mayor que el adeudado.');
         }
@@ -117,7 +119,9 @@ class Invoice extends Model
         } else if ($this->due_date < now() && $this->outstanding_balance > 0) {
             $this->status = 'overdue';
         }
-
+        if ($notes) {
+            $this->notes = $notes;
+        }
         $this->additional_information = $additional;
         $this->save();
         event(new InvoicePaid($this));
