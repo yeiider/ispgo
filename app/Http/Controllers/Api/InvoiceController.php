@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\QrCodeHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Box;
 use App\Models\DailyBox;
 use App\Models\Invoice\Invoice;
+use App\Settings\GeneralProviderConfig;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -72,7 +74,7 @@ class InvoiceController extends Controller
             $reference = $request->input('paymentReference');
             $invoiceModel = Invoice::findByDniOrInvoiceId($reference);
             if ($invoiceModel) {
-                $invoiceModel->applyPayment(notes: $request->input('note'),dailyBoxId: $request->input('todaytBox')['id']);
+                $invoiceModel->applyPayment(notes: $request->input('note'), dailyBoxId: $request->input('todaytBox')['id']);
                 DailyBox::updateAmount($request->input('todaytBox')['id'], $invoiceModel->amount);
                 return response()->json(['message' => 'Payment registered successfully', 'data' => $invoiceModel, 'status' => 200]);
             } else {
@@ -113,4 +115,26 @@ class InvoiceController extends Controller
         return response()->json(['invoices' => $invoices]);
     }
 
+    public function getReceipt(Request $request)
+    {
+        $request->validate([
+            'reference' => 'required|string'
+        ]);
+
+        $invoice = Invoice::findByDniOrInvoiceId($request->input('reference'));
+        if ($invoice) {
+            return view('invoices.receipt', ['invoice' => $invoice,'config' => $this->getConfig(),'qrCode' => QrCodeHelper::generateQrCode($invoice->increment_id)]);
+        }
+
+        abort(404);
+    }
+
+    private function getConfig(): array
+    {
+        return [
+            'name' => GeneralProviderConfig::getCompanyName(),
+            'address' => GeneralProviderConfig::getCompanyAddress(),
+            'site' => GeneralProviderConfig::getCompanyUrl()
+        ];
+    }
 }

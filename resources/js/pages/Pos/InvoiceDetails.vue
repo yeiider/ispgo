@@ -94,10 +94,10 @@
               class="p-2 bg-blue-500 text-white rounded shadow-md hover:bg-blue-600">
         Guardar Pago
       </button>
-      <button @click="attachReceipt" v-if="isPayment"
+      <a :href="url" target="_blank" v-if="isPayment"
               class="p-2 bg-green-500 text-white rounded shadow-md hover:bg-green-600">
         Ver recibo
-      </button>
+      </a>
       <button @click="cancel" class="p-2 bg-red-500 text-white rounded shadow-md hover:bg-red-600">
         Limpiar
       </button>
@@ -128,6 +128,7 @@ const editableInvoice = reactive({
   totalToPay: 0,
 });
 
+const url = ref('');
 const isPayment = ref(false);
 const resetEditableInvoice = () => {
   editableInvoice.userName = '';
@@ -157,6 +158,8 @@ const updateInvoiceData = () => {
   editableInvoice.totalToPay = parseFloat(invoice.total || 0).toFixed(2);
   editableInvoice.paymentReference = invoice.increment_id || '';
   editableInvoice.todaytBox = todayBox
+  url.value = `/invoice/receipt?reference=${props.invoice.increment_id}`
+
 
 };
 

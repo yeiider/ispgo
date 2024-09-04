@@ -19,7 +19,9 @@ class CheckUserBox
     public function handle(Request $request, Closure $next)
     {
         $user = Auth::user();
-
+        if (!$user) {
+            abort(404, 'User does not have an assigned box.');
+        }
         $box = Box::getUserBox($user->id);
 
         if (!$box) {

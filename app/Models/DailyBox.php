@@ -40,7 +40,7 @@ class DailyBox extends Model
         if (!$dailyBox) {
             throw new \Exception('DailyBox not found.');
         }
-        $dailyBox->end_amount = $newAmount;
+        $dailyBox->end_amount+=$newAmount;
         $dailyBox->save();
         return $dailyBox;
     }
