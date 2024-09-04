@@ -3,14 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Box;
 use App\Models\DailyBox;
 use App\Models\Invoice\Invoice;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
 
 class InvoiceController extends Controller
 {
-    public function search(Request $request): \Illuminate\Http\JsonResponse
+    public function search(Request $request): JsonResponse
     {
         // Validar los datos de entrada
         $request->validate([
@@ -55,7 +59,7 @@ class InvoiceController extends Controller
 
     }
 
-    public function registerPayment(Request $request): \Illuminate\Http\JsonResponse
+    public function registerPayment(Request $request): JsonResponse
     {
         $request->validate([
             'paymentReference' => 'required|string',
@@ -68,8 +72,8 @@ class InvoiceController extends Controller
             $reference = $request->input('paymentReference');
             $invoiceModel = Invoice::findByDniOrInvoiceId($reference);
             if ($invoiceModel) {
-                $invoiceModel->applyPayment(notes: $request->input('note'));
-                DailyBox::updateAmount($request->input('todaytBox')['id'],$invoiceModel->amount);
+                $invoiceModel->applyPayment(notes: $request->input('note'),dailyBoxId: $request->input('todaytBox')['id']);
+                DailyBox::updateAmount($request->input('todaytBox')['id'], $invoiceModel->amount);
                 return response()->json(['message' => 'Payment registered successfully', 'data' => $invoiceModel, 'status' => 200]);
             } else {
                 return response()->json(['message' => 'Invoice not found'], 404);
@@ -80,4 +84,33 @@ class InvoiceController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+
+
+    /**
+     * Get invoices for the current day's DailyBox and where customer is assigned to the box.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getInvoicesForToday(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        $box = Box::getUserBox($user->id);
+
+        if (!$box) {
+            return response()->json(['message' => 'No box assigned to the user.'], 404);
+        }
+
+        $today = Carbon::now()->format('Y-m-d');
+        $todayDailyBox = $box->dailyBoxes()->where('date', $today)->first();
+
+        if (!$todayDailyBox) {
+            return response()->json(['message' => 'No DailyBox found for today.'], 404);
+        }
+
+        $invoices = Invoice::where('daily_box_id', $todayDailyBox->id)->get();
+
+        return response()->json(['invoices' => $invoices]);
+    }
+
 }

@@ -19,7 +19,7 @@ class Invoice extends Model
     const STATUS_PAID = "paid";
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information'
+        'issue_date', 'due_date', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id'
     ];
 
     protected $casts = [
@@ -98,11 +98,11 @@ class Invoice extends Model
         return $incrementId;
     }
 
-    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null): void
+    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null, $dailyBoxId = null): void
     {
 
         $amount = $amount ?? $this->total;
-        if ( $this->status === 'paid'){
+        if ($this->status === 'paid') {
             throw new \Exception('La factura ya ha sido pagada');
         }
         if ($amount > $this->total - $this->amount) {
@@ -122,6 +122,7 @@ class Invoice extends Model
         if ($notes) {
             $this->notes = $notes;
         }
+        $this->daily_box_id = $dailyBoxId;
         $this->additional_information = $additional;
         $this->save();
         event(new InvoicePaid($this));

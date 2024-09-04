@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import {ref, provide} from 'vue';
+import {ref, provide, onMounted} from 'vue';
 import SearchBar from './SearchBar.vue';
 import CashierInfo from './CashierInfo.vue';
 import InvoiceDetails from './InvoiceDetails.vue';
@@ -48,6 +48,7 @@ import CustomerList from './CustomerList.vue';
 import {usePage} from "@inertiajs/inertia-vue3";
 import RealTimeClock from "./RealTimeClock.vue";
 import CreateDailyBoxForm from './CreateDailyBoxForm.vue'; // Importa el componente de formulario
+import axios from "axios";
 
 const customers = ref([]);
 const selectedInvoice = ref(null);
@@ -68,6 +69,12 @@ const setCustomers = (customerData) => {
   customers.value = customerData;
   selectedInvoice.value = null;
 }
+
+onMounted(() => {
+  axios.get('/invoice/find-by-box').then((response) => {
+    console.log(response)
+  })
+});
 
 const formatPrice = (price) => {
   // Asegurarse de que price sea un número con decimales

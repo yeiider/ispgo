@@ -38,6 +38,7 @@ Route::post('/payment/handlewompievent', [\App\Http\Controllers\Payments\WompiCo
 
 Route::get('/invoice/search', [InvoiceController::class, 'search']);
 Route::post('/invoice/apply-payment', [InvoiceController::class, 'registerPayment']);
+Route::get('/invoice/find-by-box', [InvoiceController::class, 'getInvoicesForToday']);
 Route::get('/customer/search', [\App\Http\Controllers\Api\CustomerApi::class, 'search']);
 
 
