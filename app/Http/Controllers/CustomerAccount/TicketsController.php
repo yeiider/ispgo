@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Settings\SupportProviderConfig;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Laravel\Nova\Http\Resources\UserResource;
@@ -39,6 +40,11 @@ class TicketsController extends Controller
 
     public function create(): \Inertia\Response
     {
+        if (!SupportProviderConfig::allowCustomerCreateTickets()) {
+             abort(403);
+        }
         return Inertia::render('CustomerAccount/Tickets/Create', []);
     }
+
+
 }
