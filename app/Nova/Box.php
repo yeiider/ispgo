@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use App\Models\User;
+use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MultiSelect;
 use Laravel\Nova\Fields\Select;
@@ -24,7 +25,6 @@ class Box extends Resource
 
     public function fields(Request $request)
     {
-        $users = User::all()->pluck('name', 'id');
         return [
             ID::make()->sortable(),
 
@@ -58,5 +58,12 @@ class Box extends Resource
     protected function getUserOptions()
     {
         return \App\Models\User::all()->pluck('name', 'id')->toArray();
+    }
+
+    public function actions(NovaRequest $request): array
+    {
+        return [
+            Action::redirect('Invoice Pos', '/admin/pos')->standalone(),
+        ];
     }
 }

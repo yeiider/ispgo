@@ -1,5 +1,7 @@
 <?php
 
+use Ispgo\Mikrotik\Settings\SettingMikrotik;
+
 return [
     "general" => [
         "setting" => [
@@ -459,5 +461,16 @@ return [
                 "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ],
         ],
+    ],
+
+    "mikrotik" => [
+        "setting" => [
+            "label" => "Mikrotik",
+            "class" => "form-control",
+        ],
+        "general" => SettingMikrotik::getGeneralSettings(),
+        "ppp" => SettingMikrotik::getPPPSettings(),
+        "simple_queue" => SettingMikrotik::getSimpleQueueSettings(),
+        "dhcp" => SettingMikrotik::getDHCPSettings(),
     ],
 ];
