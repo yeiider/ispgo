@@ -15,6 +15,10 @@ class DailyBox extends Model
         'transactions'
     ];
 
+    protected $casts = [
+        'date' => 'datetime',
+    ];
+
     public function box()
     {
         return $this->belongsTo(Box::class);

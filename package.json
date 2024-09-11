@@ -13,7 +13,9 @@
         "build-Ckeditor": "cd nova-components/Ckeditor && npm run dev",
         "build-Ckeditor-prod": "cd nova-components/Ckeditor && npm run prod",
         "build-ckeditor": "cd nova-components/Ckeditor && npm run dev",
-        "build-ckeditor-prod": "cd nova-components/Ckeditor && npm run prod"
+        "build-ckeditor-prod": "cd nova-components/Ckeditor && npm run prod",
+        "build-mikrotik": "cd nova-components/Mikrotik && npm run dev",
+        "build-mikrotik-prod": "cd nova-components/Mikrotik && npm run prod"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.19",
