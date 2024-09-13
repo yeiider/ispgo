@@ -2,8 +2,11 @@
 
 namespace Ispgo\Mikrotik;
 
+use App\Events\ServiceCreated;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Ispgo\Mikrotik\Listener\ServiceCreateListener;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Http\Middleware\Authenticate;
 use Laravel\Nova\Nova;
@@ -18,6 +21,12 @@ class ToolServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Event::listen(
+            ServiceCreated::class,
+            [ServiceCreateListener::class, 'handle']
+        );
+
+
         $this->app->booted(function () {
             $this->routes();
         });

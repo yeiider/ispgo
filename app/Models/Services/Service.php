@@ -2,6 +2,7 @@
 
 namespace App\Models\Services;
 
+use App\Events\ServiceCreated;
 use App\Events\ServiceUpdateStatus;
 use App\Models\Customers\Address;
 use App\Models\Customers\Customer;
@@ -53,6 +54,13 @@ class Service extends Model
         return "{$this->service_ip} - {$this->customer->full_name}";
     }
 
+    public function getServiceNameAttribute()
+    {
+        $formattedName = strtolower(str_replace(' ', '_', $this->customer->first_name));
+        return "{$this->id}_{$formattedName}";
+    }
+
+
     public function plan()
     {
         return $this->belongsTo(Plan::class);
@@ -72,6 +80,10 @@ class Service extends Model
             $model->updated_by = Auth::id();
         });
 
+        static::created(function ($model) {
+            event(new ServiceCreated($model));
+
+        });
         static::updating(function ($service) {
             if ($service->isDirty('service_status')) {
                 $service->updated_by = Auth::id();
@@ -137,6 +149,7 @@ class Service extends Model
         $action->user_id = $technician_id;
         $action->action_notes = $notes;
         $action->status = 'pending';
+        $action->action_date = $this->created_at;
         $action->save();
 
         return $action;

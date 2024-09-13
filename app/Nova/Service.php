@@ -13,6 +13,8 @@ use App\Nova\Filters\ServiceType;
 use App\Nova\Lenses\TelephonicServiceLens;
 use App\Nova\Lenses\TelevisionServiceLens;
 use Illuminate\Http\Request;
+use Ispgo\Mikrotik\Nova\Actions\MikrotikAction;
+use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
@@ -127,7 +129,10 @@ class Service extends Resource
             new SuspendService(),
             new GenerateInvoice(),
             new CreateActionsServiceInstall(),
-            new CreateActionsServiceUninstall()
+            new CreateActionsServiceUninstall(),
+            (new MikrotikAction())->canSee(function () {
+                return MikrotikConfigProvider::getEnabled();
+            })
         ];
     }
 
