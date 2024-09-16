@@ -5,9 +5,9 @@ namespace Ispgo\Mikrotik\Helper;
 use Exception;
 use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
 
-class Data
+class HelperMikrotikData
 {
-    public function getConfig(): array
+    public static function getConfig(): array
     {
         $enabled = MikrotikConfigProvider::getEnabled();
 
@@ -25,8 +25,8 @@ class Data
             'host' => $host,
             'user' => $username,
             'pass' => $password,
-            'ssh_port' => $sshPort,
-            'ssh_timeout' => $timeout
+            'ssh_port' => (int)$sshPort,
+            'ssh_timeout' => (int)$timeout
         ];
 
     }

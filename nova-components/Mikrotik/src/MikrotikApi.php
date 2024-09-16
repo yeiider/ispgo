@@ -14,17 +14,23 @@ class MikrotikApi
     protected $client;
 
     /**
-     * Constructor para inicializar el cliente RouterOS usando las configuraciones de MikroTik.
+     * Constructor que inicializa el cliente RouterOS usando las configuraciones de MikroTik.
      *
      * @param array $config Configuración del cliente (host, user, pass, etc.)
+     * @param Client|null $client Opcional: Cliente inyectado para pruebas
      * @throws Exception Si no se puede conectar a MikroTik.
      */
-    public function __construct(array $config)
+    public function __construct(array $config, Client $client = null)
     {
-        try {
-            $this->client = new Client($config);
-        } catch (Exception $e) {
-            throw new Exception('Error connecting to MikroTik: ' . $e->getMessage());
+        // Si un cliente se pasa como parámetro, lo usamos. De lo contrario, creamos uno nuevo.
+        if ($client) {
+            $this->client = $client;
+        } else {
+            try {
+                $this->client = new Client($config);
+            } catch (Exception $e) {
+                throw new Exception('Error connecting to MikroTik: ' . $e->getMessage());
+            }
         }
     }
 
@@ -164,4 +170,7 @@ class MikrotikApi
     {
         $this->disconnect();
     }
+
+
 }
+

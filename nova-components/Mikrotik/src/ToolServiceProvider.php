@@ -48,11 +48,10 @@ class ToolServiceProvider extends ServiceProvider
         }
 
         Nova::router(['nova', Authenticate::class, Authorize::class], 'mikrotik')
-            ->group(__DIR__.'/../routes/inertia.php');
+            ->group(__DIR__ . '/../routes/inertia.php');
 
-        Route::middleware(['nova', Authorize::class])
-            ->prefix('nova-vendor/mikrotik')
-            ->group(__DIR__.'/../routes/api.php');
+        Route::prefix('mikrotik')
+            ->group(__DIR__ . '/../routes/api.php');
     }
 
     /**

@@ -21,7 +21,7 @@ class PPPoEProfileManager extends MikrotikBaseManager
     public function createPPPProfile(string $name, ?string $rateLimit = null, ?string $localAddress = null, ?string $remoteAddressPool = null, ?string $dnsServers = null): ?array
     {
         // Verificar si PPPoE está habilitado
-        if (MikrotikConfigProvider::getPppEnabled() !== '1') {
+        if (!MikrotikConfigProvider::getPppEnabled()) {
             throw new Exception("PPPoE está deshabilitado en la configuración.");
         }
 
