@@ -37,6 +37,7 @@ use App\Nova\Ticket;
 use App\NovaPermissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Ispgo\Mikrotik\Mikrotik;
 use Ispgo\SettingsManager\SettingsManager;
 use Laravel\Nova\Dashboards\Main;
 use Laravel\Nova\Menu\MenuGroup;
@@ -128,6 +129,11 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                         return $request->user() && $request->user()->can('Setting');
                     }),
 
+                MenuSection::make(__('Mikrotik Manager'),[
+                    MenuItem::link('Plans PPPoe','mikrotik/planes-ppp'),
+                    MenuItem::link('Ip Pools','mikrotik/ip-pool'),
+                ])->icon('cog')->collapsable(),
+
                 $this->getNovaPermissionsMenu($request), // Agregar menú de NovaPermissions
             ];
         });
@@ -182,7 +188,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         return [
             new SettingsManager,
-            new NovaPermissions
+            new NovaPermissions,
+            new Mikrotik
         ];
     }
 

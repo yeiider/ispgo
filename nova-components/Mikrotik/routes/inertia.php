@@ -17,3 +17,9 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 Route::get('/', function (NovaRequest $request) {
     return inertia('Mikrotik');
 });
+Route::get('/planes-ppp', function (NovaRequest $request) {
+    return inertia('Mikrotik');
+});
+Route::get('/ip-pool', function (NovaRequest $request) {
+    return inertia('Pool');
+});

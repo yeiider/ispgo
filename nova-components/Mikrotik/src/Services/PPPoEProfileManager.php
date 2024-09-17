@@ -3,6 +3,7 @@
 namespace Ispgo\Mikrotik\Services;
 
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
 
 class PPPoEProfileManager extends MikrotikBaseManager
@@ -43,6 +44,7 @@ class PPPoEProfileManager extends MikrotikBaseManager
             'remote-address' => $remoteAddressPool, // Pool de IPs
             'dns-server' => $dnsServers, // DNS opcionales
         ];
+
 
         // Ejecutar el comando para crear el perfil PPPoE
         return $this->mikrotikApi->execute('/ppp/profile/add', $params);
@@ -93,7 +95,7 @@ class PPPoEProfileManager extends MikrotikBaseManager
      */
     public function listPPPProfiles(): ?array
     {
-        // Ejecutar el comando para listar los perfiles PPPoE
+        $this->init();
         return $this->mikrotikApi->execute('/ppp/profile/print', []);
     }
 }
