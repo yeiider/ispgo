@@ -2,13 +2,15 @@
 
 namespace Ispgo\Mikrotik\Services;
 
-use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
+use Illuminate\Support\Facades\Log;
 use Ispgo\Mikrotik\MikrotikApi;
+use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
 use Exception;
 
 class PPPoEManager extends MikrotikBaseManager
 {
     protected $mikrotikApi;
+
 
 
     /**
@@ -24,77 +26,85 @@ class PPPoEManager extends MikrotikBaseManager
      */
     public function createPPPoEClient(string $username, string $password, string $service = 'pppoe', ?string $profile = null, ?string $remoteAddress = null): ?array
     {
-        // Verificar si PPPoE está habilitado
-        if (MikrotikConfigProvider::getPppEnabled() !== '1') {
+        if (!MikrotikConfigProvider::getEnabled()) {
             throw new Exception("PPPoE está deshabilitado en la configuración.");
         }
+        Log::info("PPPoE Crear PPPoE");
 
-        // Obtener perfil PPP por defecto si no se proporciona uno
-        $profile = $profile ?? MikrotikConfigProvider::getPppDefaultProfile();
+        $profile = $profile ?? "default";
+        $remoteAddress = MikrotikConfigProvider::getStaticIpEnabled() ? $remoteAddress : null;
 
-        // Obtener configuración de dirección IP estática (opcional)
-        $remoteAddress = $remoteAddress ?? MikrotikConfigProvider::getStaticIPAddress($username);
-
-        // Configurar los parámetros del cliente PPPoE
         $params = [
             'name' => $username,
             'password' => $password,
             'service' => $service,
-            'profile' => $profile,
-            'remote-address' => $remoteAddress,
         ];
+        if (MikrotikConfigProvider::getIpPoolEnabled()) {
+            $params['profile'] = $profile;
+        }
+        if ($remoteAddress) {
+            $params['remote-address'] = $remoteAddress;
+        }
 
-        // Crear el cliente PPPoE en el router MikroTik
-        $this->init();
         return $this->mikrotikApi->execute('/ppp/secret/add', $params);
     }
 
+
+
     /**
-     * Actualizar un cliente PPPoE existente.
+     * Habilitar un cliente PPPoE existente.
      *
      * @param string $username Nombre de usuario PPPoE.
-     * @param array $params Parámetros a actualizar (como password, profile, etc).
      * @return array|null Respuesta de la API de MikroTik.
      * @throws Exception
      */
-    public function updatePPPoEClient(string $username, array $params): ?array
+    public function enablePPPoEClient(string $username): ?array
     {
-        // Verificar si PPPoE está habilitado
-        if (MikrotikConfigProvider::getPppEnabled() !== '1') {
-            throw new Exception("PPPoE está deshabilitado en la configuración.");
+        try {
+            $this->init();
+            // Buscar el ID del cliente por el nombre de usuario
+            $clientId = $this->mikrotikApi->findPPPoEClientIdByUsername($username,'/ppp/secret/print');
+
+            if (!$clientId) {
+                throw new Exception("Cliente PPPoE no encontrado: $username");
+            }
+
+            // Ejecutar el comando para habilitar el cliente PPPoE
+            return $this->mikrotikApi->execute('/ppp/secret/set', [
+                '.id' => $clientId,  // Se utiliza el ID del cliente
+                'disabled' => 'no',  // Habilitar el cliente
+            ]);
+        } catch (Exception $e) {
+            throw new Exception('Error al habilitar el cliente PPPoE: ' . $e->getMessage());
         }
-
-        // Añadir el nombre del usuario al array de parámetros
-        $params['name'] = $username;
-
-        // Ejecutar el comando para actualizar el cliente PPPoE
-        return $this->mikrotikApi->execute('/ppp/secret/set', $params);
     }
 
     /**
-     * Eliminar un cliente PPPoE por su nombre de usuario.
+     * Deshabilitar un cliente PPPoE existente.
      *
      * @param string $username Nombre de usuario PPPoE.
      * @return array|null Respuesta de la API de MikroTik.
      * @throws Exception
      */
-    public function deletePPPoEClient(string $username): ?array
+    public function disablePPPoEClient(string $username): ?array
     {
-        // Ejecutar el comando para eliminar el cliente PPPoE
-        return $this->mikrotikApi->execute('/ppp/secret/remove', [
-            'name' => $username,
-        ]);
-    }
 
-    /**
-     * Obtener la lista de clientes PPPoE.
-     *
-     * @return array|null Respuesta de la API de MikroTik.
-     * @throws Exception
-     */
-    public function listPPPoEClients(): ?array
-    {
-        // Obtener la lista de clientes PPPoE
-        return $this->mikrotikApi->execute('/ppp/secret/print', []);
+        try {
+            $this->init();
+            // Buscar el ID del cliente por el nombre de usuario
+            $clientId = $this->mikrotikApi->findPPPoEClientIdByUsername($username,'/ppp/secret/print');
+
+            if (!$clientId) {
+                throw new Exception("Cliente PPPoE no encontrado: $username");
+            }
+
+            // Ejecutar el comando para deshabilitar el cliente PPPoE
+            return $this->mikrotikApi->execute('/ppp/secret/set', [
+                '.id' => $clientId,  // Se utiliza el ID del cliente
+                'disabled' => 'yes',  // Deshabilitar el cliente
+            ]);
+        } catch (Exception $e) {
+            throw new Exception('Error al deshabilitar el cliente PPPoE: ' . $e->getMessage());
+        }
     }
 }

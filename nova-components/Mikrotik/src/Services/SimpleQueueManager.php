@@ -9,14 +9,6 @@ use Exception;
 
 class SimpleQueueManager extends MikrotikBaseManager
 {
-    /**
-     * @throws Exception
-     */
-    public function __construct()
-    {
-        $this->init();
-
-    }
 
     /**
      * Crear una Simple Queue para un cliente específico.
@@ -49,6 +41,7 @@ class SimpleQueueManager extends MikrotikBaseManager
             'max-limit' => $downloadLimit . '/' . $uploadLimit,
             'queue' => $queueType ?: 'default',
         ];
+        $this->init();
 
         return $this->mikrotikApi->execute('/queue/simple/add', $params);
     }
@@ -102,6 +95,7 @@ class SimpleQueueManager extends MikrotikBaseManager
 
         Log::info(json_encode($params));
 
+        $this->init();
 
         // Ejecutar el comando para crear la simple queue en el router MikroTik
         return $this->mikrotikApi->execute('/queue/simple/add', $params);
@@ -138,8 +132,62 @@ class SimpleQueueManager extends MikrotikBaseManager
             'max-limit' => $downloadLimit . '/' . $uploadLimit,
             'queue' => $queueType ?: 'default',
         ];
-
+        $this->init();
         // Ejecutar el comando para actualizar la simple queue en el router MikroTik
         return $this->mikrotikApi->execute('/queue/simple/set', $params);
+    }
+
+    /**
+     * Habilitar un cliente PPPoE existente.
+     *
+     * @param string $username Nombre de usuario PPPoE.
+     * @return array|null Respuesta de la API de MikroTik.
+     * @throws Exception
+     */
+    public function enableSimpleQueueEClient(string $username): ?array
+    {
+        try {
+            $this->init();
+            // Buscar el ID del cliente por el nombre de usuario
+            $clientId = $this->mikrotikApi->findPPPoEClientIdByUsername($username,'/queue/simple/print');
+
+            if (!$clientId) {
+                throw new Exception("Cliente PPPoE no encontrado: $username");
+            }
+            return $this->mikrotikApi->execute('/queue/simple/set', [
+                '.id' => $clientId,
+                'disabled' => 'no', // Habilitar el cliente
+            ]);
+        } catch (Exception $e) {
+            throw new Exception('Error al habilitar el cliente PPPoE: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Deshabilitar un cliente PPPoE existente.
+     *
+     * @param string $username Nombre de usuario PPPoE.
+     * @return array|null Respuesta de la API de MikroTik.
+     * @throws Exception
+     */
+    public function disableSimpleQueueClient(string $username): ?array
+    {
+        try {
+            $this->init();
+
+            // Buscar el ID del cliente por el nombre de usuario
+            $clientId = $this->mikrotikApi->findPPPoEClientIdByUsername($username,'/queue/simple/print');
+
+            if (!$clientId) {
+                throw new Exception("Cliente PPPoE no encontrado: $username");
+            }
+
+            return $this->mikrotikApi->execute('/queue/simple/set', [
+                '.id' => $username,
+                'disabled' => 'yes', // Deshabilitar el cliente
+            ]);
+        } catch (Exception $e) {
+            throw new Exception('Error al deshabilitar el cliente PPPoE: ' . $e->getMessage());
+        }
     }
 }

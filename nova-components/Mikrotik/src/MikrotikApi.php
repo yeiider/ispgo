@@ -2,6 +2,7 @@
 
 namespace Ispgo\Mikrotik;
 
+use Illuminate\Support\Facades\Log;
 use RouterOS\Client;
 use RouterOS\Query;
 use Exception;
@@ -88,7 +89,6 @@ class MikrotikApi
             foreach ($params as $key => $value) {
                 $query->equal($key, $value);
             }
-
             // Ejecutar la consulta
             return $this->client->query($query)->read();
         } catch (Exception $e) {
@@ -153,6 +153,25 @@ class MikrotikApi
         } catch (Exception $e) {
             throw new Exception('Error in queryWithTag: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Buscar un cliente PPPoE por nombre de usuario y obtener su ID.
+     *
+     * @param string $username Nombre de usuario PPPoE.
+     * @return string|null El ID del cliente PPPoE, o null si no se encuentra.
+     * @throws Exception
+     */
+    public function findPPPoEClientIdByUsername(string $username,string $command): ?string
+    {
+        // Utiliza el método get() de MikrotikApi para buscar el cliente por nombre de usuario
+        $clients = $this->get($command, [['name', $username]]);
+
+        if (is_array($clients) && count($clients) > 0) {
+            return $clients[0]['.id'] ?? null;  // Devolver el ID del cliente si se encuentra
+        }
+
+        return null;  // Devolver null si no se encuentra el cliente
     }
 
     /**

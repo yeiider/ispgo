@@ -96,7 +96,7 @@ class MikrotikApi extends Controller
             ];
 
             // Crear el perfil PPPoE en MikroTik
-            $this->pppoeProfileManager->createPPPProfile($params['name'], $params['rate-limit'], $params['local-address'], $params['remote-address-pool'], $params['dns-server']);
+            $this->pppoeProfileManager->createPPPProfile($params['name'], $params['rate-limit'], $params['local-address']??null, $params['remote-address-pool'], $params['dns-server']);
 
             // Marcar el plan como sincronizado en la base de datos
             $plan->is_synchronized = true;

@@ -57,14 +57,30 @@ class MikrotikConfigProvider
         return (bool)ConfigHelper::getConfigValue(self::PPP_PATH . 'ppp_enabled');
     }
 
-    public static function getPppDefaultProfile(): ?string
+    public static function getServiceType(): ?string
     {
-        return ConfigHelper::getConfigValue(self::PPP_PATH . 'default_profile');
+        return ConfigHelper::getConfigValue(self::PPP_PATH . 'service_type');
     }
 
-    public static function getPppMaxSessions(): ?string
+    public static function getIpPoolEnabled(): bool
     {
-        return ConfigHelper::getConfigValue(self::PPP_PATH . 'max_sessions');
+        return (bool)ConfigHelper::getConfigValue(self::PPP_PATH . 'ip_pool_enabled');
+    }
+
+    public static function getClientIdentifier(): string
+    {
+        return (string)ConfigHelper::getConfigValue(self::PPP_PATH . 'client_identifier');
+    }
+
+    public static function getStaticIpEnabled(): string
+    {
+        return (string)ConfigHelper::getConfigValue(self::PPP_PATH . 'static_ip_enabled');
+    }
+
+    public static function getPasswordPPPSecret():string
+    {
+        return (string)ConfigHelper::getConfigValue(self::PPP_PATH . 'password_ppp_secret');
+
     }
 
     // Simple Queue settings
@@ -109,21 +125,6 @@ class MikrotikConfigProvider
         return ConfigHelper::getConfigValue(self::DHCP_PATH . 'dns_servers');
     }
 
-    // IP Pool settings
-    public static function getIPPoolName(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::IP_POOL_PATH . 'ip_pool_name');
-    }
-
-    public static function getIPPoolRangeStart(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::IP_POOL_PATH . 'range_start');
-    }
-
-    public static function getIPPoolRangeEnd(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::IP_POOL_PATH . 'range_end');
-    }
 
     // Static IP settings
     public static function getStaticIPAddress(string $identifier): ?string
@@ -146,4 +147,7 @@ class MikrotikConfigProvider
     {
         return ConfigHelper::getConfigValue(self::QOS_PATH . 'max_limit');
     }
+
+
+
 }

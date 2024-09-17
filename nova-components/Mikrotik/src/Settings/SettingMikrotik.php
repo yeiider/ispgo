@@ -3,6 +3,7 @@
 namespace Ispgo\Mikrotik\Settings;
 
 use Ispgo\Mikrotik\Settings\Config\Sources\QueueType;
+use Ispgo\Mikrotik\Settings\Config\Sources\ServicesType;
 
 class SettingMikrotik
 {
@@ -65,16 +66,34 @@ class SettingMikrotik
                 "label" => "Habilitar PPP",
                 "placeholder" => "Habilitar PPP",
             ],
-            "default_profile" => [
-                "field" => "text-field",
-                "label" => "Perfil PPP por Defecto",
+            "service_type" => [
+                "field" => "select-field",
+                "label" => "Service Type",
                 "placeholder" => "default",
+                "options" => ServicesType::class
             ],
-            "max_sessions" => [
-                "field" => "number-field",
-                "label" => "Máximo de Sesiones",
-                "placeholder" => "10",
+            "ip_pool_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Habilitar IP Pool",
+                "placeholder" => "Habilitar IP Pool",
             ],
+
+            "static_ip_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Habilitar IP Estática",
+                "placeholder" => "Habilitar IP Estática",
+            ],
+            "client_identifier" => [
+                "field" => "text-field",
+                "label" => "Identificador de Cliente (MAC o PPP Secret)",
+                "placeholder" => "00:11:22:33:44:55 o pppoeuser1",
+            ],
+            "password_ppp_secret" => [
+                "field" => "text-field",
+                "label" => "Password PPP Secret (PPP Secret)",
+                "placeholder" => "Password",
+            ],
+
         ];
     }
 
@@ -110,60 +129,9 @@ class SettingMikrotik
         ];
     }
 
-    public static function getIPPoolSettings(): array
-    {
-        return [
-            "setting" => [
-                "label" => "IP Pool Configuration",
-                "code" => "ip_pool"
-            ],
-            "ip_pool_enabled" => [
-                "field" => "boolean-field",
-                "label" => "Habilitar IP Pool",
-                "placeholder" => "Habilitar IP Pool",
-            ],
-            "ip_pool_name" => [
-                "field" => "text-field",
-                "label" => "Nombre del Pool de IP",
-                "placeholder" => "pool1",
-            ],
-            "range_start" => [
-                "field" => "text-field",
-                "label" => "Inicio del Rango de IP",
-                "placeholder" => "192.168.1.10",
-            ],
-            "range_end" => [
-                "field" => "text-field",
-                "label" => "Fin del Rango de IP",
-                "placeholder" => "192.168.1.100",
-            ],
-        ];
-    }
 
-    public static function getStaticIPSettings(): array
-    {
-        return [
-            "setting" => [
-                "label" => "Static IP Configuration",
-                "code" => "static_ip"
-            ],
-            "static_ip_enabled" => [
-                "field" => "boolean-field",
-                "label" => "Habilitar IP Estática",
-                "placeholder" => "Habilitar IP Estática",
-            ],
-            "client_identifier" => [
-                "field" => "text-field",
-                "label" => "Identificador de Cliente (MAC o PPP Secret)",
-                "placeholder" => "00:11:22:33:44:55 o pppoeuser1",
-            ],
-            "ip_address" => [
-                "field" => "text-field",
-                "label" => "Dirección IP Estática",
-                "placeholder" => "192.168.1.50",
-            ],
-        ];
-    }
+
+
 
 
     public static function getQoSSettings(): array
@@ -240,7 +208,6 @@ class SettingMikrotik
             ],
         ];
     }
-
 
 
     // Configuración DHCP

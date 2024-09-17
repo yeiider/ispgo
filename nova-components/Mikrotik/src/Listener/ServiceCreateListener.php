@@ -55,6 +55,7 @@ class ServiceCreateListener implements ShouldQueue
         $service = $event->service;
         if ($service->service_status !== "active")
             return;
+
         if (!MikrotikConfigProvider::getEnabled()) {
             Log::warning('Mikrotik no está habilitado. No se puede proceder con la creación del servicio.');
             return;
@@ -63,6 +64,10 @@ class ServiceCreateListener implements ShouldQueue
 
         // Obtener el servicio y su plan desde el evento
         $plan = $service->plan;
+        if (!$plan->is_synchronized) {
+            Log::warning('Este plan no se ha creado dentro de los PPP profile');
+            return;
+        }
 
         // Instanciar el PlanFormatter, SimpleQueueManager, y PPPoEManager
         $planFormatter = new PlanFormatter();
@@ -73,8 +78,6 @@ class ServiceCreateListener implements ShouldQueue
         $formattedData = $planFormatter->formatPlanAndService($plan, $service);
 
         try {
-            // Decidir cómo crear el usuario o configuración dependiendo de las configuraciones activas
-
             // Crear Simple Queue si está habilitado
             if (MikrotikConfigProvider::getSimpleQueueEnabled()) {
                 Log::info('Antes de llamar a createSimpleQueueFromFormattedData.');
@@ -85,17 +88,24 @@ class ServiceCreateListener implements ShouldQueue
 
             // Crear PPPoE si está habilitado
             if (MikrotikConfigProvider::getPppEnabled()) {
+                // Verificar si el pool de IP está activo
+                $useIpPool = MikrotikConfigProvider::getIpPoolEnabled(); // Obtener si el pool de IP está activo
+                $service = MikrotikConfigProvider::getServiceType();
+                $password = MikrotikConfigProvider::getPasswordPPPSecret();
+                // Si el pool de IP está activo, no enviar dirección IP
+                $serviceIp = $useIpPool ? null : $formattedData['service_ip'];
+                $profile = strtolower(str_replace(' ', '_', $formattedData['plan_name']));
+                // Crear PPPoE Client utilizando el nombre del plan como perfil
                 $pppoeManager->createPPPoEClient(
-                    $formattedData['plan_name'],
-                    'default_password',  // Cambiar por un valor real si es necesario
-                    'pppoe',             // Tipo de servicio
-                    null,                // Perfil, si es necesario
-                    $formattedData['service_ip'] // Dirección IP del servicio
+                    $formattedData['service_name'],     // Usar el nombre del plan como nombre de usuario
+                    $password,              // Contraseña predeterminada, cambiar según corresponda
+                    $service,                         // Tipo de servicio
+                    $profile,     // Usar el nombre del plan como perfil
+                    $serviceIp                       // Dirección IP (null si se usa pool de IPs)
                 );
                 Log::info('PPPoE creado para el servicio: ' . $formattedData['service_name']);
             }
 
-            // Agregar otras configuraciones aquí según sea necesario
         } catch (\Exception $e) {
             // Si falla la creación, registrar el error en los logs
             Log::error('Error al crear la configuración para el servicio: ' . $formattedData['service_name'] . '. ' . $e->getMessage());

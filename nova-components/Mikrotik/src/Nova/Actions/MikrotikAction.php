@@ -4,8 +4,10 @@ namespace Ispgo\Mikrotik\Nova\Actions;
 
 use App\Models\Services\Service;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
 use Laravel\Nova\Actions\Action;
+use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
 use Ispgo\Mikrotik\Services\PlanFormatter;
 use Ispgo\Mikrotik\Services\SimpleQueueManager;
@@ -43,6 +45,9 @@ class MikrotikAction extends Action
              **/
             $service = $model;
             $plan = $service->plan;
+            if (!$plan->is_synchronized) {
+                return ActionResponse::danger('Este plan no se ha creado dentro de los PPP profile');
+            }
 
             // Formatear los datos del plan y el servicio
             $formattedData = $this->planFormatter->formatPlanAndService($plan, $service);
@@ -57,12 +62,19 @@ class MikrotikAction extends Action
 
             // Verificar si se debe crear un PPPoE
             if (MikrotikConfigProvider::getPppEnabled()) {
+                $useIpPool = MikrotikConfigProvider::getIpPoolEnabled(); // Obtener si el pool de IP está activo
+                $service = MikrotikConfigProvider::getServiceType();
+                $password = MikrotikConfigProvider::getPasswordPPPSecret();
+
+                // Si el pool de IP está activo, no enviar dirección IP
+                $serviceIp = $useIpPool ? null : $formattedData['service_ip'];
+                $profile = strtolower(str_replace(' ', '_', $formattedData['plan_name']));
                 $this->pppoeManager->createPPPoEClient(
                     $formattedData['service_name'],
-                    'default_password',  // Se puede ajustar
-                    'pppoe',             // Tipo de servicio
-                    null,                // Perfil, si es necesario
-                    $formattedData['service_ip'] // Dirección IP del servicio
+                    $password,  // Se puede ajustar
+                    $service,             // Tipo de servicio
+                    $profile,                // Perfil, si es necesario
+                    $serviceIp // Dirección IP del servicio
                 );
             }
         }

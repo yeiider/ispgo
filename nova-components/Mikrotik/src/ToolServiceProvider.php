@@ -3,9 +3,11 @@
 namespace Ispgo\Mikrotik;
 
 use App\Events\ServiceCreated;
+use App\Events\ServiceUpdateStatus;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Ispgo\Mikrotik\Listener\ServiceChangeStatus;
 use Ispgo\Mikrotik\Listener\ServiceCreateListener;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Http\Middleware\Authenticate;
@@ -24,6 +26,10 @@ class ToolServiceProvider extends ServiceProvider
         Event::listen(
             ServiceCreated::class,
             [ServiceCreateListener::class, 'handle']
+        );
+        Event::listen(
+            ServiceUpdateStatus::class,
+            [ServiceChangeStatus::class, 'handle']
         );
 
 
