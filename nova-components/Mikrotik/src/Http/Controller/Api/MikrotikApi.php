@@ -58,6 +58,8 @@ class MikrotikApi extends Controller
                 return strtolower(str_replace(' ', '_', $profile['name']));
             }, $pppProfiles);
 
+            $syncedPlans = [];
+
             // Sincronizar los planes seleccionados que no están en MikroTik
             foreach ($selectedPlans as $plan) {
                 $formattedPlanName = strtolower(str_replace(' ', '_', $plan->name));
@@ -65,14 +67,23 @@ class MikrotikApi extends Controller
                 if (!in_array($formattedPlanName, $pppProfileNames)) {
                     // Crear el perfil en MikroTik
                     $this->createPPPProfile($plan, $request->input('pool'));
+                    $plan->is_synchronized = true; // Actualiza el estado de sincronización
+                } else {
+                    $plan->is_synchronized = true; // Ya estaba sincronizado
                 }
+
+                $syncedPlans[] = $plan; // Añadir el plan sincronizado a la lista
             }
 
-            return response()->json(["message" => "Selected profiles synchronized"], 200);
+            return response()->json([
+                "message" => "Selected profiles synchronized",
+                "data" => $syncedPlans // Devuelve los planes sincronizados con su estado
+            ], 200);
         } catch (Exception $e) {
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }
+
 
     /**
      * Crear un perfil PPPoE para un plan que no está sincronizado.
