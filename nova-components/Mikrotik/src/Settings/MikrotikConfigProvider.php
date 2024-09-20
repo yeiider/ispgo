@@ -3,6 +3,7 @@
 namespace Ispgo\Mikrotik\Settings;
 
 use App\Helpers\ConfigHelper;
+use function Symfony\Component\String\b;
 
 class MikrotikConfigProvider
 {
@@ -10,11 +11,14 @@ class MikrotikConfigProvider
     const PPP_PATH = "mikrotik/ppp/";
     const SIMPLE_QUEUE_PATH = "mikrotik/simple_queue/";
     const DHCP_PATH = "mikrotik/dhcp/";
+    const IP_POOL_PATH = "mikrotik/ip_pool/";
+    const STATIC_IP_PATH = "mikrotik/static_ip/";
+    const QOS_PATH = "mikrotik/qos/";
 
     // General MikroTik settings
-    public static function getEnabled(): ?string
+    public static function getEnabled(): ?bool
     {
-        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'enabled');
+        return (bool)ConfigHelper::getConfigValue(self::GENERAL_PATH . 'enabled');
     }
 
     public static function getHost(): ?string
@@ -22,9 +26,9 @@ class MikrotikConfigProvider
         return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'host');
     }
 
-    public static function getPort(): ?string
+    public static function getPort(): ?int
     {
-        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'port');
+        return (int)ConfigHelper::getConfigValue(self::GENERAL_PATH . 'port');
     }
 
     public static function getUsername(): ?string
@@ -48,25 +52,41 @@ class MikrotikConfigProvider
     }
 
     // PPP settings
-    public static function getPppEnabled(): ?string
+    public static function getPppEnabled(): ?bool
     {
-        return ConfigHelper::getConfigValue(self::PPP_PATH . 'enabled');
+        return (bool)ConfigHelper::getConfigValue(self::PPP_PATH . 'ppp_enabled');
     }
 
-    public static function getPppDefaultProfile(): ?string
+    public static function getServiceType(): ?string
     {
-        return ConfigHelper::getConfigValue(self::PPP_PATH . 'default_profile');
+        return ConfigHelper::getConfigValue(self::PPP_PATH . 'service_type');
     }
 
-    public static function getPppMaxSessions(): ?string
+    public static function getIpPoolEnabled(): bool
     {
-        return ConfigHelper::getConfigValue(self::PPP_PATH . 'max_sessions');
+        return (bool)ConfigHelper::getConfigValue(self::PPP_PATH . 'ip_pool_enabled');
+    }
+
+    public static function getClientIdentifier(): string
+    {
+        return (string)ConfigHelper::getConfigValue(self::PPP_PATH . 'client_identifier');
+    }
+
+    public static function getStaticIpEnabled(): string
+    {
+        return (string)ConfigHelper::getConfigValue(self::PPP_PATH . 'static_ip_enabled');
+    }
+
+    public static function getPasswordPPPSecret():string
+    {
+        return (string)ConfigHelper::getConfigValue(self::PPP_PATH . 'password_ppp_secret');
+
     }
 
     // Simple Queue settings
-    public static function getSimpleQueueEnabled(): ?string
+    public static function getSimpleQueueEnabled(): bool
     {
-        return ConfigHelper::getConfigValue(self::SIMPLE_QUEUE_PATH . 'enabled');
+        return (bool)ConfigHelper::getConfigValue(self::SIMPLE_QUEUE_PATH . 'simple_queue_enabled');
     }
 
     public static function getSimpleQueueLimitUpload(): ?string
@@ -87,7 +107,7 @@ class MikrotikConfigProvider
     // DHCP settings
     public static function getDhcpEnabled(): ?string
     {
-        return ConfigHelper::getConfigValue(self::DHCP_PATH . 'enabled');
+        return ConfigHelper::getConfigValue(self::DHCP_PATH . 'dhcp_enabled');
     }
 
     public static function getDhcpPool(): ?string
@@ -104,4 +124,30 @@ class MikrotikConfigProvider
     {
         return ConfigHelper::getConfigValue(self::DHCP_PATH . 'dns_servers');
     }
+
+
+    // Static IP settings
+    public static function getStaticIPAddress(string $identifier): ?string
+    {
+        return ConfigHelper::getConfigValue(self::STATIC_IP_PATH . $identifier . '/ip_address');
+    }
+
+    // QoS settings
+    public static function getQoSEnabled(): ?string
+    {
+        return ConfigHelper::getConfigValue(self::QOS_PATH . 'qos_enabled');
+    }
+
+    public static function getQoSPriority(): ?string
+    {
+        return ConfigHelper::getConfigValue(self::QOS_PATH . 'priority');
+    }
+
+    public static function getQoSMaxLimit(): ?string
+    {
+        return ConfigHelper::getConfigValue(self::QOS_PATH . 'max_limit');
+    }
+
+
+
 }

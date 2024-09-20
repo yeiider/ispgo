@@ -472,5 +472,12 @@ return [
         "ppp" => SettingMikrotik::getPPPSettings(),
         "simple_queue" => SettingMikrotik::getSimpleQueueSettings(),
         "dhcp" => SettingMikrotik::getDHCPSettings(),
+
+        // Métodos adicionales
+      // Configuración de IP Estáticas
+        "qos" => SettingMikrotik::getQoSSettings(),                 // Configuración de QoS y Prioridades
+        "ipv6" => SettingMikrotik::getIPv6Settings(),               // Configuración de IPv6
+        "monitoring" => SettingMikrotik::getMonitoringSettings(),   // Configuración de Monitoreo y Notificaciones
     ],
+
 ];

@@ -2,8 +2,13 @@
 
 namespace Ispgo\Mikrotik;
 
+use App\Events\ServiceCreated;
+use App\Events\ServiceUpdateStatus;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Ispgo\Mikrotik\Listener\ServiceChangeStatus;
+use Ispgo\Mikrotik\Listener\ServiceCreateListener;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Http\Middleware\Authenticate;
 use Laravel\Nova\Nova;
@@ -18,6 +23,16 @@ class ToolServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Event::listen(
+            ServiceCreated::class,
+            [ServiceCreateListener::class, 'handle']
+        );
+        Event::listen(
+            ServiceUpdateStatus::class,
+            [ServiceChangeStatus::class, 'handle']
+        );
+
+
         $this->app->booted(function () {
             $this->routes();
         });
@@ -39,11 +54,10 @@ class ToolServiceProvider extends ServiceProvider
         }
 
         Nova::router(['nova', Authenticate::class, Authorize::class], 'mikrotik')
-            ->group(__DIR__.'/../routes/inertia.php');
+            ->group(__DIR__ . '/../routes/inertia.php');
 
-        Route::middleware(['nova', Authorize::class])
-            ->prefix('nova-vendor/mikrotik')
-            ->group(__DIR__.'/../routes/api.php');
+        Route::prefix('mikrotik')
+            ->group(__DIR__ . '/../routes/api.php');
     }
 
     /**

@@ -23,7 +23,7 @@ class Mikrotik extends Tool
     /**
      * Build the menu that renders the navigation links for the tool.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param Request $request
      * @return mixed
      */
     public function menu(Request $request)
@@ -31,5 +31,17 @@ class Mikrotik extends Tool
         return MenuSection::make('Mikrotik')
             ->path('/mikrotik')
             ->icon('server');
+    }
+
+    /**
+     * Determine if the tool is authorized to be used.
+     *
+     * @param Request $request
+     * @return bool
+     */
+    public function authorize($request)
+    {
+        //return $request->user() && $request->user()->can('Setting');
+        return true;
     }
 }

@@ -3,6 +3,7 @@
 namespace Ispgo\Mikrotik\Settings;
 
 use Ispgo\Mikrotik\Settings\Config\Sources\QueueType;
+use Ispgo\Mikrotik\Settings\Config\Sources\ServicesType;
 
 class SettingMikrotik
 {
@@ -35,7 +36,7 @@ class SettingMikrotik
                 "placeholder" => "admin",
             ],
             "password" => [
-                "field" => "password-field",
+                "field" => "text-field",
                 "label" => "Contraseña API",
                 "placeholder" => "********",
             ],
@@ -60,21 +61,39 @@ class SettingMikrotik
                 "label" => "PPP Configuration",
                 "code" => "ppp"
             ],
-            "enabled" => [
+            "ppp_enabled" => [
                 "field" => "boolean-field",
                 "label" => "Habilitar PPP",
                 "placeholder" => "Habilitar PPP",
             ],
-            "default_profile" => [
-                "field" => "text-field",
-                "label" => "Perfil PPP por Defecto",
+            "service_type" => [
+                "field" => "select-field",
+                "label" => "Service Type",
                 "placeholder" => "default",
+                "options" => ServicesType::class
             ],
-            "max_sessions" => [
-                "field" => "number-field",
-                "label" => "Máximo de Sesiones",
-                "placeholder" => "10",
+            "ip_pool_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Habilitar IP Pool",
+                "placeholder" => "Habilitar IP Pool",
             ],
+
+            "static_ip_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Habilitar IP Estática",
+                "placeholder" => "Habilitar IP Estática",
+            ],
+            "client_identifier" => [
+                "field" => "text-field",
+                "label" => "Identificador de Cliente (MAC o PPP Secret)",
+                "placeholder" => "00:11:22:33:44:55 o pppoeuser1",
+            ],
+            "password_ppp_secret" => [
+                "field" => "text-field",
+                "label" => "Password PPP Secret (PPP Secret)",
+                "placeholder" => "Password",
+            ],
+
         ];
     }
 
@@ -86,7 +105,7 @@ class SettingMikrotik
                 "label" => "Simple Queue Configuration",
                 "code" => "simple_queue"
             ],
-            "enabled" => [
+            "simple_queue_enabled" => [
                 "field" => "boolean-field",
                 "label" => "Habilitar Simple Queue",
                 "placeholder" => "Habilitar Simple Queue",
@@ -110,6 +129,87 @@ class SettingMikrotik
         ];
     }
 
+
+
+
+
+
+    public static function getQoSSettings(): array
+    {
+        return [
+            "setting" => [
+                "label" => "QoS Configuration",
+                "code" => "qos"
+            ],
+            "qos_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Habilitar QoS",
+                "placeholder" => "Habilitar QoS",
+            ],
+            "priority" => [
+                "field" => "number-field",
+                "label" => "Prioridad del Tráfico",
+                "placeholder" => "1-8",
+            ],
+            "max_limit" => [
+                "field" => "text-field",
+                "label" => "Límite Máximo de Ancho de Banda",
+                "placeholder" => "50M/50M",
+            ],
+        ];
+    }
+
+    public static function getIPv6Settings(): array
+    {
+        return [
+            "setting" => [
+                "label" => "IPv6 Configuration",
+                "code" => "ipv6"
+            ],
+            "ipv_6_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Habilitar IPv6",
+                "placeholder" => "Habilitar IPv6",
+            ],
+            "ipv6_pool" => [
+                "field" => "text-field",
+                "label" => "Pool IPv6",
+                "placeholder" => "ipv6-pool1",
+            ],
+            "prefix_length" => [
+                "field" => "number-field",
+                "label" => "Longitud del Prefijo",
+                "placeholder" => "64",
+            ],
+        ];
+    }
+
+    public static function getMonitoringSettings(): array
+    {
+        return [
+            "setting" => [
+                "label" => "Monitoring and Notifications",
+                "code" => "monitoring"
+            ],
+            "monitory_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Habilitar Monitoreo",
+                "placeholder" => "Habilitar Monitoreo",
+            ],
+            "notification_email" => [
+                "field" => "text-field",
+                "label" => "Correo Electrónico para Notificaciones",
+                "placeholder" => "admin@isp.com",
+            ],
+            "alert_threshold" => [
+                "field" => "number-field",
+                "label" => "Umbral de Alerta (Uso de CPU o Ancho de Banda)",
+                "placeholder" => "80 (%)",
+            ],
+        ];
+    }
+
+
     // Configuración DHCP
     public static function getDHCPSettings(): array
     {
@@ -118,7 +218,7 @@ class SettingMikrotik
                 "label" => "DHCP Configuration",
                 "code" => "dhcp"
             ],
-            "enabled" => [
+            "dhcp_enabled" => [
                 "field" => "boolean-field",
                 "label" => "Habilitar DHCP",
                 "placeholder" => "Habilitar DHCP",
