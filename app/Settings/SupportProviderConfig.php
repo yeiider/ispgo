@@ -6,11 +6,11 @@ use App\Helpers\ConfigHelper;
 
 class SupportProviderConfig
 {
-    const PATH_SUPPORT = "invoice/general/";
+    const PATH_SUPPORT = "support/ticket_settings/";
 
     public static function allowCustomerCreateTickets(): bool
     {
-        return (bool)ConfigHelper::getConfigValue(self::PATH_SUPPORT . 'allow_create_ticket');
+        return ConfigHelper::getConfigValue(self::PATH_SUPPORT . 'allow_create_ticket');
     }
 
     public static function notifyCustomer(): bool

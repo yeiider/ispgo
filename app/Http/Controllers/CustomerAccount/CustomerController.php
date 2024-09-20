@@ -27,7 +27,6 @@ class CustomerController extends Controller
 
         $customer = $this->getCustomer();
 
-
         $request->validate([
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
@@ -40,13 +39,13 @@ class CustomerController extends Controller
             ],
         ]);
 
-
         $customer->update($request->only(
             'first_name',
             'last_name',
             'email_address',
             'date_of_birth',
-            'phone_number'
+            'phone_number',
+            'document_type'
         ));
         return redirect()->route('index');
     }

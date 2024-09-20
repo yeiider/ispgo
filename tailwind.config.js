@@ -43,6 +43,20 @@ module.exports = {
                     DEFAULT: 'hsl(var(--card))',
                     foreground: 'hsl(var(--card-foreground))'
                 },
+                purple: {
+                    DEFAULT: '#0067a5',
+                    '50': '#f0f9ff',
+                    '100': '#dff1ff',
+                    '200': '#b8e6ff',
+                    '300': '#7ad2ff',
+                    '400': '#33bcfd',
+                    '500': '#09a3ee',
+                    '600': '#0083cc',
+                    '700': '#0067a5',
+                    '800': '#045888',
+                    '900': '#0a4c75',
+                    '950': '#062e4b',
+                }
             },
         }
     },

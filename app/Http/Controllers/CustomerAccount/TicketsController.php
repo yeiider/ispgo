@@ -41,8 +41,9 @@ class TicketsController extends Controller
     public function create(): \Inertia\Response
     {
         if (!SupportProviderConfig::allowCustomerCreateTickets()) {
-             abort(403);
+            abort(403);
         }
+
         return Inertia::render('CustomerAccount/Tickets/Create', []);
     }
 
