@@ -28,7 +28,12 @@ onMounted(() => {
       <div class="actions">
         <a
           :href="ticketCreateUrl"
-          class="component-button px-4 py-2.5 text-sm font-medium rounded-md opacity-[95%] hover:opacity-100 focus:ring-2 focus:ring-offset-2 cursor-pointer inline-flex items-center w-full justify-center disabled:opacity-50 hover:font-semibold focus:outline-none">Create
+          class="btn-primary">Create
+          tickets</a>
+
+        <a
+          :href="ticketCreateUrl"
+          class="btn-primary-outline mt-4">Create
           tickets</a>
       </div>
     </div>
