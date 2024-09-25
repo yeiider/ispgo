@@ -4,6 +4,7 @@ import Input from "../Components/Input.vue";
 import Select from "../Components/Select.vue";
 import {useForm} from "@inertiajs/inertia-vue3";
 import Button from "../Components/Button.vue";
+import PaperAirplane from './../Icons/PaperAirplane.vue'
 
 const props = defineProps({
   sidebar: Object,
@@ -47,13 +48,13 @@ const handleSubmit = () => {
     form.put(props.routeUpdateCustomer);
   }
 };
+
 </script>
 
 <template>
   <Layout :sidebar="sidebar" :customer="customer">
     <h1 class="text-3xl font-semibold text-slate-950">Edit Account</h1>
     <h2 class="text-2xl mt-5 md:mt-10 font-light">Form</h2>
-    {{ customer }}
     <hr class="my-2 border-gray-300">
     <form class="space-y-5 w-full mt-10" @submit.prevent="handleSubmit">
       <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -72,12 +73,15 @@ const handleSubmit = () => {
         <Input label="Identity Document" id="identity_document" v-model="form.identity_document"
                name="identity_document" type="number" class="col-span-1" :required="true"/>
       </div>
+      <hr class="my-10">
+
       <div>
         <Button
           class=""
           :is-loading="form.processing"
           type="submit">
-          Submit
+          <span>Submit</span>
+          <PaperAirplane/>
         </Button>
       </div>
     </form>

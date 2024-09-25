@@ -48,17 +48,25 @@
     }
 }
 
-.component-button {
-    color: #ffffff;
-    background-color: #0ea5e9;
-}
 
 @layer components {
-    .btn-primary {
-        @apply bg-purple text-white px-4 py-2.5 text-sm font-medium rounded-md opacity-[95%] hover:opacity-100 focus:ring-2 focus:ring-offset-2 cursor-pointer inline-flex items-center w-full justify-center disabled:opacity-50 focus:outline-none
+    .btn {
+        @apply px-4 py-2 rounded-lg font-medium inline-flex leading-none items-center justify-center gap-2 tracking-tight ;
     }
 
-    .btn-primary-outline {
-        @apply border-[1px] border-purple text-purple px-4 py-2.5 text-sm font-medium rounded-md opacity-[95%] hover:opacity-100 hover:bg-purple-100 focus:ring-2 focus:ring-offset-2 cursor-pointer inline-flex items-center w-full justify-center disabled:opacity-50 focus:outline-none
+    .btn-primary {
+        @apply bg-purple-700 text-white hover:bg-purple-700/90;
     }
+
+    .btn-outline-primary {
+        @apply text-purple-700 border-[1px] border-purple-700 hover:bg-purple-700 hover:text-white;
+    }
+
+    .btn-text {
+        @apply text-black bg-transparent;
+    }
+
+   .btn-outline-danger {
+       @apply text-red-500 border-[1px] border-red-500 hover:bg-red-500/90 hover:text-white;
+   }
 }

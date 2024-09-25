@@ -70,7 +70,7 @@ onMounted(updateFocusState);
     <div class="flex relative flex-col justify-center h-11">
       <div class="flex relative">
         <label :for="id" @click="inputRef.focus()"
-               :class="{'top-0 -translate-y-1 ml-2 text-xs auth-component-input-label-focused text-[#0ea5e9] font-bold' : isFocusedOrFilled, 'top-[16px] ml-2.5 text-[15px] text-gray-500' : !isFocusedOrFilled }"
+               :class="{'top-0 -translate-y-1 ml-2 text-xs auth-component-input-label-focused text-purple font-bold' : isFocusedOrFilled, 'top-[16px] ml-2.5 text-[15px] text-gray-500' : !isFocusedOrFilled }"
                class="block absolute px-1.5 py-0 font-normal leading-normal bg-white duration-300 ease-out cursor-text auth-component-input dark:text-gray-300">
           {{ label }}
           <span v-if="required" class="text-red-500">*</span>
@@ -88,7 +88,7 @@ onMounted(updateFocusState);
             :value="modelValue"
             @input="updateValue"
             ref="inputRef"
-            class="auth-component-input appearance-none flex w-full h-11 px-3.5 text-sm bg-white border rounded-md border-gray-300 ring-offset-background placeholder:text-gray-500 focus:outline-none focus:border-0 focus:ring-2 focus:ring-[#0ea5e9] disabled:cursor-not-allowed disabled:opacity-50 ">
+            class="auth-component-input appearance-none flex w-full h-11 px-3.5 text-sm bg-white border rounded-md border-gray-300 ring-offset-background placeholder:text-gray-500 focus:outline-none focus:border-0 focus:ring-2 focus:ring-purple disabled:cursor-not-allowed disabled:opacity-50 ">
         </div>
       </div>
     </div>
