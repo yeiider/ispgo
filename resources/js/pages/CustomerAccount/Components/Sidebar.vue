@@ -38,7 +38,7 @@ const showMenu = () => {
       </svg>
     </button>
     <div
-      class="h-screen flex-col justify-between  hidden sm:flex"
+      class="h-screen flex-col justify-between hidden sm:flex lg:border-l lg:border-r-gray-50"
       :class="{active: isActive}">
       <div class="px-4 py-6">
         <div class="flex justify-center">
@@ -68,8 +68,9 @@ const showMenu = () => {
         class="sticky inset-x-0 bottom-0 border-t border-gray-100 hidden sm:block"
         :class="{active: isActive}">
         <div class="flex flex-col justify-between flex-wrap gap-2 bg-white p-4">
-          <p class="text-sm mb-2 font-semibold">
-            <span>{{ fullName }}</span>
+          <p class="text-sm mb-2 ">
+            <span>👋 Hello </span>
+            <span class="font-semibold"> {{ fullName }}</span>
             <span class="hidden">{{ customer.email_address }}</span>
           </p>
           <a :href="sidebar.url_logout"
