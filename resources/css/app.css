@@ -48,10 +48,9 @@
     }
 }
 
-
 @layer components {
     .btn {
-        @apply px-4 py-2 rounded-lg font-medium inline-flex leading-none items-center justify-center gap-2 tracking-tight ;
+        @apply px-5 py-3 rounded-lg font-medium inline-flex leading-none items-center justify-center gap-2 tracking-tight ;
     }
 
     .btn-primary {
@@ -66,7 +65,7 @@
         @apply text-black bg-transparent;
     }
 
-   .btn-outline-danger {
-       @apply text-red-500 border-[1px] border-red-500 hover:bg-red-500/90 hover:text-white;
-   }
+    .btn-outline-danger {
+        @apply text-red-500 border-[1px] border-red-500 hover:bg-red-500/90 hover:text-white;
+    }
 }

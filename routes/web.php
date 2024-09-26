@@ -58,6 +58,7 @@ Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('
     Route::get('/tickets/create', [TicketsController::class, 'create'])->name('tickets.create');
     Route::get('/customer/edit', [CustomerController::class, 'edit'])->name('customer.edit');
     Route::put('/customer/update', [CustomerController::class, 'update'])->name('customer.update');
+    Route::put('/customer/change-password', [CustomerController::class, 'changePassword'])->name('customer.changePassword');
 });
 
 

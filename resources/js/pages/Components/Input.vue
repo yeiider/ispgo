@@ -1,5 +1,6 @@
 <script setup>
 import {onMounted, ref} from "vue";
+import {twMerge} from "tailwind-merge"
 
 defineProps({
   type: String,
@@ -10,7 +11,11 @@ defineProps({
     type: Boolean,
     default: false
   },
-  modelValue: String
+  modelValue: String,
+  error: {
+    type: Boolean,
+    required: false
+  }
 });
 
 const inputRef = ref(null);
@@ -88,13 +93,9 @@ onMounted(updateFocusState);
             :value="modelValue"
             @input="updateValue"
             ref="inputRef"
-            class="auth-component-input appearance-none flex w-full h-11 px-3.5 text-sm bg-white border rounded-md border-gray-300 ring-offset-background placeholder:text-gray-500 focus:outline-none focus:border-0 focus:ring-2 focus:ring-purple disabled:cursor-not-allowed disabled:opacity-50 ">
+            :class="twMerge('auth-component-input appearance-none flex w-full h-11 px-3.5 text-sm bg-white border rounded-md border-gray-300 ring-offset-background placeholder:text-gray-500 focus:outline-none focus:border-0 focus:ring-2 focus:ring-purple disabled:cursor-not-allowed disabled:opacity-50', error? 'border-red-500': '')">
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-
-</style>
