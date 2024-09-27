@@ -6,6 +6,14 @@ import Select from "../../Components/Select.vue";
 import Button from "../../Components/Button.vue"
 import {Icon} from "../../Icons/index.js";
 
+const props = defineProps({
+  errors: {
+    type: Object,
+    required: false
+  },
+  documentTypes: Array
+})
+
 const form = useForm({
   first_name: null,
   last_name: null,
@@ -19,10 +27,6 @@ const form = useForm({
 const submit = () => {
   form.post('register');
 }
-
-defineProps({
-  documentTypes: Array
-})
 
 </script>
 
@@ -71,8 +75,10 @@ defineProps({
         label="Email Address"
         id="email"
         name="email"
-      />
-
+        :error="'email_address' in errors"
+      >
+        <p v-if="errors && 'email_address' in errors" class="text-sm text-red-500 mt-1">{{ errors.email_address }}*</p>
+      </Input>
       <Input
         v-model="form.password"
         type="password"
@@ -80,6 +86,7 @@ defineProps({
         label="Password"
         id="password"
         name="password"
+        :error="'password' in errors"
       />
 
       <Input
@@ -89,7 +96,10 @@ defineProps({
         label="Confirm Password"
         id="password_confirmation"
         name="password_confirmation"
-      />
+        :error="'password' in errors"
+      >
+        <p v-if="errors && 'password' in errors" class="text-sm text-red-500 mt-1">{{ errors.password }}*</p>
+      </Input>
 
       <Button
         :is-loading="form.processing"
@@ -108,7 +118,3 @@ defineProps({
     </div>
   </LayoutAuth>
 </template>
-
-<style scoped>
-
-</style>

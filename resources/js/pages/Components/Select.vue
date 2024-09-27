@@ -99,6 +99,7 @@ onMounted(updateFocusState);
         </div>
       </div>
     </div>
+    <slot></slot>
   </div>
 </template>
 

@@ -8,7 +8,7 @@ class SupportProviderConfig
 {
     const PATH_SUPPORT = "support/ticket_settings/";
 
-    public static function allowCustomerCreateTickets(): bool
+    public static function allowCustomerCreateTickets(): bool | null
     {
         return ConfigHelper::getConfigValue(self::PATH_SUPPORT . 'allow_create_ticket');
     }

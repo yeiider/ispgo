@@ -129,9 +129,11 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                         return $request->user() && $request->user()->can('Setting');
                     }),
 
-                MenuSection::make(__('Mikrotik Manager'),[
-                    MenuItem::link('Plans PPPoe','mikrotik/planes-ppp'),
-                    MenuItem::link('Ip Pools','mikrotik/ip-pool'),
+                MenuSection::make(__('Mikrotik Manager'), [
+                    MenuItem::link('Plans PPPoe', 'mikrotik/planes-ppp'),
+                    MenuItem::link('Ip Pools', 'mikrotik/ip-pool'),
+                    MenuItem::link('Ipv6 Pools', 'mikrotik/ipv6-pool'),
+                    MenuItem::link('DHCP Server Ipv6', 'mikrotik/dhcp-serve'),
                 ])->icon('cog')->collapsable(),
 
                 $this->getNovaPermissionsMenu($request), // Agregar menú de NovaPermissions

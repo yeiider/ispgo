@@ -22,7 +22,8 @@
         "laravel/passport": "^12.0",
         "laravel/tinker": "^2.9",
         "sereny/nova-permissions": "^1.6",
-        "ispgo/mikrotik": "@dev"
+        "ispgo/mikrotik": "@dev",
+        "ispgo/smartolt": "@dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -99,6 +100,10 @@
         "3": {
             "type": "path",
             "url": "./nova-components/Mikrotik"
+        },
+        "4": {
+            "type": "path",
+            "url": "./nova-components/Smartolt"
         }
     }
 }
