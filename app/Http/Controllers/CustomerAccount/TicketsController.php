@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Settings\Config\Sources\IssueTypes;
 use App\Settings\SupportProviderConfig;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -41,9 +42,12 @@ class TicketsController extends Controller
     public function create(): \Inertia\Response
     {
         if (!SupportProviderConfig::allowCustomerCreateTickets()) {
-             abort(403);
+            abort(403);
         }
-        return Inertia::render('CustomerAccount/Tickets/Create', []);
+
+        $issueTypes = IssueTypes::getConfig();
+
+        return Inertia::render('CustomerAccount/Tickets/Create', compact('issueTypes'));
     }
 
 

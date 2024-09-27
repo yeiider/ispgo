@@ -7,6 +7,16 @@ defineProps({
   name: String,
   label: String,
   id: String,
+  rows: {
+    type: String,
+    default: '5',
+    required: false
+  },
+  cols: {
+    type: String,
+    default: '6',
+    required: false
+  },
   required: {
     type: Boolean,
     default: false
@@ -72,7 +82,7 @@ onMounted(updateFocusState);
 
 <template>
   <div class="w-full h-auto">
-    <div class="flex relative flex-col justify-center h-11">
+    <div class="flex relative flex-col justify-center">
       <div class="flex relative">
         <label :for="id" @click="inputRef.focus()"
                :class="{'top-0 -translate-y-1 ml-2 text-xs auth-component-input-label-focused text-purple font-bold' : isFocusedOrFilled, 'top-[16px] ml-2.5 text-[15px] text-gray-500' : !isFocusedOrFilled }"
@@ -82,18 +92,20 @@ onMounted(updateFocusState);
         </label>
 
         <div data-model="email" class="mt-1.5 w-full rounded-md shadow-sm auth-component-input-container">
-          <input
+          <textarea
             :required="required"
             :id="id"
             :name="name"
-            :type="type"
             @focus="onFocus()"
             @blur="onBlur()"
             @change="onChange"
             :value="modelValue"
             @input="updateValue"
             ref="inputRef"
-            :class="twMerge('auth-component-input appearance-none flex w-full h-11 px-3.5 text-sm bg-white border rounded-md border-gray-300 ring-offset-background placeholder:text-gray-500 focus:outline-none focus:border-0 focus:ring-2 focus:ring-purple disabled:cursor-not-allowed disabled:opacity-50', error? 'border-red-500': '')">
+            :rows="rows"
+            :cols="cols"
+            :class="twMerge('auth-component-input appearance-none flex w-full min-h-11 px-3.5 pt-[12px] text-sm bg-white border rounded-md border-gray-300 ring-offset-background placeholder:text-gray-500 focus:outline-none focus:border-0 focus:ring-2 focus:ring-purple disabled:cursor-not-allowed disabled:opacity-50', error? 'border-red-500': '')">
+            </textarea>
         </div>
       </div>
     </div>

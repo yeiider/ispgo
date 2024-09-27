@@ -3,6 +3,7 @@
 import Layout from "../Layouts/Dashboard.vue";
 import {onMounted, ref} from "vue";
 import Pagination from "../../Components/Pagination.vue"
+import {Icon} from "../../Icons/index.js";
 
 const props = defineProps({
   sidebar: Object,
@@ -28,8 +29,10 @@ onMounted(() => {
       <div class="actions">
         <a
           :href="ticketCreateUrl"
-          class="component-button px-4 py-2.5 text-sm font-medium rounded-md opacity-[95%] hover:opacity-100 focus:ring-2 focus:ring-offset-2 cursor-pointer inline-flex items-center w-full justify-center disabled:opacity-50 hover:font-semibold focus:outline-none">Create
-          tickets</a>
+          class="btn btn-outline-primary mt-4">
+          <span>Create tickets</span>
+          <Icon.SquaresPlus/>
+        </a>
       </div>
     </div>
     <div class="flex flex-col">
