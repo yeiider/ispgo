@@ -4,6 +4,7 @@ import Input from "../../Components/Input.vue";
 import {useForm} from "@inertiajs/inertia-vue3";
 import Select from "../../Components/Select.vue";
 import Button from "../../Components/Button.vue"
+import {Icon} from "../../Icons/index.js";
 
 const form = useForm({
   first_name: null,
@@ -94,7 +95,8 @@ defineProps({
         :is-loading="form.processing"
         type="submit"
         class="w-full">
-        Continue
+        <span>Continue</span>
+        <Icon.LockOpen/>
       </Button>
     </form>
     <div class="mt-3 space-x-0.5 text-sm leading-5 text-left w-full" style="color:#212936">

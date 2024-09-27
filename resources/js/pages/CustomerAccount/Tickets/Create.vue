@@ -6,6 +6,8 @@ import {useForm} from "@inertiajs/inertia-vue3";
 import PaperAirplane from "../../Icons/PaperAirplane.vue";
 import Button from "../../Components/Button.vue";
 import Select from "../../Components/Select.vue";
+import vueFilePond from "vue-filepond";
+import "filepond/dist/filepond.min.css";
 
 const props = defineProps({
   sidebar: Object,
@@ -28,6 +30,8 @@ const handleSubmit = () => {
 
 }
 
+const FilePond = vueFilePond();
+
 </script>
 
 <template>
@@ -37,12 +41,12 @@ const handleSubmit = () => {
       <h2 class="text-2xl mt-5 md:mt-10 font-light">Create a new ticket</h2>
       <hr>
       <hr class="my-2 border-gray-300">
-      <div class="grid md:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Input
           label="Title"
           v-model="form.title"
           type="text"
-          class="md:col-span-2 lg:col-span-3"
+          class="col-span-4 md:col-span-2 lg:col-span-3"
           :required="true"
         />
         <Select
@@ -50,7 +54,7 @@ const handleSubmit = () => {
           name="issue_type"
           v-model="form.issue_type"
           :required="true"
-          class="md:col-span-2 lg:col-span-2"
+          class="col-span-4 md:col-span-2 lg:col-span-2"
           :options="issueTypes"
         />
         <Textarea
@@ -72,18 +76,20 @@ const handleSubmit = () => {
           label="Contact Method"
           v-model="form.contact_method"
           type="text"
-          class="md:col-span-2 lg:col-span-2"
+          class="col-span-4 md:col-span-2 lg:col-span-2"
           :required="true"
         />
       </div>
-      <button
-        type="submit"
-        class="btn btn-primary"
-        :is-loading="form.processing"
-      >
-        <span>Submit</span>
-        <PaperAirplane/>
-      </button>
+      <div class="actions">
+        <button
+          type="submit"
+          class="btn btn-primary w-full md:w-auto"
+          :is-loading="form.processing"
+        >
+          <span>Submit</span>
+          <PaperAirplane/>
+        </button>
+      </div>
     </form>
   </Layout>
 
