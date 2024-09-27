@@ -48,6 +48,9 @@ Route::middleware('guest:customer')->prefix('customer')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('customer.login');
     Route::get('/register', [AuthController::class, 'showRegisterForm']);
     Route::post('/register', [AuthController::class, 'register'])->name('customer.register');
+    Route::get('/password/reset', function () {
+        return Inertia::render('CustomerAccount/Authentication/ResetPassword');
+    })->name('customer.password.reset');
 });
 
 Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('customer-account')->group(function () {

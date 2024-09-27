@@ -86,7 +86,7 @@ class AuthController extends Controller
         Auth::guard('customer')->login($customer);
         $customer->sendEmailVerificationNotification();
 
-
         return redirect()->route('index');
     }
+
 }
