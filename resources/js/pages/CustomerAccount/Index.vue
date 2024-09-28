@@ -3,7 +3,11 @@ import Layout from "./Layouts/Dashboard.vue";
 import IconPencil from './../Icons/Pencil.vue'
 import {Icon} from './../Icons/index.js'
 
-defineProps({sidebar: Object, customer: Object, route_edit_customer: String})
+defineProps({
+  sidebar: Object,
+  customer: Object,
+  route_edit_customer: String
+})
 
 </script>
 
@@ -65,7 +69,7 @@ defineProps({sidebar: Object, customer: Object, route_edit_customer: String})
         <a :href="route_edit_customer"
            class="btn btn-outline-primary">
           <span>Edit</span>
-          <Icon.Pencil class="size-5" />
+          <Icon.Pencil class="size-5"/>
         </a>
       </div>
     </div>

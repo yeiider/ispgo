@@ -3,12 +3,16 @@ import {onMounted, ref} from "vue";
 import {Icon} from "../../Icons/index.js";
 
 
-const props = defineProps({sidebar: Object, customer: Object});
+const props = defineProps({
+  sidebar: Object,
+  customer: Object
+});
 
 const href = window.location.href;
 
 const fullName = ref('')
 onMounted(() => {
+  console.log(props)
   let customer = props.customer;
   fullName.value = `${customer?.first_name} ${customer?.last_name}`;
 })
