@@ -77,7 +77,7 @@ const submit = () => {
         name="email"
         :error="'email_address' in errors"
       >
-        <p v-if="errors && 'email_address' in errors" class="text-sm text-red-500 mt-1">{{ errors.email_address }}*</p>
+        <p v-if="errors && 'email_address' in errors" class="text-sm text-red-500 mt-2">{{ errors.email_address }}*</p>
       </Input>
       <Input
         v-model="form.password"
@@ -98,7 +98,7 @@ const submit = () => {
         name="password_confirmation"
         :error="'password' in errors"
       >
-        <p v-if="errors && 'password' in errors" class="text-sm text-red-500 mt-1">{{ errors.password }}*</p>
+        <p v-if="errors && 'password' in errors" class="text-sm text-red-500 mt-2">{{ errors.password }}*</p>
       </Input>
 
       <Button

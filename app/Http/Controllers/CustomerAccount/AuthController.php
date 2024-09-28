@@ -4,8 +4,12 @@ namespace App\Http\Controllers\CustomerAccount;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customers\Customer;
+use App\Models\PasswordReset;
 use App\Settings\Config\Sources\DocumentType;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Http\{Request, RedirectResponse};
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -89,4 +93,84 @@ class AuthController extends Controller
         return redirect()->route('index');
     }
 
+
+    /**
+     * Display the password reset form.
+     *
+     * @return \Inertia\Response
+     */
+    public function showPasswordResetForm(): \Inertia\Response
+    {
+        return Inertia::render('CustomerAccount/Authentication/ResetPassword', []);
+    }
+
+    /**
+     * Send a password reset link to the given customer.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function sendPasswordResetEmail(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $request->validate([
+            'email_address' => 'required|string|email|max:255|exists:customers,email_address',
+        ]);
+
+        $customer = Customer::where('email_address', $request->email_address)->first();
+
+        if ($customer) {
+            // Generate a password reset token and send email
+            $token = Str::random(60);
+            DB::table('password_resets')->insert([
+                'email' => $request->email_address,
+                'token' => $token,
+                'created_at' => now(),
+            ]);
+
+            // Send email to the customer with the reset link
+            Mail::send('emails.password_reset', ['token' => $token], function ($message) use ($customer) {
+                $message->to($customer->email_address);
+                $message->subject('Password Reset Request');
+            });
+        }
+
+        return back()->with('status', 'We have emailed your password reset link!');
+    }
+
+    public function showCreatePassword(Request $request, $token): \Inertia\Response|RedirectResponse
+    {
+        if (!$token) {
+            return redirect()
+                ->withErrors(['token' => 'Invalid token'])
+                ->route('customer.password.reset');
+        }
+
+        $passwordReset = PasswordReset::where('token', $token)->firstOrFail();
+        $email = $passwordReset->email;
+        $customer = Customer::where('email_address', $email)->first();
+        if (!$customer) {
+            return redirect()->withErrors([
+                'error' => 'This password reset token is invalid.',
+            ])->route('customer.password.reset');
+        }
+
+        $routeCreatePassword = route('customer.password.create');
+        return Inertia::render('CustomerAccount/Authentication/CreatePassword', compact('customer', 'routeCreatePassword'));
+    }
+
+    public function createPassword(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'email_address' => 'required|string|email|max:255|exists:customers,email_address',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $customer = Customer::where('email_address', $request->email_address)->first();
+        $customer->password = Hash::make($request->password);
+        $customer->save();
+
+        return redirect()
+            ->route('customer.login')
+            ->with('status', 'Your password has been created!');
+    }
 }

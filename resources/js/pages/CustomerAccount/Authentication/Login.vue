@@ -25,7 +25,6 @@ const submit = () => {
 <template>
   <LayoutAuth title="Sign in">
     <form class="space-y-5 w-full" @submit.prevent="submit">
-<<<<<<< HEAD
       <div v-if="form.errors?.error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
            role="alert">
         <span class="block sm:inline">{{ form.errors?.error }}</span>
@@ -39,11 +38,6 @@ const submit = () => {
       </div>
       <Input v-model="form.email_address" :required="true" type="email" label="Email Address" id="email" name="email"/>
       <Input v-model="form.password" :required="true" type="password" label="Password" id="password" name="password"/>
-=======
-      <Input v-model="form.email_address" :required="true" type="email" label="Email Address" id="email" name="email" :error="'error' in props.errors"/>
-      <Input v-model="form.password" :required="true" type="password" label="Password" id="password" name="password" :error="'error' in props.errors"/>
-      <p v-if="'error' in props.errors" class="text-sm text-red-500">{{errors.error}}*</p>
->>>>>>> d3a3ed6487964e63bf848ccddc730e6ddcf48ee7
       <div class="flex justify-between items-center mt-6 text-sm leading-5">
         <a href="/customer/password/reset" class="underline cursor-pointer opacity-[67%] hover:opacity-[80%]">Forget
           your password?</a>
