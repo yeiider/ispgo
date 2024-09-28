@@ -46,12 +46,12 @@
 </head>
 <body>
 <div class="container">
-    <h1>Solicitud de Restablecimiento de Contraseña</h1>
-    <p>Hemos recibido una solicitud para restablecer tu contraseña. Puedes hacerlo a través del siguiente enlace:</p>
-    <a href="{{ url('/customer/password/create', $token) }}">Restablecer Contraseña</a>
-    <p>Si no has solicitado un restablecimiento de contraseña, no es necesario que hagas nada.</p>
-    <p>Gracias,</p>
-    <strong>El equipo de {{ config('app.name') }}</strong>
+    <h1>Password Reset Request</h1>
+    <p>We have received a request to reset your password. You can do it through the following link:</p>
+    <a href="{{ url('/customer/password/create', $token) }}">Reset Password</a>
+    <p>If you haven't requested a password reset, you don't need to do anything.</p>
+    <p>Thank you,</p>
+    <p>The team of <strong>{{ config('app.name') }}</strong></p>
 </div>
 </body>
 </html>

@@ -60,6 +60,11 @@ class AuthController extends Controller
         return redirect('/');
     }
 
+    /**
+     * Display the registration form.
+     *
+     * @return \Inertia\Response
+     */
     public function showRegisterForm(): \Inertia\Response
     {
         $documentTypes = DocumentType::getConfig();
@@ -69,7 +74,16 @@ class AuthController extends Controller
         ]);
     }
 
-    public function register(Request $request)
+    /**
+     * Handle customer registration.
+     *
+     * Validates the incoming request data, creates a new customer, logs them in,
+     * sends an email verification notification, and redirects to the index route.
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function register(Request $request): RedirectResponse
     {
         $request->validate([
             'first_name' => 'required|string|max:100',
@@ -137,6 +151,13 @@ class AuthController extends Controller
         return back()->with('status', 'We have emailed your password reset link!');
     }
 
+    /**
+     * Display the create password form.
+     *
+     * @param Request $request
+     * @param string $token
+     * @return \Inertia\Response|RedirectResponse
+     */
     public function showCreatePassword(Request $request, $token): \Inertia\Response|RedirectResponse
     {
         if (!$token) {
@@ -158,6 +179,16 @@ class AuthController extends Controller
         return Inertia::render('CustomerAccount/Authentication/CreatePassword', compact('customer', 'routeCreatePassword'));
     }
 
+    /**
+     * Create a new password for the customer.
+     *
+     * This method validates the request data to ensure the email address and password are provided,
+     * then it hashes the password and updates the customer's record in the database.
+     * Finally, it redirects to the customer login route with a status message.
+     *
+     * @param Request $request The HTTP request instance containing the form data.
+     * @return RedirectResponse The HTTP redirect response to the customer login route.
+     */
     public function createPassword(Request $request): RedirectResponse
     {
         $request->validate([
