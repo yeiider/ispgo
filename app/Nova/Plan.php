@@ -5,6 +5,7 @@ namespace App\Nova;
 use App\Nova\Lenses\TelephonicPlanLens;
 use App\Nova\Lenses\TelevisionPlanLens;
 use Illuminate\Http\Request;
+use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Currency;
@@ -30,14 +31,24 @@ class Plan extends Resource
 
     public function fields(Request $request)
     {
-        return [
-            ID::make()->sortable(),
+        $basicPanel = new Panel(__('Basic Information'), $this->basicInformationFields());
+        $planPanel = new Panel(__('Plan Details'), $this->planDetailsFields());
+        $feedbackPanel = new Panel(__('Customer Feedback'), $this->customerFeedbackFields());
+        $technicalPanel = new Panel(__('Technical Details'), $this->technicalDetailsFields());
 
-            new Panel(__('Basic Information'), $this->basicInformationFields()),
-            new Panel(__('Plan Details'), $this->planDetailsFields()),
-            new Panel(__('Customer Feedback'), $this->customerFeedbackFields()),
-            new Panel(__('Technical Details'), $this->technicalDetailsFields()),
+        $panels = [
+            ID::make()->sortable(),
+            $basicPanel,
+            $planPanel,
+            $feedbackPanel,
+            $technicalPanel,
         ];
+
+        if (ProviderSmartOlt::getEnabled()) {
+            $panels[] = new Panel(__('Smart OLT'), $this->attributesSmartOlt());
+        }
+
+        return $panels;
     }
 
     protected function basicInformationFields()
@@ -94,6 +105,7 @@ class Plan extends Resource
         ];
     }
 
+
     protected function planDetailsFields()
     {
         return [
@@ -130,6 +142,14 @@ class Plan extends Resource
             Textarea::make(__('Customer Reviews'), 'customer_reviews')
                 ->nullable()
                 ->alwaysShow()->hideFromIndex(),
+        ];
+    }
+
+    protected function attributesSmartOlt()
+    {
+        return [
+            Text::make(__('Profile'), 'profile_smart_olt')
+                ->nullable(),
         ];
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use Ispgo\Mikrotik\Settings\SettingMikrotik;
+use Ispgo\Smartolt\Settings\SettingSmartolt;
 
 return [
     "general" => [
@@ -474,10 +475,18 @@ return [
         "dhcp" => SettingMikrotik::getDHCPSettings(),
 
         // Métodos adicionales
-      // Configuración de IP Estáticas
+        // Configuración de IP Estáticas
         "qos" => SettingMikrotik::getQoSSettings(),                 // Configuración de QoS y Prioridades
         "ipv6" => SettingMikrotik::getIPv6Settings(),               // Configuración de IPv6
         "monitoring" => SettingMikrotik::getMonitoringSettings(),   // Configuración de Monitoreo y Notificaciones
+    ],
+    "smartolt" => [
+        "setting" => [
+            "label" => "Smart Olt",
+            "class" => "form-control",
+        ],
+        "general" => SettingSmartolt::getGeneralSettings(),
+
     ],
 
 ];

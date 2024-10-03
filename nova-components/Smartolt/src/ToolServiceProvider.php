@@ -2,8 +2,12 @@
 
 namespace Ispgo\Smartolt;
 
+use App\Events\ServiceActive;
+use App\Events\ServiceSuspend;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Ispgo\Smartolt\Listeners\ServiceOltManagerListener;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Http\Middleware\Authenticate;
 use Laravel\Nova\Nova;
@@ -18,6 +22,14 @@ class ToolServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
+        Event::listen(
+            ServiceActive::class,
+            [ServiceOltManagerListener::class, 'handle']
+        );
+
+
+
         $this->app->booted(function () {
             $this->routes();
         });

@@ -2,7 +2,9 @@
 
 namespace App\Models\Services;
 
+use App\Events\ServiceActive;
 use App\Events\ServiceCreated;
+use App\Events\ServiceSuspend;
 use App\Events\ServiceUpdateStatus;
 use App\Models\Customers\Address;
 use App\Models\Customers\Customer;
@@ -23,7 +25,7 @@ class Service extends Model
         'password_router', 'service_status', 'activation_date', 'deactivation_date',
         'bandwidth', 'mac_address', 'installation_date', 'service_notes', 'contract_id',
         'support_contact', 'service_location', 'service_type', 'static_ip', 'data_limit',
-        'last_maintenance', 'billing_cycle', 'service_priority',
+        'last_maintenance', 'billing_cycle', 'service_priority', 'sn',
         'assigned_technician', 'service_contract', 'created_by', 'updated_by',
     ];
 
@@ -92,8 +94,12 @@ class Service extends Model
         });
     }
 
-    public function generateInvoice($notes = null): Invoice
+    public function generateInvoice($notes = null)
     {
+        if ($this->service_status == 'free') {
+            // No generar factura para servicios con estado 'free'
+            return null;
+        }
         $price = $this->plan->monthly_price;
         $tax = $price * 0.19;
         $total = $price + $tax;
@@ -172,16 +178,23 @@ class Service extends Model
     {
         $this->service_status = 'suspended';
         $this->save();
+        event(new ServiceSuspend($this));
     }
 
     public function activate()
     {
         $this->service_status = 'active';
         $this->save();
+        event(new ServiceActive($this));
     }
 
-    public static function getAllActiveServicesForInvoiceMonthly()
+    public static function getServicesWithUnpaidInvoices()
     {
-        return self::where('service_status', '!=', 'free')->get();
+        return self::where('service_status', '!=', 'free')
+            ->whereHas('invoices', function ($query) {
+                $query->where('status', 'unpaid');
+            })
+            ->get();
     }
+
 }

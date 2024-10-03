@@ -24,7 +24,10 @@ class SuspendServicesMonthly extends Command
             $currentDate = Carbon::now();
 
             if ($currentDate->day == $cutOffDate) {
-                $services = Service::getAllActiveServicesForInvoiceMonthly();
+                // Obtener los servicios con facturas impagas
+                $services = Service::getServicesWithUnpaidInvoices();
+
+                // Suspender todos los servicios en tu aplicación
                 foreach ($services as $service) {
                     $service->suspend();
                 }

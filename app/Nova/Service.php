@@ -15,6 +15,8 @@ use App\Nova\Lenses\TelevisionServiceLens;
 use Illuminate\Http\Request;
 use Ispgo\Mikrotik\Nova\Actions\MikrotikAction;
 use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
+use Ispgo\Smartolt\Nova\Actions\LoadPlanSmartOlt;
+use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
@@ -40,7 +42,9 @@ class Service extends Resource
 
     public function fields(NovaRequest $request)
     {
-        return [
+
+
+        $panels = [
             ID::make(__('ID'), 'id')->sortable(),
 
             new Panel('Customer & Router Details', $this->customerRouterFields()),
@@ -51,6 +55,12 @@ class Service extends Resource
 
             new Panel('Technical Information', $this->technicalInformationFields()),
         ];
+
+        if (ProviderSmartOlt::getEnabled()) {
+            $panels[] = new Panel(__('Smart OLT'), $this->attributesSmartOlt());
+        }
+
+        return $panels;
     }
 
     protected function customerRouterFields()
@@ -97,9 +107,16 @@ class Service extends Resource
     {
         return [
             Text::make('Support Contact', 'support_contact'),
-            BelongsTo::make('Service Location', 'address',Address::class)->hideFromIndex()->searchable(),
+            BelongsTo::make('Service Location', 'address', Address::class)->hideFromIndex()->searchable(),
             Text::make('Billing Cycle', 'billing_cycle'),
             Textarea::make('Service Contract', 'service_contract'),
+        ];
+    }
+
+    protected function attributesSmartOlt(): array
+    {
+        return [
+            Text::make('Onu SN', 'sn'),
         ];
     }
 
@@ -132,6 +149,9 @@ class Service extends Resource
             new CreateActionsServiceUninstall(),
             (new MikrotikAction())->canSee(function () {
                 return MikrotikConfigProvider::getEnabled();
+            }),
+            (new LoadPlanSmartOlt())->canSee(function () {
+                return ProviderSmartOlt::getEnabled();
             })
         ];
     }

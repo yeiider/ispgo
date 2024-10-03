@@ -33,8 +33,11 @@ if ($cutOffDate < $billingDate) {
 
 $cutOffDate = Carbon::create($scheduleYear, $scheduleMonth, $cutOffDate);
 
+Schedule::command('smartolt:process_batches')->everyMinute();
+
+
 Schedule::command('services:suspend_monthly')->monthlyOn($cutOffDate->day, '00:00');
-Schedule::call(function (){
+Schedule::call(function () {
     $cutoffTime = Carbon::now()->subMinutes(\Ispgo\Wiivo\WiivoConfigProvider::getSessionLife());
     SessionChatBot::where('updated_at', '<', $cutoffTime)->delete();
 })->everyMinute();
