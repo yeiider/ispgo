@@ -36,8 +36,12 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $customer = CustomerAccount::getConfig();
-
-        return array_merge(parent::share($request), $customer);
+        $config = CustomerAccount::getConfig();
+        $customer = $config['customer'] ?? null;
+        $sidebar = $config['sidebar'] ?? null;
+        $flash = [
+            'status' => $request->session()->get('status'),
+        ];
+        return array_merge(parent::share($request), compact('customer', 'sidebar', 'flash'));
     }
 }

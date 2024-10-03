@@ -38,21 +38,21 @@ class CustomerAccount implements ConfigProviderInterface
                     'url' => route('index'),
                     'title' => __('My Account'),
                 ],
-                [
+                /*[
                     'code' => 'my_orders',
                     'url' => route('orders'),
                     'title' => __('My Orders'),
-                ],
+                ],*/
                 [
                     'code' => 'tickets',
                     'url' => route('tickets'),
                     'title' => __('Tickets'),
                 ],
-                [
+                /*[
                     'code' => 'payments',
                     'url' => '',//route('customer.addresses'),
                     'title' => __('Payments'),
-                ],
+                ],*/
                 [
                     'code' => 'invoices',
                     'url' => '',
@@ -64,11 +64,11 @@ class CustomerAccount implements ConfigProviderInterface
                     'title' => __('Address Book'),
                 ],
 
-                [
+                /*[
                     'code' => 'account_information',
                     'url' => '',//route('customer.addresses'),
                     'title' => __('Account information'),
-                ],
+                ],*/
             ]
         ];
     }

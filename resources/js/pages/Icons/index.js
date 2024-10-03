@@ -3,11 +3,16 @@ import PaperAirplane from './PaperAirplane.vue';
 import ArrowLongRight from "./ArrowLongRight.vue";
 import PencilSquare from "./PencilSquare.vue"
 import SquaresPlus from "./SquaresPlus.vue";
-
+import LockOpen from "./LockOpen.vue"
+import ArrowPath from  "./ArrowPath.vue"
+import Megaphone from "./Megaphone.vue"
 export const Icon = {
     Pencil,
     PencilSquare,
     PaperAirplane,
     ArrowLongRight,
     SquaresPlus,
+    LockOpen,
+    ArrowPath,
+    Megaphone,
 };
