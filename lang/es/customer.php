@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'customer' => 'Cliente',
+    'first_name' => 'Nombre',
+    'last_name' => 'Apellido',
+    'date_of_birth' => 'Fecha de Nacimiento',
+    'gender' => 'Género',
+    'gender_male' => 'Masculino',
+    'gender_female' => 'Femenino',
+    'gender_other' => 'Otro',
+    'phone' => 'Teléfono',
+    'phone_number' => 'Número de Teléfono',
+    'email_address' => 'Dirección de Correo Electrónico',
+    'email' => 'Correo Electrónico',
+    'document_type' => 'Tipo de Documento',
+    'document_number' => 'Número de Documento',
+    'identity_document' => 'Documento de Identidad',
+    'status' => 'Estado',
+    'customer_status' => 'Estado del Cliente',
+    'active' => 'Activo',
+    'inactive' => 'Inactivo',
+    'additional_notes' => 'Notas Adicionales',
+    'taxDetails' => 'Detalles Fiscales',
+    'addresses' => 'Direcciones',
+    'services' => 'Servicios',
+    'send_email' => 'Enviar Correo',
+];

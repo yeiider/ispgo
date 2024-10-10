@@ -16,7 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class Customer extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory;
-    use Notifiable; 
+    use Notifiable;
 
     protected $casts = [
         'date_of_birth' => 'date',
@@ -116,6 +116,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
     {
         return self::where('identity_document', $identityDocument)->first();
     }
+
     public static function searchCustomersWithInvoices($input)
     {
         return self::where(function ($query) use ($input) {
@@ -134,5 +135,10 @@ class Customer extends Authenticatable implements MustVerifyEmail
         return $this->invoices()->orderBy('created_at', 'desc')->first();
     }
 
+    /*public function getCustomerStatusAttribute($value)
+    {
+        return __('attribute.customer_status.' . $value);
+
+    }*/
 
 }

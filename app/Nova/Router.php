@@ -39,29 +39,35 @@ class Router extends Resource
      * @param NovaRequest $request
      * @return array
      */
-    public function fields(NovaRequest $request)
+    public function fields(NovaRequest $request): array
     {
         return [
             ID::make(__('ID'), 'id')->sortable(),
 
-            Select::make(__('Status'), 'status')
+            Select::make(__('attribute.status'), 'status')
                 ->options([
-                    'enabled' => __('Enabled'),
-                    'disabled' => __('Disabled'),
-                ])->default("enabled")->hideFromIndex(),
+                    'enabled' => __('attribute.enabled'),
+                    'disabled' => __('attribute.disabled'),
+                ])
+                ->default("enabled")
+                ->displayUsingLabels()
+                ->hideFromDetail()
+                ->hideFromIndex(),
 
-            Badge::make(__('Status'), 'status')->map([
+            Badge::make(__('attribute.status'), 'status')->map([
                 'enabled' => 'success',
                 'disabled' => 'danger',
             ])->icons([
                 'danger' => 'exclamation-circle',
                 'success' => 'check-circle',
-            ]),
-            Text::make(__('Code'), 'code')
+            ])->label(function ($value) {
+                return __('attribute.'.$value);
+            }),
+            Text::make(__('router.code'), 'code')
                 ->rules('required', 'max:255')
                 ->sortable(),
 
-            Text::make(__('Name'), 'name')
+            Text::make(__('router.name'), 'name')
                 ->rules('required', 'max:255')
                 ->sortable(),
         ];
@@ -74,7 +80,7 @@ class Router extends Resource
      * @param NovaRequest $request
      * @return array
      */
-    public function cards(NovaRequest $request)
+    public function cards(NovaRequest $request): array
     {
         return [];
     }
@@ -85,7 +91,7 @@ class Router extends Resource
      * @param NovaRequest $request
      * @return array
      */
-    public function filters(NovaRequest $request)
+    public function filters(NovaRequest $request): array
     {
         return [];
     }
@@ -96,7 +102,7 @@ class Router extends Resource
      * @param NovaRequest $request
      * @return array
      */
-    public function lenses(NovaRequest $request)
+    public function lenses(NovaRequest $request): array
     {
         return [];
     }
@@ -107,7 +113,7 @@ class Router extends Resource
      * @param NovaRequest $request
      * @return array
      */
-    public function actions(NovaRequest $request)
+    public function actions(NovaRequest $request): array
     {
         return [];
     }

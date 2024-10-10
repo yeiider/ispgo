@@ -47,13 +47,13 @@ class Service extends Resource
         $panels = [
             ID::make(__('ID'), 'id')->sortable(),
 
-            new Panel('Customer & Router Details', $this->customerRouterFields()),
+            new Panel(__('service.customer_and_router_details'), $this->customerRouterFields()),
 
-            new Panel('Service Details', $this->serviceDetailsFields()),
+            new Panel(__('service.service_details'), $this->serviceDetailsFields()),
 
-            new Panel('Billing & Contract Information', $this->billingContractFields()),
+            new Panel(__('service.billing_and_contract_information'), $this->billingContractFields()),
 
-            new Panel('Technical Information', $this->technicalInformationFields()),
+            new Panel(__('service.technical_information'), $this->technicalInformationFields()),
         ];
 
         if (ProviderSmartOlt::getEnabled()) {
@@ -66,27 +66,27 @@ class Service extends Resource
     protected function customerRouterFields()
     {
         return [
-            BelongsTo::make('Customer', 'customer', Customers\Customer::class)
+            BelongsTo::make(__('customer.customer'), 'customer', Customers\Customer::class)
                 ->searchable(),
             BelongsTo::make('Router', 'router', \App\Nova\Router::class),
         ];
     }
 
-    protected function serviceDetailsFields()
+    protected function serviceDetailsFields(): array
     {
         return [
-            BelongsTo::make('Plan', 'Plan', \App\Nova\Plan::class),
-            Text::make('Service IP', 'service_ip')->sortable(),
-            Text::make('Username Router', 'username_router'),
-            Text::make('Password Router', 'password_router')->hideFromIndex(),
-            Select::make('Service Status', 'service_status')->options([
-                'active' => 'Active',
-                'inactive' => 'Inactive',
-                'suspended' => 'Suspended',
-                'pending' => 'Pending',
-                'free' => 'free'
+            BelongsTo::make(__('Plan'), 'plan', \App\Nova\Plan::class),
+            Text::make(__('service.service_ip'), 'service_ip')->sortable(),
+            Text::make(__('service.username_router'), 'username_router'),
+            Text::make(__('service.password_router'), 'password_router')->hideFromIndex(),
+            Select::make(__('service.service_status'), 'service_status')->options([
+                'active' => __('attribute.active'),
+                'inactive' => __('attribute.inactive'),
+                'suspended' => __('attribute.suspended'),
+                'pending' => __('attribute.pending'),
+                'free' => __('attribute.free')
             ])->displayUsingLabels()->hideFromIndex(),
-            Badge::make(__('Status'), 'service_status')->map([
+            Badge::make(__('attribute.status'), 'service_status')->map([
                 'active' => 'success',
                 'inactive' => 'danger',
                 'suspended' => 'info',
@@ -97,49 +97,51 @@ class Service extends Resource
                 'success' => 'check-circle',
                 'info' => 'status-offline',
                 'warning' => 'clock',
-            ]),
-            Date::make('Activation Date', 'activation_date'),
-            Date::make('Deactivation Date', 'deactivation_date'),
+            ])->label(function ($value) {
+                return __('attribute.' . $value);
+            }),
+            Date::make(__('service.activation_date'), 'activation_date'),
+            Date::make(__('service.deactivation_date'), 'deactivation_date'),
         ];
     }
 
-    protected function billingContractFields()
+    protected function billingContractFields(): array
     {
         return [
-            Text::make('Support Contact', 'support_contact'),
-            BelongsTo::make('Service Location', 'address', Address::class)->hideFromIndex()->searchable(),
-            Text::make('Billing Cycle', 'billing_cycle'),
-            Textarea::make('Service Contract', 'service_contract'),
+            Text::make(__('service.support_contact'), 'support_contact'),
+            BelongsTo::make(__('service.address'), 'address', Address::class)->hideFromIndex()->searchable(),
+            Text::make(__('service.billing_cycle'), 'billing_cycle'),
+            Textarea::make(__('service.service_contract'), 'service_contract'),
         ];
     }
 
     protected function attributesSmartOlt(): array
     {
         return [
-            Text::make('Onu SN', 'sn'),
+            Text::make(__('Onu SN'), 'sn'),
         ];
     }
 
-    protected function technicalInformationFields()
+    protected function technicalInformationFields(): array
     {
         return [
-            Number::make('Bandwidth', 'bandwidth')->hideFromIndex(),
+            Number::make(__('service.bandwidth'), 'bandwidth')->hideFromIndex(),
 
-            Text::make('MAC Address', 'mac_address')->hideFromIndex(),
-            Date::make('Installation Date', 'installation_date'),
-            Textarea::make('Service Notes', 'service_notes'),
-            Boolean::make('Static IP', 'static_ip')->hideFromIndex(),
-            Number::make('Data Limit', 'data_limit')->hideFromIndex(),
-            Date::make('Last Maintenance', 'last_maintenance')->hideFromIndex(),
-            Select::make('Service Priority', 'service_priority')->options([
-                'normal' => 'Normal',
-                'high' => 'High',
-                'critical' => 'Critical'
+            Text::make(__('service.mac_address'), 'mac_address')->hideFromIndex(),
+            Date::make(__('service.installation_date'), 'installation_date'),
+            Textarea::make(__('service.service_notes'), 'service_notes'),
+            Boolean::make(__('service.static_ip'), 'static_ip')->hideFromIndex(),
+            Number::make(__('service.data_limit'), 'data_limit')->hideFromIndex(),
+            Date::make(__('service.last_maintenance'), 'last_maintenance')->hideFromIndex(),
+            Select::make(__('service.service_priority'), 'service_priority')->options([
+                'normal' => __('attribute.normal'),
+                'high' => __('attribute.high'),
+                'critical' => __('attribute.critical')
             ])->displayUsingLabels()->default('normal'),
         ];
     }
 
-    public function actions(NovaRequest $request)
+    public function actions(NovaRequest $request): array
     {
         return [
             new ActivateService(),

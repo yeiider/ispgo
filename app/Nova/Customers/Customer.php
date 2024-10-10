@@ -40,34 +40,40 @@ class Customer extends Resource
     {
         return [
             ID::make()->sortable(),
-            Text::make(__('First Name'), 'first_name')->sortable()->rules('required', 'max:100'),
-            Text::make(__('Last Name'), 'last_name')->sortable()->rules('required', 'max:100'),
-            Date::make(__('Date of Birth'), 'date_of_birth')->nullable(),
-            Text::make(__('Phone Number'), 'phone_number')->rules('required','max:12'),
-            Text::make(__('Email Address'), 'email_address')->sortable()->rules('required', 'email', 'max:100'),
-            Select::make(__('Document Type'), 'document_type')
+            Text::make(__('customer.first_name'), 'first_name')->sortable()->rules('required', 'max:100'),
+            Text::make(__('customer.last_name'), 'last_name')->sortable()->rules('required', 'max:100'),
+            Date::make(__('customer.date_of_birth'), 'date_of_birth')->nullable(),
+            Text::make(__('customer.phone_number'), 'phone_number')->rules('required','max:12'),
+            Text::make(__('customer.email_address'), 'email_address')->sortable()->rules('required', 'email', 'max:100'),
+            Select::make(__('customer.document_type'), 'document_type')
                 ->options(DocumentType::pluck('name', 'code')->toArray())
                 ->sortable()
                 ->rules('required', 'max:20'),
-            Text::make(__('Identity Document'), 'identity_document')->rules('required', 'max:100'),
-            Badge::make(__('Status'), 'customer_status')->map([
+            Text::make(__('customer.identity_document'), 'identity_document')->rules('required', 'max:100'),
+            Badge::make(__('customer.status'), 'customer_status')->map([
                 'active' => 'success',
                 'inactive' => 'danger',
                 'suspended' => 'warning',
             ])->icons([
                 'danger' => 'exclamation-circle',
                 'success' => 'check-circle'
-            ]),
-            Select::make(__('Customer Status'), 'customer_status')
+            ])->label(function ($value) {
+                return __('attribute.customer_status.' . $value);
+            }),
+
+            Select::make(__('customer.customer_status'), 'customer_status')
                 ->options([
-                    'active' => __('Active'),
-                    'inactive' => __('Inactive')
-                ])->hideFromIndex()
+                    'active' => __('customer.active'),
+                    'inactive' => __('customer.inactive')
+                ])
+                ->displayUsingLabels()
+                ->hideFromIndex()
                 ->sortable()->rules('required'),
-            Textarea::make(__('Additional Notes'), 'additional_notes')->nullable(),
-            HasOne::make(__('Tax Details'), 'taxDetails', TaxDetail::class),
-            HasMany::make(__('Addresses'), 'addresses', Address::class),
-            HasMany::make(__('Services'), 'services', Service::class),
+
+            Textarea::make(__('customer.additional_notes'), 'additional_notes')->nullable(),
+            HasOne::make(__('customer.taxDetails'), 'taxDetails', TaxDetail::class),
+            HasMany::make(__('customer.addresses'), 'addresses', Address::class),
+            HasMany::make(__('customer.services'), 'services', Service::class),
         ];
     }
 
@@ -75,7 +81,7 @@ class Customer extends Resource
     {
         return [
             new UpdateCustomerStatus,
-            Action::using(__('Send Email'), function (ActionFields $fields, Collection $models) {
+            Action::using(__('customer.send_email'), function (ActionFields $fields, Collection $models) {
                 $model = $models->first();
                 $template = EmailTemplate::find(3); // ID de la plantilla de bienvenida
                 Mail::to($model->email_address)->send(new DynamicEmail(["customer" => $model], $template));

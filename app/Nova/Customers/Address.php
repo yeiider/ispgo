@@ -25,20 +25,20 @@ class Address extends Resource
     {
         return [
             ID::make()->sortable(),
-            BelongsTo::make(__('Customer'), 'customer', Customer::class),
-            Text::make(__('Address'), 'address')->sortable()->rules('required', 'max:100'),
-            Text::make(__('City'), 'city')->sortable()->rules('required', 'max:100'),
-            Text::make(__('State/Province'), 'state_province')->sortable()->rules('required', 'max:100'),
-            Text::make(__('Postal Code'), 'postal_code')->sortable()->rules('required', 'max:20'),
-            Country::make(__('Country'), 'country')->sortable()->rules('required', 'max:100'),
-            Select::make(__('Address Type'), 'address_type')
+            BelongsTo::make(__('customer.customer'), 'customer', Customer::class),
+            Text::make(__('address.address'), 'address')->sortable()->rules('required', 'max:100'),
+            Text::make(__('address.city'), 'city')->sortable()->rules('required', 'max:100'),
+            Text::make(__('address.state_province'), 'state_province')->sortable()->rules('required', 'max:100'),
+            Text::make(__('address.postal_code'), 'postal_code')->sortable()->rules('required', 'max:20'),
+            Country::make(__('address.country'), 'country')->sortable()->rules('required', 'max:100'),
+            Select::make(__('address.address_type'), 'address_type')
                 ->options([
-                    'billing' => __('Billing'),
-                    'shipping' => __('Shipping'),
+                    'billing' => __('address.billing'),
+                    'shipping' => __('address.shipping'),
                 ])
                 ->sortable()->rules('required'),
-            Number::make(__('Latitude'), 'latitude')->nullable()->step(0.0000001),
-            Number::make(__('Longitude'), 'longitude')->nullable()->step(0.0000001),
+            Number::make(__('address.latitude'), 'latitude')->nullable()->step(0.0000001),
+            Number::make(__('address.longitude'), 'longitude')->nullable()->step(0.0000001),
         ];
     }
 

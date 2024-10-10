@@ -27,12 +27,13 @@ class TaxDetail extends Resource
     {
         return [
             ID::make()->sortable(),
-            Boolean::make('Enable Billing'),
-            BelongsTo::make(__('Customer'), 'customer', Customer::class),
+            Boolean::make(__('tax.enable_billing'), 'enable_billing'),
+            BelongsTo::make(__('customer.customer'), 'customer', Customer::class),
             Select::make(__('Fiscal Document'), 'tax_identification_type')
                 ->options(TaxIdentificationType::pluck('name', 'code')->toArray())
                 ->sortable()
-                ->rules('required', 'max:5'),
+                ->rules('required', 'max:5')
+                ->displayUsingLabels(),
 
 
             Text::make(__('Tax Identification Number'), 'tax_identification_number')
@@ -45,14 +46,17 @@ class TaxDetail extends Resource
             Select::make(__('Taxpayer Type'), 'taxpayer_type')
                 ->options(TaxpayerType::pluck('name', 'code')->toArray())
                 ->sortable()
-                ->rules('required', 'max:255'),
+                ->rules('required', 'max:255')
+                ->displayUsingLabels(),
 
             Select::make(__('Fiscal Regime'), 'fiscal_regime')
                 ->options(FiscalRegime::pluck('name', 'code')->toArray())
                 ->sortable()
-                ->rules('required', 'max:255'),
-            Boolean::make('Send Notifications'),
-            Boolean::make('Send Invoice'),
+                ->rules('required', 'max:255')
+                ->displayUsingLabels(),
+
+            Boolean::make(__('tax.send_notifications'), 'send_notifications'),
+            Boolean::make(__('tax.send_invoice'), 'send_invoice'),
         ];
     }
 

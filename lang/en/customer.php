@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'customer' => 'Customer',
+    'first_name' => 'First Name',
+    'last_name' => 'Last Name',
+    'date_of_birth' => 'Date of Birth',
+    'gender' => 'Gender',
+    'gender_male' => 'Male',
+    'gender_female' => 'Female',
+    'gender_other' => 'Other',
+    'phone' => 'Phone',
+    'phone_number' => 'Phone Number',
+    'email_address' => 'Email Address',
+    'email' => 'Email',
+    'document_type' > 'Document Type',
+    'document_number' => 'Document Number',
+    'identity_document' => 'Identity Document',
+    'status' => 'Status',
+    'customer_status' => 'Customer Status',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'additional_notes' => 'Additional Notes',
+    'taxDetails' => 'Tax Details',
+    'addresses' => 'Addresses',
+    'services' => 'Services',
+    'send_email' => 'Send Email',
+];

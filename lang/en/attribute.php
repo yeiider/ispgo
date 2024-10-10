@@ -1,0 +1,41 @@
+<?php
+return [
+    'gender' => [
+        'male' => 'Male',
+        'female' => 'Female',
+        'other' => 'Other',
+    ],
+    'address_type' => [
+        'billing' => 'Billing',
+        'shipping' => 'Shipping',
+    ],
+    'customer_status' => [
+        'active' => 'Active',
+        'inactive' => 'Inactive',
+    ],
+    'status' => 'Status',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'suspended' => 'Suspended',
+    'pending' => 'Pending',
+    'free' => 'Free',
+    'approved' => 'Approved',
+    'rejected' => 'Rejected',
+    'cancelled' => 'Cancelled',
+    'completed' => 'Completed',
+    'failed' => 'Failed',
+    'pending_payment' => 'Pending Payment',
+    'processing' => 'Processing',
+    'on_hold' => 'On Hold',
+    'refunded' => 'Refunded',
+    'deleted' => 'Deleted',
+    'no' => 'No',
+    'yes' => 'Yes',
+    'created_at' => 'Created At',
+    'normal' => 'Normal',
+    'high' => 'High',
+    'critical' => 'Critical',
+    'enabled' => 'Enabled',
+    'disabled' => 'Disabled',
+
+];

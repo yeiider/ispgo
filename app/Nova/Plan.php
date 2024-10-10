@@ -29,12 +29,12 @@ class Plan extends Resource
         'id', 'name', 'description'
     ];
 
-    public function fields(Request $request)
+    public function fields(Request $request): array
     {
-        $basicPanel = new Panel(__('Basic Information'), $this->basicInformationFields());
-        $planPanel = new Panel(__('Plan Details'), $this->planDetailsFields());
-        $feedbackPanel = new Panel(__('Customer Feedback'), $this->customerFeedbackFields());
-        $technicalPanel = new Panel(__('Technical Details'), $this->technicalDetailsFields());
+        $basicPanel = new Panel(__('plan.basic_information'), $this->basicInformationFields());
+        $planPanel = new Panel(__('plan.plan_details'), $this->planDetailsFields());
+        $feedbackPanel = new Panel(__('plan.customer_feedback'), $this->customerFeedbackFields());
+        $technicalPanel = new Panel(__('plan.technical_details'), $this->technicalDetailsFields());
 
         $panels = [
             ID::make()->sortable(),
@@ -54,101 +54,105 @@ class Plan extends Resource
     protected function basicInformationFields()
     {
         return [
-            Select::make(__('Status'))
+            Select::make(__('attribute.status'), 'status')
                 ->options([
-                    'active' => __('Active'),
-                    'inactive' => __('Inactive')
+                    'active' => __('attribute.active'),
+                    'inactive' => __('attribute.inactive')
                 ])->displayUsingLabels()->default('active')
+                ->hideFromDetail()
                 ->rules('required')->hideFromIndex(),
 
-            Badge::make(__('Status'))->map([
+            Badge::make(__('attribute.status'), 'status')->map([
                 'active' => 'success',
                 'inactive' => 'danger',
             ])->icons([
                 'danger' => 'exclamation-circle',
                 'success' => 'check-circle',
-            ]),
+            ])->label(function ($value) {
+                return __('attribute.' . $value);
+            }),
 
-            Select::make(__('Modality Type'))
+            Select::make(__('plan.modality_type'), 'modality_type')
                 ->options([
-                    'postpaid' => __('Postpaid'),
-                    'prepaid' => __('Prepaid'),
+                    'postpaid' => __('plan.postpaid'),
+                    'prepaid' => __('plan.prepaid'),
                 ])->displayUsingLabels()->default('postpaid')->rules('required'),
 
-            Select::make(__('Plan Type'))
+            Select::make(__('plan.plan_type'), 'plan_type')
                 ->options([
-                    'internet' => __('Internet'),
-                    'television' => __('Television'),
-                    'telephonic' => __('Telephonic'),
+                    'internet' => __('plan.internet'),
+                    'television' => __('plan.television'),
+                    'telephonic' => __('plan.telephonic'),
                 ])->displayUsingLabels()->default('internet')->rules('required'),
 
 
-            Text::make(__('Name'), 'name')
+            Text::make(__('plan.name'), 'name')
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Currency::make(__('Monthly Price'), 'monthly_price')
+            Currency::make(__('plan.monthly_price'), 'monthly_price')
                 ->sortable()
                 ->rules('required'),
-            Currency::make(__('Overage Price'), 'overage_fee')
+            Currency::make(__('plan.overage_fee'), 'overage_fee')
                 ->sortable(),
-            Number::make(__('Download Speed'), 'download_speed')
+            Number::make(__('plan.download_speed'), 'download_speed')
                 ->sortable()
                 ->default(0)
-                ->rules('required')->help(__('specify speed in MG')),
-            Number::make(__('Upload Speed'), 'upload_speed')
+                ->rules('required')
+                ->help(__('plan.download_speed_help')),
+            Number::make(__('plan.upload_speed'), 'upload_speed')
                 ->sortable()
                 ->default(0)
                 ->rules('required'),
-            Boolean::make(__('Unlimited Data'), 'unlimited_data'),
+            Boolean::make(__('plan.unlimited_data'), 'unlimited_data'),
 
 
         ];
     }
 
 
-    protected function planDetailsFields()
+    protected function planDetailsFields(): array
     {
         return [
-            Textarea::make(__('Description'), 'description')
+            Textarea::make(__('plan.description'), 'description')
                 ->alwaysShow()->hideFromIndex(),
-            Number::make(__('Data Limit'), 'data_limit')
+            Number::make(__('plan.data_limit'), 'data_limit')
                 ->sortable()
                 ->nullable(),
-            Text::make(__('Contract Period'), 'contract_period')
+            Text::make(__('plan.contract_period'), 'contract_period')
                 ->nullable()->hideFromIndex(),
-            Textarea::make(__('Promotions'), 'promotions')
+            Textarea::make(__('plan.promotions'), 'promotions')
                 ->nullable()
                 ->alwaysShow()->hideFromIndex(),
-            Textarea::make(__('Extras Included'), 'extras_included')
+            Textarea::make(__('plan.extras_included'), 'extras_included')
                 ->nullable()
                 ->alwaysShow()->hideFromIndex(),
-            Textarea::make(__('Geographic Availability'), 'geographic_availability')
+            Textarea::make(__('plan.geographic_availability'), 'geographic_availability')
                 ->nullable()
                 ->alwaysShow()->hideFromIndex(),
-            Date::make(__('Promotion Start Date'), 'promotion_start_date')
+            Date::make(__('plan.promotion_start_date'), 'promotion_start_date')
                 ->nullable(),
-            Date::make(__('Promotion End Date'), 'promotion_end_date')
+            Date::make(__('plan.promotion_end_date'), 'promotion_end_date')
                 ->nullable(),
-            Image::make(__('Plan Image'), 'plan_image')
+            Image::make(__('plan.plan_image'), 'plan_image')
                 ->nullable()->hideFromIndex(),
         ];
     }
 
-    protected function customerFeedbackFields()
+    protected function customerFeedbackFields(): array
     {
         return [
-            Number::make(__('Customer Rating'), 'customer_rating')
+            Number::make(__('plan.customer_rating'), 'customer_rating')
                 ->nullable(),
-            Textarea::make(__('Customer Reviews'), 'customer_reviews')
+            Textarea::make(__('plan.customer_reviews'), 'customer_reviews')
                 ->nullable()
                 ->alwaysShow()->hideFromIndex(),
         ];
     }
 
-    protected function attributesSmartOlt()
+    protected function attributesSmartOlt(): array
     {
         return [
-            Text::make(__('Profile'), 'profile_smart_olt')
+            Text::make(__('plan.profile_smart_olt'), 'profile_smart_olt')
                 ->nullable(),
         ];
     }
@@ -156,15 +160,15 @@ class Plan extends Resource
     protected function technicalDetailsFields()
     {
         return [
-            Textarea::make(__('Service Compatibility'), 'service_compatibility')
+            Textarea::make(__('plan.service_compatibility'), 'service_compatibility')
                 ->nullable()
                 ->alwaysShow(),
-            Text::make(__('Network Priority'), 'network_priority')
+            Text::make(__('plan.network_priority'), 'network_priority')
                 ->nullable(),
-            Textarea::make(__('Technical Support'), 'technical_support')
+            Textarea::make(__('plan.technical_support'), 'technical_support')
                 ->nullable()
                 ->alwaysShow(),
-            Textarea::make(__('Additional Benefits'), 'additional_benefits')
+            Textarea::make(__('plan.additional_benefits'), 'additional_benefits')
                 ->nullable()
                 ->alwaysShow(),
         ];
@@ -176,7 +180,7 @@ class Plan extends Resource
      * @param NovaRequest $request
      * @return array
      */
-    public function lenses(NovaRequest $request)
+    public function lenses(NovaRequest $request): array
     {
         return [
             new TelevisionPlanLens(),
