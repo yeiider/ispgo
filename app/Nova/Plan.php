@@ -51,7 +51,7 @@ class Plan extends Resource
         return $panels;
     }
 
-    protected function basicInformationFields()
+    protected function basicInformationFields(): array
     {
         return [
             Select::make(__('attribute.status'), 'status')

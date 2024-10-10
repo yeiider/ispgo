@@ -37,10 +37,10 @@ class StatusTickets extends Filter
     public function options(NovaRequest $request): array
     {
         return [
-            __("Open") => "Open",
-            __("In Progress") => "In Progress",
-            __("Closed") => "Closed",
-            __("Resolved") => "resolved",
+            __("attribute.open") => "Open",
+            __("attribute.in_progress") => "In Progress",
+            __("attribute.closed") => "Closed",
+            __("attribute.resolved") => "resolved",
         ];
     }
 }

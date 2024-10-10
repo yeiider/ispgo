@@ -42,8 +42,8 @@ class CustomerStatus extends Filter
     public function options(Request $request)
     {
         return [
-            'Active' => 'active',
-            'Inactive' => 'inactive',
+            __('attribute.active') => 'active',
+            __('attribute.inactive') => 'inactive',
         ];
     }
 }

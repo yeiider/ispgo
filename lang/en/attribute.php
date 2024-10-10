@@ -32,10 +32,15 @@ return [
     'no' => 'No',
     'yes' => 'Yes',
     'created_at' => 'Created At',
+    'updated_at' => 'Updated At',
     'normal' => 'Normal',
     'high' => 'High',
     'critical' => 'Critical',
     'enabled' => 'Enabled',
     'disabled' => 'Disabled',
+    'open' => 'Open',
+    'in_progress' => 'In Progress',
+    'closed' => 'Closed',
+    'resolved' => 'Resolved',
 
 ];

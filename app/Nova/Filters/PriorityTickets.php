@@ -37,10 +37,10 @@ class PriorityTickets extends Filter
     public function options(NovaRequest $request)
     {
         return [
-            __("Urgent") => "urgent",
-            __("Low") => "low",
-            __("Medium") => "medium",
-            __("High") => "high",
+            __('attribute.urgent') => 'urgent',
+            __('attribute.low') => 'low',
+            __('attribute.medium') => 'medium',
+            __('attribute.high') => 'high',
         ];
     }
 }

@@ -22,16 +22,16 @@ class Expense extends Resource
         'id', 'description', 'amount'
     ];
 
-    public function fields(NovaRequest $request)
+    public function fields(NovaRequest $request): array
     {
         return [
             ID::make()->sortable(),
-            Text::make('Description')->sortable(),
-            Currency::make('Amount')->sortable(),
-            Date::make('Date')->sortable(),
-            Text::make('Payment Method')->sortable(),
-            Text::make('Category')->sortable(),
-            BelongsTo::make('Supplier', 'supplier', Supplier::class)->sortable(),
+            Text::make(__('expense.description'), 'description')->sortable(),
+            Currency::make(__('expense.amount'), 'amount')->sortable(),
+            Date::make(__('expense.date'), 'date')->sortable(),
+            Text::make('expense.payment_method', 'payment_method')->sortable(),
+            Text::make(__('expense.category'), 'category')->sortable(),
+            BelongsTo::make(__('expense.supplier'), 'supplier', Supplier::class)->sortable(),
         ];
     }
 }

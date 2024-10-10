@@ -68,7 +68,7 @@ class Service extends Resource
         return [
             BelongsTo::make(__('customer.customer'), 'customer', Customers\Customer::class)
                 ->searchable(),
-            BelongsTo::make('Router', 'router', \App\Nova\Router::class),
+            BelongsTo::make(__('router.router'), 'router', \App\Nova\Router::class),
         ];
     }
 

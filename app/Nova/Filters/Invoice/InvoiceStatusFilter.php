@@ -33,13 +33,13 @@ class InvoiceStatusFilter extends Filter
      * @param \Laravel\Nova\Http\Requests\NovaRequest $request
      * @return array
      */
-    public function options(NovaRequest $request)
+    public function options(NovaRequest $request): array
     {
         return [
-            'Paid' => 'paid',
-            'Unpaid' => 'unpaid',
-            'Overdue' => 'overdue',
-            'Canceled' => 'canceled'
+            __('invoice.paid') => 'paid',
+            __('invoice.unpaid') => 'unpaid',
+            __('invoice.overdue') => 'overdue',
+            __('invoice.canceled') => 'canceled'
         ];
     }
 }

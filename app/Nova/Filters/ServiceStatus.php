@@ -33,14 +33,14 @@ class ServiceStatus extends Filter
      * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
      * @return array
      */
-    public function options(NovaRequest $request)
+    public function options(NovaRequest $request): array
     {
         return [
-            'Active' => 'active',
-            'Inactive' => 'inactive',
-            'Suspended' => 'suspended',
-            'Pending' => 'pending',
-            'Free' => 'free',
+            __('attribute.active') => 'active',
+            __('attribute.inactive') => 'inactive',
+            __('attribute.suspended') => 'suspended',
+            __('attribute.pending') => 'pending',
+            __('attribute.free') => 'free',
         ];
     }
 }

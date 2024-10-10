@@ -67,73 +67,72 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             return [
                 MenuSection::dashboard(Main::class)->icon('chart-bar'),
                 // customers
-                MenuSection::make(__('Customers & Services'), [
-                    MenuGroup::make(__('All Customers'), [
-                        MenuItem::resource(Customer::class),
-                        MenuItem::resource(Address::class),
-                        MenuItem::resource(TaxDetail::class),
+                MenuSection::make(__('panel.customers_and_services'), [
+                    MenuGroup::make(__('panel.all_customers'), [
+                        MenuItem::resource(Customer::class)->name(__('panel.customers')),
+                        MenuItem::resource(Address::class)->name(__('panel.addresses')),
+                        MenuItem::resource(TaxDetail::class)->name(__('panel.tax_details')),
                     ]),
-                    MenuGroup::make(__('All Services'), [
+                    MenuGroup::make(__('panel.all_services'), [
                         MenuItem::resource(Service::class),
-                        MenuItem::lens(Service::class, TelephonicServiceLens::class),
-                        MenuItem::lens(Service::class, TelevisionServiceLens::class),
-                        MenuItem::lens(Installation::class, InstallationsLens::class),
-                        MenuItem::lens(Installation::class, UninstallationsLens::class),
+                        MenuItem::lens(Service::class, TelephonicServiceLens::class)->name(__('panel.telephonic_services')),
+                        MenuItem::lens(Service::class, TelevisionServiceLens::class)->name(__('panel.television_services')),
+                        MenuItem::lens(Installation::class, InstallationsLens::class)->name(__('panel.installations')),
+                        MenuItem::lens(Installation::class, UninstallationsLens::class)->name(__('panel.uninstallations')),
                     ]),
 
 
                 ])->icon('users')->collapsable(),
 
-                MenuSection::make(__('Invoices'), [
-                    MenuItem::resource(Invoice::class),
-                    MenuItem::resource(CreditNote::class),
-                    MenuItem::resource(PaymentPromise::class),
-                    MenuItem::resource(DailyInvoiceBalance::class),
+                MenuSection::make(__('panel.invoices'), [
+                    MenuItem::resource(Invoice::class)->name(__('panel.invoices')),
+                    MenuItem::resource(CreditNote::class)->name(__('panel.credit_notes')),
+                    MenuItem::resource(PaymentPromise::class)->name(__('panel.payment_promises')),
+                    MenuItem::resource(DailyInvoiceBalance::class)->name(__('panel.daily_invoice_balances')),
                 ])->icon('archive')->collapsable(),
-                MenuSection::make(__('Finances'), [
-                    MenuItem::resource(CashRegister::class),
-                    MenuItem::resource(Income::class),
-                    MenuItem::resource(Expense::class),
-                    MenuItem::resource(Transaction::class),
-                    MenuItem::resource(Box::class),
-                    MenuItem::resource(DailyBox::class),
+                MenuSection::make(__('panel.finances'), [
+                    MenuItem::resource(CashRegister::class)->name(__('panel.cash_registers')),
+                    MenuItem::resource(Income::class)->name(__('panel.incomes')),
+                    MenuItem::resource(Expense::class)->name(__('panel.expenses')),
+                    MenuItem::resource(Transaction::class)->name(__('panel.transactions')),
+                    MenuItem::resource(Box::class)->name(__('panel.boxes')),
+                    MenuItem::resource(DailyBox::class)->name(__('panel.daily_boxes')),
                 ])->icon('cash')->collapsable(),
 
-                MenuSection::make(__('Tickets'), [
-                    MenuItem::resource(Ticket::class)
+                MenuSection::make(__('panel.tickets'), [
+                    MenuItem::resource(Ticket::class)->name(__('panel.tickets')),
                 ])->icon('support')->collapsable(),
 
-                MenuSection::make(__('Content'), [
-                    MenuItem::resource(Pages::class),
-                    MenuItem::resource(EmailTemplate::class)
+                MenuSection::make(__('panel.content'), [
+                    MenuItem::resource(Pages::class)->name(__('panel.pages')),
+                    MenuItem::resource(EmailTemplate::class)->name(__('panel.email_templates')),
                 ])->icon('desktop-computer')->collapsable(),
 
-                MenuSection::make(__('Inventory'), [
-                    MenuItem::resource(Warehouse::class),
-                    MenuItem::resource(Category::class),
-                    MenuItem::resource(Product::class),
-                    MenuItem::resource(Supplier::class),
-                    MenuItem::resource(EquipmentAssignment::class),
+                MenuSection::make(__('panel.inventory'), [
+                    MenuItem::resource(Warehouse::class)->name(__('panel.warehouses')),
+                    MenuItem::resource(Category::class)->name(__('panel.categories')),
+                    MenuItem::resource(Product::class)->name(__('panel.products')),
+                    MenuItem::resource(Supplier::class)->name(__('panel.suppliers')),
+                    MenuItem::resource(EquipmentAssignment::class)->name(__('panel.equipment_assignments')),
                 ])->icon('clipboard-list')->collapsable(),
 
-                MenuSection::make('System Network', [
-                    MenuItem::resource(Router::class),
-                    MenuItem::resource(Plan::class),
-                    MenuItem::lens(Plan::class, TelephonicPlanLens::class),
-                    MenuItem::lens(Plan::class, TelevisionPlanLens::class),
+                MenuSection::make(__('panel.system_network'), [
+                    MenuItem::resource(Router::class)->name(__('panel.routers')),
+                    MenuItem::resource(Plan::class)->name(__('panel.plans')),
+                    MenuItem::lens(Plan::class, TelevisionPlanLens::class)->name(__('panel.television_plans')),
                 ])->icon('server')->collapsable(),
 
-                MenuSection::make(__('Settings Manager'))
+                MenuSection::make(__('panel.settings_manager'))
                     ->path('/settings-manager')
                     ->icon('cog')->canSee(function ($request) {
                         return $request->user() && $request->user()->can('Setting');
                     }),
 
-                MenuSection::make(__('Mikrotik Manager'), [
-                    MenuItem::link('Plans PPPoe', 'mikrotik/planes-ppp'),
-                    MenuItem::link('Ip Pools', 'mikrotik/ip-pool'),
-                    MenuItem::link('Ipv6 Pools', 'mikrotik/ipv6-pool'),
-                    MenuItem::link('DHCP Server Ipv6', 'mikrotik/dhcp-serve'),
+                MenuSection::make(__('panel.mikrotik_manager'), [
+                    MenuItem::link(__('panel.plans_PPPoe'), 'mikrotik/planes-ppp'),
+                    MenuItem::link(__('panel.ip_pools'), 'mikrotik/ip-pool'),
+                    MenuItem::link(__('panel.ipv6_pools'), 'mikrotik/ipv6-pool'),
+                    MenuItem::link(__('panel.DHCP_server_Ipv6'), 'mikrotik/dhcp-serve'),
                 ])->icon('cog')->collapsable(),
 
                 $this->getNovaPermissionsMenu($request), // Agregar menú de NovaPermissions

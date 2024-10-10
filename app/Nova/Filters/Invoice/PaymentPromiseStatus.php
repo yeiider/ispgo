@@ -41,12 +41,12 @@ class PaymentPromiseStatus extends Filter
      * @param Request $request
      * @return array
      */
-    public function options(Request $request)
+    public function options(Request $request): array
     {
         return [
-            'Pending' => 'pending',
-            'Fulfilled' => 'fulfilled',
-            'Cancelled' => 'cancelled',
+            __('attribute.pending') => 'pending',
+            __('attribute.fulfilled') => 'fulfilled',
+            __('attribute.cancelled') => 'cancelled',
         ];
     }
 }

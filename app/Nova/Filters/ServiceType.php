@@ -35,10 +35,12 @@ class ServiceType extends Filter
      * @param NovaRequest $request
      * @return array
      */
-    public function options(NovaRequest $request)
+    public function options(NovaRequest $request): array
     {
         return [
-            'internet', 'television', 'telephonic'
+            __('plan.internet') => 'internet',
+            __('plan.television') => 'television',
+            __('plan.telephonic') => 'telephonic'
         ];
     }
 

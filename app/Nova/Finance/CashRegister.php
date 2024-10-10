@@ -19,14 +19,14 @@ class CashRegister extends Resource
         'id',
     ];
 
-    public function fields(NovaRequest $request)
+    public function fields(NovaRequest $request): array
     {
         return [
             ID::make()->sortable(),
-            Number::make('Initial Balance', 'initial_balance')->sortable(),
-            Number::make('Current Balance', 'current_balance')->sortable(),
-            DateTime::make('Created At', 'created_at')->onlyOnDetail(),
-            DateTime::make('Updated At', 'updated_at')->onlyOnDetail(),
+            Number::make(__('cash_register.initial_balance'), 'initial_balance')->sortable(),
+            Number::make(__('cash_register.current_balance'), 'current_balance')->sortable(),
+            DateTime::make(__('attribute.created_at'), 'created_at')->onlyOnDetail(),
+            DateTime::make(__('attribute.updated_at'), 'updated_at')->onlyOnDetail(),
         ];
     }
 }
