@@ -43,4 +43,5 @@ return [
     'routers' => 'Routers',
     'plans' => 'Planes',
     'television_plans' => 'Planes de Televisión',
+    'telephonic_plans' => 'Planes Telefónicos',
 ];

@@ -25,13 +25,13 @@ class Transaction extends Resource
     {
         return [
             ID::make()->sortable(),
-            Text::make('Description')->sortable(),
-            Currency::make('Amount')->sortable(),
-            Date::make('Date')->sortable(),
-            Text::make('Type')->sortable(),
-            Text::make('Payment Method')->sortable(),
-            Text::make('Category')->sortable(),
-            BelongsTo::make('Cash Register', 'cashRegister', CashRegister::class)->searchable(),
+            Text::make(__('attribute.description'),'description')->sortable(),
+            Currency::make(__('attribute.amount'),'amount')->sortable(),
+            Date::make(__('attribute.date'),'date')->sortable(),
+            Text::make(__('attribute.type'),'type')->sortable(),
+            Text::make(__('attribute.payment_method'),'payment_method')->sortable(),
+            Text::make(__('attribute.category'),'category')->sortable(),
+            BelongsTo::make(__('cash_register.cash_register'), 'cashRegister', CashRegister::class)->searchable(),
         ];
     }
 }

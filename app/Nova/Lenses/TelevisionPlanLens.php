@@ -18,7 +18,7 @@ class TelevisionPlanLens extends Lens
 
     public function name()
     {
-        return __('Television Plan');
+        return __('panel.television_plans');
     }
 
     /**

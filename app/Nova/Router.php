@@ -8,6 +8,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Text;
 use Illuminate\Http\Request;
+
 class Router extends Resource
 {
     /**
@@ -61,7 +62,7 @@ class Router extends Resource
                 'danger' => 'exclamation-circle',
                 'success' => 'check-circle',
             ])->label(function ($value) {
-                return __('attribute.'.$value);
+                return __('attribute.' . $value);
             }),
             Text::make(__('router.code'), 'code')
                 ->rules('required', 'max:255')
@@ -71,6 +72,16 @@ class Router extends Resource
                 ->rules('required', 'max:255')
                 ->sortable(),
         ];
+    }
+
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Routers');
+    }
+
+    public static function singularLabel(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Router');
     }
 
 

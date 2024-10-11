@@ -28,47 +28,51 @@ class Product extends Resource
     {
         return [
             ID::make()->sortable(),
-            Boolean::make('Enable for Sales?.', 'status')
+            Boolean::make(__('Enable for Sales?.'), 'status')
                 ->sortable()
                 ->rules('required')->default(false),
-            Text::make('Name')
+            Text::make(__('Name'), 'name')
                 ->sortable()
                 ->rules('required', 'max:255'),
             Text::make('SKU')
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Number::make('Qty')->default(0)
+            Number::make(__('Qty'), 'qty')->default(0)
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Text::make('Brand')
+            Text::make(__('Brand'), 'brand')
                 ->sortable()
                 ->rules('nullable', 'max:255'),
-            Image::make('Image')->path('inventory/img'),
-            Currency::make('Price')
+            Image::make(__('Image'), 'image')->path('inventory/img'),
+            Currency::make(__('Price'), 'price')
                 ->sortable()
                 ->rules('required', 'numeric'),
-            Currency::make('Special Price')
+            Currency::make(__('Special Price'), 'special_price')
                 ->sortable()
                 ->rules('nullable', 'numeric'),
-            Currency::make('Cost Price')
+            Currency::make(__('Cost Price'), 'cost_price')
                 ->sortable()
                 ->rules('required', 'numeric'),
-            Markdown::make('Description')
+            Markdown::make(__('Description'), 'description')
                 ->hideFromIndex(),
-            Text::make('Reference')
+            Text::make(__('Reference'), 'reference')
                 ->sortable()
                 ->rules('nullable', 'max:255'),
-            Number::make('Taxes')
+            Number::make(__('Taxes'), 'taxes')
                 ->sortable(),
 
-            Text::make('URL Key')
+            Text::make(__('URL Key'),'url_key')
                 ->sortable(),
-            BelongsTo::make('Warehouse')
+            BelongsTo::make(__('Warehouse'),'warehouse', Warehouse::class)
                 ->sortable(),
-            BelongsTo::make('Category')
+            BelongsTo::make(__('Category'),'category', Category::class)
                 ->sortable(),
-
         ];
+    }
+
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Products');
     }
 
 

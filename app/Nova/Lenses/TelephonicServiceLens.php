@@ -30,7 +30,7 @@ class TelephonicServiceLens extends Lens
 
     public function name()
     {
-        return __('Telephonic Service');
+        return __('panel.telephonic_services');
     }
 
     /**

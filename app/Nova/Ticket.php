@@ -48,47 +48,50 @@ class Ticket extends Resource
      * @param NovaRequest $request
      * @return array
      */
-    public function fields(Request $request)
+    public function fields(Request $request): array
     {
         $technicians = User::technicians()->pluck('name', 'id');
         return [
             ID::make()->sortable(),
 
-            BelongsTo::make('Customer', 'customer', Customer::class)
+            BelongsTo::make(__('customer.customer'), 'customer', Customer::class)
                 ->sortable()
                 ->searchable()
                 ->rules('required'),
 
-            BelongsTo::make('Service', 'service', Service::class)
+            BelongsTo::make(__('service.service'), 'service', Service::class)
                 ->sortable()
                 ->searchable()
                 ->nullable(),
 
-            Select::make('Issue Type')
+            Select::make(__('attribute.issue_type'), 'issue_type')
                 ->options([
-                    'connectivity' => 'Connectivity',
-                    'billing' => 'Billing',
-                    'configuration' => 'Configuration',
+                    'connectivity' => __('attribute.connectivity'),
+                    'billing' => __('attribute.billing'),
+                    'configuration' => __('attribute.configuration'),
                     // Add more issue types as needed
                 ])
+                ->displayUsingLabels()
                 ->rules('required'),
 
-            Select::make('Priority')
+            Select::make(__('attribute.priority'), 'priority')
                 ->options([
-                    'low' => 'Low',
-                    'medium' => 'Medium',
-                    'high' => 'High',
-                    'urgent' => 'Urgent',
+                    'low' => __('attribute.low'),
+                    'medium' => __('attribute.medium'),
+                    'high' => __('attribute.high'),
+                    'urgent' => __('attribute.urgent'),
                 ])
+                ->displayUsingLabels()
                 ->rules('required'),
 
-            Select::make('Status')
+            Select::make(__('attribute.status'), 'status')
                 ->options([
-                    'open' => 'Open',
-                    'in_progress' => 'In Progress',
-                    'resolved' => 'Resolved',
-                    'closed' => 'Closed',
+                    'open' => __('attribute.open'),
+                    'in_progress' => __('attribute.in_progress'),
+                    'resolved' => __('attribute.resolved'),
+                    'closed' => __('attribute.closed'),
                 ])
+                ->displayUsingLabels()
                 ->default('open')
                 ->rules('required'),
 
@@ -96,35 +99,35 @@ class Ticket extends Resource
                 ->sortable()
                 ->rules('required', 'max:255'),
 
-            Textarea::make('Description')
+            Textarea::make(__('attribute.description'), 'description')
                 ->alwaysShow()
                 ->rules('required'),
 
-            DateTime::make('Created At')
+            DateTime::make(__('attribute.created_at'), 'created_at')
                 ->onlyOnDetail()
                 ->sortable(),
 
-            DateTime::make('Updated At')
+            DateTime::make(__('attribute.updated_at'), 'updated_at')
                 ->onlyOnDetail()
                 ->sortable(),
 
-            DateTime::make('Closed At')
+            DateTime::make(__('attribute.closed_at'), 'closed_at')
                 ->nullable()
                 ->onlyOnDetail()
                 ->sortable(),
 
-            Select::make('Technician', 'user_id')
+            Select::make(__('attribute.technician'), 'user_id')
                 ->options($technicians)
                 ->displayUsingLabels(),
 
-            Textarea::make('Resolution Notes')
+            Textarea::make(__('attribute.resolution_notes'), 'resolution_notes')
                 ->alwaysShow()
                 ->nullable(),
 
-            File::make('Attachments')
+            File::make(__('attribute.attachments'), 'attachments')
                 ->nullable(),
 
-            Text::make('Contact Method')
+            Text::make(__('attribute.contact_method'), 'contact_method')
                 ->nullable()
                 ->sortable(),
         ];
@@ -136,7 +139,7 @@ class Ticket extends Resource
      * @param Request $request
      * @return array
      */
-    public function cards(Request $request)
+    public function cards(Request $request): array
     {
         return [];
     }
@@ -147,7 +150,7 @@ class Ticket extends Resource
      * @param Request $request
      * @return array
      */
-    public function filters(Request $request)
+    public function filters(Request $request): array
     {
         return [
             new StatusTickets,
@@ -161,7 +164,7 @@ class Ticket extends Resource
      * @param Request $request
      * @return array
      */
-    public function lenses(Request $request)
+    public function lenses(Request $request): array
     {
         return [];
     }

@@ -19,8 +19,8 @@ class EquipmentAssignmentStatus extends Filter
      * Apply the filter to the given query.
      *
      * @param NovaRequest $request
-     * @param  Builder  $query
-     * @param  mixed  $value
+     * @param Builder $query
+     * @param mixed $value
      * @return Builder
      */
     public function apply(NovaRequest $request, $query, $value)
@@ -34,11 +34,11 @@ class EquipmentAssignmentStatus extends Filter
      * @param NovaRequest $request
      * @return array
      */
-    public function options(NovaRequest $request)
+    public function options(NovaRequest $request): array
     {
         return [
-            'Assigned' => 'assigned',
-            'Returned' => 'returned'
+            __('Assigned') => 'assigned',
+            __('Returned') => 'returned'
         ];
     }
 }

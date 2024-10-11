@@ -20,40 +20,40 @@ class DailyBox extends Resource
         'id', 'date'
     ];
 
-    public function fields(Request $request)
+    public function fields(Request $request): array
     {
         return [
             ID::make()->sortable(),
 
-            BelongsTo::make('Box', 'box', Box::class)
+            BelongsTo::make(__('box.box'), 'box', Box::class)
                 ->sortable()
                 ->rules('required'),
 
-            Date::make('Date')
+            Date::make(__('attribute.date'), 'date')
                 ->sortable()
                 ->rules('required'),
 
-            Number::make('Start Amount', 'start_amount')
+            Number::make(__('box.start_amount'), 'start_amount')
                 ->sortable()
                 ->rules('required', 'numeric', 'min:0'),
 
-            Number::make('End Amount', 'end_amount')
+            Number::make(__('box.end_amount'), 'end_amount')
                 ->sortable()
                 ->rules('required', 'numeric', 'min:0'),
 
-            Textarea::make('Transactions')
+            Textarea::make(__('attribute.transactions'), 'transactions')
                 ->hideFromIndex(),
         ];
     }
 
-    public static function label()
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
     {
-        return 'Daily Boxes';
+        return __('box.daily_boxes');
     }
 
-    public static function singularLabel()
+    public static function singularLabel(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
     {
-        return 'Daily Box';
+        return __('box.daily_box');
     }
 }
 

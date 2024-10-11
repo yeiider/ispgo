@@ -18,21 +18,26 @@ class Warehouse extends Resource
         'id', 'name', 'code', 'address'
     ];
 
-    public function fields(NovaRequest $request)
+    public function fields(NovaRequest $request): array
     {
         return [
             ID::make()->sortable(),
-            Text::make('Name')
+            Text::make(__('attribute.name'), 'name')
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Text::make('Address')
+            Text::make(__('address.address'), 'address')
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Text::make('Code')
+            Text::make(__('attribute.code'), 'code')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
         ];
+    }
+
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('warehouse.warehouses');
     }
 
 

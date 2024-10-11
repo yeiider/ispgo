@@ -8,7 +8,6 @@ use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Http\Requests\LensRequest;
@@ -26,7 +25,7 @@ class InstallationsLens extends Lens
 
     public function name()
     {
-        return __('Install');
+        return __('panel.installations');
     }
 
     /**

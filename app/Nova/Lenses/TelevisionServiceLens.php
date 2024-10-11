@@ -30,7 +30,7 @@ class TelevisionServiceLens extends Lens
 
     public function name()
     {
-        return __('Television Service');
+        return __('panel.television_services');
     }
 
     /**

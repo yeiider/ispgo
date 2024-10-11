@@ -20,38 +20,49 @@ class Supplier extends Resource
         'id', 'name', 'document', 'email'
     ];
 
-    public function fields(NovaRequest $request)
+    public function fields(NovaRequest $request): array
     {
         return [
             ID::make()->sortable(),
-            Text::make('Name')
+            Text::make(__('Name'), 'name')
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Text::make('Contact')
+            Text::make(__('Contact'), 'contact')
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Text::make('Document')
+            Text::make(__('Document'), 'document')
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Textarea::make('Description')
+            Textarea::make(__('Description'), 'description')
                 ->hideFromIndex(),
-            Country::make('Country')->searchable()
+            Country::make(__('Country'), 'country')->searchable()
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Text::make('City')
+            Text::make(__('City'), 'city')
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Text::make('Postal Code')
+            Text::make(__('Postal Code'), 'postal_code')
                 ->sortable()
                 ->rules('required', 'max:255'),
-            Text::make('Email')
+            Text::make(__('Email'), 'email')
                 ->sortable()
                 ->rules('required', 'email', 'max:255'),
-            Text::make('Phone')
+            Text::make(__('Phone'), 'phone')
                 ->sortable()
                 ->rules('required', 'max:255')
         ];
     }
+
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Suppliers');
+    }
+
+    public static function singularLabel(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Supplier');
+    }
+
 
     public static function authorizedToCreate(Request $request)
     {

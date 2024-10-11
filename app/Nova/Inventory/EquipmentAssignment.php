@@ -49,18 +49,29 @@ class EquipmentAssignment extends Resource
     {
         return [
             ID::make(__('ID'), 'id')->sortable(),
-            BelongsTo::make('User', 'user', User::class)->sortable()->searchable(),
-            BelongsTo::make('Product', 'product', Product::class)->sortable()->searchable(),
-            DateTime::make('Assigned At', 'assigned_at')->sortable(),
-            DateTime::make('Returned At', 'returned_at')->nullable()->sortable(),
+            BelongsTo::make(__('User'), 'user', User::class)->sortable()->searchable(),
+            BelongsTo::make(__('Product'), 'product', Product::class)->sortable()->searchable(),
+            DateTime::make(__('Assigned At'), 'assigned_at')->sortable(),
+            DateTime::make(__('Returned At'), 'returned_at')->nullable()->sortable(),
             Select::make('Status', 'status')->options([
-                'assigned' => 'Assigned',
-                'returned' => 'Returned',
+                'assigned' => __('Assigned'),
+                'returned' => __('Returned'),
             ])->displayUsingLabels()->sortable(),
-            Text::make('Condition on Assignment', 'condition_on_assignment')->nullable(),
-            Text::make('Condition on Return', 'condition_on_return')->nullable(),
-            Textarea::make('Notes', 'notes')->nullable(),
+            Text::make(__('Condition on Assignment'), 'condition_on_assignment')->nullable(),
+            Text::make(__('Condition on Return'), 'condition_on_return')->nullable(),
+            Textarea::make(__('Notes'), 'notes')->nullable(),
         ];
+    }
+
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Equipment Assignments');
+    }
+
+
+    public static function singularLabel(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Equipment Assignment');
     }
 
     /**
@@ -80,7 +91,7 @@ class EquipmentAssignment extends Resource
      * @param NovaRequest $request
      * @return array
      */
-    public function filters(Request $request)
+    public function filters(Request $request): array
     {
         return [
             new EquipmentAssignmentStatus

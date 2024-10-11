@@ -29,9 +29,13 @@ class Expense extends Resource
             Text::make(__('expense.description'), 'description')->sortable(),
             Currency::make(__('expense.amount'), 'amount')->sortable(),
             Date::make(__('expense.date'), 'date')->sortable(),
-            Text::make('expense.payment_method', 'payment_method')->sortable(),
+            Text::make(__('attribute.payment_method'), 'payment_method')->sortable(),
             Text::make(__('expense.category'), 'category')->sortable(),
             BelongsTo::make(__('expense.supplier'), 'supplier', Supplier::class)->sortable(),
         ];
+    }
+
+    public static function label() {
+        return __('expense.expense');
     }
 }

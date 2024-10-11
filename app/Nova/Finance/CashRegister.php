@@ -29,4 +29,8 @@ class CashRegister extends Resource
             DateTime::make(__('attribute.updated_at'), 'updated_at')->onlyOnDetail(),
         ];
     }
+
+    public static function label() {
+        return __('cash_register.cash_registers');
+    }
 }

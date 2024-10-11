@@ -8,7 +8,6 @@ use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Http\Requests\LensRequest;
@@ -24,9 +23,9 @@ class UninstallationsLens extends Lens
      * @return string
      */
 
-    public function name()
+    public function name(): string
     {
-        return __('Uninstall');
+        return __('panel.Uninstallations');
     }
 
     /**

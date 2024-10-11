@@ -23,39 +23,40 @@ class Box extends Resource
         'id', 'name'
     ];
 
-    public function fields(Request $request)
+    public function fields(Request $request): array
     {
         return [
             ID::make()->sortable(),
 
-            Text::make('Name')
+            Text::make(__('box.name'), 'name')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
-            MultiSelect::make('Users')
+            MultiSelect::make(__('user.user'), 'users')
                 ->options($this->getUserOptions())
                 ->rules('required'),
 
-            HasMany::make('Daily Boxes', 'dailyBoxes', DailyBox::class)
+            HasMany::make(__('box.daily_boxes'), 'dailyBoxes', DailyBox::class)
                 ->sortable(),
         ];
     }
 
-    public static function label()
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
     {
-        return 'Boxes';
+        return __('box.boxes');
     }
 
-    public static function singularLabel()
+    public static function singularLabel(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
     {
-        return 'Box';
+        return __('box.box');
     }
+
     /**
      * Get the list of user options.
      *
      * @return array
      */
-    protected function getUserOptions()
+    protected function getUserOptions(): array
     {
         return \App\Models\User::all()->pluck('name', 'id')->toArray();
     }

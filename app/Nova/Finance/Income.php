@@ -23,11 +23,15 @@ class Income extends Resource
     {
         return [
             ID::make()->sortable(),
-            Text::make('Description')->sortable(),
-            Currency::make('Amount')->sortable(),
-            Date::make('Date')->sortable(),
-            Text::make('Payment Method')->sortable(),
-            Text::make('Category')->sortable()
+            Text::make( __('attribute.description'),'description')->sortable(),
+            Currency::make(__('attribute.amount'),'amount')->sortable(),
+            Date::make(__('attribute.date'),'date')->sortable(),
+            Text::make(__('attribute.payment_method'),'payment_method')->sortable(),
+            Text::make(__('attribute.category'), 'category')->sortable()
         ];
     }
+     public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+     {
+        return __('income.incomes');
+     }
 }

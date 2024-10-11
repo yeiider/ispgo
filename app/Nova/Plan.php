@@ -174,6 +174,16 @@ class Plan extends Resource
         ];
     }
 
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Plans');
+    }
+
+    public static function singularLabel(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Plan');
+    }
+
     /**
      * Get the lenses available for the resource.
      *

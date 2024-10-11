@@ -21,9 +21,9 @@ class TelephonicPlanLens extends Lens
      * @return string
      */
 
-    public function name()
+    public function name(): string
     {
-        return __('Telephonic Plan');
+        return __('panel.telephonic_plans');
     }
 
     /**
