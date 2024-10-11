@@ -37,29 +37,33 @@ class Invoice extends Resource
         'id', 'amount', 'issue_date', 'status'
     ];
 
-    public function fields(NovaRequest $request)
+    public function fields(NovaRequest $request): array
     {
         return [
             ID::make(__('ID'), 'id')->sortable(),
-            Text::make('Increment Id')->readonly(),
-            BelongsTo::make('Customer', 'customer', Customers\Customer::class)->searchable()->readonly(),
-            BelongsTo::make('Service', 'service', \App\Nova\Service::class)->searchable()->readonly(),
+            Text::make(__('invoice.increment_id'), 'increment_id')->readonly(),
+            BelongsTo::make(__('customer.customer'), 'customer', Customers\Customer::class)->searchable()->readonly(),
+            BelongsTo::make(__('service.service'), 'service', \App\Nova\Service::class)->searchable()->readonly(),
 
-            Currency::make('Subtotal', 'subtotal')->step(0.01),
-            Currency::make('Tax', 'tax')->step(0.01),
-            Currency::make('Total', 'total')->step(0.01),
-            Currency::make('Amount', 'amount')->step(0.01),
-            Currency::make('Discount', 'discount')->step(0.01),
-            Currency::make('Total Pay', 'total')->step(0.01),
-            Date::make('Issue Date', 'issue_date'),
-            Date::make('Due Date', 'due_date'),
-            Select::make('Status', 'status')->options([
-                'paid' => 'Paid',
-                'unpaid' => 'Unpaid',
-                'overdue' => 'Overdue',
-                'canceled' => 'Canceled'
-            ])->displayUsingLabels()->hideFromIndex()->readonly(),
-            Badge::make(__('Status'))->map([
+            Currency::make(__('invoice.subtotal'), 'subtotal')->step(0.01),
+            Currency::make(__('invoice.tax'), 'tax')->step(0.01),
+            Currency::make(__('invoice.total'), 'total')->step(0.01),
+            Currency::make(__('invoice.amount'), 'amount')->step(0.01),
+            Currency::make(__('invoice.discount'), 'discount')->step(0.01),
+            Currency::make(__('invoice.total_pay'), 'total')->step(0.01),
+            Date::make(__('invoice.issue_date'), 'issue_date'),
+            Date::make(__('invoice.due_date'), 'due_date'),
+            Select::make(__('attribute.status'), 'status')->options([
+                'paid' => __('attribute.paid'),
+                'unpaid' => __('attribute.unpaid'),
+                'overdue' => __('attribute.overdue'),
+                'canceled' => __('attribute.canceled')
+            ])->displayUsingLabels()
+                ->hideFromIndex()
+                ->hideFromDetail()
+                ->readonly(),
+
+            Badge::make(__('attribute.status'), 'status')->map([
                 'paid' => 'success',
                 'overdue' => 'info',
                 'unpaid' => 'warning',
@@ -69,20 +73,22 @@ class Invoice extends Resource
                 'success' => 'check-circle',
                 'warning' => 'minus-circle',
                 'info' => 'speakerphone'
-            ]),
-            Text::make('Payment Method', 'payment_method'),
-            Textarea::make('Notes', 'notes')->hideFromIndex(),
+            ])->label(function ($value) {
+                return __('attribute.'.$value);
+            }),
+            Text::make(__('invoice.payment_method'), 'payment_method'),
+            Textarea::make(__('invoice.notes'), 'notes')->hideFromIndex(),
         ];
     }
 
-    public function actions(NovaRequest $request)
+    public function actions(NovaRequest $request): array
     {
         return [
             (new RegisterPayment())->showInline(),
             (new RegisterPaymentPromise())->showInline(),
             (new ApplyDiscount())->showInline(),
             (new DownloadInvoicePdf())->showInline(),
-            DestructiveAction::using(__('Cancel invoice'), function (ActionFields $fields, Collection $models) {
+            DestructiveAction::using(__('invoice.cancel_invoice'), function (ActionFields $fields, Collection $models) {
                 $models->each->canceled();
             })->showInline()
         ];
@@ -107,9 +113,10 @@ class Invoice extends Resource
             new InvoicesStatus(),
             new OutstandingBalance(),
             new TotalRevenue(),
-          //  new MonthlyRevenue()
+            //  new MonthlyRevenue()
         ];
     }
+
     public static function authorizedToCreate(Request $request)
     {
         return false;

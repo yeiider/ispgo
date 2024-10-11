@@ -42,4 +42,8 @@ return [
     'in_progress' => 'En progreso',
     'closed' => 'Cerrado',
     'resolved' => 'Resuelto',
+    'paid' => 'Pagado',
+    'unpaid' => 'No Pagado',
+    'overdue' => 'Vencido',
+    'canceled' => 'Cancelado',
 ];

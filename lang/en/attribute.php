@@ -42,5 +42,8 @@ return [
     'in_progress' => 'In Progress',
     'closed' => 'Closed',
     'resolved' => 'Resolved',
-
+    'paid' => 'Paid',
+    'unpaid' => 'Unpaid',
+    'overdue' => 'Overdue',
+    'canceled' => 'Canceled',
 ];
