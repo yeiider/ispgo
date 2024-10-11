@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'tax_detail' => 'Detalles de Impuestos',
     'tax' => 'Impuesto',
     'enable_billing' => 'Habilitar Facturación',
     'tax_identification_type' => 'Documento Fiscal',

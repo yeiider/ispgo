@@ -94,6 +94,11 @@ class Invoice extends Resource
         ];
     }
 
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('invoice.invoice');
+    }
+
     public function filters(Request $request)
     {
         return [

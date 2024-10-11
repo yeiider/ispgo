@@ -60,6 +60,10 @@ class TaxDetail extends Resource
         ];
     }
 
+    public static function label() {
+        return __('tax.tax_detail');
+    }
+
     public static function authorizedToCreate(Request $request)
     {
         return auth()->check() && $request->user()->can('createTaxDetail');

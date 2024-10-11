@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'addresses' => 'Direcciones',
     'address' => 'Dirección',
     'city' => 'Ciudad',
     'state_province' => 'Estado/Provincia',

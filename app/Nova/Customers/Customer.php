@@ -36,14 +36,14 @@ class Customer extends Resource
         'id', 'first_name', 'last_name', 'email_address', 'phone_number'
     ];
 
-    public function fields(Request $request)
+    public function fields(Request $request): array
     {
         return [
             ID::make()->sortable(),
             Text::make(__('customer.first_name'), 'first_name')->sortable()->rules('required', 'max:100'),
             Text::make(__('customer.last_name'), 'last_name')->sortable()->rules('required', 'max:100'),
             Date::make(__('customer.date_of_birth'), 'date_of_birth')->nullable(),
-            Text::make(__('customer.phone_number'), 'phone_number')->rules('required','max:12'),
+            Text::make(__('customer.phone_number'), 'phone_number')->rules('required', 'max:12'),
             Text::make(__('customer.email_address'), 'email_address')->sortable()->rules('required', 'email', 'max:100'),
             Select::make(__('customer.document_type'), 'document_type')
                 ->options(DocumentType::pluck('name', 'code')->toArray())
@@ -77,7 +77,7 @@ class Customer extends Resource
         ];
     }
 
-    public function actions(NovaRequest $request)
+    public function actions(NovaRequest $request): array
     {
         return [
             new UpdateCustomerStatus,
@@ -89,17 +89,22 @@ class Customer extends Resource
         ];
     }
 
-    public static function authorizedToCreate(Request $request)
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('customer.customer');
+    }
+
+    public static function authorizedToCreate(Request $request): bool
     {
         return auth()->check() && $request->user()->can('createCustomer');
     }
 
-    public function authorizedToUpdate(Request $request)
+    public function authorizedToUpdate(Request $request): bool
     {
         return auth()->check() && $request->user()->can('updateCustomer', $this->resource);
     }
 
-    public function authorizedToDelete(Request $request)
+    public function authorizedToDelete(Request $request): bool
     {
         return auth()->check() && $request->user()->can('deleteCustomer', $this->resource);
     }
@@ -127,7 +132,7 @@ class Customer extends Resource
      * @param NovaRequest $request
      * @return array
      */
-    public function cards(NovaRequest $request)
+    public function cards(NovaRequest $request): array
     {
         return [
             new NewCustomers

@@ -23,7 +23,7 @@ class NewCustomers extends Value
      * @param NovaRequest $request
      * @return mixed
      */
-    public function calculate(NovaRequest $request)
+    public function calculate(NovaRequest $request): mixed
     {
         return $this->count($request, Customer::class);
     }
@@ -33,7 +33,7 @@ class NewCustomers extends Value
      *
      * @return array
      */
-    public function ranges()
+    public function ranges(): array
     {
         return [
             30 => Nova::__('30 Days'),
@@ -51,7 +51,7 @@ class NewCustomers extends Value
      *
      * @return \DateTimeInterface|null
      */
-    public function cacheFor()
+    public function cacheFor(): ?\DateTimeInterface
     {
         return now()->addMinutes(5);
     }
@@ -61,8 +61,16 @@ class NewCustomers extends Value
      *
      * @return string
      */
-    public function uriKey()
+    public function uriKey(): string
     {
         return 'new-customers';
     }
+
+    public  function name()
+    {
+        return __('customer.new_customers');
+
+    }
+
+
 }

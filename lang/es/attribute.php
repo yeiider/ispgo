@@ -46,4 +46,14 @@ return [
     'unpaid' => 'No Pagado',
     'overdue' => 'Vencido',
     'canceled' => 'Cancelado',
+    'date' => 'Fecha',
+    'total_invoices' => 'Total de facturas',
+    'paid_invoices' => 'Facturas pagadas',
+    'total_subtotal' => 'Total parcial',
+    'total_tax' => 'Total impuestos',
+    'total_amount' => 'Total',
+    'total_discount' => 'Total descuento',
+    'total_outstanding_balance' => 'Saldo pendiente',
+    'total_revenue' => 'Total ingresos',
+
 ];

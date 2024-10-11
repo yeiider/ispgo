@@ -105,6 +105,10 @@ class Service extends Resource
         ];
     }
 
+    public static function label() {
+        return __('service.services');
+    }
+
     protected function billingContractFields(): array
     {
         return [

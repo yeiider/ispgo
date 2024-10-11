@@ -46,4 +46,13 @@ return [
     'unpaid' => 'Unpaid',
     'overdue' => 'Overdue',
     'canceled' => 'Canceled',
+    'date' => 'Date',
+    'total_invoices' => 'Total Invoices',
+    'paid_invoices' => 'Paid Invoices',
+    'total_subtotal' => 'Total Subtotal',
+    'total_tax' => 'Total Tax',
+    'total_amount' => 'Total Amount',
+    'total_discount' => 'Total Discount',
+    'total_outstanding_balance' => 'Total Outstanding Balance',
+    'total_revenue' => 'Total Revenue',
 ];

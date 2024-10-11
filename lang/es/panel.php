@@ -24,7 +24,7 @@ return [
 
     'customers' => 'Clientes',
     'addresses' => 'Direcciones',
-    'tax_details' => 'Detalles Fiscales',
+    'tax_details' => 'Detalles Impuesto',
     'telephonic_services' => 'Servicios Telefónicos',
     'television_services' => 'Servicios de Televisión',
     'installations' => 'Instalaciones',

@@ -25,4 +25,5 @@ return [
     'addresses' => 'Addresses',
     'services' => 'Services',
     'send_email' => 'Send Email',
+    'new_customers' => 'New Customers',
 ];

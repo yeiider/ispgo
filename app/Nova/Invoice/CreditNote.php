@@ -3,13 +3,14 @@
 namespace App\Nova\Invoice;
 
 use App\Nova\Resource;
+use App\Nova\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Textarea;
 
 class CreditNote extends Resource
 {
@@ -42,16 +43,24 @@ class CreditNote extends Resource
      * @param Request $request
      * @return array
      */
-    public function fields(Request $request)
+    public function fields(Request $request): array
     {
         return [
             ID::make()->sortable(),
-            BelongsTo::make('Invoice','invoice',Invoice::class)->searchable(),
-            BelongsTo::make('User')->default(Auth::id())->readonly(),
-            Currency::make('Amount')->step(0.01)->rules('required', 'numeric', 'min:0'),
-            Date::make('Issue Date')->rules('required', 'date'),
-            Text::make('Reason')->rules('nullable', 'string', 'max:255'),
+            BelongsTo::make(__('credit_note.invoice'), 'invoice', Invoice::class)->searchable(),
+            BelongsTo::make(__('credit_note.user'), 'user', User::class)
+                ->default(Auth::id())->readonly()
+
+            ,
+            Currency::make(__('credit_note.amount'), 'amount')->step(0.01)->rules('required', 'numeric', 'min:0'),
+            Date::make(__('credit_note.issue_date'), 'issue_date')->rules('required', 'date'),
+            Textarea::make(__('credit_note.reason'), 'reason')->rules('nullable', 'string', 'max:255'),
         ];
+    }
+
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('credit_note.credit_note');
     }
 
     public static function authorizedToCreate(Request $request)

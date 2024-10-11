@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'services' => 'Servicios',
     'service' => 'Servicio',
     'plan' => 'Plan',
     'service_ip' => 'IP del Servicio',

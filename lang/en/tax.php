@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'tax_detail' => 'Tax Detail',
     'tax' => 'Tax',
     'enable_billing' => 'Enable Billing',
     'tax_identification_type' => 'Fiscal Document',

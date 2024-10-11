@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'addresses' => 'Addresses',
     'address' => 'Address',
     'city' => 'City',
     'state_province' => 'State/Province',
@@ -11,4 +12,5 @@ return [
     'shipping' => 'Shipping',
     'latitude' => 'Latitude',
     'longitude' => 'Longitude',
+
 ];

@@ -25,4 +25,5 @@ return [
     'addresses' => 'Direcciones',
     'services' => 'Servicios',
     'send_email' => 'Enviar Correo',
+    'new_customers' => 'Clientes Nuevos',
 ];

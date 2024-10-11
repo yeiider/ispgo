@@ -39,7 +39,7 @@ class DailyInvoiceBalance extends Resource
      * @param NovaRequest $request
      * @return array
      */
-    public function fields(NovaRequest $request)
+    public function fields(NovaRequest $request): array
     {
         /**
          * 'date' => $date,
@@ -55,16 +55,21 @@ class DailyInvoiceBalance extends Resource
 
         return [
             ID::make()->sortable(),
-            Date::make('Date')->sortable(),
-            Currency::make('Total Invoices')->sortable(),
-            Currency::make('Paid Invoices')->sortable(),
-            Currency::make('Total Subtotal')->sortable(),
-            Currency::make('Total Tax')->sortable(),
-            Currency::make('Total Amount')->sortable(),
-            Currency::make('Total Discount')->sortable(),
-            Currency::make('Total Outstanding Balance')->sortable(),
-            Currency::make('Total Revenue')->sortable(),
+            Date::make(__('attribute.date'),'date')->sortable(),
+            Currency::make(__('attribute.total_invoice'), 'total_invoice')->sortable(),
+            Currency::make(__('attribute.paid_invoices'), 'paid_invoices')->sortable(),
+            Currency::make(__('attribute.total_subtotal'), 'total_subtotal')->sortable(),
+            Currency::make(__('attribute.total_tax'), 'total_tax')->sortable(),
+            Currency::make(__('attribute.total_amount'), 'total_amount')->sortable(),
+            Currency::make(__('attribute.total_discount'), 'total_discount')->sortable(),
+            Currency::make(__('attribute.total_outstanding_balance'), 'total_outstanding_balance')->sortable(),
+            Currency::make(__('attribute.total_revenue'), 'total_revenue')->sortable(),
         ];
+    }
+
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('balance.daily_invoice_balance');
     }
 
     /**

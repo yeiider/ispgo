@@ -42,6 +42,10 @@ class Address extends Resource
         ];
     }
 
+    public static function label() {
+        return __('address.addresses');
+    }
+
 
     public static function authorizedToCreate(Request $request)
     {
