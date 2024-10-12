@@ -53,9 +53,9 @@ class RolesAndPermissionsSeeder extends Seeder
             Permission::create(['group' => $item, 'name' => 'delete' . $item]);
             Permission::create(['group' => $item, 'name' => 'destroy' . $item]);
         });
+        Permission::create(['group' => "invoice", 'name' => 'PostInvoice']);
         Permission::create(['group' => "invoice", 'name' => 'ViewDailyInvoiceBalance']);
 
-        // Crear un rol Super-Admin y asignar todos los permisos
 
 
         $role = Role::create(['name' => 'super-admin']);
