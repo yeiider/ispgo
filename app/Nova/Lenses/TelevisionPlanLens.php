@@ -57,7 +57,9 @@ class TelevisionPlanLens extends Lens
             ])->icons([
                 'danger' => 'exclamation-circle',
                 'success' => 'check-circle',
-            ]),
+            ])->label(function ($value) {
+                return __($value);
+            }),
             Select::make(__('Modality Type'))
                 ->options([
                     'postpaid' => __('Postpaid'),

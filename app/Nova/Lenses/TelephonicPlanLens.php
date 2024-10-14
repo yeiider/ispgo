@@ -62,7 +62,9 @@ class TelephonicPlanLens extends Lens
             ])->icons([
                 'danger' => 'exclamation-circle',
                 'success' => 'check-circle',
-            ]),
+            ])->label(function ($value) {
+                return __($value);
+            }),
             Select::make(__('Modality Type'))
                 ->options([
                     'postpaid' => __('Postpaid'),
@@ -85,7 +87,7 @@ class TelephonicPlanLens extends Lens
      * @param NovaRequest $request
      * @return array
      */
-    public function cards(NovaRequest $request)
+    public function cards(NovaRequest $request): array
     {
         return [];
     }

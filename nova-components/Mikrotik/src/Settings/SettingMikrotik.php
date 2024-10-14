@@ -4,12 +4,14 @@ namespace Ispgo\Mikrotik\Settings;
 
 use Ispgo\Mikrotik\Settings\Config\Sources\QueueType;
 use Ispgo\Mikrotik\Settings\Config\Sources\ServicesType;
+use Laravel\Nova\Menu\MenuSection;
 
 class SettingMikrotik
 {
     // Configuración General
     public static function getGeneralSettings(): array
     {
+
         return [
             "setting" => [
                 "label" => "General Information",

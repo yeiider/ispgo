@@ -8,6 +8,7 @@ use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
 use App\Nova\DailyBox;
+use App\Nova\Dashboards\Main;
 use App\Nova\EmailTemplate;
 use App\Nova\Finance\CashRegister;
 use App\Nova\Finance\Expense;
@@ -39,7 +40,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Ispgo\Mikrotik\Mikrotik;
 use Ispgo\SettingsManager\SettingsManager;
-use Laravel\Nova\Dashboards\Main;
+
 use Laravel\Nova\Menu\MenuGroup;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;

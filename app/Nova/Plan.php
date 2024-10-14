@@ -157,7 +157,7 @@ class Plan extends Resource
         ];
     }
 
-    protected function technicalDetailsFields()
+    protected function technicalDetailsFields(): array
     {
         return [
             Textarea::make(__('plan.service_compatibility'), 'service_compatibility')

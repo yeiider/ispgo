@@ -5,6 +5,7 @@ namespace Ispgo\Mikrotik;
 use App\Events\ServiceCreated;
 use App\Events\ServiceUpdateStatus;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Ispgo\Mikrotik\Listener\ServiceChangeStatus;
@@ -21,7 +22,7 @@ class ToolServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         Event::listen(
             ServiceCreated::class,
@@ -38,7 +39,7 @@ class ToolServiceProvider extends ServiceProvider
         });
 
         Nova::serving(function (ServingNova $event) {
-            //
+            Lang::setLocale(config('app.locale'));
         });
     }
 
@@ -65,8 +66,10 @@ class ToolServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
-        //
+        $this->app->singleton('translator', function ($app) {
+            return $app->make('Illuminate\Contracts\Translation\Translator');
+        });
     }
 }
