@@ -7,7 +7,6 @@ use App\Nova\Metrics\Invoice\MonthlyRevenue;
 use App\Nova\Metrics\Invoice\OutstandingBalance;
 use App\Nova\Metrics\Invoice\TotalRevenue;
 use App\Nova\Metrics\NewCustomers;
-use Laravel\Nova\Cards\Help;
 use Laravel\Nova\Dashboards\Main as Dashboard;
 
 class Main extends Dashboard
