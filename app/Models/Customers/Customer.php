@@ -135,10 +135,5 @@ class Customer extends Authenticatable implements MustVerifyEmail
         return $this->invoices()->orderBy('created_at', 'desc')->first();
     }
 
-    /*public function getCustomerStatusAttribute($value)
-    {
-        return __('attribute.customer_status.' . $value);
-
-    }*/
 
 }

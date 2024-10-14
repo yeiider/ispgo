@@ -17,4 +17,5 @@ class InvoicesStatus extends Partition
     {
         return 'invoices-status';
     }
+
 }

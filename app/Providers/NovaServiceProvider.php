@@ -92,7 +92,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(DailyInvoiceBalance::class)->name(__('panel.daily_invoice_balances')),
                 ])->icon('archive')->collapsable(),
                 MenuSection::make(__('panel.finances'), [
-                    MenuItem::resource(CashRegister::class)->name(__('panel.cash_registers')),
+                    MenuItem::resource(CashRegister::class)->name(__('panel.cash_registers'))->canSee(function ($request) {
+                        return $request->user() && $request->user()->can('PostInvoice');
+                    }),
                     MenuItem::resource(Income::class)->name(__('panel.incomes')),
                     MenuItem::resource(Expense::class)->name(__('panel.expenses')),
                     MenuItem::resource(Transaction::class)->name(__('panel.transactions')),
