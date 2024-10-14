@@ -66,11 +66,10 @@ class NewCustomers extends Value
         return 'new-customers';
     }
 
-    public  function name()
+    public function name(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
     {
         return __('customer.new_customers');
 
     }
-
 
 }

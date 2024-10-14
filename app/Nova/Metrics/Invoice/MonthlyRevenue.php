@@ -20,4 +20,9 @@ class MonthlyRevenue extends Trend
     {
         return 'monthly-revenue';
     }
+
+    public function name(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Monthly Revenue');
+    }
 }

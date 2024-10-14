@@ -54,28 +54,23 @@
     "Enable Static IP": "Enable Static IP",
     "Client Identifier (MAC or PPP Secret)": "Client Identifier (MAC or PPP Secret)",
     "Password PPP Secret (PPP Secret)": "Password PPP Secret (PPP Secret)",
-
     "Simple Queue Configuration": "Simple Queue Configuration",
     "Enable Simple Queue": "Enable Simple Queue",
     "Default Upload Limit": "Default Upload Limit",
     "Default Download Limit": "Default Download Limit",
     "Queue Type": "Queue Type",
-
     "QoS Configuration": "QoS Configuration",
     "Enable QoS": "Enable QoS",
     "Traffic Priority": "Traffic Priority",
     "Max Bandwidth Limit": "Max Bandwidth Limit",
-
     "IPv6 Configuration": "IPv6 Configuration",
     "Enable IPv6": "Enable IPv6",
     "IPv6 Pool": "IPv6 Pool",
     "Prefix Length": "Prefix Length",
-
     "Monitoring and Notifications": "Monitoring and Notifications",
     "Enable Monitoring": "Enable Monitoring",
     "Notification Email": "Notification Email",
     "Alert Threshold (CPU or Bandwidth Usage)": "Alert Threshold (CPU or Bandwidth Usage)",
-
     "DHCP Configuration": "DHCP Configuration",
     "Enable DHCP": "Enable DHCP",
     "DHCP Pool": "DHCP Pool",
@@ -86,6 +81,9 @@
     "Roles": "Roles",
     "Guard Name": "Guard Name",
     "Main": "Main",
-    "main": "main"
-
+    "main": "main",
+    "Total Revenue": "Total Revenue",
+    "Outstanding Balance": "Outstanding Balance",
+    "Monthly Revenue": "Monthly Revenue",
+    "Invoice Status": "Invoice Status"
 }

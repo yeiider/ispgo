@@ -18,4 +18,9 @@ class InvoicesStatus extends Partition
         return 'invoices-status';
     }
 
+    public function name(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Invoice Status');
+    }
+
 }

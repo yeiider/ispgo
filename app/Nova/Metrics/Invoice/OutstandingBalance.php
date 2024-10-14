@@ -30,4 +30,9 @@ class OutstandingBalance extends Value
     {
         return 'outstanding-balance';
     }
+
+    public function name(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Outstanding Balance');
+    }
 }

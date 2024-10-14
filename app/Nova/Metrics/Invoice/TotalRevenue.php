@@ -16,7 +16,7 @@ class TotalRevenue extends Value
      */
     public $icon = 'cash';
 
-    public function calculate(NovaRequest $request)
+    public function calculate(NovaRequest $request): \Laravel\Nova\Metrics\ValueResult
     {
         return $this->sum($request, Invoice::class, 'amount');
     }
@@ -37,5 +37,10 @@ class TotalRevenue extends Value
     public function uriKey()
     {
         return 'total-revenue';
+    }
+
+    public function name(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Total Revenue');
     }
 }
