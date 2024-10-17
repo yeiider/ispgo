@@ -42,6 +42,9 @@ Route::get('/invoice/find-by-box', [InvoiceController::class, 'getInvoicesForTod
 Route::get('/invoice/receipt', [InvoiceController::class, 'getReceipt']);
 Route::get('/customer/search', [\App\Http\Controllers\Api\CustomerApi::class, 'search']);
 
+Route::get('/', function () {
+    return Inertia::render('Welcome', []);
+})->name('home');
 
 Route::middleware('guest:customer')->prefix('customer')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm']);

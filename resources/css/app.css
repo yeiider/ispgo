@@ -72,4 +72,8 @@
     .actions {
         @apply flex justify-end;
     }
+
+    .bg-cream {
+        @apply bg-purple-50;
+    }
 }
