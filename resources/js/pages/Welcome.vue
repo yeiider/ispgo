@@ -22,8 +22,16 @@ import trueFalse from './assets/true-false.png'
 import gradebook from './assets/gradebook.png'
 import discussion from './assets/discussion.png'
 import integrations from './assets/integrations.png'
+import {Icon} from "./Icons/index.js";
 
 const open = ref(false);
+const year = new Date().getFullYear();
+
+const isOpenMenu = ref(false);
+
+const toggleMenu = () => {
+  isOpenMenu.value = !isOpenMenu.value;
+}
 
 onMounted(() => {
   AOS.init()
@@ -37,12 +45,13 @@ onMounted(() => {
       <div class="flex flex-row items-center justify-between py-6">
         <div class="relative md:mt-8">
           <a href="#"
-             class="text-lg relative z-50 font-bold tracking-widest text-gray-900 rounded-lg focus:outline-none focus:shadow-outline">Skilline</a>
+             class="text-lg relative z-50 font-bold tracking-widest text-gray-900 rounded-lg focus:outline-none focus:shadow-outline">[Nombre
+            ISP]</a>
           <svg class="h-11 z-40 absolute -top-2 -left-3" viewBox="0 0 79 79" fill="none"
                xmlns="http://www.w3.org/2000/svg">
             <path
               d="M35.2574 2.24264C37.6005 -0.100501 41.3995 -0.100505 43.7426 2.24264L76.7574 35.2574C79.1005 37.6005 79.1005 41.3995 76.7574 43.7426L43.7426 76.7574C41.3995 79.1005 37.6005 79.1005 35.2574 76.7574L2.24264 43.7426C-0.100501 41.3995 -0.100505 37.6005 2.24264 35.2574L35.2574 2.24264Z"
-              fill="#65DAFF"/>
+              fill="#7ad2ff"/>
           </svg>
         </div>
         <button class="rounded-lg md:hidden focus:outline-none focus:shadow-outline"
@@ -63,8 +72,10 @@ onMounted(() => {
         <!--<a
           class="px-4 py-2 mt-2 text-sm bg-transparent rounded-lg md:mt-8 md:ml-4 hover:text-gray-900 focus:outline-none focus:shadow-outline"
           href="#">Blog</a>-->
-        <a class="px-10 py-3 mt-2 text-sm text-center bg-white text-gray-800 rounded-full md:mt-8 md:ml-4" href="/customer/login">Login</a>
-        <a class="px-10 py-3 mt-2 text-sm text-center bg-purple text-white rounded-full md:mt-8 md:ml-4" href="/customer/register">Sign
+        <a class="px-10 py-3 mt-2 text-sm text-center bg-white text-gray-800 rounded-full md:mt-8 md:ml-4"
+           href="/customer/login">Login</a>
+        <a class="px-10 py-3 mt-2 text-sm text-center bg-purple text-white rounded-full md:mt-8 md:ml-4"
+           href="/customer/register">Sign
           Up</a>
       </nav>
     </div>
@@ -75,15 +86,16 @@ onMounted(() => {
       <div
         class="flex flex-col w-full lg:w-6/12 justify-center lg:pt-24 items-start text-center lg:text-left mb-5 md:mb-0">
         <h1 data-aos="fade-right" data-aos-once="true" class="my-4 text-5xl text-purple-950 font-bold leading-tight">
-          <span class="text-purple">Studying</span> Online is now much easier
+          <span class="text-purple">Conexiones</span> a Internet rápidas y confiables para tu hogar y negocio
         </h1>
-        <p data-aos="fade-down" data-aos-once="true" data-aos-delay="300" class="leading-normal text-2xl mb-8">Skilline
-          is an interesting platform that will teach you in more an interactive way</p>
+        <p data-aos="fade-down" data-aos-once="true" data-aos-delay="300" class="leading-normal text-2xl mb-8">Disfruta
+          de un servicio de Internet de alta velocidad con una cobertura que se adapta a tus necesidades, ya sea en casa
+          o en la oficina.</p>
         <div data-aos="fade-up" data-aos-once="true" data-aos-delay="700"
              class="w-full md:flex items-center justify-center lg:justify-start md:space-x-5">
           <a href="/customer/register"
-            class="lg:mx-0 bg-purple text-white text-xl font-bold rounded-full py-4 px-9 focus:outline-none transform transition hover:scale-110 duration-300 ease-in-out">
-            Join now
+             class="lg:mx-0 bg-purple text-white text-xl font-bold rounded-full py-4 px-9 focus:outline-none transform transition hover:scale-110 duration-300 ease-in-out">
+            Únete ahora
           </a>
         </div>
       </div>
@@ -147,7 +159,7 @@ onMounted(() => {
 
     <!-- trusted by -->
     <div class="max-w-4xl mx-auto">
-      <h1 class="text-center mb-3 text-gray-400 font-medium">Trusted by 5,000+ Companies Worldwide</h1>
+      <h1 class="text-center mb-3 text-gray-400 font-medium">Con la confianza de miles de hogares y negocios</h1>
       <div class="grid grid-cols-3 lg:grid-cols-6 gap-4 justify-items-center">
         <img class="h-7" :src="google" alt="google">
         <img class="h-7" :src="netflix" alt="netflix">
@@ -160,10 +172,12 @@ onMounted(() => {
 
     <!-- All-In-One Cloud Software. -->
     <div data-aos="flip-up" class="max-w-xl mx-auto text-center mt-24">
-      <h1 class="font-bold text-purple-950 my-3 text-2xl">All-In-One <span class="text-purple">Cloud Software.</span>
+      <h1 class="font-bold text-purple-950 my-3 text-2xl">Servicio Integral <span class="text-purple">de Conexión a Internet</span>
       </h1>
-      <p class="leading-relaxed text-gray-500">Skilline is one powerful online software suite that combines all the
-        tools needed to run a successful school or office.</p>
+      <p class="leading-relaxed text-gray-500">
+        Nuestro servicio de Internet es la solución completa que ofrece todo lo necesario para mantener tu hogar o
+        negocio conectado de manera rápida y confiable.
+      </p>
     </div>
     <!-- card -->
     <div class="grid md:grid-cols-3 gap-14 md:gap-5 mt-20">
@@ -176,9 +190,11 @@ onMounted(() => {
               fill="white"/>
           </svg>
         </div>
-        <h1 class="font-medium text-xl mb-3 lg:px-14 text-darken">Online Billing, Invoicing, & Contracts</h1>
-        <p class="px-4 text-gray-500">Simple and secure control of your organization’s financial and legal transactions.
-          Send customized invoices and contracts</p>
+        <h1 class="font-medium text-xl mb-3 lg:px-14 text-purple-950">Facturación en línea y gestión de contratos</h1>
+        <p class="px-4 text-gray-500">
+          Gestiona de manera fácil y segura todas las transacciones financieras y contractuales de tu servicio de
+          Internet.
+        </p>
       </div>
       <div data-aos="fade-up" data-aos-delay="150" class="bg-white shadow-xl p-6 text-center rounded-xl">
         <div style="background: #487BF0;"
@@ -222,9 +238,13 @@ onMounted(() => {
               fill="#F5F5FC"/>
           </svg>
         </div>
-        <h1 class="font-medium text-xl mb-3 lg:px-14 text-darken">Easy Scheduling & Attendance Tracking</h1>
-        <p class="px-4 text-gray-500">Schedule and reserve classrooms at one campus or multiple campuses. Keep detailed
-          records of student attendance</p>
+        <h1 class="font-medium text-xl mb-3 lg:px-14 text-purple-950">Instalación rápida y soporte técnico
+          disponible</h1>
+        <p class="px-4 text-gray-500">
+          Disfruta de una instalación rápida y eficiente de tu servicio de Internet, sin complicaciones. Además, nuestro
+          equipo de soporte técnico está disponible 24/7 para resolver cualquier problema o duda, asegurando que siempre
+          tengas una conexión estable y de calidad.
+        </p>
       </div>
       <div data-aos="fade-up" data-aos-delay="300" class="bg-white shadow-xl p-6 text-center rounded-xl">
         <div style="background: #29B9E7;"
@@ -235,19 +255,23 @@ onMounted(() => {
               fill="white"/>
           </svg>
         </div>
-        <h1 class="font-medium text-xl mb-3 lg:px-14 text-darken lg:h-14 pt-3">Customer Tracking</h1>
-        <p class="px-4 text-gray-500">Automate and track emails to individuals or groups. Skilline’s built-in system
-          helps organize your organization </p>
+        <h1 class="font-medium text-xl mb-3 lg:px-14 text-purple-950 lg:h-14 pt-3">Atención personalizada y soluciones a
+          medida</h1>
+        <p class="px-4 text-gray-500">
+          Ofrecemos atención personalizada y soluciones adaptadas a las necesidades específicas de cada cliente.
+        </p>
       </div>
     </div>
 
     <!-- lorem -->
     <div class="mt-28">
       <div data-aos="flip-down" class="text-center max-w-screen-md mx-auto">
-        <h1 class="text-3xl text-purple-950 font-bold mb-4">What is<span class="text-purple">Skilline?</span></h1>
-        <p class="text-gray-500">Skilline is a platform that allows educators to create online classes whereby they can
-          store the course materials online; manage assignments, quizzes and exams; monitor due dates; grade results and
-          provide students with feedback all in one place.</p>
+        <h1 class="text-3xl text-purple-950 font-bold mb-4">¿Qué es <span class="text-purple">[Nombre ISP]?</span>
+        </h1>
+        <p class="text-gray-500">[Nombre ISP] es una plataforma que permite a los usuarios gestionar su conexión a
+          Internet de manera sencilla y eficiente. Desde un solo lugar, puedes controlar el uso de tu red, revisar
+          detalles de tu plan, gestionar facturas, realizar pagos y recibir asistencia técnica personalizada para
+          garantizar una experiencia de navegación óptima.</p>
       </div>
       <div data-aos="fade-up"
            class="flex flex-col md:flex-row justify-center space-y-5 md:space-y-0 md:space-x-6 lg:space-x-10 mt-7">
@@ -255,11 +279,8 @@ onMounted(() => {
           <img class="rounded-2xl" :src="Rectangle19" alt="">
           <div class="absolute bg-black bg-opacity-20 bottom-0 left-0 right-0 w-full h-full rounded-2xl">
             <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <h1 class="uppercase text-white font-bold text-center text-sm lg:text-xl mb-3">FOR INSTRUCTORS</h1>
-              <button
-                class="rounded-full text-white border text-xs lg:text-md px-6 py-3 w-full font-medium focus:outline-none transform transition hover:scale-110 duration-300 ease-in-out">
-                Start a class today
-              </button>
+              <h1 class="uppercase text-white font-bold text-center text-sm lg:text-xl mb-3">Para Hogares | Para
+                Empresas</h1>
             </div>
           </div>
         </div>
@@ -267,11 +288,7 @@ onMounted(() => {
           <img class="rounded-2xl" :src="Rectangle21" alt="">
           <div class="absolute bg-black bg-opacity-20 bottom-0 left-0 right-0 w-full h-full rounded-2xl">
             <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <h1 class="uppercase text-white font-bold text-center text-sm lg:text-xl mb-3">FOR STUDENTS</h1>
-              <button
-                class="rounded-full text-white text-xs lg:text-md px-6 py-3 w-full font-medium focus:outline-none transform transition hover:scale-110 duration-300 ease-in-out"
-                style="background: rgba(35, 189, 238, 0.9)">Enter access code
-              </button>
+              <h1 class="uppercase text-white font-bold text-center text-sm lg:text-xl mb-3">Para tu familia</h1>
             </div>
           </div>
         </div>
@@ -281,23 +298,19 @@ onMounted(() => {
     <div class="sm:flex items-center sm:space-x-8 mt-36">
       <div data-aos="fade-right" class="sm:w-1/2 relative">
         <div class="bg-purple-400 rounded-full absolute w-12 h-12 z-0 -left-4 -top-3 animate-pulse"></div>
-        <h1 class="font-semibold text-2xl relative z-50 text-darken lg:pr-10">Everything you can do in a physical
-          classroom, <span class="text-purple">you can do with Skilline</span></h1>
-        <p class="py-5 lg:pr-32">Skilline’s school management software helps traditional and online schools manage
-          scheduling, attendance, payments and virtual classrooms all in one secure cloud-based system.</p>
+        <h1 class="font-semibold text-2xl relative z-50 text-purple-950 lg:pr-10">Todo lo que necesitas para estar
+          conectado, <span class="text-purple">lo encuentras con nuestro servicio de Internet</span></h1>
+        <p class="py-5 lg:pr-32">
+          Nuestro servicio de Internet te ofrece todo lo que necesitas para mantenerte siempre
+          conectado, tanto en tu hogar como en tu negocio. Con una red confiable y de alta velocidad, puedes gestionar
+          múltiples dispositivos, videollamadas, streaming y más, todo con la tranquilidad de contar con soporte
+          especializado y una infraestructura segura.
+        </p>
         <a href="" class="underline">Learn More</a>
       </div>
       <div data-aos="fade-left" class="sm:w-1/2 relative mt-10 sm:mt-0">
         <div style="background: #23BDEE;" class="floating w-24 h-24 absolute rounded-lg z-0 -top-3 -left-3"></div>
         <img class="rounded-xl z-40 relative" :src="teacher" alt="">
-        <button
-          class="bg-white w-14 h-14 rounded-full flex items-center justify-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 focus:outline-none transform transition hover:scale-110 duration-300 ease-in-out z-50">
-          <svg class="w-5 h-5 ml-1" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M22.5751 12.8097C23.2212 13.1983 23.2212 14.135 22.5751 14.5236L1.51538 27.1891C0.848878 27.5899 5.91205e-07 27.1099 6.25202e-07 26.3321L1.73245e-06 1.00123C1.76645e-06 0.223477 0.848877 -0.256572 1.51538 0.14427L22.5751 12.8097Z"
-              fill="#23BDEE"/>
-          </svg>
-        </button>
         <div class="bg-purple w-40 h-40 floating absolute rounded-lg z-10 -bottom-3 -right-3"></div>
       </div>
     </div>
@@ -313,8 +326,9 @@ onMounted(() => {
              class="w-5 h-5 rounded-full absolute z-0 right-52 bottom-1 animate-ping"></div>
       </div>
       <div data-aos="fade-down" class="md:w-5/12 mt-20 md:mt-0 text-gray-500">
-        <h1 class="text-2xl text-purple-950 font-semibold lg:pr-40">A <span class="text-purple">user interface</span>
-          designed for the classroom</h1>
+        <h1 class="text-2xl text-purple-950 font-semibold lg:pr-40">Una <span
+          class="text-purple">conexión diseñada</span>
+          para mejorar tu productividad</h1>
         <div class="flex items-center space-x-5 my-5">
           <div class="flex-shrink bg-white shadow-lg rounded-full p-3 flex items-center justify-center">
             <svg class="w-4 h-4" viewBox="0 0 27 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -324,7 +338,7 @@ onMounted(() => {
               <rect x="14.7727" y="14.1816" width="11.8182" height="11.8182" rx="2" fill="#F48C06"/>
             </svg>
           </div>
-          <p>Teachers don’t get lost in the grid view and have a dedicated Podium space.</p>
+          <p>Conéctate de manera eficiente y mantente siempre en línea, sin interrupciones.</p>
         </div>
         <div class="flex items-center space-x-5 my-5">
           <div class="flex-shrink bg-white shadow-lg rounded-full p-3 flex items-center justify-center">
@@ -333,7 +347,8 @@ onMounted(() => {
               <rect width="21.2245" height="21.2245" rx="2" fill="#F48C06"/>
             </svg>
           </div>
-          <p>TA’s and presenters can be moved to the front of the class.</p>
+          <p>Los técnicos de soporte y presentadores pueden ser trasladados al frente para brindar asistencia directa y
+            personalizada.</p>
         </div>
         <div class="flex items-center space-x-5 my-5">
           <div class="flex-shrink bg-white shadow-lg rounded-full p-3 flex items-center justify-center">
@@ -343,7 +358,8 @@ onMounted(() => {
                 fill="#2F327D"/>
             </svg>
           </div>
-          <p>Teachers can easily see all students and class data at one time.</p>
+          <p>Los usuarios pueden acceder fácilmente a toda la información de su cuenta y datos de servicio en un solo
+            lugar.</p>
         </div>
       </div>
     </div>
@@ -351,10 +367,13 @@ onMounted(() => {
     <!-- Tools For Teachers And Learners -->
     <div class="flex flex-col md:flex-row items-center md:space-x-10 mt-16">
       <div data-aos="fade-right" class="md:w-1/2 lg:pl-14">
-        <h1 class="font-semibold text-purple-950 text-3xl lg:pr-56"><span class="text-purple">Tools</span> For Teachers
-          And Learners</h1>
-        <p class="text-gray-500 my-4 lg:pr-32">Class has a dynamic set of teaching tools built to be deployed and used
-          during class. Teachers can handout assignments in real-time for students to complete and submit.</p>
+        <h1 class="font-semibold text-purple-950 text-3xl lg:pr-56"><span class="text-purple">Herramientas</span> para
+          Usuarios y Empresas</h1>
+        <p class="text-gray-500 my-4 lg:pr-32">
+          Nuestro servicio ofrece un conjunto dinámico de herramientas diseñadas para optimizar tu experiencia de
+          conexión. Los usuarios pueden gestionar en tiempo real sus dispositivos, monitorizar el uso de datos y
+          realizar ajustes inmediatos, todo desde una plataforma intuitiva y accesible.
+        </p>
       </div>
       <img data-aos="fade-left" class="md:w-1/2" :src="girlBooks" alt="girlBooks">
     </div>
@@ -365,41 +384,45 @@ onMounted(() => {
         <img class="md:w-11/12" :src="trueFalse">
       </div>
       <div data-aos="fade-left" class="md:w-6/12 md:transform md:-translate-y-20">
-        <h1 class="font-semibold text-purple-950 text-3xl lg:pr-64">Assessments, <span
-          class="text-purple">Quizzes</span>, Tests</h1>
-        <p class="text-gray-500 my-5 lg:pr-52">Easily launch live assignments, quizzes, and tests. Student results are
-          automatically entered in the online gradebook.</p>
+        <h1 class="font-semibold text-purple-950 text-3xl lg:pr-64">Evaluaciones <span
+          class="text-purple">y Monitoreo</span> de Uso</h1>
+        <p class="text-gray-500 my-5 lg:pr-52">
+          Realiza fácilmente evaluaciones en tiempo real sobre el rendimiento de tu conexión a Internet. Monitorea el
+          uso de datos, velocidad y calidad del servicio, y recibe informes automáticos para asegurarte de que siempre
+          tienes el mejor rendimiento posible.
+        </p>
       </div>
     </div>
 
     <!-- Class Management Tools for Educators -->
     <div class="flex flex-col md:flex-row items-center mt-12">
       <div data-aos="fade-right" class="md:w-5/12">
-        <h1 class="text-purple-950 font-semibold text-3xl leading-tight lg:pr-32"><span class="text-purple">Class Management</span>
-          Tools for Educators</h1>
-        <p class="my-5 lg:pr-14">Class provides tools to help run and manage the class such as Class Roster, Attendance,
-          and more. With the Gradebook, teachers can review and grade tests and quizzes in real-time.</p>
+        <h1 class="text-purple-950 font-semibold text-3xl leading-tight lg:pr-32"><span
+          class="text-purple">Herramientas</span>
+          de Gestión para Usuarios</h1>
+        <p class="my-5 lg:pr-14">[Nombre ISP] ofrece herramientas que te permiten gestionar y optimizar tu
+          servicio de Internet, como el monitoreo de dispositivos conectados, control de ancho de banda y más. Con
+          nuestro sistema de reportes en tiempo real, puedes revisar el rendimiento de tu red y realizar ajustes para
+          maximizar la eficiencia.</p>
       </div>
       <img data-aos="fade-left" class="md:w-7/12" :src="gradebook" alt="gradebook">
     </div>
 
-    <!-- One-on-One Discussions -->
+
     <div class="mt-24 flex flex-col-reverse md:flex-row items-center md:space-x-10">
       <div data-aos="fade-right" class="md:w-7/12">
         <img class="md:w-11/12" :src="discussion" alt="discussion">
       </div>
       <div data-aos="fade-left" class="md:w-5/12 md:transform md:-translate-y-6">
-        <h1 class="font-semibold text-purple-950 text-3xl lg:pr-64">One-on-One <span
-          class="text-purple">Discussions</span></h1>
-        <p class="text-gray-500 my-5 lg:pr-24">Teachers and teacher assistants can talk with students privately without
-          leaving the Zoom environment.</p>
+        <h1 class="font-semibold text-purple-950 text-3xl lg:pr-64">Atención <span
+          class="text-purple">Personalizada</span></h1>
+        <p class="text-gray-500 my-5 lg:pr-24">
+          Nuestro equipo de soporte técnico te ofrece asistencia personalizada a través de canales privados y seguros,
+          sin necesidad de salir de nuestra plataforma. Resolvemos tus dudas y brindamos soluciones a medida,
+          garantizando una experiencia de usuario óptima.
+        </p>
       </div>
     </div>
-
-    <button data-aos="flip-up"
-            class="px-5 py-3 border border-purple text-purple font-medium my-14 focus:outline-none transform transition hover:scale-110 duration-300 ease-in-out rounded-full mx-auto block">
-      See more features
-    </button>
 
     <!-- INTEGRATIONS -->
     <div class="mt-24 flex flex-col md:flex-row items-start md:space-x-10">
@@ -411,10 +434,13 @@ onMounted(() => {
           <span class="border border-gray-300 w-14 absolute"></span>
           <h1 class="text-purple tracking-widest text-sm">INTEGRATIONS</h1>
         </div>
-        <h1 class="font-semibold text-purple-950 text-2xl lg:pr-40">200+ educational tools and platform <span
-          class="text-purple">integrations</span></h1>
-        <p class="text-gray-500 my-5 lg:pr-20">Schoology has every tool your classroom needs and comes pre-integrated
-          with more than 200+ tools, student information systems (SIS), and education platforms.</p>
+        <h1 class="font-semibold text-purple-950 text-2xl lg:pr-40">Más de 200 herramientas e <span
+          class="text-purple">integraciones de plataformas</span></h1>
+        <p class="text-gray-500 my-5 lg:pr-20">
+          [Nombre ISP] ofrece todas las herramientas que necesitas para gestionar tu conexión, y es compatible con
+          más de 200 plataformas y dispositivos inteligentes. Disfruta de una integración fluida con sistemas de
+          gestión, aplicaciones de hogar inteligente y más, todo diseñado para mejorar tu experiencia de conectividad.
+        </p>
         <button
           class="px-5 py-3 border border-purple text-purple font-medium my-4 focus:outline-none transform transition hover:scale-110 duration-300 ease-in-out rounded-full">
           See All Integrations
@@ -423,7 +449,7 @@ onMounted(() => {
     </div>
 
     <!-- TESTIMONIAL -->
-    <div class="mt-24 flex flex-col-reverse md:flex-row items-start md:space-x-10">
+    <!--<div class="mt-24 flex flex-col-reverse md:flex-row items-start md:space-x-10">
       <div data-aos="zoom-in-right" class="md:w-5/12">
         <div class="flex items-center space-x-20 mb-5">
           <span class="border border-gray-300 w-14 absolute"></span>
@@ -450,6 +476,42 @@ onMounted(() => {
       <div data-aos="zoom-in-left" class="md:w-7/12">
         <img class="md:w-10/12 mx-auto" src="./assets/testimonials.png">
       </div>
+    </div>-->
+
+
+    <div class="fixed bottom-5 right-5 z-50">
+
+
+      <!-- Menú flotante -->
+      <transition name="fade">
+        <div
+          v-if="isOpenMenu"
+          class="flex flex-col items-center space-y-3 mt-3"
+        >
+          <div class="bg-white rounded-full shadow-lg flex items-center space-x-2 w-48">
+            <div class="h-10 w-10 rounded-full border border-purple-500 flex items-center justify-center">
+              <Icon.DocumentCurrencyDollar class="text-purple-600 w-5 h-5"/>
+            </div>
+            <a href="/checkout" class="text-purple-600">Paga tu Factura</a>
+          </div>
+          <div class="bg-white rounded-full shadow-lg flex items-center space-x-2 w-48">
+            <div class="h-10 w-10 rounded-full border border-purple-500 flex items-center justify-center">
+              <Icon.ChartBar class="text-purple-600 w-5 h-5"/>
+            </div>
+            <a href="/nova/" class="text-purple-600">Empresa</a>
+          </div>
+        </div>
+      </transition>
+      <!-- Botón flotante -->
+      <div class="flex justify-end mt-2">
+        <button
+          @click="toggleMenu"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold h-14 w-14 rounded-full shadow-lg flex justify-center items-center focus:outline-none"
+        >
+          <Icon.Bars3BottomLeft v-if="!isOpenMenu"/>
+          <Icon.XMark v-else/>
+        </button>
+      </div>
     </div>
 
   </div>
@@ -458,15 +520,15 @@ onMounted(() => {
     <div class="max-w-lg mx-auto">
       <div class="flex py-12 justify-center text-white items-center px-20 sm:px-36">
         <div class="relative">
-          <h1 class="font-bold text-xl pr-5 relative z-50">Skilline</h1>
+          <h1 class="font-bold text-xl pr-5 relative z-50">[Nombre ISP]</h1>
           <svg class="w-11 h-11 absolute -top-2 -left-3 z-40" viewBox="0 0 79 79" fill="none"
                xmlns="http://www.w3.org/2000/svg">
             <path
               d="M35.9645 2.94975C37.9171 0.997129 41.0829 0.997127 43.0355 2.94975L76.0502 35.9645C78.0029 37.9171 78.0029 41.0829 76.0503 43.0355L43.0355 76.0502C41.0829 78.0029 37.9171 78.0029 35.9645 76.0503L2.94975 43.0355C0.997129 41.0829 0.997127 37.9171 2.94975 35.9645L35.9645 2.94975Z"
-              stroke="#26C1F2" stroke-width="2"/>
+              stroke="#0067a5" stroke-width="2"/>
           </svg>
         </div>
-        <span class="border-l border-gray-500 text-sm pl-5 py-2 font-semibold">Virtual Class for Zoom</span>
+        <span class="border-l border-gray-500 text-sm pl-5 py-2 font-semibold">Sala Virtual de Soporte</span>
       </div>
       <div class="flex items-center text-gray-400 text-sm justify-center">
         <a href="" class="pr-3">Careers</a>
@@ -474,10 +536,9 @@ onMounted(() => {
         <a href="" class="border-l border-gray-400 pl-3">Terms & Conditions</a>
       </div>
       <div class="text-center text-white">
-        <p class="my-3 text-gray-400 text-sm">&copy; 2021 Class Technologies Inc. </p>
+        <p class="my-3 text-gray-400 text-sm">&copy; {{ year }} Go Line </p>
         <div class="py-3 tracking-wide">
-          <p>Code By <span class="font-semibold">mhaecal</span></p>
-          <p>UI/UX By <span class="font-semibold">Irvan Moses</span></p>
+          <p class="text-sm">Code By <span class="font-semibold">Yeider Mina| Juan Jose</span></p>
         </div>
       </div>
     </div>
@@ -530,7 +591,14 @@ body {
   }
 }
 
-.text-darken {
-  color: #2F327D;
+/* Agregamos una transición suave */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
 }
+
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */
+{
+  opacity: 0;
+}
+
 </style>
