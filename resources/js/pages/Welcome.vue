@@ -23,9 +23,13 @@ import gradebook from './assets/gradebook.png'
 import discussion from './assets/discussion.png'
 import integrations from './assets/integrations.png'
 import {Icon} from "./Icons/index.js";
+import {__} from "../translation.js";
+import {usePage} from "@inertiajs/inertia-vue3";
 
+const props = usePage().props.value
 const open = ref(false);
 const year = new Date().getFullYear();
+
 
 const isOpenMenu = ref(false);
 
@@ -34,7 +38,7 @@ const toggleMenu = () => {
 }
 
 onMounted(() => {
-  AOS.init()
+  AOS.init();
 })
 </script>
 
@@ -42,8 +46,8 @@ onMounted(() => {
   <!-- navbar -->
   <div class="w-full text-gray-700 bg-cream">
     <div class="flex flex-col max-w-screen-xl px-8 mx-auto md:items-center md:justify-between md:flex-row">
-      <div class="flex flex-row items-center justify-between py-6">
-        <div class="relative md:mt-8">
+      <div class="flex flex-row items-center justify-between py-6 md:mt-8">
+        <div class="relative">
           <a href="#"
              class="text-lg relative z-50 font-bold tracking-widest text-gray-900 rounded-lg focus:outline-none focus:shadow-outline">[Nombre
             ISP]</a>
@@ -72,11 +76,18 @@ onMounted(() => {
         <!--<a
           class="px-4 py-2 mt-2 text-sm bg-transparent rounded-lg md:mt-8 md:ml-4 hover:text-gray-900 focus:outline-none focus:shadow-outline"
           href="#">Blog</a>-->
-        <a class="px-10 py-3 mt-2 text-sm text-center bg-white text-gray-800 rounded-full md:mt-8 md:ml-4"
-           href="/customer/login">Login</a>
-        <a class="px-10 py-3 mt-2 text-sm text-center bg-purple text-white rounded-full md:mt-8 md:ml-4"
-           href="/customer/register">Sign
-          Up</a>
+        <div class="flex gap-5" v-if="!props.isAuthenticated">
+          <a class="px-10 py-3 text-sm text-center bg-white text-gray-800 rounded-full"
+             :href="props.loginUrl">{{ __('Login') }}</a>
+          <a class="px-10 py-3 text-sm text-center bg-purple text-white rounded-full"
+             :href="props.registerUrl">{{ __('Sign Up') }}</a>
+        </div>
+        <div class="" v-else>
+          <a :href="props.customerDashboardUrl" class="px-10 py-3 text-sm text-center bg-white text-gray-800 rounded-full">
+            <Icon.User class="inline-block w-5 h-5 mr-2" />
+            {{ props.customer.first_name }}
+          </a>
+        </div>
       </nav>
     </div>
   </div>
@@ -541,6 +552,9 @@ onMounted(() => {
           <p class="text-sm">Code By <span class="font-semibold">Yeider Mina| Juan Jose</span></p>
         </div>
       </div>
+    </div>
+    <div class="bg-amber-300">
+      {{ __('Assigned At') }}
     </div>
   </footer>
 

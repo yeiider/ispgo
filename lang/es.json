@@ -85,5 +85,22 @@
     "Total Revenue": "Ingresos Totales",
     "Outstanding Balance": "Saldo Pendiente",
     "Monthly Revenue": "Ingresos Mensuales",
-    "Invoice Status": "Estado de las Facturas"
+    "Invoice Status": "Estado de las Facturas",
+    "Login": "Iniciar sesión",
+    "Sign Up": "Registrarse",
+    "My Account": "Mi cuenta",
+    "Tickets": "Tickets",
+    "Invoices": "Facturas",
+    "Address Book": "Libreta de direcciones",
+    "Hello": "Hola",
+    "Edit": "Editar",
+    "Account information": "Información de la cuenta",
+    "First Name": "Nombre",
+    "Last Name": "Apellido",
+    "Date of Birth": "Fecha de nacimiento",
+    "Phone Number": "Número de teléfono",
+    "Email Address": "Dirección de correo electrónico",
+    "Document Type": "Tipo de documento",
+    "Identity Document": "Documento de identidad",
+    "Logout": "Cerrar sesión"
 }

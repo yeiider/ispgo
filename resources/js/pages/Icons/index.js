@@ -10,6 +10,7 @@ import Bars3BottomLeft from "./Bars3BottomLeft.vue"
 import XMark from "./XMark.vue"
 import ChartBar from "./ChartBar.vue"
 import DocumentCurrencyDollar from "./DocumentCurrencyDollar.vue"
+import User from "./User.vue"
 
 export const Icon = {
     Pencil,
@@ -24,4 +25,5 @@ export const Icon = {
     XMark,
     ChartBar,
     DocumentCurrencyDollar,
+    User
 };

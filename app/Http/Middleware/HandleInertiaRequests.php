@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Settings\Config\Sources\CustomerAccount;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Lang;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -42,6 +43,17 @@ class HandleInertiaRequests extends Middleware
         $flash = [
             'status' => $request->session()->get('status'),
         ];
-        return array_merge(parent::share($request), compact('customer', 'sidebar', 'flash'));
+
+
+        $translate = [
+            'locale' => function () {
+                return Lang::getLocale();
+            },
+            'language' => function () {
+                return Lang::get('*');
+            }
+        ];
+
+        return array_merge(parent::share($request), compact('customer', 'sidebar', 'flash', 'translate'));
     }
 }

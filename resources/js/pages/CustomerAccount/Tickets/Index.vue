@@ -26,7 +26,7 @@ onMounted(() => {
   <Layout :sidebar="sidebar" :customer="customer">
     <div class="flex flex-wrap md:flex-nowrap justify-between">
       <h1 class="text-3xl font-semibold text-slate-950">Tickets</h1>
-      <div class="actions">
+      <div class="actions hidden">
         <a
           :href="ticketCreateUrl"
           class="btn btn-outline-primary mt-4">

@@ -1,18 +1,16 @@
 <script setup>
 import {onMounted, ref} from "vue";
 import {Icon} from "../../Icons/index.js";
+import {usePage} from "@inertiajs/inertia-vue3";
+import {__} from "../../../translation.js";
 
 
-const props = defineProps({
-  sidebar: Object,
-  customer: Object
-});
+const props = usePage().props.value;
 
 const href = window.location.href;
 
 const fullName = ref('')
 onMounted(() => {
-  console.log(props)
   let customer = props.customer;
   fullName.value = `${customer?.first_name} ${customer?.last_name}`;
 })
@@ -26,7 +24,7 @@ const showMenu = () => {
 </script>
 
 <template>
-  <aside v-if="sidebar" class="w-auto border-e bg-white sm:w-1/2 md:w-1/3 lg:w-1/5">
+  <aside v-if="props.sidebar" class="w-auto border-e bg-white sm:w-1/2 md:w-1/3 lg:w-1/5">
     <button class="block sm:hidden top-4 p-4 ml-auto" @click="showMenu()">
       <svg v-if="isActive" width="20px" height="20px" viewBox="0 0 24 24" fill="none"
            xmlns="http://www.w3.org/2000/svg">
@@ -50,14 +48,11 @@ const showMenu = () => {
           <span style="height:32px; width:auto;" class="flex justify-center mb-2">
            <img :src="logoSrc" alt="logo sass">
           </span>
-            <span>
-            {{ sidebar.app_name }}
-          </span>
           </a>
         </div>
 
         <ul class="mt-6 space-y-1">
-          <li v-for="(link, key) in sidebar.links" :key="key">
+          <li v-for="(link, key) in props.sidebar.links" :key="key">
             <a
               :href="link.url"
               class="block rounded-md px-4 py-3 text-sm font-medium text-gray-700 hover:bg-purple-50 hover:text-purple"
@@ -73,13 +68,13 @@ const showMenu = () => {
         :class="{active: isActive}">
         <div class="flex flex-col justify-between flex-wrap gap-2 bg-white p-4">
           <p class="text-sm mb-2 ">
-            <span>👋 Hello </span>
+            <span class="mr-2">👋 {{ __('Hello') }} </span>
             <span class="font-semibold"> {{ fullName }}</span>
-            <span class="hidden">{{ customer.email_address }}</span>
+            <span class="hidden">{{ props.customer.email_address }}</span>
           </p>
-          <a :href="sidebar.url_logout"
+          <a :href="props.sidebar.url_logout"
              class="btn btn-outline-danger">
-            <span>Logout</span>
+            <span>{{ __('Logout') }}</span>
             <Icon.ArrowLongRight/>
           </a>
         </div>
