@@ -25,7 +25,7 @@ const submit = () => {
 <template>
   <LayoutAuth title="Sign in">
     <form class="space-y-5 w-full" @submit.prevent="submit">
-      <Input v-model="form.email_address" :required="true" type="email" label="Email Address" id="email" name="email" :error="errors && 'error' in errors" />
+      <Input :focus="true" v-model="form.email_address" :required="true" type="email" label="Email Address" id="email" name="email" :error="errors && 'error' in errors" />
       <Input v-model="form.password" :required="true" type="password" label="Password" id="password" name="password" :error="errors && 'error' in errors">
         <p v-if="errors" class="text-red-500 mt-2">{{errors.error}}</p>
       </Input>

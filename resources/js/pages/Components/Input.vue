@@ -2,10 +2,15 @@
 import {onMounted, ref} from "vue";
 import {twMerge} from "tailwind-merge"
 
-defineProps({
+const props = defineProps({
   type: String,
   name: String,
   label: String,
+  focus: {
+    type: Boolean,
+    default: false,
+    required: false
+  },
   id: String,
   required: {
     type: Boolean,
@@ -34,6 +39,12 @@ const onBlur = () => {
     updateFocusState();
   }
 };
+
+onMounted(() => {
+  if (props.focus && inputRef.value) {
+    inputRef.value.focus()
+  }
+})
 
 /**
  * A function that is called when the value of an input element changes.
@@ -81,7 +92,7 @@ onMounted(updateFocusState);
           <span v-if="required" class="text-red-500">*</span>
         </label>
 
-        <div data-model="email" class="mt-1.5 w-full rounded-md shadow-sm auth-component-input-container">
+        <div class="mt-1.5 w-full rounded-md shadow-sm auth-component-input-container">
           <input
             :required="required"
             :id="id"
