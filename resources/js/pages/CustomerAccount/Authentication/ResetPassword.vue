@@ -5,6 +5,7 @@ import Input from "../../Components/Input.vue";
 import {useForm} from "@inertiajs/inertia-vue3";
 import Button from "../../Components/Button.vue";
 import {Icon} from "../../Icons/index.js";
+import {__} from "../../../translation.js";
 
 const props = defineProps({
   errors: {
@@ -36,7 +37,7 @@ const submit = () => {
 
 <template>
   <LayoutAuth title="Reset password">
-    <p class="mt-0 text-center text-gray-700 mb-4">You are having trouble logging in?</p>
+    <p class="mt-0 text-center text-gray-700 mb-4">{{__("You are having trouble logging in?")}}</p>
     <form class="space-y-5 w-full" @submit.prevent="submit">
       <div class="bg-teal-100 border-t-4 border-teal-500 rounded-b text-teal-900 px-4 py-3" role="alert" v-if="props.flash?.status">
         <div class="flex items-center gap-1">
@@ -60,7 +61,7 @@ const submit = () => {
         :is-loading="form.processing"
         type="submit"
         class="w-full">
-        <span>Send E-mail</span>
+        <span>{{__("Send E-mail")}}</span>
         <Icon.PaperAirplane/>
       </Button>
 

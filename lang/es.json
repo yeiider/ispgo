@@ -102,5 +102,20 @@
     "Email Address": "Dirección de correo electrónico",
     "Document Type": "Tipo de documento",
     "Identity Document": "Documento de identidad",
-    "Logout": "Cerrar sesión"
+    "Logout": "Cerrar sesión",
+    "Forget your password?": "¿Olvidaste tu contraseña?",
+    "Don't have an account?": "¿No tienes una cuenta?",
+    "Sign up": "Inscribirse",
+    "Sign In": "Iniciar sesión",
+    "Password": "Contraseña",
+    "Continue": "Continuar",
+    "Already have an account?": "¿Ya tienes una cuenta?",
+    "Confirm Password": "Confirmar Contraseña",
+    "Identity document": "Documento de identidad",
+    "The provided credentials do not match our records.": "Las credenciales proporcionadas no coinciden con nuestros registros.",
+    "Reset password": "Restablecer contraseña",
+    "You are having trouble logging in?": "¿Tiene problemas para iniciar sesión?",
+    "Send E-mail": "Enviar correo electrónico",
+    "Change password": "Cambiar la contraseña",
+    "Create a new password": "Crea una nueva contraseña"
 }

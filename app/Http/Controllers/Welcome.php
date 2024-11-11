@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
-
+use App\Settings\GeneralProviderConfig;
 class Welcome extends Controller
 {
 
@@ -14,7 +14,7 @@ class Welcome extends Controller
             'registerUrl' => route('customer.register'),
             'isAuthenticated' => auth('customer')->check(),
             'customerDashboardUrl' => route('index'),
+            'companyName' => GeneralProviderConfig::getCompanyName()
         ]);
     }
-
 }

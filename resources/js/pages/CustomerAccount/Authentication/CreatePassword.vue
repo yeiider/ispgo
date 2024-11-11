@@ -5,6 +5,7 @@ import {useForm} from "@inertiajs/inertia-vue3";
 import Input from "../../Components/Input.vue";
 import Button from "../../Components/Button.vue";
 import {Icon} from "../../Icons/index.js";
+import {__} from "../../../translation.js";
 
 const props = defineProps({
   errors: {
@@ -59,7 +60,7 @@ const submit = () => {
         :is-loading="form.processing"
         type="submit"
         class="w-full">
-        <span>Change password</span>
+        <span>{{__("Change password")}}</span>
         <Icon.PaperAirplane/>
       </Button>
     </form>

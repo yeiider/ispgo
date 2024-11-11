@@ -49,8 +49,7 @@ onMounted(() => {
       <div class="flex flex-row items-center justify-between py-6 md:mt-8">
         <div class="relative">
           <a href="#"
-             class="text-lg relative z-50 font-bold tracking-widest text-gray-900 rounded-lg focus:outline-none focus:shadow-outline">[Nombre
-            ISP]</a>
+             class="text-lg relative z-50 font-bold tracking-widest text-gray-900 rounded-lg focus:outline-none focus:shadow-outline">{{ props.companyName }}</a>
           <svg class="h-11 z-40 absolute -top-2 -left-3" viewBox="0 0 79 79" fill="none"
                xmlns="http://www.w3.org/2000/svg">
             <path
@@ -277,9 +276,9 @@ onMounted(() => {
     <!-- lorem -->
     <div class="mt-28">
       <div data-aos="flip-down" class="text-center max-w-screen-md mx-auto">
-        <h1 class="text-3xl text-purple-950 font-bold mb-4">¿Qué es <span class="text-purple">[Nombre ISP]?</span>
+        <h1 class="text-3xl text-purple-950 font-bold mb-4">¿Qué es <span class="text-purple">{{props.companyName}}?</span>
         </h1>
-        <p class="text-gray-500">[Nombre ISP] es una plataforma que permite a los usuarios gestionar su conexión a
+        <p class="text-gray-500">{{ props.companyName }} es una plataforma que permite a los usuarios gestionar su conexión a
           Internet de manera sencilla y eficiente. Desde un solo lugar, puedes controlar el uso de tu red, revisar
           detalles de tu plan, gestionar facturas, realizar pagos y recibir asistencia técnica personalizada para
           garantizar una experiencia de navegación óptima.</p>
@@ -411,7 +410,7 @@ onMounted(() => {
         <h1 class="text-purple-950 font-semibold text-3xl leading-tight lg:pr-32"><span
           class="text-purple">Herramientas</span>
           de Gestión para Usuarios</h1>
-        <p class="my-5 lg:pr-14">[Nombre ISP] ofrece herramientas que te permiten gestionar y optimizar tu
+        <p class="my-5 lg:pr-14">{{ props.companyName }} ofrece herramientas que te permiten gestionar y optimizar tu
           servicio de Internet, como el monitoreo de dispositivos conectados, control de ancho de banda y más. Con
           nuestro sistema de reportes en tiempo real, puedes revisar el rendimiento de tu red y realizar ajustes para
           maximizar la eficiencia.</p>
@@ -448,7 +447,7 @@ onMounted(() => {
         <h1 class="font-semibold text-purple-950 text-2xl lg:pr-40">Más de 200 herramientas e <span
           class="text-purple">integraciones de plataformas</span></h1>
         <p class="text-gray-500 my-5 lg:pr-20">
-          [Nombre ISP] ofrece todas las herramientas que necesitas para gestionar tu conexión, y es compatible con
+          {{props.companyName}} ofrece todas las herramientas que necesitas para gestionar tu conexión, y es compatible con
           más de 200 plataformas y dispositivos inteligentes. Disfruta de una integración fluida con sistemas de
           gestión, aplicaciones de hogar inteligente y más, todo diseñado para mejorar tu experiencia de conectividad.
         </p>
@@ -531,7 +530,7 @@ onMounted(() => {
     <div class="max-w-lg mx-auto">
       <div class="flex py-12 justify-center text-white items-center px-20 sm:px-36">
         <div class="relative">
-          <h1 class="font-bold text-xl pr-5 relative z-50">[Nombre ISP]</h1>
+          <h1 class="font-bold text-xl pr-5 relative z-50">{{ props.companyName }}</h1>
           <svg class="w-11 h-11 absolute -top-2 -left-3 z-40" viewBox="0 0 79 79" fill="none"
                xmlns="http://www.w3.org/2000/svg">
             <path
@@ -552,9 +551,6 @@ onMounted(() => {
           <p class="text-sm">Code By <span class="font-semibold">Yeider Mina| Juan Jose</span></p>
         </div>
       </div>
-    </div>
-    <div class="bg-amber-300">
-      {{ __('Assigned At') }}
     </div>
   </footer>
 

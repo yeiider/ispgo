@@ -102,5 +102,20 @@
     "Email Address": "Email Address",
     "Document Type": "Document Type",
     "Identity Document": "Identity Document",
-    "Logout": "Logout"
+    "Logout": "Logout",
+    "Forget your password?": "Forget your password?",
+    "Don't have an account?": "Don't have an account?",
+    "Sign up": "Sign up",
+    "Sign In": "Sign In",
+    "Password": "Password",
+    "Continue": "Continue",
+    "Already have an account?": "Already have an account?",
+    "Confirm Password": "Confirm Password",
+    "Identity document": "Identity document",
+    "The provided credentials do not match our records.": "The provided credentials do not match our records.",
+    "Reset password": "Reset password",
+    "You are having trouble logging in?": "You are having trouble logging in?",
+    "Send E-mail": "Send E-mail",
+    "Change password": "Change password",
+    "Create a new password": "Create a new password"
 }

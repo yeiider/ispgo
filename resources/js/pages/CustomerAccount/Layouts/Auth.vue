@@ -1,4 +1,6 @@
 <script setup>
+import {__} from '../../../translation.js'
+
 defineProps({
   title: String
 })
@@ -17,7 +19,7 @@ const logoSrc = '/img/logo2.png'
               <a href="/public" style="height:32px; width:auto; display:block">
                 <img :src="logoSrc" alt="logo" width="80"/>
               </a>
-              <h1 id="auth-heading-title" class="mt-2 text-xl font-medium leading-9">{{ title }}</h1>
+              <h1 id="auth-heading-title" class="mt-2 text-xl font-medium leading-9">{{ __(title) }}</h1>
             </div>
             <slot></slot>
           </div>

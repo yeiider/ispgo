@@ -5,6 +5,7 @@ import {useForm} from "@inertiajs/inertia-vue3";
 import Select from "../../Components/Select.vue";
 import Button from "../../Components/Button.vue"
 import {Icon} from "../../Icons/index.js";
+import {__} from "../../../translation.js";
 
 const props = defineProps({
   errors: {
@@ -37,7 +38,7 @@ const submit = () => {
       <Input
         v-model="form.first_name"
         type="text"
-        label="Firs name"
+        label="First Name"
         :required="true"
         id="first_name"
         name="first_name"
@@ -46,7 +47,7 @@ const submit = () => {
       <Input
         v-model="form.last_name"
         type="text"
-        label="Last name"
+        label="Last Name"
         :required="true"
         id="last_name"
         name="last_name"
@@ -56,14 +57,14 @@ const submit = () => {
         v-model="form.document_type"
         :options="documentTypes"
         :required="true"
-        label="Document type"
+        label="Document Type"
       />
 
       <Input
         v-model="form.identity_document"
         type="number"
         :required="true"
-        label="Identity document"
+        label="Identity Document"
         id="identity_document"
         name="identity_document"
       />
@@ -77,7 +78,7 @@ const submit = () => {
         name="email"
         :error="'email_address' in errors"
       >
-        <p v-if="errors && 'email_address' in errors" class="text-sm text-red-500 mt-2">{{ errors.email_address }}*</p>
+        <p v-if="errors && 'email_address' in errors" class="text-sm text-red-500 mt-2">{{ __(errors.email_address) }}*</p>
       </Input>
       <Input
         v-model="form.password"
@@ -98,22 +99,22 @@ const submit = () => {
         name="password_confirmation"
         :error="'password' in errors"
       >
-        <p v-if="errors && 'password' in errors" class="text-sm text-red-500 mt-2">{{ errors.password }}*</p>
+        <p v-if="errors && 'password' in errors" class="text-sm text-red-500 mt-2">{{ __(errors.password) }}*</p>
       </Input>
 
       <Button
         :is-loading="form.processing"
         type="submit"
         class="w-full">
-        <span>Continue</span>
+        <span>{{__("Continue")}}</span>
         <Icon.LockOpen/>
       </Button>
     </form>
     <div class="mt-3 space-x-0.5 text-sm leading-5 text-left w-full" style="color:#212936">
-      <span class="opacity-[47%]">Already have an account? </span>
+      <span class="opacity-[47%]">{{__("Already have an account?")}} </span>
       <a class="underline cursor-pointer opacity-[67%] hover:opacity-[80%]" data-auth="register-link"
          href="/customer/login">
-        Sign in
+        {{__("Sign In")}}
       </a>
     </div>
   </LayoutAuth>
