@@ -117,5 +117,12 @@
     "You are having trouble logging in?": "¿Tiene problemas para iniciar sesión?",
     "Send E-mail": "Enviar correo electrónico",
     "Change password": "Cambiar la contraseña",
-    "Create a new password": "Crea una nueva contraseña"
+    "Create a new password": "Crea una nueva contraseña",
+    "Forgot your password?": "¿Olvidó su contraseña?",
+    "Enter your email below to login to your account": "Ingrese su correo electrónico a continuación para iniciar sesión en su cuenta",
+    "This email address does not exist in our records.": "Esta dirección de correo electrónico no existe en nuestros registros.",
+    "Please wait": "Por favor espere",
+    "The email must be a valid email address.": "El correo electrónico debe ser una dirección de correo electrónico válida.",
+    "We have emailed your password reset link!": "¡Hemos enviado por correo electrónico su enlace de restablecimiento de contraseña!",
+    "The password confirmation does not match.": "La confirmación de la contraseña no coincide."
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Settings\Config\Sources\CustomerAccount;
+use App\Settings\GeneralProviderConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Lang;
 use Inertia\Middleware;
@@ -53,7 +54,12 @@ class HandleInertiaRequests extends Middleware
                 return Lang::get('*');
             }
         ];
+        $companyName = GeneralProviderConfig::getCompanyName();
+        $isAuthenticated = auth('customer')->check();
 
-        return array_merge(parent::share($request), compact('customer', 'sidebar', 'flash', 'translate'));
+        return array_merge(
+            parent::share($request),
+            compact('customer', 'sidebar', 'flash', 'translate', 'companyName', 'isAuthenticated')
+        );
     }
 }

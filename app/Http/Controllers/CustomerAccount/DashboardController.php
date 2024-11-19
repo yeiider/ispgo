@@ -9,13 +9,13 @@ class DashboardController extends Controller
 {
     public function index(): \Inertia\Response
     {
-        return Inertia::render('CustomerAccount/Index', [
+        return Inertia::render('Customer/Dashboard', [
             'route_edit_customer' => route('customer.edit'),
         ]);
     }
 
     public function orders(): \Inertia\Response
     {
-        return Inertia::render('CustomerAccount/Orders');
+        return Inertia::render('Customer/Orders');
     }
 }

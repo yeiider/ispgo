@@ -16,8 +16,8 @@ use Inertia\Inertia;
 
 class AuthController extends Controller
 {
-    private const LOGIN_FORM_PATH = 'CustomerAccount/Authentication/Login';
-    private const REGISTer_FORM_PATH = 'CustomerAccount/Authentication/Register';
+    private const LOGIN_FORM_PATH = 'Customer/Authentication/Login';
+    private const REGISTer_FORM_PATH = 'Customer/Authentication/Register';
 
     /**
      * Display the login form.
@@ -115,7 +115,7 @@ class AuthController extends Controller
      */
     public function showPasswordResetForm(): \Inertia\Response
     {
-        return Inertia::render('CustomerAccount/Authentication/ResetPassword', []);
+        return Inertia::render('Customer/Authentication/ResetPassword', []);
     }
 
     /**
@@ -128,6 +128,8 @@ class AuthController extends Controller
     {
         $request->validate([
             'email_address' => 'required|string|email|max:255|exists:customers,email_address',
+        ], [
+            'email_address.exists' => __('This email address does not exist in our records.'),
         ]);
 
         $customer = Customer::where('email_address', $request->email_address)->first();
@@ -148,7 +150,7 @@ class AuthController extends Controller
             });
         }
 
-        return back()->with('status', 'We have emailed your password reset link!');
+        return back()->with('status', __('We have emailed your password reset link!'));
     }
 
     /**
@@ -176,7 +178,7 @@ class AuthController extends Controller
         }
 
         $routeCreatePassword = route('customer.password.create');
-        return Inertia::render('CustomerAccount/Authentication/CreatePassword', compact('customer', 'routeCreatePassword'));
+        return Inertia::render('Customer/Authentication/CreatePassword', compact('customer', 'routeCreatePassword'));
     }
 
     /**
@@ -194,6 +196,9 @@ class AuthController extends Controller
         $request->validate([
             'email_address' => 'required|string|email|max:255|exists:customers,email_address',
             'password' => 'required|string|min:8|confirmed',
+        ], [
+            'email_address.exists' => __('This email address does not exist in our records.'),
+            'password.confirmed' => __('The password confirmation does not match.'),
         ]);
 
         $customer = Customer::where('email_address', $request->email_address)->first();

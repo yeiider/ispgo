@@ -12,9 +12,6 @@ class Welcome extends Controller
         return Inertia::render('Welcome', [
             'loginUrl' => route('customer.login'),
             'registerUrl' => route('customer.register'),
-            'isAuthenticated' => auth('customer')->check(),
-            'customerDashboardUrl' => route('index'),
-            'companyName' => GeneralProviderConfig::getCompanyName()
         ]);
     }
 }

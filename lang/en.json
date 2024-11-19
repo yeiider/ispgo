@@ -117,5 +117,12 @@
     "You are having trouble logging in?": "You are having trouble logging in?",
     "Send E-mail": "Send E-mail",
     "Change password": "Change password",
-    "Create a new password": "Create a new password"
+    "Create a new password": "Create a new password",
+    "Forgot your password?": "Forgot your password?",
+    "Enter your email below to login to your account": "Enter your email below to login to your account",
+    "This email address does not exist in our records.": "This email address does not exist in our records.",
+    "Please wait": "Please wait",
+    "The email must be a valid email address.": "The email must be a valid email address.",
+    "We have emailed your password reset link!": "We have emailed your password reset link!",
+    "The password confirmation does not match.": "The password confirmation does not match."
 }

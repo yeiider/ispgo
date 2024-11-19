@@ -30,8 +30,6 @@ const submit = () => {
       <Input v-model="form.password" :required="true" type="password" label="Password" id="password" name="password" :error="errors && 'error' in errors">
         <p v-if="errors" class="text-red-500 mt-2">{{__(errors.error)}}</p>
       </Input>
-
-      <Input2 />
       <div class="flex justify-between items-center mt-6 text-sm leading-5">
         <a href="/customer/password/reset" class="underline cursor-pointer opacity-[67%] hover:opacity-[80%]">{{__("Forget your password?")}}</a>
       </div>
