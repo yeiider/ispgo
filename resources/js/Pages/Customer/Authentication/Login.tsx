@@ -88,7 +88,7 @@ export default function Login() {
   const toggleVisibility = () => setIsVisible((prevState) => !prevState);
 
   return (
-    <div className="flex h-screen w-full items-center justify-center px-4">
+    <div className="flex h-[85vh] w-full items-center justify-center px-4">
       <Card className="mx-auto max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">{__('Sign In')}</CardTitle>

@@ -17,7 +17,7 @@ class TicketsController extends Controller
 {
     public function index(): \Inertia\Response
     {
-        return Inertia::render('CustomerAccount/Tickets/Index', [
+        return Inertia::render('Customer/Tickets/Index', [
             'tickets' => Ticket::where('customer_id', $this->getCustomerId())
                 ->orderBy('created_at', 'desc')
                 ->paginate(15)
@@ -47,7 +47,7 @@ class TicketsController extends Controller
 
         $issueTypes = IssueTypes::getConfig();
 
-        return Inertia::render('CustomerAccount/Tickets/Create', compact('issueTypes'));
+        return Inertia::render('Customer/Tickets/Create', compact('issueTypes'));
     }
 
 

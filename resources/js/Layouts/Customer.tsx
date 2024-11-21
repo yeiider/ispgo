@@ -4,7 +4,7 @@ import {AppSidebar} from "@/components/AppSidebar.tsx";
 
 export default function Customer({children}: { children: React.ReactNode }) {
   return (
-    <SidebarProvider className="mt-20 ">
+    <SidebarProvider className="mt-20">
       <AppSidebar className="mt-20"/>
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">

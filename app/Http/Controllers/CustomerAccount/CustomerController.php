@@ -18,7 +18,7 @@ class CustomerController extends Controller
         $documentTypes = DocumentType::getConfig();
         $routeUpdateCustomer = route('customer.update');
         $routeChangePassword = route('customer.changePassword');
-        return Inertia::render('CustomerAccount/Edit',
+        return Inertia::render('Customer/Edit',
             compact('documentTypes', 'routeUpdateCustomer', 'routeChangePassword')
         );
     }
