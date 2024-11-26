@@ -51,14 +51,8 @@ export default function Login() {
   useEffect(() => {
     if (errors && "error" in errors) {
       // @ts-ignore
-      toast.error(errors.error, {
+      toast.error(<span className="text-red-500">{errors?.error}</span>, {
         position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         classNames: {
           toast: "bg-red-100",
           title: 'text-red-500',
