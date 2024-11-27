@@ -61,7 +61,7 @@ Route::middleware('guest:customer')->prefix('customer')->group(function () {
 Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('customer-account')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');
     Route::get('/orders', [DashboardController::class, 'orders'])->name('orders');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('customer.logout');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('customer.logout');
     Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets');
     Route::get('/tickets/create', [TicketsController::class, 'create'])->name('tickets.create');
     Route::get('/customer/edit', [CustomerController::class, 'edit'])->name('customer.edit');

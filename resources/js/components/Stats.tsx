@@ -7,7 +7,7 @@ export default function Stats() {
         {/* Stats */}
         <div>
           <h4 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-neutral-200">Accuracy rate</h4>
-          <p className="mt-2 sm:mt-3 text-4xl sm:text-6xl font-bold text-blue-600">99.95%</p>
+          <p className="mt-2 sm:mt-3 text-4xl sm:text-6xl font-bold text-[#0ea5e9]">99.95%</p>
           <p className="mt-1 text-gray-500 dark:text-neutral-500">in fulfilling orders</p>
         </div>
         {/* End Stats */}
@@ -15,7 +15,7 @@ export default function Stats() {
         {/* Stats */}
         <div>
           <h4 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-neutral-200">Startup businesses</h4>
-          <p className="mt-2 sm:mt-3 text-4xl sm:text-6xl font-bold text-blue-600">2,000+</p>
+          <p className="mt-2 sm:mt-3 text-4xl sm:text-6xl font-bold text-[#0ea5e9]">2,000+</p>
           <p className="mt-1 text-gray-500 dark:text-neutral-500">partner with Preline</p>
         </div>
         {/* End Stats */}
@@ -23,7 +23,7 @@ export default function Stats() {
         {/* Stats */}
         <div>
           <h4 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-neutral-200">Happy customer</h4>
-          <p className="mt-2 sm:mt-3 text-4xl sm:text-6xl font-bold text-blue-600">85%</p>
+          <p className="mt-2 sm:mt-3 text-4xl sm:text-6xl font-bold text-[#0ea5e9]">85%</p>
           <p className="mt-1 text-gray-500 dark:text-neutral-500">this year alone</p>
         </div>
         {/* End Stats */}

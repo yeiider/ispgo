@@ -132,7 +132,7 @@ export default function CreatePassword() {
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={processing}>
+              <Button type="submit" className="w-full bg-[#0ea5e9] hover:bg-[#38bdf8]" disabled={processing}>
                 {processing ? (
                   <>
 

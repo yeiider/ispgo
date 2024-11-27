@@ -235,7 +235,7 @@ export default function Register() {
                 )}
               />
 
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full bg-[#0ea5e9] hover:bg-[#38bdf8]">
                 {__('Login')}
               </Button>
             </form>
