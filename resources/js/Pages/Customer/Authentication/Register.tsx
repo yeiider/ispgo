@@ -26,7 +26,7 @@ export interface DocumentType {
 const formSchema = z.object({
   first_name: z.string().min(3),
   last_name: z.string().min(3),
-  document_type: z.string().min(3),
+  document_type: z.string().min(1),
   identity_document: z.string().min(3),
   email_address: z.string().email({
     message: "The email must be a valid email address."
@@ -58,6 +58,7 @@ export default function Register() {
   })
 
   const onSubmit = () => {
+    console.log("Hola")
     post('register');
   }
 
@@ -138,7 +139,13 @@ export default function Register() {
                 render={({field}) => (
                   <FormItem>
                     <FormLabel htmlFor="document_type">{__('Document Type')}</FormLabel>
-                    <Select name="document_type" onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select name="document_type" onValueChange={(value) => {
+                      field.onChange(value);
+                      setData({
+                        ...data,
+                        document_type: value
+                      })
+                    }} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a document type"/>
