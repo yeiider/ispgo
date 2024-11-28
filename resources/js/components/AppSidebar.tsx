@@ -1,5 +1,6 @@
 import {
-  Command,
+  icons,
+  ChartNoAxesCombined
 } from "lucide-react"
 
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/sidebar"
 import {usePage, Link} from "@inertiajs/react";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar.tsx";
+import {getInitials} from "@/lib/utils.ts";
 
 type Props = {
   sidebar: {
@@ -31,9 +33,21 @@ type Props = {
 interface ILink {
   code: string,
   title: string,
-  url: string
+  url: string,
+  icon: string,
 }
 
+
+interface IIcon {
+  name: string,
+  color?: string,
+  size?: string
+}
+const Icon = ({name, color, size}: IIcon) => {
+  // @ts-ignore
+  const LucideIcon = icons[name];
+  return <LucideIcon color={color} size={size}/>;
+}
 
 export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
 
@@ -48,7 +62,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
               <a href="#">
                 <div
                   className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4"/>
+                  <ChartNoAxesCombined className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{sidebar.app_name}</span>
@@ -65,6 +79,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu>
             {sidebar.links.map((item) => (
               <SidebarMenuButton key={item.code}>
+                <Icon name={item.icon}/>
                 <Link href={item.url}>
                   <span>{item.title}</span>
                 </Link>
@@ -73,15 +88,15 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="bg-red-500">
+      <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <Avatar className="h-8 w-8 lg:h-10 lg:w-10 rounded-lg">
+                  <AvatarFallback className="rounded-lg uppercase">{getInitials(customer.last_name)}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{customer.last_name}</span>

@@ -41,7 +41,7 @@ export default function FAQ() {
       <div className="max-w-2xl mx-auto">
         <Accordion type="single" collapsible>
           {frequentlyAskedQuestions.map((item) => (
-            <AccordionItem value={`item-${item.id}`}>
+            <AccordionItem key={item.id} value={`item-${item.id}`}>
               <AccordionTrigger>{item.question}</AccordionTrigger>
               <AccordionContent>
                 {item.answer}

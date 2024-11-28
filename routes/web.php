@@ -10,6 +10,8 @@ use App\Http\Controllers\CustomerAccount\TicketsController;
 use App\Http\Controllers\Api\BoxApi;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Http\Controllers\CustomerAccount\InvoiceController as CustomerInvoiceController;
+
 
 // Rutas de Nova
 Route::middleware(['nova'])->prefix('nova')->group(function () {
@@ -64,6 +66,8 @@ Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('
     Route::get('/logout', [AuthController::class, 'logout'])->name('customer.logout');
     Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets');
     Route::get('/tickets/create', [TicketsController::class, 'create'])->name('tickets.create');
+    Route::get('/invoices', [CustomerInvoiceController::class, 'index'])->name('invoices');
+    Route::get('/address-book', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'index'])->name('addresses');
     Route::get('/customer/edit', [CustomerController::class, 'edit'])->name('customer.edit');
     Route::put('/customer/update', [CustomerController::class, 'update'])->name('customer.update');
     Route::put('/customer/change-password', [CustomerController::class, 'changePassword'])->name('customer.changePassword');

@@ -37,38 +37,26 @@ class CustomerAccount implements ConfigProviderInterface
                     'code' => "my_account",
                     'url' => route('index'),
                     'title' => __('My Account'),
+                    'icon' => 'User',
                 ],
-                /*[
-                    'code' => 'my_orders',
-                    'url' => route('orders'),
-                    'title' => __('My Orders'),
-                ],*/
                 [
                     'code' => 'tickets',
                     'url' => route('tickets'),
                     'title' => __('Tickets'),
+                    'icon' => 'Tickets'
                 ],
-                /*[
-                    'code' => 'payments',
-                    'url' => '',//route('customer.addresses'),
-                    'title' => __('Payments'),
-                ],*/
                 [
                     'code' => 'invoices',
-                    'url' => '',
+                    'url' => route('invoices'),
                     'title' => __('Invoices'),
+                    'icon' => 'FileText'
                 ],
                 [
                     'code' => 'address_book',
-                    'url' => '',//route('customer.addresses'),
+                    'url' => route('addresses'),
                     'title' => __('Address Book'),
+                    'icon' => 'NotebookTabs'
                 ],
-
-                /*[
-                    'code' => 'account_information',
-                    'url' => '',//route('customer.addresses'),
-                    'title' => __('Account information'),
-                ],*/
             ]
         ];
     }

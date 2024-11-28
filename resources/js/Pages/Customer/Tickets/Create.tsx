@@ -1,9 +1,9 @@
-import Customer from "@/Layouts/Customer.tsx";
+import CustomerLayout from "@/Layouts/CustomerLayout.tsx";
 
 export default function Create() {
   return (
-    <Customer>
+    <CustomerLayout>
       <p>Create</p>
-    </Customer>
+    </CustomerLayout>
   )
 }
