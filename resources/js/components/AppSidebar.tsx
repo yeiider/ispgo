@@ -1,6 +1,6 @@
 import {
   icons,
-  ChartNoAxesCombined, SatelliteDish
+  SatelliteDish
 } from "lucide-react"
 
 import {
