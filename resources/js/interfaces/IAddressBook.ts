@@ -25,6 +25,7 @@ export interface Daum {
   country: string
   latitude: string
   longitude: string
+  address_type: string,
   created_at: string
   updated_at: string
 }

@@ -6,7 +6,7 @@ export default function CustomerLayout({children}: { children: React.ReactNode }
   return (
     <SidebarProvider className="items-start">
       <AppSidebar className="mt-20 h-[85svh]"/>
-      <SidebarInset className="">
+      <SidebarInset className="!min-h-[70svh]">
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1"/>

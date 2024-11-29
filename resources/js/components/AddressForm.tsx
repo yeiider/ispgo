@@ -21,16 +21,15 @@ interface Props {
 }
 
 export default function AddressForm({address, id, countries}: Props) {
-  console.log(countries)
-
   const formSchema = z.object({
     address: z.string().min(3),
     city: z.string().min(3),
-    country: z.string().min(3),
+    country: z.string().min(1),
     state_province: z.string().min(3),
     latitude: z.string().min(1),
     longitude: z.string().min(1),
     postal_code: z.string().min(3),
+    address_type: z.string().min(1),
   })
 
 
@@ -41,6 +40,7 @@ export default function AddressForm({address, id, countries}: Props) {
     state_province: address?.state_province || "",
     latitude: address?.latitude || "",
     longitude: address?.longitude || "",
+    address_type: address?.address_type || "",
     postal_code: address?.postal_code || "",
   })
 
@@ -53,7 +53,7 @@ export default function AddressForm({address, id, countries}: Props) {
     if (typeof address !== "undefined") {
       put(`/customer-account/address-book/update/${id}`)
     } else {
-      post("/customer-account/address-book")
+      post("/customer-account/address-book/store")
     }
   }
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +62,18 @@ export default function AddressForm({address, id, countries}: Props) {
       [e.target.name]: e.target.value
     })
   }
+
+  const addressTypes = [
+    {
+      label: __('Billing'),
+      value: 'billing'
+    },
+    {
+      label: __('Shipping'),
+      value: 'shipping'
+    },
+  ]
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className=" max-w-5xl">
@@ -141,8 +153,8 @@ export default function AddressForm({address, id, countries}: Props) {
                 </FormItem>
               )}
             />
-
           </div>
+
           <div className="col-span-1">
             <FormField
               control={form.control}
@@ -183,6 +195,38 @@ export default function AddressForm({address, id, countries}: Props) {
                   <FormControl>
                     <Input type="text" placeholder="" {...field} onInput={handleInput}/>
                   </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+          </div>
+
+
+          <div className="col-span-2">
+            <FormField
+              control={form.control}
+              name="address_type"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel htmlFor="address_type">{__('Address Type')}</FormLabel>
+                  <Select name="address_type" value={field.value} onValueChange={(value) => {
+                    field.onChange(value);
+                    setData({
+                      ...data,
+                      address_type: value
+                    })
+                  }} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a address type"/>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {addressTypes.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>{__(item.label)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage/>
                 </FormItem>
               )}

@@ -36,6 +36,7 @@ class Address extends Resource
                     'billing' => __('address.billing'),
                     'shipping' => __('address.shipping'),
                 ])
+                ->displayUsingLabels()
                 ->sortable()->rules('required'),
             Number::make(__('address.latitude'), 'latitude')->nullable()->step(0.0000001),
             Number::make(__('address.longitude'), 'longitude')->nullable()->step(0.0000001),

@@ -47,9 +47,4 @@ class Address extends Model
             $model->updated_by = Auth::id();
         });
     }
-
-    public function getAddressTypeAttribute($value): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
-    {
-        return __('attribute.address_type.' . $value);
-    }
 }

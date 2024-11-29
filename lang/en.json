@@ -148,5 +148,12 @@
     "State Province": "State Province",
     "Address": "Address",
     "This action cannot be undone. This will permanently delete your address and remove your data from our servers.": "This action cannot be undone. This will permanently delete your address and remove your data from our servers.",
-    "Save Address": "Save Address"
+    "Save Address": "Save Address",
+    "Address created successfully.": "Address created successfully.",
+    "Address updated successfully.": "Address updated successfully.",
+    "Address Type": "Address Type",
+    "Latitude": "Latitude",
+    "Longitude": "Longitude",
+    "Billing": "Billing",
+    "Shipping": "Shipping"
 }

@@ -26,6 +26,7 @@ class AddressBook extends Controller
                     'state_province' => $address->state_province,
                     'postal_code' => $address->postal_code,
                     'country' => $address->country,
+                    'address_type' => $address->address_type,
                     'created_at' => $address->created_at,
                     'updated_at' => $address->updated_at,
                 ]),
@@ -40,7 +41,7 @@ class AddressBook extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'address' => 'required',
@@ -50,6 +51,15 @@ class AddressBook extends Controller
             'country' => 'required',
         ]);
 
+        $address = Address::create([
+            'customer_id' => Auth::guard('customer')->id(),
+            ...$request->all(),
+        ]);
+
+        $address->save();
+        return redirect()
+            ->route('addresses')
+            ->with('status', __('Address created successfully.'));
     }
 
     public function update(Request $request, int $id): \Illuminate\Http\RedirectResponse
@@ -62,7 +72,10 @@ class AddressBook extends Controller
 
         $address = Address::query()->findOrFail($id);
         $address->update($request->all());
-        return redirect()->route('address.edit', $address->id);
+        $address->save();
+        return redirect()
+            ->route('addresses')
+            ->with('status', __('Address updated successfully.'));
 
     }
 
@@ -76,19 +89,16 @@ class AddressBook extends Controller
         return Inertia::render('Customer/AddressBook/Edit', [
             'address' => $address,
             'id' => $address->id,
-            'countries' => array_map(fn($country) => [
-                'value' => $country,
-                'label' => $this->countries()->get($country),
-            ], $this->countries()->keys()->toArray()),
+            'countries' => $this->countriesOptions()
         ]);
     }
 
     public function countriesOptions(): array
     {
-        return $this->countries()->map(fn($country) => [
+        return array_map(fn($country) => [
             'value' => $country,
-            'label' => $country,
-        ])->toArray();
+            'label' => $this->countries()->get($country),
+        ], $this->countries()->keys()->toArray());
     }
 
     public function countries(): \Illuminate\Support\Collection

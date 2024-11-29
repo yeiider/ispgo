@@ -29,18 +29,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "@/components/ui/alert-dialog"
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Button} from "@/components/ui/button.tsx";
 import {TriangleAlert} from "lucide-react";
+import {toast} from "sonner";
 
 type Props = {
   address_book: IAddressBook,
-  addressCreateUrl: string
+  addressCreateUrl: string,
+  flash: {
+    status: string | null,
+  }
 }
 export default function Index() {
-  const {address_book} = usePage<Props>().props;
+  const {address_book, flash} = usePage<Props>().props;
   const [isOpen, setIsOpen] = useState(false);
   const [id, setId] = useState<number | null>(null);
+
 
   const deleteAddress = () => {
     if (typeof id == null) {
@@ -49,6 +54,19 @@ export default function Index() {
 
     console.log(id)
   }
+  useEffect(() => {
+
+    if (flash.status) {
+      console.log(flash.status)
+      toast.success(flash.status, {
+        classNames: {
+          title: "text-green-500",
+          icon: "text-green-500",
+        }
+      });
+    }
+    return;
+  }, []);
 
   return (
     <CustomerLayout>

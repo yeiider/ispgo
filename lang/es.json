@@ -148,5 +148,12 @@
     "State Province": "Provincia Estatal",
     "Address": "Dirección",
     "This action cannot be undone. This will permanently delete your address and remove your data from our servers.": "Esta acción no se puede deshacer. Esto eliminará permanentemente su dirección y elimine sus datos de nuestros servidores.",
-    "Save Address": "Guardar Dirección"
+    "Save Address": "Guardar Dirección",
+    "Address created successfully.": "Dirección creada con éxito.",
+    "Address updated successfully.": "Dirección actualizada con éxito.",
+    "Address Type": "Tipo de Dirección",
+    "Latitude": "Latitud",
+    "Longitude": "Longitud",
+    "Billing": "Facturación",
+    "Shipping": "Envío"
 }

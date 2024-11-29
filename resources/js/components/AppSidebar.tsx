@@ -96,10 +96,10 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 lg:h-10 lg:w-10 rounded-lg">
-                  <AvatarFallback className="rounded-lg uppercase">{getInitials(customer.last_name)}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg uppercase">{getInitials(customer.first_name)}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{customer.last_name}</span>
+                  <span className="truncate font-semibold">{customer.first_name}</span>
                   <span className="truncate text-xs">{customer.email_address}</span>
                 </div>
               </div>
