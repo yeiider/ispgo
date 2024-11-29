@@ -9,6 +9,7 @@ import {__} from "@/translation.ts";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
+import {Server} from "lucide-react";
 
 
 interface Props {
@@ -235,6 +236,7 @@ export default function AddressForm({address, id, countries}: Props) {
         </div>
 
         <Button type="submit" className="mt-4">
+          <Server />
           <span>{__(address ? 'Save Changes' : 'Save Address')}</span>
         </Button>
       </form>

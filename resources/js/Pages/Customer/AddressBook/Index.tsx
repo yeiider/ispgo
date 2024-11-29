@@ -31,8 +31,9 @@ import {
 } from "@/components/ui/alert-dialog"
 import {useEffect, useState} from "react";
 import {Button} from "@/components/ui/button.tsx";
-import {TriangleAlert} from "lucide-react";
+import {PencilLine, Plus, Trash, TriangleAlert} from "lucide-react";
 import {toast} from "sonner";
+import {useForm} from "@inertiajs/react";
 
 type Props = {
   address_book: IAddressBook,
@@ -45,19 +46,17 @@ export default function Index() {
   const {address_book, flash} = usePage<Props>().props;
   const [isOpen, setIsOpen] = useState(false);
   const [id, setId] = useState<number | null>(null);
-
+  const form = useForm();
 
   const deleteAddress = () => {
     if (typeof id == null) {
       return;
     }
-
+    form.delete(`/customer-account/address-book/delete/${id}`)
     console.log(id)
   }
   useEffect(() => {
-
     if (flash.status) {
-      console.log(flash.status)
       toast.success(flash.status, {
         classNames: {
           title: "text-green-500",
@@ -72,6 +71,14 @@ export default function Index() {
     <CustomerLayout>
       <div className="flex flex-col gap-4 justify-between">
         <h1 className="text-3xl font-semibold text-slate-950">{__('Address Book')}</h1>
+        <div className="flex justify-end">
+          <Button asChild>
+            <Link href={"/customer-account/address-book/create"}>
+              <Plus/>
+              <span>{__('Create Address')}</span>
+            </Link>
+          </Button>
+        </div>
         <div>
           <Table>
             <TableCaption>{__('A list of your recent tickets.')}</TableCaption>
@@ -97,13 +104,19 @@ export default function Index() {
                   <TableCell>{item.postal_code}</TableCell>
                   <TableCell className="flex items-center gap-4">
                     <Link href={`/customer-account/address-book/edit/${item.id}`}
-                          className="text-yellow-500 ">{__('Edit')}</Link>
-                    <Button variant="link" className="font-normal" onClick={() => {
-                      setIsOpen(true);
-                      setId(item.id);
-                    }}>
-                      <span className="text-red-500">{__('Delete')}</span>
-                    </Button>
+                          className="text-yellow-500 flex items-center gap-2">
+                      <PencilLine className="text-yellow-500" />
+                      <span>{__('Edit')}</span>
+                    </Link>
+                    {address_book.data.length > 1 && (
+                      <Button variant="link" className="font-normal" onClick={() => {
+                        setIsOpen(true);
+                        setId(item.id);
+                      }}>
+                        <Trash className="text-red-500" />
+                        <span className="text-red-500">{__('Delete')}</span>
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

@@ -72,6 +72,7 @@ Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('
     route::post('/address-book/store', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'store'])->name('address.store');
     Route::get('/address-book/edit/{id}', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'edit'])->name('address.edit');
     Route::put('/address-book/update/{id}', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'update'])->name('address.update');
+    Route::delete('/address-book/delete/{id}', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'destroy'])->name('address.destroy');
     Route::get('/customer/edit', [CustomerController::class, 'edit'])->name('customer.edit');
     Route::put('/customer/update', [CustomerController::class, 'update'])->name('customer.update');
     Route::put('/customer/change-password', [CustomerController::class, 'changePassword'])->name('customer.changePassword');
