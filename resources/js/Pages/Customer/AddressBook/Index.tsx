@@ -1,5 +1,5 @@
 import CustomerLayout from "@/Layouts/CustomerLayout.tsx";
-import {usePage} from "@inertiajs/react";
+import {Link, usePage} from "@inertiajs/react";
 import {IAddressBook} from "@/interfaces/IAddressBook.ts";
 import {__} from "@/translation.ts";
 import {
@@ -19,13 +19,37 @@ import {
   PaginationLink, PaginationNext,
   PaginationPrevious
 } from "@/components/ui/pagination.tsx";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog"
+import {useState} from "react";
+import {Button} from "@/components/ui/button.tsx";
+import {TriangleAlert} from "lucide-react";
 
 type Props = {
-  address_book: IAddressBook
+  address_book: IAddressBook,
+  addressCreateUrl: string
 }
 export default function Index() {
   const {address_book} = usePage<Props>().props;
-  console.log(address_book)
+  const [isOpen, setIsOpen] = useState(false);
+  const [id, setId] = useState<number | null>(null);
+
+  const deleteAddress = () => {
+    if (typeof id == null) {
+      return;
+    }
+
+    console.log(id)
+  }
+
   return (
     <CustomerLayout>
       <div className="flex flex-col gap-4 justify-between">
@@ -41,26 +65,36 @@ export default function Index() {
                 <TableHead>{__('Country')}</TableHead>
                 <TableHead>{__('State Province')}</TableHead>
                 <TableHead>{__('Postal Code')}</TableHead>
+                <TableHead>{__('Actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {address_book.data.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.id}</TableCell>
-                  <TableCell>{item.address}</TableCell>
+                  <TableCell className="underline">{item.address}</TableCell>
                   <TableCell>{item.city}</TableCell>
                   <TableCell>{item.country}</TableCell>
                   <TableCell>{item.state_province}</TableCell>
                   <TableCell>{item.postal_code}</TableCell>
+                  <TableCell className="flex items-center gap-4">
+                    <Link href={`/customer-account/address-book/edit/${item.id}`}
+                          className="text-yellow-500 ">{__('Edit')}</Link>
+                    <Button variant="link" className="font-normal" onClick={() => {
+                      setIsOpen(true);
+                      setId(item.id);
+                    }}>
+                      <span className="text-red-500">{__('Delete')}</span>
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={5}>
+                <TableCell colSpan={7}>
                   <Pagination>
                     <PaginationContent>
-
                       <PaginationPrevious
                         className={!address_book.prev_page_url ? 'disabled' : ''}
                         href={address_book.prev_page_url || '#'}
@@ -88,6 +122,26 @@ export default function Index() {
               </TableRow>
             </TableFooter>
           </Table>
+
+
+          <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader className="flex flex-col items-center">
+                <TriangleAlert/>
+                <AlertDialogTitle>{__('Are you absolutely sure?')}</AlertDialogTitle>
+                <AlertDialogDescription className="text-center">
+                  {__('This action cannot be undone. This will permanently delete your address and remove your data from our servers.')}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <div className="flex items-center gap-4 w-full justify-center">
+                  <AlertDialogAction onClick={deleteAddress}>Confirm</AlertDialogAction>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                </div>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
         </div>
       </div>
     </CustomerLayout>

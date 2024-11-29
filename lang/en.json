@@ -146,5 +146,7 @@
     "Status": "Status",
     "Increment Id": "Increment Id",
     "State Province": "State Province",
-    "Address": "Address"
+    "Address": "Address",
+    "This action cannot be undone. This will permanently delete your address and remove your data from our servers.": "This action cannot be undone. This will permanently delete your address and remove your data from our servers.",
+    "Save Address": "Save Address"
 }

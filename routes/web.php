@@ -68,6 +68,10 @@ Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('
     Route::get('/tickets/create', [TicketsController::class, 'create'])->name('tickets.create');
     Route::get('/invoices', [CustomerInvoiceController::class, 'index'])->name('invoices');
     Route::get('/address-book', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'index'])->name('addresses');
+    Route::get('/address-book/create', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'create'])->name('address.create');
+    route::post('/address-book/store', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'store'])->name('address.store');
+    Route::get('/address-book/edit/{id}', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'edit'])->name('address.edit');
+    Route::put('/address-book/update/{id}', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'update'])->name('address.update');
     Route::get('/customer/edit', [CustomerController::class, 'edit'])->name('customer.edit');
     Route::put('/customer/update', [CustomerController::class, 'update'])->name('customer.update');
     Route::put('/customer/change-password', [CustomerController::class, 'changePassword'])->name('customer.changePassword');

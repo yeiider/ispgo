@@ -146,5 +146,7 @@
     "Status": "Estado",
     "Increment Id": "Consecutivo",
     "State Province": "Provincia Estatal",
-    "Address": "Dirección"
+    "Address": "Dirección",
+    "This action cannot be undone. This will permanently delete your address and remove your data from our servers.": "Esta acción no se puede deshacer. Esto eliminará permanentemente su dirección y elimine sus datos de nuestros servidores.",
+    "Save Address": "Guardar Dirección"
 }

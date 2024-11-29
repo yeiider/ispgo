@@ -23,6 +23,8 @@ export interface Daum {
   state_province: string
   postal_code: string
   country: string
+  latitude: string
+  longitude: string
   created_at: string
   updated_at: string
 }
