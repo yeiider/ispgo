@@ -1,6 +1,6 @@
 import {
   icons,
-  ChartNoAxesCombined
+  ChartNoAxesCombined, SatelliteDish
 } from "lucide-react"
 
 import {
@@ -28,6 +28,7 @@ type Props = {
     email_address: string,
     id: number
   }
+  companyName: string
 }
 
 interface ILink {
@@ -51,7 +52,7 @@ const Icon = ({name, color, size}: IIcon) => {
 
 export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
 
-  const {sidebar, customer} = usePage<Props>().props;
+  const {sidebar, customer, companyName} = usePage<Props>().props;
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -62,10 +63,10 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
               <a href="#">
                 <div
                   className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <ChartNoAxesCombined className="size-4" />
+                  <SatelliteDish className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{sidebar.app_name}</span>
+                  <span className="truncate font-semibold">{companyName}</span>
                   <span className="truncate text-xs">Enterprise</span>
                 </div>
               </a>

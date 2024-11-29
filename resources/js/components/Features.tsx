@@ -16,11 +16,13 @@ export default function Features() {
             {/* Title */}
             <div className="space-y-2 md:space-y-4">
               <h2 className="font-bold text-3xl lg:text-4xl text-gray-800 dark:text-neutral-200">
-                We tackle the challenges start-ups face
+                Todo lo que necesitas para estar conectado, lo encuentras con nuestro servicio de Internet
               </h2>
               <p className="text-gray-500 dark:text-neutral-500">
-                Besides working with start-up enterprises as a partner for digitalization, we have built enterprise
-                products for common pain points that we have encountered in various products and projects.
+                Nuestro servicio de Internet te ofrece todo lo que necesitas para mantenerte siempre conectado, tanto en
+                tu hogar como en tu negocio. Con una red confiable y de alta velocidad, puedes gestionar múltiples
+                dispositivos, videollamadas, streaming y más, todo con la tranquilidad de contar con soporte
+                especializado y una infraestructura segura.
               </p>
             </div>
             {/* End Title */}
@@ -36,7 +38,7 @@ export default function Features() {
             </span>
                 <div className="grow">
               <span className="text-sm sm:text-base text-gray-500 dark:text-neutral-500">
-                <span className="font-bold">Easy & fast</span> designing
+                <span className="font-bold">Fácil y rápido</span> diseño
               </span>
                 </div>
               </li>
@@ -50,7 +52,7 @@ export default function Features() {
             </span>
                 <div className="grow">
               <span className="text-sm sm:text-base text-gray-500 dark:text-neutral-500">
-                Powerful <span className="font-bold">features</span>
+                Características <span className="font-bold">potentes</span>
               </span>
                 </div>
               </li>
@@ -64,7 +66,7 @@ export default function Features() {
             </span>
                 <div className="grow">
               <span className="text-sm sm:text-base text-gray-500 dark:text-neutral-500">
-                User Experience Design
+                Diseño de Experiencia de Usuario
               </span>
                 </div>
               </li>

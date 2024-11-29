@@ -54,7 +54,7 @@ class HandleInertiaRequests extends Middleware
                 return Lang::get('*');
             }
         ];
-        $companyName = GeneralProviderConfig::getCompanyName();
+        $companyName = GeneralProviderConfig::getCompanyName() ?? env('APP_NAME');
         $isAuthenticated = auth('customer')->check();
 
         return array_merge(

@@ -1,5 +1,6 @@
 import {Button} from "@/components/ui/button.tsx";
 import {Link} from "@inertiajs/react";
+import {__} from "@/translation.ts";
 
 export default function Hero() {
   return (
@@ -8,17 +9,17 @@ export default function Hero() {
       <div className="grid md:grid-cols-2 gap-4 md:gap-8 xl:gap-20 md:items-center">
         <div>
           <h1
-            className="block text-3xl font-bold text-gray-800 sm:text-4xl lg:text-6xl lg:leading-tight dark:text-white">Start
-            your journey with <span className="text-[#0ea5e9]">Preline</span></h1>
-          <p className="mt-3 text-lg text-gray-800 dark:text-neutral-400">Hand-picked professionals and expertly crafted
-            components, designed for any kind of entrepreneur.</p>
+            className="block text-3xl font-bold text-gray-800 sm:text-4xl lg:text-6xl lg:leading-tight dark:text-white">Conexiones
+            a Internet rápidas y confiables para tu hogar y negocio <span className="text-[#0ea5e9]">Preline</span></h1>
+          <p className="mt-3 text-lg text-gray-800 dark:text-neutral-400">Disfruta de un servicio de Internet de alta
+            velocidad con una cobertura que se adapta a tus necesidades, ya sea en casa o en la oficina.</p>
 
           {/* Buttons */}
           <div className="mt-7 grid gap-3 w-full sm:inline-flex">
             <Button className="bg-[#0ea5e9]" asChild
             >
               <Link href="#">
-                Get started
+                <span>{__('Get started')}</span>
                 <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                      viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
                      strokeLinejoin="round">
@@ -29,7 +30,7 @@ export default function Hero() {
             <a
               className="py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
               href="#">
-              Contact sales team
+              {__('Contact sales team')}
             </a>
           </div>
           {/* End Buttons */}
