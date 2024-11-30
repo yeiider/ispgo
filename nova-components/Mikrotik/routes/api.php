@@ -25,7 +25,7 @@ Route::get('/add-queue', [\Ispgo\Mikrotik\Http\Controller\Mikrotik::class, 'addA
 Route::get('/add-pppoe', [\Ispgo\Mikrotik\Http\Controller\Mikrotik::class, 'addPPPoEClient'])->name('mikrotik.pppoe.add');
 Route::get('/plans', [\Ispgo\Mikrotik\Http\Controller\Api\MikrotikApi::class, 'getPlans'])->name('mikrotik.plans');
 Route::get('/ppp-profile', [\Ispgo\Mikrotik\Http\Controller\Api\MikrotikApi::class, 'getPPPProfiles'])->name('mikrotik.ppp.profiles');
-Route::post('/sync-selected-ppp-profiles', [\Ispgo\Mikrotik\Http\Controller\Api\MikrotikApi::class, 'syncSelectedPPPProfiles'])->name('mikrotik.ppp.profiles.sync');
+Route::post('/sync-selected-ppp-profiles', [\Ispgo\Mikrotik\Http\Controller\Api\MikrotikApi::class, 'syncSelectedPPPProfiles'])->name('mikrotik.ppp.profiles.sync.profile');
 Route::post('/sync-ppp-profiles', [\Ispgo\Mikrotik\Http\Controller\Api\MikrotikApi::class, 'syncPPPProfiles'])->name('mikrotik.ppp.profiles.sync');
 Route::get('/pools', [PoolController::class, 'getPools'])->name('mikrotik.pools');
 Route::post('/pools', [PoolController::class, 'createPool'])->name('mikrotik.pools.create');
