@@ -53,7 +53,7 @@ Route::middleware('guest:customer')->prefix('customer')->group(function () {
     })->name('customer.password.reset.get');
     Route::post('/password/reset', [AuthController::class, 'sendPasswordResetEmail'])->name('customer.password.reset');
     Route::get('/password/create/{token}', [AuthController::class, 'showCreatePassword'])->name('customer.password.create');
-    Route::post('/password/create', [AuthController::class, 'createPassword'])->name('customer.password.create');
+    Route::post('/password/create', [AuthController::class, 'createPassword'])->name('customer.password.create.post');
 });
 
 Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('customer-account')->group(function () {
