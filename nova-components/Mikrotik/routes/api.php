@@ -33,7 +33,7 @@ Route::delete('/pools/{id}', [PoolController::class, 'deletePool'])->name('mikro
 
 Route::get('/ipv6-pools', [\Ispgo\Mikrotik\Http\Controller\Api\IPv6PoolController::class, 'getPools'])->name('mikrotik.pools.ipv6');
 Route::post('/ipv6-pools', [\Ispgo\Mikrotik\Http\Controller\Api\IPv6PoolController::class, 'createPool'])->name('mikrotik.pools.ipv6.create');
-Route::delete('ipv6-pools/{id}', [\Ispgo\Mikrotik\Http\Controller\Api\IPv6PoolController::class, 'deletePool'])->name('mikrotik.pools.delete');
+Route::delete('ipv6-pools/{id}', [\Ispgo\Mikrotik\Http\Controller\Api\IPv6PoolController::class, 'deletePool'])->name('mikrotik.pools.ipv6.delete');
 
 Route::get('dhcp',[\Ispgo\Mikrotik\Http\Controller\Api\DHCPv6Controller::class, 'getDHCPs'])->name('mikrotik.pools.dhcps');
 Route::post('dhcp',[\Ispgo\Mikrotik\Http\Controller\Api\DHCPv6Controller::class, 'createDHCP'])->name('mikrotik.pools.dhcps.create');
