@@ -15,8 +15,5 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './resources/js')
     }
-  },
-  server: {
-    https: true, // Fuerza el uso de HTTPS
-  },
+  }
 });
