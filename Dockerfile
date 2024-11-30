@@ -1,7 +1,13 @@
+# Imagen base con PHP 8.2 y soporte para FPM
 FROM php:8.2-fpm
 
 # Establecer directorio de trabajo
 WORKDIR /var/www/html
+
+# Establecer variables de entorno para la construcción
+ENV APP_ENV=local
+ENV DB_CONNECTION=sqlite
+ENV DB_DATABASE=/var/www/html/database/database.sqlite
 
 # Instalar dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y \
@@ -33,18 +39,15 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copiar el código de la aplicación al contenedor
 COPY . .
 
-# Copiar auth.json
-COPY auth.json /var/www/html/auth.json
+# Crear el archivo de base de datos SQLite vacío
+RUN mkdir -p database && touch database/database.sqlite
 
-# Configurar permisos correctos
+# Configurar permisos correctos para los directorios de almacenamiento y caché
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Instalar las dependencias de Laravel usando Composer
 RUN composer install --no-dev --optimize-autoloader
-
-# Eliminar auth.json después de la instalación
-RUN rm /var/www/html/auth.json
 
 # Correr comandos de optimización de Laravel
 RUN php artisan config:cache \
