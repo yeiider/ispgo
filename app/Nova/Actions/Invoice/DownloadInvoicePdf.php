@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Nova\Actions;
+namespace App\Nova\Actions\Invoice;
 
 use App\Models\Invoice\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;

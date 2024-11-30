@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Nova\Actions\Invoice;
+namespace App\Nova\Actions\Invoice\Invoice;
 
 use App\Models\Invoice\Invoice;
 use Illuminate\Bus\Queueable;

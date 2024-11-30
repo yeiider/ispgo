@@ -3,7 +3,7 @@
 namespace App\Nova;
 
 use App\Models\User;
-use App\Nova\Actions\AssignmentTickets;
+use App\Nova\Actions\Invoice\AssignmentTickets;
 use App\Nova\Customers\Customer;
 use App\Nova\Filters\PriorityTickets;
 use App\Nova\Filters\StatusTickets;

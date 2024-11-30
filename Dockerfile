@@ -1,13 +1,11 @@
-# Imagen base con PHP 8.2 y soporte para FPM
 FROM php:8.2-fpm
 
 # Establecer directorio de trabajo
 WORKDIR /var/www/html
 
 # Establecer variables de entorno para la construcción
-ENV APP_ENV=local
-ENV DB_CONNECTION=sqlite
-ENV DB_DATABASE=/var/www/html/database/database.sqlite
+ENV APP_ENV=build
+ENV DB_CONNECTION=null
 
 # Instalar dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y \
@@ -38,9 +36,6 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Copiar el código de la aplicación al contenedor
 COPY . .
-
-# Crear el archivo de base de datos SQLite vacío
-RUN mkdir -p database && touch database/database.sqlite
 
 # Configurar permisos correctos para los directorios de almacenamiento y caché
 RUN chown -R www-data:www-data /var/www/html \

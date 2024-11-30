@@ -2,10 +2,10 @@
 
 namespace App\Nova\Invoice;
 
-use App\Nova\Actions\ApplyDiscount;
-use App\Nova\Actions\DownloadInvoicePdf;
-use App\Nova\Actions\Invoice\RegisterPayment;
-use App\Nova\Actions\Invoice\RegisterPaymentPromise;
+use App\Nova\Actions\Invoice\ApplyDiscount;
+use App\Nova\Actions\Invoice\DownloadInvoicePdf;
+use App\Nova\Actions\Invoice\Invoice\RegisterPayment;
+use App\Nova\Actions\Invoice\Invoice\RegisterPaymentPromise;
 use App\Nova\Customers;
 use App\Nova\Filters\Invoice\InvoiceStatusFilter;
 use App\Nova\Metrics\Invoice\InvoicesStatus;
