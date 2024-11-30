@@ -1,7 +1,2 @@
 #!/bin/bash
-
-# Iniciar PHP-FPM
-php-fpm &
-
-# Iniciar NGINX en primer plano
-nginx -g "daemon off;"
+mkdir -p /var/log/nginx
