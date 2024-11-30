@@ -4,8 +4,10 @@ FROM php:8.2-fpm
 WORKDIR /var/www/html
 
 # Establecer variables de entorno para la construcción
-ENV APP_ENV=build
-ENV DB_CONNECTION=null
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+ENV DB_CONNECTION=sqlite
+ENV DB_DATABASE=/tmp/database.sqlite
 
 # Instalar dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y \
@@ -33,6 +35,9 @@ RUN docker-php-ext-install pdo_mysql pdo_pgsql zip sockets
 
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Crear un archivo de base de datos SQLite vacío
+RUN touch /tmp/database.sqlite
 
 # Copiar el código de la aplicación al contenedor
 COPY . .
