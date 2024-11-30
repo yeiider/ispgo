@@ -4,23 +4,32 @@ FROM php:8.2-fpm
 # Establecer directorio de trabajo
 WORKDIR /var/www/html
 
-# Instalar dependencias del sistema necesarias para Laravel y extensiones de PHP
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    libjpeg-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
     libpng-dev \
+    libwebp-dev \
+    libxpm-dev \
     libzip-dev \
     unzip \
     ghostscript \
     postgresql-client \
     nginx \
-    && docker-php-ext-configure gd --with-jpeg --with-png \
-    && docker-php-ext-install pdo_mysql pdo_pgsql zip gd opcache \
     && apt-get clean
+
+# Configurar y instalar la extensión GD
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-xpm
+
+RUN docker-php-ext-install gd
+
+# Instalar otras extensiones de PHP
+RUN docker-php-ext-install pdo_mysql pdo_pgsql zip opcache
 
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copiar el código de Laravel al contenedor
+# Copiar el código de la aplicación al contenedor
 COPY . .
 
 # Configurar permisos correctos para los directorios de almacenamiento y caché
@@ -46,8 +55,6 @@ COPY start.sh /var/www/html/start.sh
 
 # Dar permisos de ejecución al script de inicio
 RUN chmod +x /var/www/html/start.sh
-
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 # Comando de inicio
 CMD ["/var/www/html/start.sh"]
