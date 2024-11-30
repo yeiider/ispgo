@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.2
-
 FROM php:8.2-fpm
 
 # Establecer directorio de trabajo
@@ -35,15 +33,17 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copiar el código de la aplicación al contenedor
 COPY . .
 
-# Configurar permisos correctos para los directorios de almacenamiento y caché
+# Copiar auth.json
+COPY auth.json /var/www/html/auth.json
+
+# Configurar permisos correctos
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Configurar Composer para usar el auth.json
-RUN --mount=type=secret,id=auth,target=/var/www/html/auth.json \
-    composer install --no-dev --optimize-autoloader
+# Instalar las dependencias de Laravel usando Composer
+RUN composer install --no-dev --optimize-autoloader
 
-# Eliminar auth.json después de la instalación (opcional)
+# Eliminar auth.json después de la instalación
 RUN rm /var/www/html/auth.json
 
 # Correr comandos de optimización de Laravel
