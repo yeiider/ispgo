@@ -25,10 +25,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-x
     && docker-php-ext-install gd
 
 # Instalar extensiones de PHP
-RUN docker-php-ext-install pdo_mysql pdo_pgsql zip
+RUN docker-php-ext-install pdo_mysql pdo_pgsql zip sockets
 
-# Opcional: Habilitar Opcache si es necesario
-RUN docker-php-ext-install opcache
+# Opcional: Instalar Opcache si es necesario
+# RUN docker-php-ext-install opcache
 
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
