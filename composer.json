@@ -12,7 +12,6 @@
         "barryvdh/laravel-dompdf": "^2.2",
         "endroid/qr-code": "^5.0",
         "evilfreelancer/routeros-api-php": "^1.5",
-        "hansschouten/laravel-pagebuilder": "^0.30.0",
         "intervention/image": "^3.7",
         "ispgo/ckeditor": "@dev",
         "ispgo/settings-manager": "@dev",
