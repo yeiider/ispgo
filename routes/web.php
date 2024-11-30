@@ -13,10 +13,6 @@ use Inertia\Inertia;
 use App\Http\Controllers\CustomerAccount\InvoiceController as CustomerInvoiceController;
 
 
-// Rutas de Nova
-Route::middleware(['nova'])->prefix('nova')->group(function () {
-    \Laravel\Nova\Nova::routes();
-});
 
 Route::get('checkout', [\App\Http\Controllers\Checkout::class, 'index'])->name('checkout.index');
 Route::middleware([\App\Http\Middleware\CheckUserBox::class])->prefix('admin')->group(function () {
