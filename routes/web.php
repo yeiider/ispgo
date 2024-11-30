@@ -50,7 +50,7 @@ Route::middleware('guest:customer')->prefix('customer')->group(function () {
     Route::get('/password/reset', function () {
         $routeResetPassword = route('customer.password.reset');
         return Inertia::render('Customer/Authentication/ResetPassword', compact('routeResetPassword'));
-    })->name('customer.password.reset');
+    })->name('customer.password.reset.get');
     Route::post('/password/reset', [AuthController::class, 'sendPasswordResetEmail'])->name('customer.password.reset');
     Route::get('/password/create/{token}', [AuthController::class, 'showCreatePassword'])->name('customer.password.create');
     Route::post('/password/create', [AuthController::class, 'createPassword'])->name('customer.password.create');
