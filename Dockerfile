@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y \
     ghostscript \
     postgresql-client \
     nginx \
-    supervisor \
     && docker-php-ext-configure gd --with-jpeg --with-png \
     && docker-php-ext-install pdo_mysql pdo_pgsql zip gd opcache \
     && apt-get clean
@@ -40,10 +39,15 @@ RUN php artisan config:cache \
 EXPOSE 80
 
 # Copiar archivo de configuración de NGINX
-COPY ./nginx.conf /etc/nginx/sites-available/default
+COPY nginx.conf /etc/nginx/sites-available/default
 
-# Copiar archivo de configuración de Supervisor
+# Copiar el script de inicio
+COPY start.sh /var/www/html/start.sh
+
+# Dar permisos de ejecución al script de inicio
+RUN chmod +x /var/www/html/start.sh
+
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Comando de inicio: NGINX y PHP-FPM gestionados por Supervisor
-CMD ["/usr/bin/supervisord"]
+# Comando de inicio
+CMD ["/var/www/html/start.sh"]
