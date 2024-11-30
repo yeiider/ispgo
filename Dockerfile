@@ -1,4 +1,5 @@
-# Imagen base con PHP 8.2 y soporte para FPM
+# syntax=docker/dockerfile:1.2
+
 FROM php:8.2-fpm
 
 # Establecer directorio de trabajo
@@ -6,6 +7,7 @@ WORKDIR /var/www/html
 
 # Instalar dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y \
+    git \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng-dev \
@@ -27,9 +29,6 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-x
 # Instalar extensiones de PHP
 RUN docker-php-ext-install pdo_mysql pdo_pgsql zip sockets
 
-# Opcional: Instalar Opcache si es necesario
-# RUN docker-php-ext-install opcache
-
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -40,8 +39,12 @@ COPY . .
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Instalar las dependencias de Laravel usando Composer
-RUN composer install --no-dev --optimize-autoloader
+# Configurar Composer para usar el auth.json
+RUN --mount=type=secret,id=auth,target=/var/www/html/auth.json \
+    composer install --no-dev --optimize-autoloader
+
+# Eliminar auth.json después de la instalación (opcional)
+RUN rm /var/www/html/auth.json
 
 # Correr comandos de optimización de Laravel
 RUN php artisan config:cache \
