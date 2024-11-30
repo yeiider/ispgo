@@ -8,7 +8,7 @@
 [env]
     NIXPACKS_PHP_VERSION = "8.2"
     NIXPACKS_NODE_VERSION = "18"
-    NIXPACKS_NPM_VERSION = "8"
+    NIXPACKS_NPM_VERSION = "9"
     NIXPACKS_PHP_EXTENSIONS = "pdo_pgsql"
     NIXPACKS_PKGS = "postgresqlClient"
 
