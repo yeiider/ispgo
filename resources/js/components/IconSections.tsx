@@ -2,7 +2,7 @@ export default function IconSections() {
   return (
 
     <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-      <div data-aos="flip-up" className="max-w-xl mx-auto text-center mt-24">
+      <div data-aos="flip-up" className="max-w-xl mx-auto text-center md:mt-0 md:mb-12">
         <h1 className="font-bold text-3xl lg:text-4xl text-gray-800 dark:text-neutral-200">Servicio Integral <span
           className="text-[#0ea5e9]">de Conexión a Internet</span>
         </h1>
