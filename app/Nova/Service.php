@@ -2,11 +2,11 @@
 
 namespace App\Nova;
 
-use App\Nova\Actions\Invoice\Service\ActivateService;
-use App\Nova\Actions\Invoice\Service\CreateActionsServiceInstall;
-use App\Nova\Actions\Invoice\Service\CreateActionsServiceUninstall;
-use App\Nova\Actions\Invoice\Service\GenerateInvoice;
-use App\Nova\Actions\Invoice\Service\SuspendService;
+use App\Nova\Actions\Service\ActivateService;
+use App\Nova\Actions\Service\CreateActionsServiceInstall;
+use App\Nova\Actions\Service\CreateActionsServiceUninstall;
+use App\Nova\Actions\Service\GenerateInvoice;
+use App\Nova\Actions\Service\SuspendService;
 use App\Nova\Customers\Address;
 use App\Nova\Filters\ServiceStatus;
 use App\Nova\Filters\ServiceType;
@@ -37,7 +37,7 @@ class Service extends Resource
     public static $title = 'full_service_name';
 
     public static $search = [
-        'id', 'service_ip', 'username_router', 'service_status'
+        'id', 'service_ip', 'username_router', 'service_status', 'plan'
     ];
 
     public function fields(NovaRequest $request)
@@ -75,7 +75,7 @@ class Service extends Resource
     protected function serviceDetailsFields(): array
     {
         return [
-            BelongsTo::make(__('Plan'), 'plan', \App\Nova\Plan::class),
+            BelongsTo::make(__('Plan'), 'plan', \App\Nova\Plan::class)->searchable(),
             Text::make(__('service.service_ip'), 'service_ip')->sortable(),
             Text::make(__('service.username_router'), 'username_router'),
             Text::make(__('service.password_router'), 'password_router')->hideFromIndex(),

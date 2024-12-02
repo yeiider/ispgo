@@ -27,16 +27,16 @@ class InvoiceController extends Controller
 
         try {
             $invoiceModel = Invoice::findByDniOrInvoiceId($input);
-            $invoice = $this->parseData($invoiceModel);
-            if ($invoice) {
+            if ($invoiceModel) {
+                $invoice = $this->parseData($invoiceModel);
                 return response()->json(compact('invoice'));
             } else {
-                return response()->json(['message' => 'Invoice not found'], 404);
+                return response()->json(['message' => __('Invoice not found')], 404);
             }
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Invoice not found'], 404);
+            return response()->json(['message' => __('Invoice not found')], 404);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred while searching for the invoice'], 500);
+            return response()->json(['message' => __('An error occurred while searching for the invoice')], 500);
         }
     }
 
@@ -123,7 +123,7 @@ class InvoiceController extends Controller
 
         $invoice = Invoice::findByDniOrInvoiceId($request->input('reference'));
         if ($invoice) {
-            return view('invoices.receipt', ['invoice' => $invoice,'config' => $this->getConfig(),'qrCode' => QrCodeHelper::generateQrCode($invoice->increment_id)]);
+            return view('invoices.receipt', ['invoice' => $invoice, 'config' => $this->getConfig(), 'qrCode' => QrCodeHelper::generateQrCode($invoice->increment_id)]);
         }
 
         abort(404);

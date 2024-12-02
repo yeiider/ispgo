@@ -2,7 +2,7 @@
 
 namespace App\Nova\Invoice;
 
-use App\Nova\Actions\Invoice\Invoice\RegisterPaymentByPromise;
+use App\Nova\Actions\Invoice\RegisterPaymentByPromise;
 use App\Nova\Customers\Customer;
 use App\Nova\Filters\Invoice\PaymentPromiseStatus;
 use App\Nova\Resource;

@@ -5,7 +5,7 @@ namespace App\Nova\Customers;
 use App\Mail\DynamicEmail;
 use App\Models\Customers\DocumentType;
 use App\Models\EmailTemplate;
-use App\Nova\Actions\Invoice\UpdateCustomerStatus;
+use App\Nova\Actions\UpdateCustomerStatus;
 use App\Nova\Filters\CustomerStatus;
 use App\Nova\Metrics\NewCustomers;
 use App\Nova\Resource;
