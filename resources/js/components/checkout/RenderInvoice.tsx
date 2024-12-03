@@ -3,13 +3,23 @@ import {__} from "@/translation.ts";
 import {ChevronRight} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import RenderInvoiceStatus from "@/components/RenderInvoiceStatus.tsx";
+import {usePage} from "@inertiajs/react";
 
 interface Props {
   invoice: Invoice | null
   navigation: (step: number) => void
 }
 
+type PageProps = {
+  config: {
+    companyEmail: string
+    companyPhone: string
+  }
+}
 export default function RenderInvoice({invoice, navigation}: Props) {
+  const {config} = usePage<PageProps>().props;
+
+
   return (
     <div className="relative flex flex-col bg-white shadow-lg rounded-xl pointer-events-auto dark:bg-neutral-800">
       <div className="relative overflow-hidden min-h-32 bg-gray-900 text-center rounded-t-xl dark:bg-neutral-950">
@@ -43,10 +53,10 @@ export default function RenderInvoice({invoice, navigation}: Props) {
       <div className="p-4 sm:p-7 overflow-y-auto">
         <div className="text-center">
           <h3 id="hs-ai-modal-label" className="text-lg font-semibold text-gray-800 dark:text-neutral-200">
-            Invoice from Preline
+            {__('Invoice')}
           </h3>
           <p className="text-sm text-gray-500 dark:text-neutral-500">
-            Invoice #{invoice?.increment_id}
+            {__('Reference')} #{invoice?.increment_id}
           </p>
         </div>
 
@@ -59,7 +69,7 @@ export default function RenderInvoice({invoice, navigation}: Props) {
           {/* End Col */}
 
           <div>
-            <span className="block text-xs uppercase text-gray-500 dark:text-neutral-500">Status paid:</span>
+            <span className="block text-xs uppercase text-gray-500 dark:text-neutral-500">{__('Status paid')}:</span>
             <div className="block text-sm font-medium text-gray-800 dark:text-neutral-200">
               <RenderInvoiceStatus status={invoice?.status}/>
             </div>
@@ -67,7 +77,7 @@ export default function RenderInvoice({invoice, navigation}: Props) {
           {/* End Col */}
 
           <div>
-            <span className="block text-xs uppercase text-gray-500 dark:text-neutral-500">Customer:</span>
+            <span className="block text-xs uppercase text-gray-500 dark:text-neutral-500">{__('Customer')}:</span>
             <div className="flex items-center gap-x-2">
 
               <span
@@ -79,27 +89,27 @@ export default function RenderInvoice({invoice, navigation}: Props) {
         {/* End Grid */}
 
         <div className="mt-5 sm:mt-10">
-          <h4 className="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Summary</h4>
+          <h4 className="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">{__('Summary')}</h4>
 
           <ul className="mt-3 flex flex-col">
             <li
               className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
               <div className="flex items-center justify-between w-full">
-                <span>Tax fee</span>
+                <span>{__('Tax')}</span>
                 <span>{invoice?.tax}</span>
               </div>
             </li>
             <li
               className="inline-flex items-center gap-x-2 py-3 px-4 text-sm font-semibold bg-gray-50 border text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200">
               <div className="flex items-center justify-between w-full">
-                <span>Amount</span>
+                <span>{__('Amount')}</span>
                 <span>{invoice?.amount}</span>
               </div>
             </li>
             <li
               className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
               <div className="flex items-center justify-between w-full">
-                <span>Discount</span>
+                <span>{__('Discount')}</span>
                 <span>{invoice?.discount}</span>
               </div>
             </li>
@@ -143,12 +153,26 @@ export default function RenderInvoice({invoice, navigation}: Props) {
         {/* End Buttons */}
 
         <div className="mt-5 sm:mt-10">
-          <p className="text-sm text-gray-500 dark:text-neutral-500">If you have any questions, please contact us
-            at <a
-              className="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500"
-              href="#">example@site.com</a> or call at <a
-              className="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500"
-              href="tel:+1898345492">+1 898-34-5492</a></p>
+          <p
+            className="text-sm text-gray-500 dark:text-neutral-500">
+            {config.companyEmail && (
+              <>
+            {__('If you have any questions, please contact at ')}
+              <a
+                className="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500"
+                href={`mailto:${config.companyEmail}`}>{` ${config.companyEmail}`}</a>
+              </>
+            )}
+
+            {config.companyPhone && (
+              <>
+                {__(' or call at ')}
+                <a
+                  className="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500"
+                  href={`tel:${config.companyPhone}`}>{config.companyPhone}</a>
+              </>
+            )}
+          </p>
         </div>
       </div>
       {/* End Body */}

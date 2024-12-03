@@ -18,7 +18,6 @@ type IRoot = {
 }
 export default function Navigation() {
   const props = usePage<IRoot>().props;
-
   const [active, setActive] = useState(false);
 
   const toggleMenu = () => {
@@ -97,6 +96,9 @@ export default function Navigation() {
                   href={"/customer/register"}>{__('Sign Up')}</Link>
               </>
             )}
+            <Link
+              className={twMerge("link", isActive("/checkout") && classActive)}
+              href={"/checkout"}>{__('Payments portal')}</Link>
           </div>
         </div>
       </nav>

@@ -87,7 +87,6 @@ export default function Reference({navigation}: Props) {
 
   useEffect(() => {
     const invoice = JSON.parse(window.localStorage.getItem('invoice') || '{}')
-    console.log(invoice)
 
     if (Object.keys(invoice).length > 0) {
       setInvoice(invoice);
