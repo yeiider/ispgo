@@ -19,7 +19,7 @@ class EmailTemplate extends Resource
     public static $title = 'name';
 
     public static $search = [
-        'id', 'name', 'subject', 'email_type', 'language'
+        'id', 'name', 'subject'
     ];
 
     public function fields(NovaRequest $request)
