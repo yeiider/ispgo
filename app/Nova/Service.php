@@ -2,11 +2,12 @@
 
 namespace App\Nova;
 
-use App\Nova\Actions\Invoice\Service\ActivateService;
-use App\Nova\Actions\Invoice\Service\CreateActionsServiceInstall;
-use App\Nova\Actions\Invoice\Service\CreateActionsServiceUninstall;
-use App\Nova\Actions\Invoice\Service\GenerateInvoice;
-use App\Nova\Actions\Invoice\Service\SuspendService;
+
+use App\Nova\Actions\Service\ActivateService;
+use App\Nova\Actions\Service\CreateActionsServiceInstall;
+use App\Nova\Actions\Service\CreateActionsServiceUninstall;
+use App\Nova\Actions\Service\GenerateInvoice;
+use App\Nova\Actions\Service\SuspendService;
 use App\Nova\Customers\Address;
 use App\Nova\Filters\ServiceStatus;
 use App\Nova\Filters\ServiceType;
@@ -42,8 +43,6 @@ class Service extends Resource
 
     public function fields(NovaRequest $request)
     {
-
-
         $panels = [
             ID::make(__('ID'), 'id')->sortable(),
 
