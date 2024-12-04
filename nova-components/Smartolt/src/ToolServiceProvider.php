@@ -4,6 +4,7 @@ namespace Ispgo\Smartolt;
 
 use App\Events\ServiceActive;
 use App\Events\ServiceSuspend;
+use App\Events\ServiceUpdateStatus;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -24,7 +25,7 @@ class ToolServiceProvider extends ServiceProvider
     {
 
         Event::listen(
-            ServiceActive::class,
+            ServiceUpdateStatus::class,
             [ServiceOltManagerListener::class, 'handle']
         );
 

@@ -132,7 +132,7 @@ class CustomerController extends Controller
     private function createServices(Customer $customer, array $services)
     {
         foreach ($services as $service) {
-            $customer->services()->create($service + ['customer_id' => $customer->id]);
+            $customer->services()->create($service + ['customer_id' => $customer->id, "service_location" => $customer->addresses()->first()->id]);
         }
     }
 

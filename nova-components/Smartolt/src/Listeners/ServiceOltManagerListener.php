@@ -28,16 +28,13 @@ class ServiceOltManagerListener implements ShouldQueue
 
         $service = $event->service;
 
-        // Verificar que el servicio tenga un número de serie válido
         if (empty($service->sn)) {
             Log::warning("El servicio con ID {$service->id} no tiene un número de serie válido.");
             return;
         }
 
-        // Determinar la acción (enable o disable) según el estado del servicio
         $action = $service->service_status === 'active' ? 'enable' : 'disable';
 
-        // Agregar el SN del servicio a la lista correspondiente en caché
         $this->addToBatch($service->sn, $action);
     }
 
@@ -52,10 +49,8 @@ class ServiceOltManagerListener implements ShouldQueue
     {
         $cacheKey = "smartolt_batch_{$action}";
 
-        // Obtener la lista actual de SNs para la acción
         $snList = Cache::get($cacheKey, []);
 
-        // Agregar el SN si no está ya en la lista
         if (!in_array($sn, $snList)) {
             $snList[] = $sn;
             Cache::put($cacheKey, $snList, now()->addMinutes(10));
