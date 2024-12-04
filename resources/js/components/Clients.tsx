@@ -1,6 +1,6 @@
 export default function Clients() {
   return (
-    <div className="my-24 px-4 lg:px-8">
+    <div className="my-12 md:my-24 px-4 lg:px-8">
       <div className="mt-1">
         <p className="text-center text-gray-600 dark:text-neutral-400">Con la confianza de miles de hogares y negocios</p>
       </div>

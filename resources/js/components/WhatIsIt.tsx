@@ -11,7 +11,7 @@ export default function WhatIsIt() {
   const {companyName} = usePage<Props>().props;
 
   return (
-    <div className="mt-28 container mx-auto px-12">
+    <div className="md:mt-28 container mx-auto px-4 md:px-12">
       <div className="text-center max-w-screen-md mx-auto aos-init aos-animate">
         <h1 className="text-3xl text-gray-800 font-bold mb-4">¿Qué es <span
           className="text-[#0ea5e9]">{companyName}?</span>

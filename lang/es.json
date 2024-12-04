@@ -155,5 +155,18 @@
     "Latitude": "Latitud",
     "Longitude": "Longitud",
     "Billing": "Facturación",
-    "Shipping": "Envío"
+    "Shipping": "Envío",
+    "Payments portal": "Portal de pagos",
+    "Payment method": "Método de pago",
+    "Summary": "Resumen",
+    "Payment reference": "Referencia de pago",
+    "You can search by your ID or payment reference": "Puede buscar por su ID o referencia de pago",
+    "If you have any questions, please contact at ": " Si tiene alguna pregunta, comuníquese con",
+    " or call at ": " o llame al ",
+    "Search": "Buscar",
+    "Status paid": "Estado de pagado",
+    "Customer": "Cliente",
+    "Amount": "Cantidad",
+    "Tax": "Impuestos",
+    "Invoice not found": "Factura no encontrada"
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eb4bd881b966fe898ba607683d4695c0",
+    "content-hash": "3d93a4c8eb207fd22b3306c7f39f288b",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2016,7 +2016,7 @@
         },
         {
             "name": "ispgo/ckeditor",
-            "version": "dev-main",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/Ckeditor",
@@ -2052,7 +2052,7 @@
         },
         {
             "name": "ispgo/mikrotik",
-            "version": "dev-main",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/Mikrotik",
@@ -2088,7 +2088,7 @@
         },
         {
             "name": "ispgo/settings-manager",
-            "version": "dev-main",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/SettingsManager",
@@ -2124,7 +2124,7 @@
         },
         {
             "name": "ispgo/smartolt",
-            "version": "dev-main",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/Smartolt",
@@ -2160,7 +2160,7 @@
         },
         {
             "name": "ispgo/wiivo",
-            "version": "dev-main",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./packages/ispgo/wiivo",
