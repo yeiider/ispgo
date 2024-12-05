@@ -38,8 +38,10 @@ class ServiceOltManagerListener
         $action = $service->service_status === 'active' ? 'enable' : 'disable';
 
         // Agregar el SN del servicio a la lista correspondiente en caché
-        if ($service->service_status === "active" || $service->service_status === "suspended")
+        if ($service->service_status === "active" || $service->service_status === "suspended"){
             $this->addToBatch($service->sn, $action);
+        }
+
     }
 
     /**
