@@ -32,14 +32,14 @@ class ToolServiceProvider extends ServiceProvider
             ServiceUpdateStatus::class,
             [ServiceOltManagerListener::class, 'handle']
         );
-        Event::listen(
+       /** Event::listen(
             ServiceSuspend::class,
             [ServiceOltManagerListenerSuspend::class, 'handle']
         );
         Event::listen(
             ServiceActive::class,
             [ServiceOltManagerListenerActive::class, 'handle']
-        );
+        );**/
 
 
         $this->app->booted(function () {
