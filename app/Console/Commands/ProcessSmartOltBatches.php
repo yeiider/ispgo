@@ -46,6 +46,6 @@ class ProcessSmartOltBatches extends Command
     private function dispatchBatch(array $snList, string $action, int $delay): void
     {
         $job = new \Ispgo\Smartolt\Jobs\ProcessSmartOltBatch($snList, $action);
-        dispatch($job)->delay(now()->addSeconds($delay));
+        dispatch($job)->delay(now()->addSeconds($delay))->onQueue('redis');
     }
 }
