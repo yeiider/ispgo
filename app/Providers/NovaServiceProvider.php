@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Gate;
 use Ispgo\Mikrotik\Mikrotik;
 use Ispgo\SettingsManager\SettingsManager;
 
+use Ispgo\Smartolt\Smartolt;
 use Laravel\Nova\Menu\MenuGroup;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
@@ -193,7 +194,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         return [
             new SettingsManager,
             new NovaPermissions,
-            new Mikrotik
+            new Mikrotik,
+            new Smartolt
         ];
     }
 

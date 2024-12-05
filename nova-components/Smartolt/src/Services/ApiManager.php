@@ -54,7 +54,7 @@ class ApiManager
     /**
      * Habilitar una ONU por su número de serie.
      *
-     * @throws ConnectionException
+     * @throws \Exception
      */
     public function enableOnu(string $sn): Response
     {
@@ -65,7 +65,7 @@ class ApiManager
     /**
      * Deshabilitar una ONU por su número de serie.
      *
-     * @throws ConnectionException
+     * @throws \Exception
      */
     public function disableOnu(string $sn): Response
     {

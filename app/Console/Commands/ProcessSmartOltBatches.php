@@ -1,6 +1,6 @@
 <?php
 
-namespace Ispgo\Smartolt\Commands;
+namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -19,7 +19,6 @@ class ProcessSmartOltBatches extends Command
         foreach ($actions as $action) {
             $cacheKey = "smartolt_batch_{$action}";
 
-            // Obtener y eliminar la lista de SNs del caché
             $snList = Cache::pull($cacheKey, []);
 
             if (!empty($snList)) {
@@ -30,7 +29,7 @@ class ProcessSmartOltBatches extends Command
                 foreach ($chunks as $chunk) {
                     // Programar el envío del lote con un retraso
                     $this->dispatchBatch($chunk, $action, $delay);
-                    $delay += 5; // Incrementar el retraso para el siguiente lote
+                    $delay += 10; // Incrementar el retraso para el siguiente lote
                 }
             }
         }

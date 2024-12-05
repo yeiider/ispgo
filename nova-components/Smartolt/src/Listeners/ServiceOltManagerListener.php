@@ -9,9 +9,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 
-class ServiceOltManagerListener implements ShouldQueue
+class ServiceOltManagerListener
 {
-    use InteractsWithQueue;
 
     /**
      * Handle the event.
@@ -21,6 +20,7 @@ class ServiceOltManagerListener implements ShouldQueue
      */
     public function handle(ServiceUpdateStatus $event)
     {
+
         if (!ProviderSmartOlt::getEnabled()) {
             Log::info("SmartOLT no está habilitado.");
             return;
@@ -28,14 +28,18 @@ class ServiceOltManagerListener implements ShouldQueue
 
         $service = $event->service;
 
+        // Verificar que el servicio tenga un número de serie válido
         if (empty($service->sn)) {
             Log::warning("El servicio con ID {$service->id} no tiene un número de serie válido.");
             return;
         }
 
+        // Determinar la acción (enable o disable) según el estado del servicio
         $action = $service->service_status === 'active' ? 'enable' : 'disable';
 
-        $this->addToBatch($service->sn, $action);
+        // Agregar el SN del servicio a la lista correspondiente en caché
+        if ($service->service_status === "active" || $service->service_status === "suspended")
+            $this->addToBatch($service->sn, $action);
     }
 
     /**
@@ -48,9 +52,10 @@ class ServiceOltManagerListener implements ShouldQueue
     private function addToBatch(string $sn, string $action): void
     {
         $cacheKey = "smartolt_batch_{$action}";
-
+        // Obtener la lista actual de SNs para la acción
         $snList = Cache::get($cacheKey, []);
 
+        // Agregar el SN si no está ya en la lista
         if (!in_array($sn, $snList)) {
             $snList[] = $sn;
             Cache::put($cacheKey, $snList, now()->addMinutes(10));
