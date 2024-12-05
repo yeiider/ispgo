@@ -197,4 +197,9 @@ class Service extends Model
             ->get();
     }
 
+    public static function getAllActiveServicesForInvoiceMonthly()
+    {
+        return self::where('service_status', '!=', 'free')->get();
+    }
+
 }

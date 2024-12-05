@@ -15,7 +15,7 @@ Schedule::command('calculate:daily_invoice_balances')->daily();
 
 // Programar el comando basado en la configuración de facturación
 $billingDate = GeneralProviderConfig::getBillingDate();
-Schedule::command('invoice:generate_monthly')->monthlyOn($billingDate, '00:00');
+Schedule::command('invoice:generated_monthly')->monthlyOn($billingDate, '00:00');
 
 // Programar el comando para suspender servicios basado en la fecha de corte
 $cutOffDate = GeneralProviderConfig::getCutOffDate();
