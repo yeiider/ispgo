@@ -14,15 +14,16 @@
         "evilfreelancer/routeros-api-php": "^1.5",
         "intervention/image": "^3.7",
         "ispgo/ckeditor": "@dev",
+        "ispgo/mikrotik": "@dev",
         "ispgo/settings-manager": "@dev",
+        "ispgo/smartolt": "@dev",
         "ispgo/wiivo": "@dev",
         "laravel/framework": "^11.9",
         "laravel/nova": "^4.0",
         "laravel/passport": "^12.0",
         "laravel/tinker": "^2.9",
-        "sereny/nova-permissions": "^1.6",
-        "ispgo/mikrotik": "@dev",
-        "ispgo/smartolt": "@dev"
+        "predis/predis": "^2.3",
+        "sereny/nova-permissions": "^1.6"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
