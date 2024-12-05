@@ -18,11 +18,17 @@ class ApiManager
         $this->token = ProviderSmartOlt::getToken();
     }
 
-    private function request(string $endpoint, array $payload = []): Response
+    private function request(string $endpoint, array $payload = [], bool $asForm = false): Response
     {
         try {
-            return Http::withHeaders(['X-Token' => $this->token])
-                ->post($this->baseUrl . $endpoint, $payload);
+            $request = Http::withHeaders(['X-Token' => $this->token]);
+
+            // Configurar como form-data si es necesario
+            if ($asForm) {
+                $request = $request->asForm();
+            }
+
+            return $request->post($this->baseUrl . $endpoint, $payload);
         } catch (ConnectionException $e) {
             // Aquí puedes loguear o manejar la excepción según sea necesario
             throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
@@ -37,7 +43,7 @@ class ApiManager
     public function enableBulk(array $payload): Response
     {
         $this->validatePayload($payload);
-        return $this->request('api/onu/bulk_enable', $payload);
+        return $this->request('api/onu/bulk_enable', $payload, true);
     }
 
     /**
@@ -48,7 +54,7 @@ class ApiManager
     public function disableBulk(array $payload): Response
     {
         $this->validatePayload($payload);
-        return $this->request('api/onu/bulk_disable', $payload);
+        return $this->request('api/onu/bulk_disable', $payload, true);
     }
 
     /**
