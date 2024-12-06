@@ -168,5 +168,9 @@
     "Customer": "Customer",
     "Amount": "Amount",
     "Tax": "Tax",
-    "Invoice not found": "Invoice not found"
+    "Invoice not found": "Invoice not found",
+    "Pay": "Pay",
+    "Are you sure to pay": "Are you sure to pay",
+    "Confirm": "Confirm",
+    "Cancel": "Cancel"
 }

@@ -168,5 +168,9 @@
     "Customer": "Cliente",
     "Amount": "Cantidad",
     "Tax": "Impuestos",
-    "Invoice not found": "Factura no encontrada"
+    "Invoice not found": "Factura no encontrada",
+    "Pay": "Pagar",
+    "Are you sure to pay": "¿Está seguro de pagar con",
+    "Confirm": "Confirmar",
+    "Cancel": "Cancelar"
 }
