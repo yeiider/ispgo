@@ -9,6 +9,8 @@ use App\Helpers\ConfigHelper;
 class Payu extends AbstractPaymentMethod
 {
     const PATH = "payment/payu/";
+
+    const FIELD_NAME = 'payu-enabled';
     const PRODUCTION_ACTION = "https://checkout.payulatam.com/ppp-web-gateway-payu/";
     const SANDBOX_ACTION = "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/";
     private string $payment_code = "payu";
@@ -31,6 +33,11 @@ class Payu extends AbstractPaymentMethod
             'payment_component' => $this->component,
             'image' => '/img/payments/payu.svg',
         ];
+    }
+
+    protected function getFiledEnabled(): string
+    {
+        return self::FIELD_NAME;
     }
 }
 

@@ -241,7 +241,7 @@ return [
                 "class" => "form-control",
                 "code" => "payu"
             ],
-            "enabled" => [
+            "payu-enabled" => [
                 "field" => "boolean-field",
                 "label" => "Enabled",
                 "placeholder" => "Enabled",
@@ -289,7 +289,7 @@ return [
                 'class' => 'form-control',
                 'code' => 'wompi',
             ],
-            'enabled' => [
+            'wompi-enabled' => [
                 'field' => 'boolean-field',
                 'label' => 'Enabled',
                 'placeholder' => 'Enabled',

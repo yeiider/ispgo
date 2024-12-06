@@ -18,10 +18,12 @@ abstract class AbstractPaymentMethod implements PaymentMethodInterface
 
     public function isEnabled(): bool
     {
-        return ConfigHelper::getConfigValue($this->getPath() . 'enabled') == 1;
+        return ConfigHelper::getConfigValue($this->getPath() . $this->getFiledEnabled()) == 1;
     }
 
     abstract public function getConfiguration(): array;
 
     abstract protected function getPath(): string;
+
+    abstract protected function getFiledEnabled(): string;
 }

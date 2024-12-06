@@ -3,6 +3,7 @@ import {useMemo} from "react";
 import {useStepper} from "headless-stepper";
 import StepsNavigate from "@/components/checkout/StepsNavigate.tsx";
 import Reference from "@/components/checkout/Reference.tsx";
+import PaymentMethods from "@/components/checkout/PaymentMethods.tsx";
 
 export default function Checkout() {
   const stepsList = [
@@ -43,7 +44,7 @@ export default function Checkout() {
           <Reference navigation={navigation}/>
         )}
         {state.currentStep == 1 && (
-          <>Payment method</>
+          <PaymentMethods navigation={navigation} />
         )}
         {state.currentStep == 2 && (
           <>

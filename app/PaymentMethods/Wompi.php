@@ -11,6 +11,8 @@ use GuzzleHttp\Exception\RequestException;
 class Wompi extends AbstractPaymentMethod
 {
     const PATH = "payment/wompi/";
+
+    const FIELD_NAME = 'wompi-enabled';
     private string $payment_code = "wompi";
     private string $component = "Wompi";
 
@@ -30,12 +32,17 @@ class Wompi extends AbstractPaymentMethod
         return self::PATH;
     }
 
-    public static function getEnvironment(): string
+    protected function getFiledEnabled(): string
+    {
+        return self::FIELD_NAME;
+    }
+
+    public static function getEnvironment(): string | null
     {
         return ConfigHelper::getConfigValue(self::PATH . 'env');
     }
 
-    public static function getPublicKey(): string
+    public static function getPublicKey(): string | null
     {
         if (self::getEnvironment() === 'sandbox') {
             return ConfigHelper::getConfigValue(self::PATH . 'public_key_sandbox');
