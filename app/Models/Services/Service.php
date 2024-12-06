@@ -21,7 +21,7 @@ class Service extends Model
     use HasFactory;
 
     protected $fillable = [
-        'router_id', 'customer_id', 'internet_plan_id', 'service_ip', 'username_router',
+        'router_id', 'customer_id', 'internet_plan_id', 'service_ip', 'plan_id', 'username_router',
         'password_router', 'service_status', 'activation_date', 'deactivation_date',
         'bandwidth', 'mac_address', 'installation_date', 'service_notes', 'contract_id',
         'support_contact', 'service_location', 'service_type', 'static_ip', 'data_limit',
@@ -195,6 +195,11 @@ class Service extends Model
                 $query->where('status', 'unpaid');
             })
             ->get();
+    }
+
+    public static function getAllActiveServicesForInvoiceMonthly()
+    {
+        return self::where('service_status', '!=', 'free')->get();
     }
 
 }

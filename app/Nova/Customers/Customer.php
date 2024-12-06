@@ -13,7 +13,6 @@ use App\Nova\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
-use Ispgo\Ckeditor\Ckeditor;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\Badge;

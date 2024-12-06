@@ -13,14 +13,14 @@ class ProviderSmartOlt
         return (bool)ConfigHelper::getConfigValue(self::GENERAL_PATH . 'enabled');
     }
 
-    public static function getToken(): ?bool
+    public static function getToken(): ?string
     {
-        return (bool)ConfigHelper::getConfigValue(self::GENERAL_PATH . 'token');
+        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'token');
     }
 
-    public static function getUrl(): ?bool
+    public static function getUrl(): ?string
     {
-        return (bool)ConfigHelper::getConfigValue(self::GENERAL_PATH . 'url');
+        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'url');
     }
     public static function getEnabledCustomer(): ?bool
     {

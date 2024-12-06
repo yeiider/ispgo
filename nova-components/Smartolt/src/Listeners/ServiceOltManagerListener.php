@@ -3,15 +3,12 @@
 namespace Ispgo\Smartolt\Listeners;
 
 use App\Events\ServiceUpdateStatus;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 
-class ServiceOltManagerListener implements ShouldQueue
+class ServiceOltManagerListener
 {
-    use InteractsWithQueue;
 
     /**
      * Handle the event.
@@ -21,6 +18,7 @@ class ServiceOltManagerListener implements ShouldQueue
      */
     public function handle(ServiceUpdateStatus $event)
     {
+
         if (!ProviderSmartOlt::getEnabled()) {
             Log::info("SmartOLT no está habilitado.");
             return;
@@ -38,7 +36,10 @@ class ServiceOltManagerListener implements ShouldQueue
         $action = $service->service_status === 'active' ? 'enable' : 'disable';
 
         // Agregar el SN del servicio a la lista correspondiente en caché
-        $this->addToBatch($service->sn, $action);
+        if ($service->service_status === "active" || $service->service_status === "suspended"){
+            $this->addToBatch($service->sn, $action);
+        }
+
     }
 
     /**
@@ -51,7 +52,6 @@ class ServiceOltManagerListener implements ShouldQueue
     private function addToBatch(string $sn, string $action): void
     {
         $cacheKey = "smartolt_batch_{$action}";
-
         // Obtener la lista actual de SNs para la acción
         $snList = Cache::get($cacheKey, []);
 

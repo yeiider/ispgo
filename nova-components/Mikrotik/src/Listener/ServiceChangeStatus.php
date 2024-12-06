@@ -84,8 +84,8 @@ class ServiceChangeStatus implements ShouldQueue
 
                 // Habilitar Simple Queue si está habilitado
                 if (MikrotikConfigProvider::getSimpleQueueEnabled()) {
-                    $simpleQueueManager->enableSimpleQueueEClient($service->service_ip);
-                    Log::info("Simple Queue habilitada para la IP: " . $service->service_ip);
+                    $simpleQueueManager->enableSimpleQueueEClient($service->service_name);
+                    Log::info("Simple Queue habilitada para la IP: " . $service->service_name);
                 }
             }
         }

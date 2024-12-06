@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+
 use App\Nova\Actions\Service\ActivateService;
 use App\Nova\Actions\Service\CreateActionsServiceInstall;
 use App\Nova\Actions\Service\CreateActionsServiceUninstall;
@@ -37,13 +38,11 @@ class Service extends Resource
     public static $title = 'full_service_name';
 
     public static $search = [
-        'id', 'service_ip', 'username_router', 'service_status', 'plan'
+        'id', 'service_ip', 'username_router', 'service_status'
     ];
 
     public function fields(NovaRequest $request)
     {
-
-
         $panels = [
             ID::make(__('ID'), 'id')->sortable(),
 
@@ -75,7 +74,7 @@ class Service extends Resource
     protected function serviceDetailsFields(): array
     {
         return [
-            BelongsTo::make(__('Plan'), 'plan', \App\Nova\Plan::class)->searchable(),
+            BelongsTo::make(__('Plan'), 'plan', \App\Nova\Plan::class),
             Text::make(__('service.service_ip'), 'service_ip')->sortable(),
             Text::make(__('service.username_router'), 'username_router'),
             Text::make(__('service.password_router'), 'password_router')->hideFromIndex(),

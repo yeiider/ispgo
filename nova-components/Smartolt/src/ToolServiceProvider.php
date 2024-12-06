@@ -2,12 +2,17 @@
 
 namespace Ispgo\Smartolt;
 
+
 use App\Events\ServiceActive;
 use App\Events\ServiceSuspend;
+use App\Events\ServiceUpdateStatus;
+use App\Nova\Actions\Service\ActivateService;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Ispgo\Smartolt\Listeners\ServiceOltManagerListener;
+use Ispgo\Smartolt\Listeners\ServiceOltManagerListenerActive;
+use Ispgo\Smartolt\Listeners\ServiceOltManagerListenerSuspend;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Http\Middleware\Authenticate;
 use Laravel\Nova\Nova;
@@ -24,10 +29,17 @@ class ToolServiceProvider extends ServiceProvider
     {
 
         Event::listen(
-            ServiceActive::class,
+            ServiceUpdateStatus::class,
             [ServiceOltManagerListener::class, 'handle']
         );
-
+       /** Event::listen(
+            ServiceSuspend::class,
+            [ServiceOltManagerListenerSuspend::class, 'handle']
+        );
+        Event::listen(
+            ServiceActive::class,
+            [ServiceOltManagerListenerActive::class, 'handle']
+        );**/
 
 
         $this->app->booted(function () {
@@ -51,11 +63,11 @@ class ToolServiceProvider extends ServiceProvider
         }
 
         Nova::router(['nova', Authenticate::class, Authorize::class], 'smartolt')
-            ->group(__DIR__.'/../routes/inertia.php');
+            ->group(__DIR__ . '/../routes/inertia.php');
 
         Route::middleware(['nova', Authorize::class])
             ->prefix('nova-vendor/smartolt')
-            ->group(__DIR__.'/../routes/api.php');
+            ->group(__DIR__ . '/../routes/api.php');
     }
 
     /**

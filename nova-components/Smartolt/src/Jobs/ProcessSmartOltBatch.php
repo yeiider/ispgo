@@ -14,6 +14,8 @@ class ProcessSmartOltBatch implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+
+
     public $snList;
     public $action;
 

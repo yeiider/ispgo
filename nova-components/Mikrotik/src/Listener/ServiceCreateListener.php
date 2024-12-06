@@ -64,11 +64,6 @@ class ServiceCreateListener implements ShouldQueue
 
         // Obtener el servicio y su plan desde el evento
         $plan = $service->plan;
-        if (!$plan->is_synchronized) {
-            Log::warning('Este plan no se ha creado dentro de los PPP profile');
-            return;
-        }
-
         // Instanciar el PlanFormatter, SimpleQueueManager, y PPPoEManager
         $planFormatter = new PlanFormatter();
         $simpleQueueManager = new SimpleQueueManager();
@@ -88,6 +83,10 @@ class ServiceCreateListener implements ShouldQueue
 
             // Crear PPPoE si está habilitado
             if (MikrotikConfigProvider::getPppEnabled()) {
+                if (!$plan->is_synchronized) {
+                    Log::warning('Este plan no se ha creado dentro de los PPP profile');
+                    return;
+                }
                 // Verificar si el pool de IP está activo
                 $useIpPool = MikrotikConfigProvider::getIpPoolEnabled(); // Obtener si el pool de IP está activo
                 $service = MikrotikConfigProvider::getServiceType();

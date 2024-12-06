@@ -16,8 +16,6 @@ class ConfigHelper
      */
     public static function getConfigValue(string $path, int $scopeId = 0): ?string
     {
-        $cacheKey = "config_{$path}_{$scopeId}";
-
         // Check if the value is in cache
         return CoreConfigData::getValueByPath($path, $scopeId);
     }

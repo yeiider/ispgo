@@ -83,14 +83,6 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
     protected static function booted()
     {
-        /* static::addGlobalScope('active', function (Builder $builder) {
-             $builder->where('customer_status', 'active');
-             //esto hace que cada que hagan una llamada a la base de datos solo trae clientes activos
-         })*/;
-
-        static::creating(function ($customer) {
-            // Código a ejecutar antes de crear un cliente
-        });
 
         static::created(function ($customer) {
 
