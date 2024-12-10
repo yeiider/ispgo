@@ -39,3 +39,14 @@ export function handleInput(e: React.FormEvent<HTMLInputElement>, data: any, set
     [target.name]: value
   })
 }
+
+
+export function priceFormat(price: string, {locale = 'en-US', currency = 'USD'} = {}) {
+
+  /*return price.toLocaleString(locale, {
+    style: 'currency',
+    currency
+  })*/
+  const formatter = new Intl.NumberFormat(locale, {style: 'currency', currency});
+  return formatter.format(parseFloat(price));
+}

@@ -23,8 +23,8 @@ class Checkout extends Controller
                 'currencySymbol' => null,
                 'companyEmail' => GeneralProviderConfig::getCompanyEmail(),
                 'companyPhone' => GeneralProviderConfig::getCompanyPhone(),
-            ]
-            ,
+                'locale' => str_replace('_', '-', env('APP_FAKER_LOCALE')),
+            ],
             'payment' => $payment
         ];
     }

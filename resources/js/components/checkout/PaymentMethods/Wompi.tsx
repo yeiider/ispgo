@@ -32,26 +32,19 @@ export default function Wompi({paymentMethod, invoice}: Props) {
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const {config} = usePage<Config>().props;
-
-
   const handleClick = () => {
     setOpen(true);
   }
-
-
   const calculateAmountInCents = (price: string) => {
     return parseInt(parseInt(price).toString() + '00');
   }
-
   const getSignature = async () => {
     return await axios.post('/payment/wompi/signature', {
       reference: invoice.increment_id,
       amount: calculateAmountInCents(invoice.total)
     });
   }
-
   const handleConfirm = () => {
     setLoading(true)
     setOpen(false);

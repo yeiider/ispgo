@@ -25,7 +25,7 @@ import axios from "axios";
 import {Invoice} from "@/interfaces/Invoice.ts";
 import RenderInvoice from "@/components/checkout/RenderInvoice.tsx";
 import InvoiceSkeleton from "@/components/checkout/InvoiceSkeleton.tsx";
-import { toast } from "sonner"
+import {toast} from "sonner"
 
 interface Props {
   navigation: (step: number) => void;

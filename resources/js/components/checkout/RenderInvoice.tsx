@@ -4,6 +4,7 @@ import {ChevronRight} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import RenderInvoiceStatus from "@/components/RenderInvoiceStatus.tsx";
 import {usePage} from "@inertiajs/react";
+import {priceFormat} from "@/lib/utils.ts";
 
 interface Props {
   invoice: Invoice | null
@@ -14,11 +15,22 @@ type PageProps = {
   config: {
     companyEmail: string
     companyPhone: string
+    currency: string
+    currencySymbol: string
+    locale: string
   }
 }
 export default function RenderInvoice({invoice, navigation}: Props) {
-  const {config} = usePage<PageProps>().props;
 
+  if (!invoice) {
+    return
+  }
+
+  const {config} = usePage<PageProps>().props;
+  const priceFormatOptions = {
+    currency: config.currency,
+    locale: config.locale,
+  }
 
   return (
     <div className="relative flex flex-col bg-white shadow-lg rounded-xl pointer-events-auto dark:bg-neutral-800">
@@ -96,35 +108,35 @@ export default function RenderInvoice({invoice, navigation}: Props) {
               className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
               <div className="flex items-center justify-between w-full">
                 <span>{__('Tax')}</span>
-                <span>{invoice?.tax}</span>
+                <span>{priceFormat(invoice.tax, priceFormatOptions)}</span>
               </div>
             </li>
             <li
               className="inline-flex items-center gap-x-2 py-3 px-4 text-sm font-semibold bg-gray-50 border text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200">
               <div className="flex items-center justify-between w-full">
                 <span>{__('Amount')}</span>
-                <span>{invoice?.amount}</span>
+                <span>{priceFormat(invoice.amount, priceFormatOptions)}</span>
               </div>
             </li>
             <li
               className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
               <div className="flex items-center justify-between w-full">
                 <span>{__('Discount')}</span>
-                <span>{invoice?.discount}</span>
+                <span>{priceFormat(invoice?.discount, priceFormatOptions)}</span>
               </div>
             </li>
             <li
               className="inline-flex items-center gap-x-2 py-3 px-4 text-sm font-semibold bg-gray-50 border text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200">
               <div className="flex items-center justify-between w-full">
                 <span>SubTotal</span>
-                <span>{invoice?.subtotal}</span>
+                <span>{priceFormat(invoice.subtotal, priceFormatOptions)}</span>
               </div>
             </li>
             <li
-              className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
-              <div className="flex items-center justify-between w-full">
+              className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border text-gray-900 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
+              <div className="flex items-center justify-between w-full text-[18px] font-medium [dark:text-neutral-200]">
                 <span>Total</span>
-                <span>{invoice?.total}</span>
+                <span>{priceFormat(invoice.total, priceFormatOptions)}</span>
               </div>
             </li>
           </ul>
@@ -138,7 +150,7 @@ export default function RenderInvoice({invoice, navigation}: Props) {
           </Button>
 
           <a
-            className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+            className="hidden py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
             href="#">
             <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                  viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
@@ -157,10 +169,10 @@ export default function RenderInvoice({invoice, navigation}: Props) {
             className="text-sm text-gray-500 dark:text-neutral-500">
             {config.companyEmail && (
               <>
-            {__('If you have any questions, please contact at ')}
-              <a
-                className="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500"
-                href={`mailto:${config.companyEmail}`}>{` ${config.companyEmail}`}</a>
+                {__('If you have any questions, please contact at ')}
+                <a
+                  className="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-none focus:underline font-medium dark:text-blue-500"
+                  href={`mailto:${config.companyEmail}`}>{` ${config.companyEmail}`}</a>
               </>
             )}
 
