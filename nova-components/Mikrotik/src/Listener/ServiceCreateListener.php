@@ -51,15 +51,16 @@ class ServiceCreateListener implements ShouldQueue
      */
     public function handle(ServiceCreated $event): void
     {
+        if (!MikrotikConfigProvider::getEnabled()) {
+            Log::warning('Mikrotik no está habilitado. No se puede proceder con la creación del servicio.');
+            return;
+        }
         // Verificar si Mikrotik está habilitado en la configuración general
         $service = $event->service;
         if ($service->service_status !== "active")
             return;
 
-        if (!MikrotikConfigProvider::getEnabled()) {
-            Log::warning('Mikrotik no está habilitado. No se puede proceder con la creación del servicio.');
-            return;
-        }
+
         Log::info('Iniciando el listener ServiceCreateListener.');
 
         // Obtener el servicio y su plan desde el evento
