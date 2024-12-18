@@ -89,6 +89,8 @@ class GeneratedInvoice implements ShouldQueue
             $messageTemplate
         );
 
+        Log::info($message.$phone);
+
         return ["message" => $message, 'phone' => $phone];
     }
 
