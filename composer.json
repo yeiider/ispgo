@@ -12,6 +12,7 @@
         "barryvdh/laravel-dompdf": "^2.2",
         "endroid/qr-code": "^5.0",
         "evilfreelancer/routeros-api-php": "^1.5",
+        "inertiajs/inertia-laravel": "^2.0",
         "intervention/image": "^3.7",
         "ispgo/ckeditor": "@dev",
         "ispgo/mikrotik": "@dev",
@@ -19,11 +20,11 @@
         "ispgo/smartolt": "@dev",
         "ispgo/wiivo": "@dev",
         "laravel/framework": "^11.9",
-        "laravel/nova": "^4.0",
+        "laravel/nova": "^5.0",
         "laravel/passport": "^12.0",
         "laravel/tinker": "^2.9",
         "predis/predis": "^2.3",
-        "sereny/nova-permissions": "^1.6"
+        "sereny/nova-permissions": "@dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -62,6 +63,7 @@
             "@php artisan migrate --graceful --ansi"
         ]
     },
+
     "extra": {
         "laravel": {
             "dont-discover": [
@@ -80,6 +82,7 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
+
     "repositories": {
         "nova": {
             "type": "composer",
@@ -104,6 +107,10 @@
         "4": {
             "type": "path",
             "url": "./nova-components/Smartolt"
+        },
+        "5": {
+            "type": "vcs",
+            "url": "https://github.com/yeiider/nova-permissions"
         }
     }
 }
