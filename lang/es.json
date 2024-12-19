@@ -175,5 +175,7 @@
     "Cancel": "Cancelar",
     "Invoice": "Factura",
     "Customers": "Clientes",
-    "No customers found": "Cliente no encontrado"
+    "No customers found": "Cliente no encontrado",
+    "Are you sure to pay?": "¿Está seguro de realizar el pagar?",
+    "Paid bills": "Facturas pagadas"
 }

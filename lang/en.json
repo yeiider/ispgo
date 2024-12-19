@@ -175,5 +175,7 @@
     "Cancel": "Cancel",
     "Invoice": "Invoice",
     "Customers": "Customers",
-    "No customers found": "No customers found"
+    "No customers found": "No customers found",
+    "Are you sure to pay?": "Are you sure to pay?",
+    "Paid bills": "Paid bills"
 }

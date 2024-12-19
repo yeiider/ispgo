@@ -11,8 +11,10 @@ import CustomerList from "@/Pages/Pos/CustomerList.tsx";
 import CreateDailyBoxForm from "@/Pages/Pos/CreateDailyBoxForm.tsx";
 import CalculatorComponent from "@/Pages/Pos/CalculatorComponent.tsx";
 import {usePage} from "@inertiajs/react";
-import {Box} from "lucide-react"
+import {BadgeCheck, Box} from "lucide-react"
 import {priceFormat} from "@/lib/utils.ts";
+import {Button} from "@/components/ui/button.tsx";
+import {__} from "@/translation.ts";
 
 type Props = {
   config: {
@@ -48,7 +50,6 @@ export default function MainContentPos() {
   const [currentComponent, setCurrentComponent] = useState<string>('invoices');
   const [selectInvoice, setSelectInvoice] = useState<Invoice | null>(null);
   const [customerSelected, setCustomerSelected] = useState<ICustomer | null>(null);
-  const [todayBox, setTodayBox] = useState<TodayBox | null>(null);
 
 
   const {config, cashier} = usePage<Props>().props;
@@ -77,7 +78,6 @@ export default function MainContentPos() {
   const handlerSetTodayBox = () => {
 
   }
-  console.log(selectInvoice)
 
   return (
 
@@ -104,40 +104,22 @@ export default function MainContentPos() {
 
           {/* Middle Column */}
           <div className="w-full md:w-2/3 p-4">
-            <div className="header">
-              <SearchBar onSearchCustomers={handleSetCustomers}/>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setCurrentComponent('invoices')}>
+                <span>{__('Paid bills')}</span>
+                <BadgeCheck className="text-green-500"/>
+              </Button>
             </div>
 
-            <div className="nav">
-              <nav className="bg-background text-foreground p-4">
-                <ul className="flex space-x-4">
-                  <li>
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCurrentComponent('invoices');
-                      }}
-                      className="block px-4 py-2 rounded-md text-foreground hover:text-primary hover:bg-foreground/10 cursor-pointer"
-                    >
-                      Facturas pagadas
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-
-            <main className="detail bg-gray-100 justify-around max-h-dvh flex h-[65vh]">
+            <main className="border rounded-lg flex justify-center max-h-dvh min-h-[65vh] py-5 mt-4">
               {currentComponent === 'invoices' && !selectInvoice && (
                 <InvoiceListComponent/>
               )}
 
               {selectInvoice && (
                 <InvoiceDetails
-                  onSearchCustomers={handleSetCustomers}
                   onSelectedInvoice={setSelectInvoice}
                   invoice={selectInvoice}
-                  todayBox={config.todayBox}
                   customer={customerSelected}
                 />
               )}

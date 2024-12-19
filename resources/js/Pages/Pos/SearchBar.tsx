@@ -32,7 +32,7 @@ export default function SearchBar({onSearchCustomers}: Props) {
   }
 
   const handlerInput = async (e: FormEvent<HTMLInputElement>) => {
-    if ('value' in e.target && typeof e.target.value == 'string' && e.target.value.length > 3) {
+    if ('value' in e.target && typeof e.target.value == 'string' && e.target.value.length > 2) {
       setSearchQuery(e.target.value)
       await search()
     }
