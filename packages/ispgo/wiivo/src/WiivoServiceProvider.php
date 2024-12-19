@@ -8,7 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Ispgo\Wiivo\Http\Middleware\Authorize;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Event;
-use Ispgo\Wiivo\Listener\ServiceCreateListener;
+use Ispgo\Wiivo\Listener\GeneratedInvoice;
 use Ispgo\Wiivo\Listener\PaymentInvoice;
 
 class WiivoServiceProvider extends ServiceProvider
@@ -33,6 +33,10 @@ class WiivoServiceProvider extends ServiceProvider
         Event::listen(
             InvoicePaid::class,
             [PaymentInvoice::class, 'handle']
+        );
+        Event::listen(
+            InvoiceCreated::class,
+            [GeneratedInvoice::class, 'handle']
         );
 
 
