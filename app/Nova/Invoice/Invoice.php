@@ -34,7 +34,7 @@ class Invoice extends Resource
     public static $title = 'id';
 
     public static $search = [
-        'id', 'amount', 'issue_date', 'status'
+        'id','full_name', 'amount', 'issue_date', 'status'
     ];
 
     public function fields(NovaRequest $request): array
