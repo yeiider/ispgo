@@ -17,13 +17,15 @@ class Checkout extends Controller
     {
         $payment = session('payment_data');
         session()->forget('payment_data');
+        $locale = env('APP_FAKER_LOCALE') ?? 'en_US';
+
         return [
             'config' => [
                 'currency' => config('nova.currency'),
                 'currencySymbol' => null,
                 'companyEmail' => GeneralProviderConfig::getCompanyEmail(),
                 'companyPhone' => GeneralProviderConfig::getCompanyPhone(),
-                'locale' => str_replace('_', '-', env('APP_FAKER_LOCALE')),
+                'locale' => str_replace('_', '-', $locale),
             ],
             'payment' => $payment
         ];

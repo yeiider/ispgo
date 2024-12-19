@@ -173,5 +173,7 @@
     "Are you sure to pay": "¿Está seguro de pagar con",
     "Confirm": "Confirmar",
     "Cancel": "Cancelar",
-    "Invoice": "Factura"
+    "Invoice": "Factura",
+    "Customers": "Clientes",
+    "No customers found": "Cliente no encontrado"
 }

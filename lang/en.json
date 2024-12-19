@@ -173,5 +173,7 @@
     "Are you sure to pay": "Are you sure to pay",
     "Confirm": "Confirm",
     "Cancel": "Cancel",
-    "Invoice": "Invoice"
+    "Invoice": "Invoice",
+    "Customers": "Customers",
+    "No customers found": "No customers found"
 }
