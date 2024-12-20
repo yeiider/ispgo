@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Services\Service;
 use App\Settings\GeneralProviderConfig;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class GenerateInvoicesMonthly extends Command
 {
@@ -18,12 +19,19 @@ class GenerateInvoicesMonthly extends Command
 
     public function handle()
     {
-        if (GeneralProviderConfig::getAutomaticInvoiceGeneration()){
-            $services = Service::getAllActiveServicesForInvoiceMonthly();
-            foreach ($services as $service) {
-                $service->generateInvoice();
-            }
+        if (GeneralProviderConfig::getAutomaticInvoiceGeneration()) {
+            Service::where('service_status', '!=', 'free')
+                ->chunk(50, function ($services) {
+                    foreach ($services as $service) {
+                        try {
+                            $service->generateInvoice();
+                            $this->info("Factura generada para servicio ID: {$service->id}");
+                        } catch (\Exception $e) {
+                            Log::error("Error al generar factura para el servicio ID: {$service->id} - {$e->getMessage()}");
+                        }
+                    }
+                });
         }
-
     }
+
 }
