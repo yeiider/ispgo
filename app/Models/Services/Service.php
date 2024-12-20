@@ -102,9 +102,6 @@ class Service extends Model
         }
         $price = $this->plan->monthly_price;
 
-//        $tax = $price * 0.19;
-//        $total = $price + $tax;
-
         $invoice = new Invoice();
         $invoice->service_id = $this->id;
         $invoice->customer_id = $this->customer_id;
@@ -113,11 +110,11 @@ class Service extends Model
         $invoice->user_id = Auth::id() ?? GeneralProviderConfig::getDefaultUser();
 
         $invoice->subtotal = $price;
-        $invoice->tax = $tax;
-        $invoice->total = $total;
+        $invoice->tax = 0;
+        $invoice->total = $price;
         $invoice->amount = 0;
         $invoice->discount = 0;
-        $invoice->outstanding_balance = $total;
+        $invoice->outstanding_balance = $price;
         $invoice->issue_date = now();
 
         // Obtener el día de vencimiento configurado
