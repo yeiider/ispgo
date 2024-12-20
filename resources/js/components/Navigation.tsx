@@ -3,7 +3,7 @@ import {Errors, Flash} from "@/interfaces/IRoot.ts";
 import {__} from "@/translation.ts";
 import {useState} from "react";
 import {twMerge} from "tailwind-merge";
-import {SatelliteDish} from "lucide-react";
+import {BadgeDollarSign, SatelliteDish} from "lucide-react";
 
 type IRoot = {
   errors: Errors
@@ -38,7 +38,7 @@ export default function Navigation() {
           <div>
             <a className="flex items-center gap-2 rounded-md text-xl font-semibold focus:outline-none focus:opacity-80"
                href="/" aria-label="Preline">
-              <SatelliteDish size={32} />
+              <SatelliteDish size={32}/>
               <span className="leading-none">{props.companyName}</span>
             </a>
           </div>
@@ -97,8 +97,11 @@ export default function Navigation() {
               </>
             )}
             <Link
-              className={twMerge("link", isActive("/checkout") && classActive)}
-              href={"/checkout"}>{__('Payments portal')}</Link>
+              className={twMerge("link flex items-center gap-1", isActive("/checkout") && classActive)}
+              href={"/checkout"}>
+              {__('Payments portal')}
+              <BadgeDollarSign size={16}/>
+            </Link>
           </div>
         </div>
       </nav>

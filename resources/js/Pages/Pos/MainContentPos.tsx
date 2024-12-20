@@ -1,7 +1,6 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {ICustomer} from "@/interfaces/ICustomer.ts";
 import {Invoice} from "@/interfaces/Invoice.ts";
-import axios from "axios";
 import InvoiceDetails from "@/Pages/Pos/InvoiceDetails.tsx";
 import InvoiceListComponent from "@/Pages/Pos/InvoiceListComponent.tsx";
 import CashierInfo from "@/Pages/Pos/CashierInfo.tsx";
@@ -51,23 +50,7 @@ export default function MainContentPos() {
   const [selectInvoice, setSelectInvoice] = useState<Invoice | null>(null);
   const [customerSelected, setCustomerSelected] = useState<ICustomer | null>(null);
 
-
   const {config, cashier} = usePage<Props>().props;
-
-  useEffect(() => {
-
-    // Fetch invoices
-    const fetchInvoices = async () => {
-      try {
-        const response = await axios.get('/invoice/find-by-box');
-
-      } catch (error) {
-        console.error('Error fetching invoices', error);
-      }
-    };
-
-    fetchInvoices();
-  }, []);
 
   // Handle setting customers
   const handleSetCustomers = (customerData: ICustomer[]) => {

@@ -55,11 +55,12 @@ class HandleInertiaRequests extends Middleware
             }
         ];
         $companyName = GeneralProviderConfig::getCompanyName() ?? env('APP_NAME');
+        $companyEmail = GeneralProviderConfig::getCompanyEmail() ?? env('MAIL_FROM_ADDRESS');
         $isAuthenticated = auth('customer')->check();
 
         return array_merge(
             parent::share($request),
-            compact('customer', 'sidebar', 'flash', 'translate', 'companyName', 'isAuthenticated')
+            compact('customer', 'sidebar', 'flash', 'translate', 'companyName', 'companyEmail', 'isAuthenticated')
         );
     }
 }
