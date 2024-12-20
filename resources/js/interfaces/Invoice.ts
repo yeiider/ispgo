@@ -29,4 +29,5 @@ export interface Invoice {
   email_address: string
   customer: ICustomer
   address: IAddress
+  customer_name?: string
 }

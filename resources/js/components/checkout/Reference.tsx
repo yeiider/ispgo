@@ -18,12 +18,12 @@ import {Input} from "@/components/ui/input"
 import {z} from "zod"
 import {zodResolver} from "@hookform/resolvers/zod"
 import {useForm} from "react-hook-form"
-import {Search} from "lucide-react";
+import {ChevronRight, Search} from "lucide-react";
 import React, {useEffect, useState} from "react";
 import {useForm as inertiaUseForm} from "@inertiajs/react";
 import axios from "axios";
 import {Invoice} from "@/interfaces/Invoice.ts";
-import RenderInvoice from "@/components/checkout/RenderInvoice.tsx";
+import RenderInvoice from "@/components/RenderInvoice.tsx";
 import InvoiceSkeleton from "@/components/checkout/InvoiceSkeleton.tsx";
 import {toast} from "sonner"
 
@@ -94,6 +94,12 @@ export default function Reference({navigation}: Props) {
 
   }, [])
 
+  const handleSubmit = () => {
+    navigation(1);
+  }
+
+  const continueTitle = __('Continue');
+
   return (
     <div>
       <Card>
@@ -118,7 +124,7 @@ export default function Reference({navigation}: Props) {
                   )}
                 />
               </div>
-              <Button disabled={loading} className="col-span-1" type="submit">
+              <Button disabled={loading} className="col-span-1 bg-[#0ea5e9]" type="submit">
                 <Search/>
                 <span>{__('Search')}</span>
               </Button>
@@ -126,7 +132,16 @@ export default function Reference({navigation}: Props) {
           </Form>
           <div className="mt-5">
             {loading && <InvoiceSkeleton/>}
-            {invoice && !loading && <RenderInvoice invoice={invoice} navigation={navigation}/>}
+            {invoice && !loading && (
+              <RenderInvoice invoice={invoice}>
+                {invoice.status !== 'paid' && (
+                  <Button className="bg-[#0ea5e9]" onClick={handleSubmit} type="button">
+                    <span>{continueTitle}</span>
+                    <ChevronRight/>
+                  </Button>
+                )}
+              </RenderInvoice>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -2,8 +2,6 @@ import {Invoice} from "@/interfaces/Invoice.ts";
 import {__} from "@/translation.ts";
 import RenderInvoiceStatus from "@/components/RenderInvoiceStatus.tsx";
 import {priceFormat} from "@/lib/utils.ts";
-import {Button} from "@/components/ui/button.tsx";
-import {ChevronRight} from "lucide-react";
 import {usePage} from "@inertiajs/react";
 import React from "react";
 
@@ -25,7 +23,6 @@ export default function RenderInvoice({invoice, children}: {
     currency: config.currency || 'es-CO',
     locale: config.locale || 'co',
   }
-
 
   return (
     <div className="relative flex flex-col bg-white shadow-lg rounded-xl pointer-events-auto dark:bg-neutral-800">
