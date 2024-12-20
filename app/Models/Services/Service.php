@@ -101,8 +101,9 @@ class Service extends Model
             return null;
         }
         $price = $this->plan->monthly_price;
-        $tax = $price * 0.19;
-        $total = $price + $tax;
+
+//        $tax = $price * 0.19;
+//        $total = $price + $tax;
 
         $invoice = new Invoice();
         $invoice->service_id = $this->id;
