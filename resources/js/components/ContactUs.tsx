@@ -79,6 +79,7 @@ export default function ContactUs() {
       status?: string,
     }
   }
+  console.log(usePage<Props>().props)
 
   const props = usePage<Props>().props;
   useEffect(() => {
@@ -97,8 +98,8 @@ export default function ContactUs() {
       <div className="md:grid grid-cols-2 gap-10">
         <Card className="">
           <CardHeader>
-            <CardTitle>Contact us</CardTitle>
-            <CardDescription>We'd love to talk about how we can help you.</CardDescription>
+            <CardTitle>{__('Contact us')}</CardTitle>
+            <CardDescription>{__("We'd love to talk about how we can help you.")} 🤩</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -170,7 +171,10 @@ export default function ContactUs() {
                     render={({field}) => (
                       <FormItem>
                         <FormControl>
-                          <Textarea placeholder={__('Details')} {...field} onInput={handleInput}/>
+                          <Textarea placeholder={__('Details')} {...field} onInput={(e) => {
+                            //@ts-ignore
+                            handleInput(e)
+                          }}/>
                         </FormControl>
                         <FormMessage/>
                       </FormItem>
@@ -196,12 +200,11 @@ export default function ContactUs() {
             <CircleHelp size={25} className="text-gray-700"/>
             <div className="grow">
               <h3 className="font-semibold text-gray-800 dark:text-neutral-200">Knowledgebase</h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-neutral-500">We're here to help with any questions or
-                code.</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-neutral-500">{__("We're here to help with any questions or code.")}</p>
               <a
                 className="mt-2 inline-flex items-center gap-x-2 text-sm font-medium text-gray-600 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
                 href="#">
-                Contact support
+                {__('Contact support')}
                 <ArrowRight size={16}
                             className="shrink-0 transition ease-in-out group-hover:translate-x-1 group-focus:translate-x-1"/>
               </a>
@@ -214,13 +217,11 @@ export default function ContactUs() {
             <MessagesSquare size={25} className="text-gray-700"/>
             <div className="grow">
               <h3 className="font-semibold text-gray-800 dark:text-neutral-200">FAQ</h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-neutral-500">Search our FAQ for answers to anything you
-                might
-                ask.</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-neutral-500">{__('Search our FAQ for answers to anything you might ask.')}</p>
               <a
                 className="mt-2 inline-flex items-center gap-x-2 text-sm font-medium text-gray-600 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
                 href="#">
-                Visit FAQ
+                {__('Visit FAQ')}
                 <ArrowRight size={16}
                             className="shrink-0 transition ease-in-out group-hover:translate-x-1 group-focus:translate-x-1"/>
               </a>
@@ -232,9 +233,8 @@ export default function ContactUs() {
           <div className=" flex gap-x-7 py-6">
             <SquareTerminal size={25} className="text-gray-700"/>
             <div className="grow">
-              <h3 className="font-semibold text-gray-800 dark:text-neutral-200">Developer APIs</h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-neutral-500">Check out our development quickstart
-                guide.</p>
+              <h3 className="font-semibold text-gray-800 dark:text-neutral-200">{__('Developer APIs')}</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-neutral-500">{__('Check out our development quickstart guide.')}</p>
               <a
                 className="mt-2 inline-flex items-center gap-x-2 text-sm font-medium text-gray-600 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
                 href="#">
@@ -250,10 +250,8 @@ export default function ContactUs() {
           <div className=" flex gap-x-7 py-6">
             <MailOpen size={25} className="text-gray-700"/>
             <div className="grow">
-              <h3 className="font-semibold text-gray-800 dark:text-neutral-200">Contact us by email</h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-neutral-500">If you wish to write us an email instead
-                please
-                use</p>
+              <h3 className="font-semibold text-gray-800 dark:text-neutral-200">{__('Contact us by email')}</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-neutral-500">{__('If you wish to write us an email instead please use.')}</p>
               <a
                 className="mt-2 inline-flex items-center gap-x-2 text-sm font-medium text-gray-600 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
                 href="#">
