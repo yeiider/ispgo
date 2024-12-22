@@ -8,9 +8,9 @@ export default function Footer() {
   const {companyName} = usePage<Props>().props;
 
   return (
-    <footer className="sticky top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full text-sm">
+    <footer className="max-w-[85rem] mx-auto sticky top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full text-sm">
       <nav
-        className="mb-4 relative max-w-2xl w-full bg-white border border-gray-200 rounded-lg mx-2 py-2.5 px-2 md:flex md:items-center md:justify-between  md:px-4 md:mx-auto dark:bg-neutral-900 dark:border-neutral-700">
+        className="mb-4 relative w-full bg-white border border-gray-200 rounded-lg mx-2 py-2.5 px-2 md:flex md:items-center md:justify-between  md:px-4 md:mx-auto dark:bg-neutral-900 dark:border-neutral-700">
         <div className="px-4 md:px-0 flex justify-between items-center">
           {/* Logo*/}
           <div>

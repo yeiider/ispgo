@@ -1,7 +1,7 @@
 import {Link, usePage} from "@inertiajs/react";
 import {Errors, Flash} from "@/interfaces/IRoot.ts";
 import {__} from "@/translation.ts";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {twMerge} from "tailwind-merge";
 import {BadgeDollarSign, SatelliteDish} from "lucide-react";
 
@@ -16,9 +16,25 @@ type IRoot = {
   customerDashboardUrl: string
   companyName: string
 }
+
+const INITIAL_PADDING = 'md:py-1';
+
 export default function Navigation() {
   const props = usePage<IRoot>().props;
   const [active, setActive] = useState(false);
+  const [padding, setPadding] = useState<string>(INITIAL_PADDING);
+
+  const handleScroll = () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    setPadding(scrollTop > 0 ? 'md:py-0' : INITIAL_PADDING);
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll); // Limpieza del evento
+    };
+  }, []);
 
   const toggleMenu = () => {
     setActive((prevState) => !prevState);
@@ -29,10 +45,22 @@ export default function Navigation() {
     return window.location.pathname === path;
   }
 
+  const initialPadding = 'md:py-2'
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    if (scrollTop > 0) {
+      setPadding('md:py-0')
+    } else {
+      setPadding(initialPadding);
+    }
+  })
+
   return (
-    <header className="sticky top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full text-sm">
+    <header
+      className="max-w-[85rem] mx-auto sticky top-0 inset-x-0 flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full text-sm sm:px-6 lg:px-8">
       <nav
-        className="mt-4 relative max-w-2xl w-full bg-white/60 backdrop-blur-md dark:bg-neutral-900/60 border border-gray-200 rounded-lg mx-2 py-2.5 md:flex md:items-center md:justify-between md:py-0 md:px-4 md:mx-auto dark:bg-neutral-900 dark:border-neutral-700">
+        className={`transition-all duration-300 mt-4 relative w-full bg-white/60 backdrop-blur-md dark:bg-neutral-900/60 border border-gray-200 rounded-lg mx-2  md:flex md:items-center md:justify-between py-2.5 ${padding} md:px-4 md:mx-auto dark:bg-neutral-900 dark:border-neutral-700`}>
         <div className="px-4 md:px-0 flex justify-between items-center">
           {/* Logo*/}
           <div>
