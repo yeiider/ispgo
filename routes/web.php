@@ -92,3 +92,8 @@ Route::post('/email/verification-notification', function (Request $request) {
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 
+Route::get('/401', function () {
+    abort(401, 'Unauthorized');
+})->name('error.401');
+
+

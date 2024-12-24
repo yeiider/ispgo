@@ -139,7 +139,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::link(__('panel.DHCP_server_Ipv6'), 'mikrotik/dhcp-serve'),
                 ])->icon('cog')->collapsable(),
 
-                $this->getNovaPermissionsMenu($request), // Agregar menú de NovaPermissions
+                $this->getNovaPermissionsMenu($request),
             ];
         });
     }

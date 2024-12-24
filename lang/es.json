@@ -173,5 +173,6 @@
     "Are you sure to pay": "¿Está seguro de pagar con",
     "Confirm": "Confirmar",
     "Cancel": "Cancelar",
-    "Invoice": "Factura"
+    "Invoice": "Factura",
+    "Oauth Clients": "Cliente Autenticacion Api"
 }
