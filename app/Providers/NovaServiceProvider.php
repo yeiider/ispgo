@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Nova\Box;
+use App\Nova\Contract;
 use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
@@ -77,6 +78,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     ]),
                     MenuGroup::make(__('panel.all_services'), [
                         MenuItem::resource(Service::class),
+                        MenuItem::resource(Contract::class)->name(__('panel.contract')),
                         MenuItem::lens(Service::class, TelephonicServiceLens::class)->name(__('panel.telephonic_services')),
                         MenuItem::lens(Service::class, TelevisionServiceLens::class)->name(__('panel.television_services')),
                         MenuItem::lens(Installation::class, InstallationsLens::class)->name(__('panel.installations')),

@@ -183,6 +183,54 @@ return [
             ]
         ]
     ],
+
+
+    "service" => [
+        "setting" => [
+            "label" => "Services",
+            "class" => "form-control",
+        ],
+        "general" => [
+            "setting" => [
+                "label" => "General Service Settings",
+                "class" => "form-control",
+                "code" => "general"
+            ],
+            "create_installation_order" => [
+                "field" => "boolean-field",
+                "label" => "Create Installation Order when Creating a Service",
+                "placeholder" => "Create Installation Order",
+            ],
+            "notify_user_service_creation" => [
+                "field" => "boolean-field",
+                "label" => "Notify User when Service is Created",
+                "placeholder" => "Notify User when Service is Created",
+            ],
+            "show_services_in_customer_section" => [
+                "field" => "boolean-field",
+                "label" => "Show Services in Customer Section",
+                "placeholder" => "Show Services in Customer Section",
+            ],
+        ],
+        "contract" => [
+            "setting" => [
+                "label" => "Contacts",
+                "class" => "form-control",
+                "code" => "contract"
+            ],
+            "enabled" => [
+                "field" => "boolean-field",
+                "label" => "enable the use of contracts",
+                "placeholder" => "Create Installation Order",
+            ],
+            "contract_template" => [
+                "field" => "ckeditor",
+                "label" => "Contract Template",
+                "placeholder" => "Contract Template",
+            ]
+        ],
+    ],
+
     "invoice" => [
         "setting" => [
             "label" => "Invoices",

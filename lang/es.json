@@ -174,5 +174,7 @@
     "Confirm": "Confirmar",
     "Cancel": "Cancelar",
     "Invoice": "Factura",
-    "Oauth Clients": "Cliente Autenticacion Api"
+    "Oauth Clients": "Cliente Autenticacion Api",
+    "The contract has been sent to the customer.": "El contrato se ha enviado al cliente.",
+    "Send contract to client": "Enviar contrato al cliente"
 }

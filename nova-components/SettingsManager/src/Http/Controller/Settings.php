@@ -3,6 +3,7 @@
 namespace Ispgo\SettingsManager\Http\Controller;
 
 use App\Models\CoreConfigData;
+use Ispgo\Ckeditor\Ckeditor;
 use Ispgo\SettingsManager\App\SettingsManager\SettingsLoader;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Country;
@@ -92,6 +93,9 @@ class Settings extends Resource
                         break;
                     case 'image-field':
                         $fieldInstance = Image::make($fieldLabel, $fieldKey);
+                        break;
+                    case 'ckeditor':
+                        $fieldInstance = Ckeditor::make($fieldLabel, $fieldKey);
                         break;
                     case 'text-field':
                     default:

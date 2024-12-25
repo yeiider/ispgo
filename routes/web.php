@@ -41,6 +41,7 @@ Route::get('/invoice/receipt', [InvoiceController::class, 'getReceipt']);
 Route::get('/customer/search', [\App\Http\Controllers\Api\CustomerApi::class, 'search']);
 
 Route::get('/', [\App\Http\Controllers\Welcome::class, 'index'])->name('home');
+Route::get('/signed', [\App\Http\Controllers\Signed::class, 'index'])->name('signed');
 
 Route::middleware('guest:customer')->prefix('customer')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm']);

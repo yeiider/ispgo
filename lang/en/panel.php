@@ -21,7 +21,7 @@ return [
     'products' => 'Products',
     'suppliers' => 'Suppliers',
     'equipment_assignments' => 'Equipment Assignments',
-
+    'contract' => 'Contract',
     'customers' => 'Customers',
     'addresses' => 'Addresses',
     'tax_details' => 'Tax Details',

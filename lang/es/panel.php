@@ -21,7 +21,7 @@ return [
     'products' => 'Productos',
     'suppliers' => 'Proveedores',
     'equipment_assignments' => 'Asignaciones de Equipos',
-
+    'contract' => 'Contractos',
     'customers' => 'Clientes',
     'addresses' => 'Direcciones',
     'tax_details' => 'Detalles Impuesto',
