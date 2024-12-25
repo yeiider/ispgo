@@ -44,4 +44,5 @@ return [
     'plans' => 'Plans',
     'television_plans' => 'Television Plans',
     'telephonic_plans' => 'Telephonic Plans',
+    'html_template' => 'Html Template',
 ];
