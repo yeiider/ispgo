@@ -69,7 +69,7 @@ class SettingsLoader
 
         foreach ($settings as $section => $sectionConfig) {
             $menu[] = [
-                'label' => $sectionConfig['setting']['label'],
+                'label' => __($sectionConfig['setting']['label']),
                 'class' => $sectionConfig['setting']['class'],
                 'code' => $sectionConfig['setting']['code'] ?? $section,
             ];
