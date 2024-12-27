@@ -20,7 +20,7 @@ use Laravel\Nova\Resource;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Support\Facades\Storage;
-use function PHPSTORM_META\map;
+use App\Models\Scope;
 
 class Settings extends Resource
 {
@@ -220,10 +220,13 @@ class Settings extends Resource
         return response()->json(['success' => true, 'message' => __('File deleted successfully.')]);
     }
 
-    private function getScopes()
+    /**
+     * @return array
+     */
+    private function getScopes(): array
     {
-        if (class_exists(\App\Models\Scope::class)) {
-            return \App\Models\Scope::where('is_active', true)
+        try {
+            return Scope::where('is_active', true)
                 ->orderBy('id')
                 ->get()
                 ->map(function ($scope) {
@@ -232,7 +235,8 @@ class Settings extends Resource
                         'label' => $scope->name,
                     ];
                 });
+        } catch (Exception $e) {
+            return [];
         }
-        return [];
     }
 }

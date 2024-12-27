@@ -18490,11 +18490,13 @@ __webpack_require__.r(__webpack_exports__);
     },
     saveSetting: function saveSetting() {
       var _this$section2,
+        _this$scope,
         _this2 = this;
       var continueEditing = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       Nova.request().post('/settings-manager/settings/save', {
         fields: this.fields,
-        section: (_this$section2 = this.section) !== null && _this$section2 !== void 0 ? _this$section2 : 'general'
+        section: (_this$section2 = this.section) !== null && _this$section2 !== void 0 ? _this$section2 : 'general',
+        scope: (_this$scope = this.scope) !== null && _this$scope !== void 0 ? _this$scope : 1
       }).then(function (response) {
         _this2.fetchSettings();
         if (response.data.success) {
