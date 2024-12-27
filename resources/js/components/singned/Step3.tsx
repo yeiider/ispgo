@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import {Step3Props} from "@/interfaces/ISigned.ts";
 
-export default function Step3({ nextStep, prevStep, setSignature }:Step3Props) {
+export default function Step3({nextStep, prevStep, setSignature}:Step3Props) {
   const [isSigned, setIsSigned] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [isDrawing, setIsDrawing] = useState(false)

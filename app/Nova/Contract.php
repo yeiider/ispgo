@@ -2,6 +2,10 @@
 
 namespace App\Nova;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+use Laravel\Nova\Actions\Action;
+use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
@@ -66,21 +70,11 @@ class Contract extends Resource
                 ->rules('required', 'date', 'after_or_equal:start_date')
                 ->help(__('contract.end_date_help')),
 
-            Select::make(__('contract.signed'), 'is_singned')
-                ->options([
-                    'pending' => __('contract.pending_signature'),
-                    'signed' => __('contract.signed_signature'),
-                ])
-                ->displayUsingLabels()
-                ->sortable()
-                ->rules('required', 'in:pending,signed')
-                ->help(__('contract.signed_help')),
+            Date::make(__('contract.signed_date'), 'signed_at')->onlyOnIndex(),
 
-            Boolean::make(__('contract.signed_status'), function () {
-                return $this->is_singned === 'signed';
-            })
-                ->onlyOnIndex()
-                ->sortable(),
+            Boolean::make(__('contract.signed'), 'is_signed')
+                ->rules('required', 'in:pending,signed')
+                ->help(__('contract.signed_help'))->onlyOnIndex(),
         ];
     }
 
@@ -92,8 +86,19 @@ class Contract extends Resource
     public function actions(NovaRequest $request): array
     {
         return [
-            // Acción para enviar el contrato al cliente
             new \App\Nova\Actions\SendContractToCustomerAction(),
+            Action::using(__('Ver PDF Contrato'), function (ActionFields $fields, Collection $models) {
+                foreach ($models as $contract) {
+                    $pdfPath = "public/contracts/contract_{$contract->id}_signed.pdf";
+                    if (!Storage::exists($pdfPath)) {
+                        return Action::danger("No se encontró el PDF para el contrato #{$contract->id}");
+                    }
+                    $pdfUrl = Storage::url($pdfPath);
+                    return Action::redirect($pdfUrl);
+                }
+
+                return Action::danger('No se seleccionó ningún contrato.');
+            })->showInline(),
         ];
     }
 

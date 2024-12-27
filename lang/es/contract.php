@@ -14,4 +14,5 @@ return [
     'pending_signature' => 'Pendiente por firmar',
     'signed_signature' => 'Firmado',
     'contract' => 'Contrato',
+    'signed_date' => 'Fecha de firma',
 ];

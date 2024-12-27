@@ -224,9 +224,9 @@ return [
                 "placeholder" => "Create Installation Order",
             ],
             "contract_template" => [
-                "field" => "ckeditor",
+                "field" => "select-field",
                 "label" => "Contract Template",
-                "placeholder" => "Contract Template",
+                "options" => \App\Settings\Config\Sources\HtmlTemplate::class
             ]
         ],
     ],

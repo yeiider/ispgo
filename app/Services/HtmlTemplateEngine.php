@@ -69,7 +69,6 @@ class HtmlTemplateEngine
                 return $this->handleAsset($variableExpression);
             }
 
-            // Variables dinámicas (ej. {{ customer.full_name }})
             return $this->resolveVariable($variableExpression);
         }, $content);
     }
@@ -109,17 +108,41 @@ class HtmlTemplateEngine
     /**
      * Resuelve variables dinámicas, ej: {{ customer.full_name }}
      */
-    protected function resolveVariable($expression)
+    protected function resolveVariable($expression): string
     {
-        // Dado que en la BD guardas "entity" para indicar la "clave" en $data
-        // Por ejemplo, $data['customer'] o $data['invoice']
-        // asumiendo que $this->template->entity = 'customer' o 'invoice'.
-        // Sino, podrías acceder directamente a $data[$expression].
-        //
-        // Si tu "entity" no aplica y prefieres un approach genérico,
-        // ajústalo a tus necesidades. Podrías hacer un explode del $expression
-        // y buscar en $data.
-        return $this->data[$this->template->entity]?->{$expression} ?? "{{ $expression }}";
+        // Dividir la expresión completo en partes (ej: "service.customer.full_name")
+        $pathParts = explode('.', $expression);
+
+        // Recuperar la entidad principal desde $this->template->entity
+        $rootEntity = $this->template->entity;
+
+        // Pausar si el primer elemento no coincide con la entidad
+        if ($pathParts[0] !== $rootEntity) {
+            return "{{ $expression }}"; // No coincide y se devuelve como está
+        }
+
+        // Obtener el modelo base desde la entidad
+        $model = $this->data[$rootEntity] ?? null;
+
+        // Si no existe el modelo principal, devolvemos la expresión sin interpretar
+        if (!$model) {
+            return "{{ $expression }}";
+        }
+
+        // Navegamos por el resto de la ruta dinámica
+        array_shift($pathParts); // Eliminar la entidad raíz ('service')
+
+        foreach ($pathParts as $part) {
+            // Verificar si la propiedad existe en el modelo actual
+            if (is_object($model) && isset($model->{$part})) {
+                $model = $model->{$part}; // Avanzar al siguiente nivel
+            } else {
+                return "{{ $expression }}"; // Devolver sin cambios si no se encuentra
+            }
+        }
+
+        // Devolver el valor resultante (convertido a string si es necesario)
+        return (string) $model;
     }
 
     /**

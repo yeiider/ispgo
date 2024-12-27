@@ -94,9 +94,7 @@ class Settings extends Resource
                     case 'image-field':
                         $fieldInstance = Image::make($fieldLabel, $fieldKey);
                         break;
-                    case 'ckeditor':
-                        $fieldInstance = Ckeditor::make($fieldLabel, $fieldKey);
-                        break;
+
                     case 'text-field':
                     default:
                         $fieldInstance = Text::make($fieldLabel, $fieldKey);

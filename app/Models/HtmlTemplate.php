@@ -9,6 +9,7 @@ class HtmlTemplate extends Model
     protected $fillable = [
         'name',
         'body',
+        'styles',
         'entity',
     ];
 }

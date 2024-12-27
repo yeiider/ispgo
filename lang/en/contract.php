@@ -14,4 +14,5 @@ return [
     'pending_signature' => 'Pending Signature',
     'signed_signature' => 'Signed',
     'contract' => 'Contract',
+    'signed_date' => 'Signed Date',
 ];

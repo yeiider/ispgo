@@ -1,12 +1,43 @@
 'use client'
 
-import { useState } from 'react'
+import {useState} from 'react'
 import Step1 from '@/components/singned/Step1'
 import Step2 from '@/components/singned/Step2'
 import Step3 from '@/components/singned/Step3'
 import Step4 from '@/components/singned/Step4'
+import {usePage} from "@inertiajs/react";
+import SignedDocumentView from "@/components/singned/SignedDocumentView.tsx";
+
+
+type Props = {
+  contractHtml: string,
+  url_signed:string
+  flash: {
+    status: string | null,
+  }
+  pdfUrl: string,
+  signedAt: string,
+}
 
 export default function Signing() {
+
+  const {
+    contractHtml,
+    url_signed,
+    isSigned,
+    signedAt,
+    pdfUrl,
+  } = usePage<Props>().props;
+
+  if (isSigned) {
+    return (
+      <SignedDocumentView
+        pdfUrl={pdfUrl}
+        signedAt={signedAt}
+      />
+    )
+  }
+
   const [currentStep, setCurrentStep] = useState(1)
   const [acceptedPolicies, setAcceptedPolicies] = useState({
     dataPolicy: false,
@@ -21,13 +52,14 @@ export default function Signing() {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1 acceptedPolicies={acceptedPolicies} setAcceptedPolicies={setAcceptedPolicies} nextStep={nextStep} />
+        return <Step1 acceptedPolicies={acceptedPolicies} setAcceptedPolicies={setAcceptedPolicies}
+                      nextStep={nextStep}/>
       case 2:
-        return <Step2 nextStep={nextStep} prevStep={prevStep} />
+        return <Step2 nextStep={nextStep} prevStep={prevStep} contractHtml={contractHtml}/>
       case 3:
         return <Step3 nextStep={nextStep} prevStep={prevStep} setSignature={setSignature} />
       case 4:
-        return <Step4 signature={signature} />
+        return <Step4 signature={signature} url_signed={url_signed}/>
       default:
         return null
     }
@@ -48,8 +80,9 @@ export default function Signing() {
                 <div className="w-8 h-8 mx-auto bg-white border-2 rounded-full text-lg flex items-center">
                   <span className="text-center w-full">
                     {currentStep > step ? (
-                      <svg className="w-6 h-6 text-blue-600 mx-auto" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M5 13l4 4L19 7" />
+                      <svg className="w-6 h-6 text-blue-600 mx-auto" fill="none" strokeLinecap="round"
+                           strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M5 13l4 4L19 7"/>
                       </svg>
                     ) : (
                       step

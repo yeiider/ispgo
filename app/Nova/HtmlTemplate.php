@@ -58,6 +58,9 @@ class HtmlTemplate extends Resource
             Ckeditor::make('Body', 'body')
                 ->rules('required')
                 ->help('Inserta aquí el contenido HTML de la plantilla.'),
+            Code::make('Styles', 'styles')
+                ->language("css")
+                ->help('Inserte aqui si quiere algun estilo custom para la plantilla.'),
         ];
     }
 

@@ -52,13 +52,16 @@ class Contract extends Model
         'service_id',
         'start_date',
         'end_date',
-        'is_singned',
+        'is_signed',
+        'signed_at'
     ];
 
     protected $casts = [
-        'is_singned' => 'boolean',
+        'is_signed' => 'boolean',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
+        'signed_at' => 'datetime',
+
     ];
 
     /**

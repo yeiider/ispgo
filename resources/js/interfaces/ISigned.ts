@@ -18,15 +18,19 @@ interface Step1Props {
   nextStep: () => void; // Función para avanzar al siguiente paso
 }
 
-interface Step2Props extends StepNavigationProps {}
+interface Step2Props extends StepNavigationProps {
+  contractHtml?: string
+}
 
 interface Step3Props extends StepNavigationProps {
-  setSignature: (signature: string) => void;
+  setSignature: (signature: string) => void,
 }
 
 interface Step4Props {
   signature: string;
+  url_signed?: string
+
 }
 
 
-export type {Step1Props, Step2Props, Step3Props, Step4Props,AcceptedPolicies};
+export type {Step1Props, Step2Props, Step3Props, Step4Props, AcceptedPolicies};
