@@ -3,8 +3,6 @@
 namespace Ispgo\SettingsManager\Http\Controller;
 
 use App\Models\CoreConfigData;
-use App\Models\Router;
-use Illuminate\Http\JsonResponse;
 use Ispgo\Ckeditor\Ckeditor;
 use Ispgo\SettingsManager\App\SettingsManager\SettingsLoader;
 use Laravel\Nova\Fields\Boolean;
@@ -142,7 +140,7 @@ class Settings extends Resource
         return compact('groups', 'settingMenu', 'actionsTitles', 'heading', 'scopes');
     }
 
-    public function saveSetting(NovaRequest $request): JsonResponse
+    public function saveSetting(NovaRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
             $fields = $request->fields;
@@ -184,9 +182,9 @@ class Settings extends Resource
      *
      * @param NovaRequest $request The request object.
      *
-     * @return JsonResponse The JSON response.
+     * @return \Illuminate\Http\JsonResponse The JSON response.
      */
-    public function uploadFiles(NovaRequest $request): JsonResponse
+    public function uploadFiles(NovaRequest $request): \Illuminate\Http\JsonResponse
     {
         if ($request->hasFile('file')) {
             $file = $request->file('file');
@@ -208,9 +206,9 @@ class Settings extends Resource
      * @param NovaRequest $request The NovaRequest instance.
      * @param string $file The name of the file to be deleted.
      *
-     * @return JsonResponse The JSON response indicating the result of the operation.
+     * @return \Illuminate\Http\JsonResponse The JSON response indicating the result of the operation.
      */
-    public function deleteFiles(NovaRequest $request, string $file): JsonResponse
+    public function deleteFiles(NovaRequest $request, string $file): \Illuminate\Http\JsonResponse
     {
         $disk = Storage::disk('public');
         if (!$disk->exists('uploads/' . $file)) {
@@ -224,13 +222,11 @@ class Settings extends Resource
         return response()->json(['success' => true, 'message' => __('File deleted successfully.')]);
     }
 
-    /**
-     * @return array
-     */
+
     private function getScopes()
     {
         try {
-            return Router::where('status', 'enabled')
+            return Scope::where('is_active', true)
                 ->orderBy('id')
                 ->get()
                 ->map(function ($scope) {

@@ -13,7 +13,6 @@
       <Menu class="w-[20%]"
             :menu="settingMenu"
             :section="section"
-            :scope="scope"
       />
       <form @submit.prevent="saveSetting" class="w-[75%]">
 
@@ -75,7 +74,7 @@ export default {
     Menu,
     Dropdown,
     Collapsible,
-    DefaultField,
+    DefaultField
   },
   data() {
     return {
