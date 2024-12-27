@@ -1,28 +1,31 @@
 {
-  "private": true,
-  "scripts": {
-    "dev": "npm run development",
-    "development": "mix",
-    "watch": "mix watch",
-    "watch-poll": "mix watch -- --watch-options-poll=1000",
-    "hot": "mix watch --hot",
-    "prod": "npm run production",
-    "production": "mix --production",
-    "nova:install": "npm --prefix='../../vendor/laravel/nova' ci"
-  },
-  "devDependencies": {
-    "@vue/compiler-sfc": "^3.2.22",
-    "laravel-mix": "^6.0.41",
-    "lodash": "^4.17.21",
-    "postcss": "^8.3.11",
-    "vue-loader": "^16.8.3"
-  },
-  "dependencies": {
-    "filepond": "^4.31.1",
-    "filepond-plugin-file-validate-type": "^1.2.9",
-    "filepond-plugin-image-preview": "^4.6.12",
-    "form-backend-validation": "^2.3.3",
-    "laravel-nova": "^1.12.3",
-    "vue-filepond": "^7.0.4"
-  }
+    "private": true,
+    "scripts": {
+        "dev": "npm run development",
+        "development": "mix",
+        "watch": "mix watch",
+        "watch-poll": "mix watch -- --watch-options-poll=1000",
+        "hot": "mix watch --hot",
+        "prod": "npm run production",
+        "production": "mix --production",
+        "nova:install": "npm --prefix='../../vendor/laravel/nova' ci"
+    },
+    "devDependencies": {
+        "@vue/compiler-sfc": "^3.2.22",
+        "ace-builds": "^1.37.1",
+        "form-backend-validation": "^2.3.3",
+        "laravel-mix": "^6.0.41",
+        "lodash": "^4.17.21",
+        "postcss": "^8.3.11",
+        "vue-loader": "^16.8.3"
+    },
+    "dependencies": {
+        "@ckeditor/ckeditor5-vue": "^7.3.0",
+        "filepond": "^4.31.1",
+        "filepond-plugin-file-validate-type": "^1.2.9",
+        "filepond-plugin-image-preview": "^4.6.12",
+        "form-backend-validation": "^2.3.3",
+        "laravel-nova": "^1.12.3",
+        "vue-filepond": "^7.0.4"
+    }
 }

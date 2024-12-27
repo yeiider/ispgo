@@ -37,7 +37,7 @@ export default {
     'boolean-field': BooleanField,
     'password-field': PasswordField,
     'date-field': DateField,
-    'datetime-field': DatetimeField
+    'datetime-field': DatetimeField,
 
   },
   data() {
@@ -50,7 +50,7 @@ export default {
         'boolean-field',
         'password-field',
         'date-field',
-        'datetime-field'
+        'datetime-field',
       ]
     }
   },

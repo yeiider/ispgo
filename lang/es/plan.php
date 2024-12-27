@@ -37,4 +37,5 @@ return [
     'technical_support' => 'Soporte Técnico',
     'additional_benefits' => 'Beneficios Adicionales',
     'upload_speed' => 'Velocidad de Subida',
+    'html_template' => 'Plantilla HTML',
 ];

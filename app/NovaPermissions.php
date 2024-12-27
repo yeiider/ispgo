@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Nova\Client;
 use App\Nova\User;
 use Illuminate\Http\Request;
 use Laravel\Nova\Exceptions\NovaException;
@@ -32,6 +33,8 @@ class NovaPermissions extends \Sereny\NovaPermissions\NovaPermissions
 
         // Agrega el recurso User al menú de permisos
         $items[] = $this->createMenuItem(User::class);
+
+        $items[] = $this->createMenuItem(Client::class);
 
         return MenuSection::make(__('Roles & Permissions'), $items)
             ->icon('shield-check')

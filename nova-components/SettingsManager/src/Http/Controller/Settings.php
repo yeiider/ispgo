@@ -3,6 +3,7 @@
 namespace Ispgo\SettingsManager\Http\Controller;
 
 use App\Models\CoreConfigData;
+use Ispgo\Ckeditor\Ckeditor;
 use Ispgo\SettingsManager\App\SettingsManager\SettingsLoader;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Country;
@@ -96,6 +97,7 @@ class Settings extends Resource
                     case 'image-field':
                         $fieldInstance = Image::make($fieldLabel, $fieldKey);
                         break;
+
                     case 'text-field':
                     default:
                         $fieldInstance = Text::make($fieldLabel, $fieldKey);
@@ -220,10 +222,8 @@ class Settings extends Resource
         return response()->json(['success' => true, 'message' => __('File deleted successfully.')]);
     }
 
-    /**
-     * @return array
-     */
-    private function getScopes(): array
+
+    private function getScopes()
     {
         try {
             return Scope::where('is_active', true)
