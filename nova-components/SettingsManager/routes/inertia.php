@@ -17,6 +17,13 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 Route::get('/', function (NovaRequest $request) {
     return inertia('SettingsManager');
 });
-Route::get('/section/{section}', function (NovaRequest $request) {
-    return inertia('SettingsManager',["section" => $request->section]);
+
+Route::get('/scope/{scope}/section/{section}', function (NovaRequest $request, $scope, $section) {
+    $scope = $scope ?? 1;
+
+    return inertia('SettingsManager', [
+            'scope' => $scope,
+            'section' => $section
+        ]
+    );
 });

@@ -76,12 +76,12 @@ class InvoiceController extends Controller
             if ($invoiceModel) {
                 $invoiceModel->applyPayment(notes: $request->input('note'), dailyBoxId: $request->input('todaytBox')['id']);
                 DailyBox::updateAmount($request->input('todaytBox')['id'], $invoiceModel->amount);
-                return response()->json(['message' => 'Payment registered successfully', 'data' => $invoiceModel, 'status' => 200]);
+                return response()->json(['message' => __('Payment registered successfully'), 'data' => $invoiceModel, 'status' => 200]);
             } else {
-                return response()->json(['message' => 'Invoice not found'], 404);
+                return response()->json(['message' => __('Invoice not found')], 404);
             }
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Invoice not found'], 404);
+            return response()->json(['message' => __('Invoice not found')], 404);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

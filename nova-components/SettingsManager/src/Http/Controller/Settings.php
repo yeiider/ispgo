@@ -21,6 +21,7 @@ use Laravel\Nova\Resource;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Scope;
 
 class Settings extends Resource
 {
@@ -60,6 +61,8 @@ class Settings extends Resource
 
                 // Obtener el valor del setting existente si está presente
                 $fieldValue = $existingSettings[$settingKey]->value ?? null;
+
+                $fieldLabel = __($fieldLabel);
 
                 switch ($fieldType) {
                     case 'boolean-field':
@@ -112,21 +115,29 @@ class Settings extends Resource
 
                 $fieldInstance->withMeta([
                     'group' => $group['setting']['code'],
-                    'group_label' => $group['setting']['label']
+                    'group_label' => __($group['setting']['label'])
                 ]);
 
                 $groupFields[] = $fieldInstance;
             }
 
             $groups[] = [
-                'label' => $group['setting']['label'],
+                'label' => __($group['setting']['label']),
                 'code' => $group['setting']['code'],
                 'class' => $group['setting']['class'] ?? "",
                 'fields' => $groupFields,
             ];
         }
 
-        return compact('groups', 'settingMenu');
+        $actionsTitles = [
+            'cancel' => __('Cancel'),
+            'update_continue_editing' => __('Update & Continue Editing'),
+            'update_setting' => __('Update Setting'),
+        ];
+        $heading = __('Settings Manager');
+        $scopes = $this->getScopes();
+
+        return compact('groups', 'settingMenu', 'actionsTitles', 'heading', 'scopes');
     }
 
     public function saveSetting(NovaRequest $request): \Illuminate\Http\JsonResponse
@@ -143,10 +154,10 @@ class Settings extends Resource
                 );
             }
 
-            return response()->json(['success' => true, 'message' => 'Settings saved successfully.']);
+            return response()->json(['success' => true, 'message' => __('Settings saved successfully.')]);
         } catch (Exception $e) {
             Log::error('Error saving settings: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred while saving the settings.']);
+            return response()->json(['success' => false, 'message' => __('An error occurred while saving the settings.')]);
         }
     }
 
@@ -185,7 +196,7 @@ class Settings extends Resource
         }
         return response()->json([
             'success' => false,
-            'error' => 'No se ha podido cargar la imagen.'
+            'error' => __('No se ha podido cargar la imagen.')
         ], 400);
     }
 
@@ -201,13 +212,33 @@ class Settings extends Resource
     {
         $disk = Storage::disk('public');
         if (!$disk->exists('uploads/' . $file)) {
-            return response()->json(['success' => false, 'error' => 'File not found.']);
+            return response()->json(['success' => false, 'error' => __('File not found.')]);
         }
 
         if (!$disk->delete('uploads/' . $file)) {
-            return response()->json(['success' => false, 'error' => 'File could not be deleted.']);
+            return response()->json(['success' => false, 'error' => __('File could not be deleted.')]);
         }
 
-        return response()->json(['success' => true, 'message' => 'File deleted successfully.']);
+        return response()->json(['success' => true, 'message' => __('File deleted successfully.')]);
+    }
+
+    /**
+     * @return array
+     */
+    private function getScopes(): array
+    {
+        try {
+            return Scope::where('is_active', true)
+                ->orderBy('id')
+                ->get()
+                ->map(function ($scope) {
+                    return [
+                        'code' => $scope->id,
+                        'label' => $scope->name,
+                    ];
+                });
+        } catch (Exception $e) {
+            return [];
+        }
     }
 }

@@ -35,6 +35,7 @@ use App\Nova\Lenses\UninstallationsLens;
 use App\Nova\PageBuilder\Pages;
 use App\Nova\Plan;
 use App\Nova\Router;
+use App\Nova\Scope;
 use App\Nova\Service;
 use App\Nova\Ticket;
 use App\NovaPermissions;
@@ -131,6 +132,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::lens(Plan::class, TelevisionPlanLens::class)->name(__('panel.television_plans')),
                 ])->icon('server')->collapsable(),
 
+                MenuSection::resource(Scope::class),
                 MenuSection::make(__('panel.settings_manager'))
                     ->path('/settings-manager')
                     ->icon('cog')->canSee(function ($request) {

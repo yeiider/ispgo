@@ -1,6 +1,9 @@
+import {Invoice} from "@/interfaces/Invoice.ts";
+
 export interface ICustomer {
   id: number
   first_name: string
+  full_name: string
   last_name: string
   date_of_birth: string
   phone_number: string
@@ -15,4 +18,6 @@ export interface ICustomer {
   password_reset_token_expiration: any
   created_at: string
   updated_at: string
+  customer_id?: number|string
+  invoices?: Invoice[]
 }

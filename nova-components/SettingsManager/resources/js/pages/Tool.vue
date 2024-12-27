@@ -1,10 +1,19 @@
 <template>
   <div class="relative" dusk="settings-index-component">
-    <heading class="mb-6">Settings Manager</heading>
-    <div class="flex justify-evenly items-start">
+
+    <div class="flex justify-between items-center mb-6">
+      <heading class="mb-0">{{ heading }}</heading>
+      <Dropdown
+        :options="scopes"
+        :selected="scope? scope : 0"
+        @option-selected="handleSelection"
+      />
+    </div>
+    <div class="flex justify-between items-start">
       <Menu class="w-[20%]"
             :menu="settingMenu"
             :section="section"
+            :scope="scope"
       />
       <form @submit.prevent="saveSetting" class="w-[75%]">
 
@@ -25,17 +34,17 @@
           <button type="button"
                   class="border text-left appearance-none cursor-pointer rounded text-sm font-bold focus:outline-none focus:ring ring-primary-200 dark:ring-gray-600 relative disabled:cursor-not-allowed inline-flex items-center justify-center bg-transparent border-transparent h-9 px-3 text-gray-600 dark:text-gray-400 hover:bg-gray-700/5 dark:hover:bg-gray-950"
                   @click="cancelUpdate" dusk="cancel-update-button">
-            <span class="flex items-center gap-1">Cancel</span>
+            <span class="flex items-center gap-1">{{ actionsTitles.cancel }}</span>
           </button>
           <button type="button"
                   class="border text-left appearance-none cursor-pointer rounded text-sm font-bold focus:outline-none focus:ring ring-primary-200 dark:ring-gray-600 relative disabled:cursor-not-allowed inline-flex items-center justify-center shadow h-9 px-3 bg-primary-500 border-primary-500 hover:bg-primary-400 hover:border-primary-400 text-white dark:text-gray-900"
                   @click="saveSetting(true)" dusk="update-and-continue-editing-button">
-            <span class="flex items-center gap-1">Update &amp; Continue Editing</span>
+            <span class="flex items-center gap-1">{{ actionsTitles.update_continue_editing }}</span>
           </button>
           <button type="submit"
                   class="border text-left appearance-none cursor-pointer rounded text-sm font-bold focus:outline-none focus:ring ring-primary-200 dark:ring-gray-600 relative disabled:cursor-not-allowed inline-flex items-center justify-center shadow h-9 px-3 bg-primary-500 border-primary-500 hover:bg-primary-400 hover:border-primary-400 text-white dark:text-gray-900"
                   dusk="update-button">
-            <span class="flex items-center gap-1">Update Setting</span>
+            <span class="flex items-center gap-1">{{ actionsTitles.update_setting }}</span>
           </button>
         </div>
       </form>
@@ -48,25 +57,39 @@
 import Menu from "../components/Menu.vue";
 import Collapsible from "../components/Collapsible.vue"
 import DefaultField from "../components/fields/DefaultField.vue";
+import Dropdown from "../components/Dropdown.vue";
+import {data} from "autoprefixer";
 
 export default {
   props: {
     section: {
       type: String,
       required: false
+    },
+    scope: {
+      type: String,
+      required: false
     }
   },
   components: {
     Menu,
+    Dropdown,
     Collapsible,
-    DefaultField
+    DefaultField,
   },
   data() {
     return {
       fields: [],
       groups: [],
       settingMenu: [],
-      isOpen: []
+      heading: 'Settings Manager',
+      actionsTitles: {
+        'cancel': 'Cancel',
+        'update_continue_editing': 'Update & Continue Editing',
+        'update_setting': 'Update Setting'
+      },
+      isOpen: [],
+      scopes: [],
     };
   },
   mounted() {
@@ -84,8 +107,24 @@ export default {
         if (response.data && "groups" in response.data && response.data.groups.length) {
           this.groups = response.data.groups;
         }
+        this.actionsTitles = response.data.actionsTitles;
+        this.heading = response.data.heading;
+        this.scopes = response.data.scopes;
       });
     },
+
+    handleSelection(option) {
+      if (option.code) {
+        const scope = option.code;
+        const url = window.location.pathname;
+        if (this.scope) {
+          window.location.href = url.replace(/(\/scope\/)([^/]+)/, `$1${scope}`);
+        } else {
+          window.location.href = `${url}/scope/${scope}/section/${this.section ?? 'general'}`;
+        }
+      }
+    },
+
     updateFieldValue({key, value}) {
       this.groups.forEach(group => {
         const fieldToUpdate = group.fields.find(field => field.uniqueKey === key);
@@ -107,7 +146,8 @@ export default {
     saveSetting(continueEditing = false) {
       Nova.request().post('/settings-manager/settings/save', {
         fields: this.fields,
-        section: this.section ?? 'general'
+        section: this.section ?? 'general',
+        scope: this.scope ?? 1
       }).then(response => {
         this.fetchSettings();
         if (response.data.success) {
