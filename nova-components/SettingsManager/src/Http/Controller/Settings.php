@@ -35,7 +35,7 @@ class Settings extends Resource
         $settingMenu = SettingsLoader::getSettingsMenu();
 
         // Obtener las configuraciones existentes
-        $existingSettings = CoreConfigData::all()->keyBy(function ($item) {
+        $existingSettings = CoreConfigData::where('scope_id', $request->scope)->get()->keyBy(function ($item) {
             return $item['path'];
         });
 
@@ -150,8 +150,8 @@ class Settings extends Resource
 
             foreach ($parseData as $group) {
                 CoreConfigData::updateOrCreate(
-                    ['path' => "{$section}/{$group['group']}/{$group['key']}"],
-                    ['value' => $group['value']]
+                    ['path' => "{$section}/{$group['group']}/{$group['key']}", "scope_id"=> $request->scope],
+                    ['value' => $group['value']],
                 );
             }
 
@@ -227,7 +227,12 @@ class Settings extends Resource
     private function getScopes()
     {
         try {
-            return Router::where('status', 'enabled')
+            $default = [
+                'code' => 0,
+                'label' => __('Default Config'),
+            ];
+
+            $scopes = Router::where('status', 'enabled')
                 ->orderBy('id')
                 ->get()
                 ->map(function ($scope) {
@@ -235,7 +240,12 @@ class Settings extends Resource
                         'code' => $scope->id,
                         'label' => $scope->name,
                     ];
-                });
+                })->toArray();
+
+            $scopes[] = $default;
+            sort($scopes);
+            return $scopes;
+
         } catch (Exception $e) {
             return [];
         }
