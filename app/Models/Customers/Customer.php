@@ -4,6 +4,7 @@ namespace App\Models\Customers;
 
 use App\Events\CustomerCreated;
 use App\Events\CustomerStatusUpdated;
+use App\Models\Contract;
 use App\Models\Invoice\Invoice;
 use App\Models\Services\Service;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -59,6 +60,11 @@ class Customer extends Authenticatable implements MustVerifyEmail
     public function services()
     {
         return $this->hasMany(Service::class);
+    }
+
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class);
     }
 
     public function taxDetails()

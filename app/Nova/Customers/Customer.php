@@ -6,6 +6,7 @@ use App\Mail\DynamicEmail;
 use App\Models\Customers\DocumentType;
 use App\Models\EmailTemplate;
 use App\Nova\Actions\UpdateCustomerStatus;
+use App\Nova\Contract;
 use App\Nova\Filters\CustomerStatus;
 use App\Nova\Invoice\Invoice;
 use App\Nova\Metrics\NewCustomers;
@@ -84,6 +85,9 @@ class Customer extends Resource
 
                 Tab::make(__('Invoices'), [
                     HasMany::make(__('Invoices'), 'invoices', Invoice::class),
+                ]),
+                Tab::make(__('Contracts'), [
+                    HasMany::make(__('Ccontracts'), 'contracts', Contract::class),
                 ]),
 
 
