@@ -3,6 +3,7 @@
 namespace Ispgo\SettingsManager\Http\Controller;
 
 use App\Models\CoreConfigData;
+use App\Models\Router;
 use Ispgo\Ckeditor\Ckeditor;
 use Ispgo\SettingsManager\App\SettingsManager\SettingsLoader;
 use Laravel\Nova\Fields\Boolean;
@@ -226,7 +227,7 @@ class Settings extends Resource
     private function getScopes()
     {
         try {
-            return Scope::where('is_active', true)
+            return Router::where('status', 'enabled')
                 ->orderBy('id')
                 ->get()
                 ->map(function ($scope) {

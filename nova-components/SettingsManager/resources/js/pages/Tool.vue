@@ -10,14 +10,13 @@
       />
     </div>
     <div class="flex justify-between items-start">
-      <Menu class="w-[20%]"
+      <Menu class="w-[30%] lg:w-[20%]"
             :menu="settingMenu"
             :section="section"
       />
       <form @submit.prevent="saveSetting" class="w-[75%]">
-
         <template v-for="(group, groupIndex) in groups" :key="groupIndex">
-          <card class="mb-1">
+          <card class="mb-2">
             <Collapsible :title="group.label" :isDefaultOpen="groupIndex === 0">
               <DefaultField
                 :fields="group.fields"

@@ -284,5 +284,12 @@
     "Update & Continue Editing": "Actualizar y Continuar Editando",
     "Update Setting": "Actualizar Configuración",
     "Settings Manager": "Administrador de Configuración",
-    "Updated At": "Actualizado En"
+    "Updated At": "Actualizado En",
+    "General Service Settings": "Configuraciones Generales del Servicio",
+    "Create Installation Order when Creating a Service": "Crear Orden de Instalación al Crear un Servicio",
+    "Notify User when Service is Created": "Notificar al Usuario Cuando se Cree un Servicio",
+    "Show Services in Customer Section": "Mostrar Servicios en la Sección del Cliente",
+    "Contacts": "Contactos",
+    "enable the use of contracts": "Habilitar el uso de contratos",
+    "Contract Template": "Plantilla de Contrato"
 }
