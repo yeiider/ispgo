@@ -55,7 +55,6 @@ import Menu from "../components/Menu.vue";
 import Collapsible from "../components/Collapsible.vue"
 import DefaultField from "../components/fields/DefaultField.vue";
 import Dropdown from "../components/Dropdown.vue";
-import {data} from "autoprefixer";
 
 export default {
   props: {

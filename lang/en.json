@@ -294,5 +294,13 @@
     "Show Services in Customer Section": "Show Services in Customer Section",
     "Contacts": "Contacts",
     "enable the use of contracts": "enable the use of contracts",
-    "Contract Template": "Contract Template"
+    "Contract Template": "Contract Template",
+    "Is Active": "Is Active",
+    "Subject": "Subject",
+    "Body": "Body",
+    "Styles": "Styles",
+    "Entities Variables": "Entities Variables",
+    "Test Email": "Test Email",
+    "Email Templates": "Email Templates",
+    "Html Template": "Html Template"
 }

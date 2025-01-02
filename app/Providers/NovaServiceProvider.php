@@ -115,7 +115,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('panel.content'), [
                     MenuItem::resource(Pages::class)->name(__('panel.pages')),
                     MenuItem::resource(EmailTemplate::class)->name(__('panel.email_templates')),
-                    MenuItem::resource(HtmlTemplate::class)->name(__('panel.html_template')),
+                    MenuItem::resource(HtmlTemplate::class)->name(__('Html Template')),
                 ])->icon('desktop-computer')->collapsable(),
 
                 MenuSection::make(__('panel.inventory'), [

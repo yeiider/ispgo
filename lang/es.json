@@ -294,5 +294,11 @@
     "Show Services in Customer Section": "Mostrar Servicios en la Sección del Cliente",
     "Contacts": "Contactos",
     "enable the use of contracts": "Habilitar el uso de contratos",
-    "Contract Template": "Plantilla de Contrato"
+    "Contract Template": "Plantilla de Contrato",
+    "Is Active": "Está Activo",
+    "Subject": "Asunto",
+    "Body": "Cuerpo",
+    "Styles": "Estilos",
+    "Entities Variables": "Variables de Entidades",
+    "Test Email": "Correo de Prueba"
 }
