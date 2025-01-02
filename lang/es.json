@@ -300,5 +300,7 @@
     "Body": "Cuerpo",
     "Styles": "Estilos",
     "Entities Variables": "Variables de Entidades",
-    "Test Email": "Correo de Prueba"
+    "Test Email": "Correo de Prueba",
+    "Email Templates": "Plantillas de Correo Electrónico",
+    "Html Template": "Plantilla HTML"
 }
