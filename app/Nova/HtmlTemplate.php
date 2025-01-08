@@ -5,6 +5,7 @@ namespace App\Nova;
 use App\Models\HtmlTemplate as HtmlTemplateModel;
 use Ispgo\Ckeditor\Ckeditor;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Markdown;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -58,6 +59,7 @@ class HtmlTemplate extends Resource
             Ckeditor::make(__('Body'), 'body')
                 ->rules('required')
                 ->help('Inserta aquí el contenido HTML de la plantilla.'),
+
             Code::make(__('Styles'), 'styles')
                 ->language("css")
                 ->help('Inserte aqui si quiere algun estilo custom para la plantilla.'),

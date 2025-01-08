@@ -2,7 +2,7 @@
 
 namespace App\Nova\Lenses;
 
-use App\Models\Action;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\DateTime;
@@ -31,9 +31,9 @@ class InstallationsLens extends Lens
     /**
      * Get the query builder for the lens.
      *
-     * @param \Laravel\Nova\Http\Requests\LensRequest $request
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param LensRequest $request
+     * @param Builder $query
+     * @return Builder
      */
     public static function query(LensRequest $request, $query)
     {
@@ -43,7 +43,7 @@ class InstallationsLens extends Lens
     /**
      * Get the fields available to the lens.
      *
-     * @param \Laravel\Nova\Http\Requests\LensRequest $request
+     * @param LensRequest $request
      * @return array
      */
     public function fields(Request $request)
@@ -71,7 +71,7 @@ class InstallationsLens extends Lens
                     'failed' => 'Failed',
                 ])->displayUsingLabels()->sortable()->hideFromIndex(),
 
-            Badge::make(__('Status'))->map([
+            Badge::make('Status')->map([
                 'pending' => 'warning',
                 'in_progress' => 'info',
                 'completed' => 'success',
@@ -82,13 +82,14 @@ class InstallationsLens extends Lens
                 'info' => 'refresh',
                 'warning' => 'clock',
             ]),
+
         ];
     }
 
     /**
      * Get the filters available to the lens.
      *
-     * @param \Laravel\Nova\Http\Requests\LensRequest $request
+     * @param LensRequest $request
      * @return array
      */
     public function filters(Request $request)
@@ -99,7 +100,7 @@ class InstallationsLens extends Lens
     /**
      * Get the cards available to the lens.
      *
-     * @param \Laravel\Nova\Http\Requests\LensRequest $request
+     * @param LensRequest $request
      * @return array
      */
     public function cards(Request $request)
@@ -110,7 +111,7 @@ class InstallationsLens extends Lens
     /**
      * Get the actions available to the lens.
      *
-     * @param \Laravel\Nova\Http\Requests\LensRequest $request
+     * @param LensRequest $request
      * @return array
      */
     public function actions(Request $request)
