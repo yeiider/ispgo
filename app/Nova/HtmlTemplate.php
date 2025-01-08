@@ -47,21 +47,26 @@ class HtmlTemplate extends Resource
         return [
             ID::make()->sortable(),
 
-            Text::make('Name', 'name')
+            Text::make(__('Name'), 'name')
                 ->rules('required', 'max:255')
                 ->sortable(),
 
-            Text::make('Entity', 'entity')
+            Text::make(__('Entity'), 'entity')
                 ->nullable()
                 ->help('Opcional: indica el modelo al que está asociada la plantilla (ej: "customer", "invoice", etc.)'),
 
-            Ckeditor::make('Body', 'body')
+            Ckeditor::make(__('Body'), 'body')
                 ->rules('required')
                 ->help('Inserta aquí el contenido HTML de la plantilla.'),
-            Code::make('Styles', 'styles')
+            Code::make(__('Styles'), 'styles')
                 ->language("css")
                 ->help('Inserte aqui si quiere algun estilo custom para la plantilla.'),
         ];
+    }
+
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Html Template');
     }
 
     /**

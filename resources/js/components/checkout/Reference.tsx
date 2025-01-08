@@ -62,7 +62,6 @@ export default function Reference({navigation}: Props) {
         },
       });
       setInvoice(response.data.invoice);
-      window.localStorage.setItem('invoice', JSON.stringify(response.data.invoice))
     } catch (e: any) {
       toast.error(e.response?.data?.message || 'Error occurred', {
         classNames: {
