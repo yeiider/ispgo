@@ -19,7 +19,8 @@ class SendContractToCustomerAction extends Action implements ShouldQueue
     public function handle(ActionFields $fields, \Illuminate\Support\Collection $models)
     {
         foreach ($models as $contract) {
-            $customer = $contract->customer; // Obtener al cliente asociado
+            $customer = $contract->customer;
+
             $this->markAsFinished($contract);
         }
 

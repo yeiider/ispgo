@@ -73,8 +73,8 @@ class Contract extends Resource
             Date::make(__('contract.signed_date'), 'signed_at')->onlyOnIndex(),
 
             Boolean::make(__('contract.signed'), 'is_signed')
-                ->rules('required', 'in:pending,signed')
-                ->help(__('contract.signed_help'))->onlyOnIndex(),
+                ->rules('required')
+                ->help(__('contract.signed_help')),
         ];
     }
 

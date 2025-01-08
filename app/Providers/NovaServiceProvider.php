@@ -27,7 +27,6 @@ use App\Nova\Invoice\DailyInvoiceBalance;
 use App\Nova\Invoice\Invoice;
 use App\Nova\Invoice\PaymentPromise;
 use App\Nova\Lenses\InstallationsLens;
-use App\Nova\Lenses\TelephonicPlanLens;
 use App\Nova\Lenses\TelephonicServiceLens;
 use App\Nova\Lenses\TelevisionPlanLens;
 use App\Nova\Lenses\TelevisionServiceLens;
@@ -35,7 +34,6 @@ use App\Nova\Lenses\UninstallationsLens;
 use App\Nova\PageBuilder\Pages;
 use App\Nova\Plan;
 use App\Nova\Router;
-use App\Nova\Scope;
 use App\Nova\Service;
 use App\Nova\Ticket;
 use App\NovaPermissions;
@@ -43,7 +41,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Ispgo\Mikrotik\Mikrotik;
 use Ispgo\SettingsManager\SettingsManager;
-
 use Ispgo\Smartolt\Smartolt;
 use Laravel\Nova\Exceptions\NovaException;
 use Laravel\Nova\Menu\MenuGroup;
@@ -132,7 +129,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::lens(Plan::class, TelevisionPlanLens::class)->name(__('panel.television_plans')),
                 ])->icon('server')->collapsable(),
 
-                MenuSection::resource(Scope::class),
                 MenuSection::make(__('panel.settings_manager'))
                     ->path('/settings-manager')
                     ->icon('cog')->canSee(function ($request) {

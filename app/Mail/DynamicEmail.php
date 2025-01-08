@@ -22,19 +22,9 @@ class DynamicEmail extends Mailable
         $this->template = $template;
     }
 
-    public function build()
+    public function build(): DynamicEmail
     {
-        if (!app()->environment('local')) {
-            config([
-                'mail.mailers.smtp.host' => EmailConfigProvider::getHost(),
-                'mail.mailers.smtp.port' => EmailConfigProvider::getPort(),
-                'mail.mailers.smtp.username' => EmailConfigProvider::getUsername(),
-                'mail.mailers.smtp.password' => EmailConfigProvider::getPassword(),
-                'mail.mailers.smtp.encryption' => EmailConfigProvider::getSecurity(),
-            ]);
-        }
-
-        $engine = new \App\Services\TemplateEngine($this->template, $this->data);
+        $engine = new \App\Services\EmailTemplateEngine($this->template, $this->data);
         $content = $engine->renderContentOnly(); // Renderiza solo el contenido
         $subject = $engine->replaceVariables($this->template->subject);
 
