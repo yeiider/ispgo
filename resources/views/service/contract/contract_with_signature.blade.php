@@ -72,14 +72,14 @@
 
         <!-- Bloque de firma del prestador de servicio -->
         <div class="signature-block">
-            @if(isset($providerSignatureUrl))
-                <img src="{{ $providerSignatureUrl }}" alt="Firma del prestador" class="signature-image">
+            @if($representativeSignature)
+                <img src="{{ $representativeSignature }}" alt="Firma del prestador" class="signature-image">
             @endif
             <div class="signature-line"></div>
             <p><strong>EL MANDATARIO</strong></p>
-            <p><strong>Nombre:</strong> Jader Albarracín Acaisedo</p>
-            <p><strong>Cargo:</strong> Representante Legal</p>
-            <p><strong>C.C.:</strong> 11661777181</p>
+            <p><strong>Nombre:</strong> {{$representativeName}}</p>
+            <p><strong>Cargo:</strong> {{$representativeRole}}</p>
+            <p><strong>C.C.:</strong> {{$representativeDocument}}</p>
         </div>
     </div>
 </div>

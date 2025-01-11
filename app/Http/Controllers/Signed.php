@@ -60,8 +60,8 @@ class Signed extends Controller
         // Construir la URL del PDF firmado (si existe)
         // De acuerdo con tu lógica, lo guardas en: public/contracts/contract_{ID}_signed.pdf
         $pdfFilename = "contract_{$contractId}_signed.pdf";
-        $pdfPath     = "public/contracts/{$pdfFilename}"; // Ruta interna en storage
-        $pdfUrl      = null;
+        $pdfPath = "public/contracts/{$pdfFilename}"; // Ruta interna en storage
+        $pdfUrl = null;
 
         // Si está firmado, armamos la url desde Storage
         if ($isSigned && Storage::exists($pdfPath)) {
@@ -70,12 +70,11 @@ class Signed extends Controller
 
         return Inertia::render('Signed/Index', [
             "contractHtml" => $htmlTemplate,
-            "url_signed"   => route('signed.signedContract', $contractId),
+            "url_signed" => route('signed.signedContract', $contractId),
+            "isSigned" => $isSigned,
+            "signedAt" => $signedDate,
+            "pdfUrl" => $pdfUrl
 
-            // Props adicionales para manejar la firma
-            "isSigned"     => $isSigned,
-            "signedAt"     => $signedDate,
-            "pdfUrl"       => $pdfUrl,
         ]);
     }
 
@@ -138,14 +137,39 @@ class Signed extends Controller
             $templateId = ServiceProviderConfig::contractTemplate();
             $htmlTemplate = $this->htmlBuild($templateId, $service);
 
-            // Renderizar el HTML con la firma incluida
+            $signaturePath = ServiceProviderConfig::representativeSignature();
+
+            if (!empty($signaturePath)) {
+                if (str_starts_with($signaturePath, '/storage')) {
+                    $relativePath = str_replace('/storage', '', $signaturePath);
+                    $fullPath = storage_path('app/public' . $relativePath);
+                } else {
+                    $fullPath = storage_path('app/public/' . ltrim($signaturePath, '/'));
+                }
+            }
+
+            if (file_exists($fullPath)) {
+                $imageContent = file_get_contents($fullPath);
+                $mimeType = mime_content_type($fullPath);
+                $representativeSignatureBase64 = base64_encode($imageContent);
+                $representativeSignatureUri = 'data:' . $mimeType . ';base64,' . $representativeSignatureBase64;
+            } else {
+                throw new \Exception("File not found at path: {$fullPath}");
+            }
+
+
+
             $htmlWithSignature = view('service/contract/contract_with_signature', [
                 'content' => $htmlTemplate,
-                'signatureUrl' => $signatureUri, // La imagen en data URI
+                'signatureUrl' => $signatureUri,
                 'customer' => [
                     'name' => $service->customer->full_name,
                     'document' => $service->customer->identity_document,
                 ],
+                "representativeSignature" => $representativeSignatureUri,
+                "representativeName" => ServiceProviderConfig::representativeName(),
+                "representativeDocument" => ServiceProviderConfig::representativeDocument(),
+                "representativeRole" => ServiceProviderConfig::representativeRole(),
             ])->render();
 
             // Convertir el HTML a PDF usando DomPDF
@@ -176,8 +200,6 @@ class Signed extends Controller
             ], 500);
         }
     }
-
-
 
 
 }

@@ -24,7 +24,8 @@
         "laravel/passport": "^12.0",
         "laravel/tinker": "^2.9",
         "predis/predis": "^2.3",
-        "sereny/nova-permissions": "@dev"
+        "sereny/nova-permissions": "@dev",
+        "ext-fileinfo": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

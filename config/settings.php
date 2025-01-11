@@ -227,6 +227,29 @@ return [
                 "field" => "select-field",
                 "label" => "Contract Template",
                 "options" => \App\Settings\Config\Sources\HtmlTemplate::class
+            ],
+
+            "representative_signature" => [
+                "field" => "image-field",
+                "label" => "Company Representative Signature",
+                "placeholder" => "Upload Signature",
+                "accept" => "image/*", // Limits file types to images
+            ],
+            "representative_name" => [
+                "field" => "text-field",
+                "label" => "Representative Name",
+                "placeholder" => "Enter the Representative's Name",
+            ],
+            "representative_document" => [
+                "field" => "text-field",
+                "label" => "Representative Document",
+                "placeholder" => "Enter the Representative's Document",
+            ],
+            "representative_role" => [
+                "field" => "text-field",
+                "label" => "Representative Role",
+                "placeholder" => "Enter the Representative's Role",
+
             ]
         ],
     ],

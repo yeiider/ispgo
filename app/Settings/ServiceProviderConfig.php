@@ -33,4 +33,23 @@ class ServiceProviderConfig
     {
         return (int)ConfigHelper::getConfigValue(self::PATH_SERVICE_CONTRACT . 'contract_template');
     }
+
+    public static function representativeSignature(): ?string
+    {
+        return ConfigHelper::getConfigValue(self::PATH_SERVICE_CONTRACT . 'representative_signature');
+    }
+
+    public static function representativeName(): ?string
+    {
+        return ConfigHelper::getConfigValue(self::PATH_SERVICE_CONTRACT . 'representative_name');
+    }
+
+    public static function representativeDocument(): ?string
+    {
+        return ConfigHelper::getConfigValue(self::PATH_SERVICE_CONTRACT . 'representative_document');
+    }
+    public static function representativeRole(): ?string
+    {
+        return ConfigHelper::getConfigValue(self::PATH_SERVICE_CONTRACT . 'representative_role');
+    }
 }
