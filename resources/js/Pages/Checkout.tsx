@@ -1,9 +1,10 @@
 import {__} from "@/translation.ts";
-import {useMemo} from "react";
+import {useMemo, useState} from "react";
 import {useStepper} from "headless-stepper";
 import StepsNavigate from "@/components/checkout/StepsNavigate.tsx";
 import Reference from "@/components/checkout/Reference.tsx";
 import PaymentMethods from "@/components/checkout/PaymentMethods.tsx";
+import {Invoice} from "@/interfaces/Invoice.ts";
 
 export default function Checkout() {
   const stepsList = [
@@ -32,6 +33,8 @@ export default function Checkout() {
     setStep(steteNumber)
   }
 
+  const [invoice, setInvoice] = useState<null|Invoice >(null)
+
   return (
     <div className="min-h-[80vh] max-w-2xl mx-auto mt-8 md:mt-12 mb-5">
       <div className="">
@@ -41,10 +44,10 @@ export default function Checkout() {
         </div>
 
         {state.currentStep == 0 && (
-          <Reference navigation={navigation}/>
+          <Reference navigation={navigation} onSetInvoice={setInvoice} />
         )}
         {state.currentStep == 1 && (
-          <PaymentMethods navigation={navigation} />
+          <PaymentMethods navigation={navigation} invoice={invoice} />
         )}
         {state.currentStep == 2 && (
           <>
