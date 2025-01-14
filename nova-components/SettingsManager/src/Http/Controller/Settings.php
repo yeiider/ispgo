@@ -3,6 +3,8 @@
 namespace Ispgo\SettingsManager\Http\Controller;
 
 use App\Models\CoreConfigData;
+use App\Models\Router;
+use Ispgo\Ckeditor\Ckeditor;
 use Ispgo\SettingsManager\App\SettingsManager\SettingsLoader;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Country;
@@ -33,7 +35,7 @@ class Settings extends Resource
         $settingMenu = SettingsLoader::getSettingsMenu();
 
         // Obtener las configuraciones existentes
-        $existingSettings = CoreConfigData::all()->keyBy(function ($item) {
+        $existingSettings = CoreConfigData::where('scope_id', $request->scope)->get()->keyBy(function ($item) {
             return $item['path'];
         });
 
@@ -96,6 +98,7 @@ class Settings extends Resource
                     case 'image-field':
                         $fieldInstance = Image::make($fieldLabel, $fieldKey);
                         break;
+
                     case 'text-field':
                     default:
                         $fieldInstance = Text::make($fieldLabel, $fieldKey);
@@ -147,8 +150,8 @@ class Settings extends Resource
 
             foreach ($parseData as $group) {
                 CoreConfigData::updateOrCreate(
-                    ['path' => "{$section}/{$group['group']}/{$group['key']}"],
-                    ['value' => $group['value']]
+                    ['path' => "{$section}/{$group['group']}/{$group['key']}", "scope_id"=> $request->scope],
+                    ['value' => $group['value']],
                 );
             }
 
@@ -220,13 +223,16 @@ class Settings extends Resource
         return response()->json(['success' => true, 'message' => __('File deleted successfully.')]);
     }
 
-    /**
-     * @return array
-     */
-    private function getScopes(): array
+
+    private function getScopes()
     {
         try {
-            return Scope::where('is_active', true)
+            $default = [
+                'code' => 0,
+                'label' => __('Default Config'),
+            ];
+
+            $scopes = Router::where('status', 'enabled')
                 ->orderBy('id')
                 ->get()
                 ->map(function ($scope) {
@@ -234,7 +240,12 @@ class Settings extends Resource
                         'code' => $scope->id,
                         'label' => $scope->name,
                     ];
-                });
+                })->toArray();
+
+            $scopes[] = $default;
+            sort($scopes);
+            return $scopes;
+
         } catch (Exception $e) {
             return [];
         }

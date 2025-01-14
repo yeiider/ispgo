@@ -6,7 +6,9 @@ use App\Mail\DynamicEmail;
 use App\Models\Customers\DocumentType;
 use App\Models\EmailTemplate;
 use App\Nova\Actions\UpdateCustomerStatus;
+use App\Nova\Contract;
 use App\Nova\Filters\CustomerStatus;
+use App\Nova\Invoice\Invoice;
 use App\Nova\Metrics\NewCustomers;
 use App\Nova\Resource;
 use App\Nova\Service;
@@ -24,6 +26,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Tabs\Tab;
 
 class Customer extends Resource
 {
@@ -38,41 +41,58 @@ class Customer extends Resource
     public function fields(Request $request): array
     {
         return [
-            ID::make()->sortable(),
-            Text::make(__('customer.first_name'), 'first_name')->sortable()->rules('required', 'max:100'),
-            Text::make(__('customer.last_name'), 'last_name')->sortable()->rules('required', 'max:100'),
-            Date::make(__('customer.date_of_birth'), 'date_of_birth')->nullable(),
-            Text::make(__('customer.phone_number'), 'phone_number')->rules('required', 'max:12'),
-            Text::make(__('customer.email_address'), 'email_address')->sortable()->rules('required', 'email', 'max:100'),
-            Select::make(__('customer.document_type'), 'document_type')
-                ->options(DocumentType::pluck('name', 'code')->toArray())
-                ->sortable()
-                ->rules('required', 'max:20'),
-            Text::make(__('customer.identity_document'), 'identity_document')->rules('required', 'max:100'),
-            Badge::make(__('customer.status'), 'customer_status')->map([
-                'active' => 'success',
-                'inactive' => 'danger',
-                'suspended' => 'warning',
-            ])->icons([
-                'danger' => 'exclamation-circle',
-                'success' => 'check-circle'
-            ])->label(function ($value) {
-                return __('attribute.customer_status.' . $value);
-            }),
+            Tab::group(__('Information'), [
+                Tab::make(__('Personal Information'), [
+                    ID::make()->sortable(),
+                    Text::make(__('customer.first_name'), 'first_name')->sortable()->rules('required', 'max:100'),
+                    Text::make(__('customer.last_name'), 'last_name')->sortable()->rules('required', 'max:100'),
+                    Date::make(__('customer.date_of_birth'), 'date_of_birth')->nullable(),
+                    Text::make(__('customer.phone_number'), 'phone_number')->rules('required', 'max:12'),
+                    Text::make(__('customer.email_address'), 'email_address')->sortable()->rules('required', 'email', 'max:100'),
+                    Select::make(__('customer.document_type'), 'document_type')
+                        ->options(DocumentType::pluck('name', 'code')->toArray())
+                        ->sortable()
+                        ->rules('required', 'max:20'),
+                    Text::make(__('customer.identity_document'), 'identity_document')->rules('required', 'max:100'),
+                    Badge::make(__('customer.status'), 'customer_status')->map([
+                        'active' => 'success',
+                        'inactive' => 'danger',
+                        'suspended' => 'warning',
+                    ])->icons([
+                        'danger' => 'exclamation-circle',
+                        'success' => 'check-circle'
+                    ])->label(function ($value) {
+                        return __('attribute.customer_status.' . $value);
+                    }),
 
-            Select::make(__('customer.customer_status'), 'customer_status')
-                ->options([
-                    'active' => __('customer.active'),
-                    'inactive' => __('customer.inactive')
-                ])
-                ->displayUsingLabels()
-                ->hideFromIndex()
-                ->sortable()->rules('required'),
+                    Select::make(__('customer.customer_status'), 'customer_status')
+                        ->options([
+                            'active' => __('customer.active'),
+                            'inactive' => __('customer.inactive')
+                        ])
+                        ->displayUsingLabels()
+                        ->hideFromIndex()
+                        ->sortable()->rules('required'),
 
-            Textarea::make(__('customer.additional_notes'), 'additional_notes')->nullable(),
-            HasOne::make(__('customer.taxDetails'), 'taxDetails', TaxDetail::class),
-            HasMany::make(__('customer.addresses'), 'addresses', Address::class),
-            HasMany::make(__('customer.services'), 'services', Service::class),
+                    Textarea::make(__('customer.additional_notes'), 'additional_notes')->nullable(),
+                    HasOne::make(__('customer.taxDetails'), 'taxDetails', TaxDetail::class),
+                    HasMany::make(__('customer.addresses'), 'addresses', Address::class),
+                ]),
+
+                Tab::make(__('Services'), [
+                    HasMany::make(__('services'), 'services', Service::class),
+                ]),
+
+                Tab::make(__('Invoices'), [
+                    HasMany::make(__('Invoices'), 'invoices', Invoice::class),
+                ]),
+                Tab::make(__('Contracts'), [
+                    HasMany::make(__('Ccontracts'), 'contracts', Contract::class),
+                ]),
+
+
+
+            ]),
         ];
     }
 

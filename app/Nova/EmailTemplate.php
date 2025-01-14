@@ -26,35 +26,40 @@ class EmailTemplate extends Resource
     {
         return [
             ID::make('ID')->sortable(),
-            Boolean::make('Is Active')->default(true)
+            Boolean::make(__('Is Active'), 'is_active')->default(true)
                 ->sortable(),
-            Text::make('Name')
+            Text::make(__('Name'), 'name')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
-            Text::make('Subject')
+            Text::make(__('Subject'), 'subject')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
-            Ckeditor::make('Body')
+            Ckeditor::make(__('Body'), 'body')
                 ->rules('required'),
 
-            Ckeditor::make('Styles'),
+            Ckeditor::make(__('Styles'), 'styles'),
 
-            Select::make('Entities Variables', 'entity')->options(
+            Select::make(__('Entities Variables'), 'entity')->options(
                 [
-                    "invoice" => "Invoice",
-                    "customer" => "Customer",
-                    "service" => "Service",
+                    "invoice" => __("Invoice"),
+                    "customer" => __("Customer"),
+                    "service" => __("Service"),
                 ]
-            ),
+            )->displayUsingLabels(),
 
-            Text::make('Test Email')
+            Text::make(__('Test Email'), 'test_email')
                 ->sortable()
                 ->rules('nullable', 'email'),
 
-            Textarea::make('Description'),
+            Textarea::make(__('Description'), 'description'),
 
         ];
+    }
+
+    public static function label(): \Illuminate\Foundation\Application|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('Email Templates');
     }
 }

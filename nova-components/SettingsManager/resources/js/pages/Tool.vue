@@ -1,8 +1,7 @@
 <template>
   <div class="relative" dusk="settings-index-component">
-
     <div class="flex justify-between items-center mb-6">
-      <heading class="mb-0">{{ heading }}</heading>
+      <heading class="mb-2 md:mb-0">{{ heading }}</heading>
       <Dropdown
         :options="scopes"
         :selected="scope? scope : 0"
@@ -10,15 +9,13 @@
       />
     </div>
     <div class="flex justify-between items-start">
-      <Menu class="w-[20%]"
+      <Menu class="mb-2 md:mb-0 w-[20%]"
             :menu="settingMenu"
             :section="section"
-            :scope="scope"
       />
       <form @submit.prevent="saveSetting" class="w-[75%]">
-
         <template v-for="(group, groupIndex) in groups" :key="groupIndex">
-          <card class="mb-1">
+          <card class="mb-2">
             <Collapsible :title="group.label" :isDefaultOpen="groupIndex === 0">
               <DefaultField
                 :fields="group.fields"
@@ -58,7 +55,6 @@ import Menu from "../components/Menu.vue";
 import Collapsible from "../components/Collapsible.vue"
 import DefaultField from "../components/fields/DefaultField.vue";
 import Dropdown from "../components/Dropdown.vue";
-import {data} from "autoprefixer";
 
 export default {
   props: {
@@ -75,7 +71,7 @@ export default {
     Menu,
     Dropdown,
     Collapsible,
-    DefaultField,
+    DefaultField
   },
   data() {
     return {
@@ -99,7 +95,8 @@ export default {
     fetchSettings() {
       let url = '/settings-manager/settings';
       if (this.section) {
-        url = `${url}?section=${this.section}`;
+        const scope = this.scope ?? 0;
+        url = `${url}?scope=${scope}&section=${this.section}`;
       }
 
       Nova.request().get(url).then(response => {
@@ -114,14 +111,12 @@ export default {
     },
 
     handleSelection(option) {
-      if (option.code) {
-        const scope = option.code;
-        const url = window.location.pathname;
-        if (this.scope) {
-          window.location.href = url.replace(/(\/scope\/)([^/]+)/, `$1${scope}`);
-        } else {
-          window.location.href = `${url}/scope/${scope}/section/${this.section ?? 'general'}`;
-        }
+      const scope = option.code;
+      const url = window.location.pathname;
+      if (typeof this.scope !== 'undefined') {
+        window.location.href = url.replace(/(\/scope\/)([^/]+)/, `$1${scope}`);
+      } else {
+        window.location.href = `${url}/scope/${scope}/section/${this.section ?? 'general'}`;
       }
     },
 

@@ -183,6 +183,77 @@ return [
             ]
         ]
     ],
+
+
+    "service" => [
+        "setting" => [
+            "label" => "Services",
+            "class" => "form-control",
+        ],
+        "general" => [
+            "setting" => [
+                "label" => "General Service Settings",
+                "class" => "form-control",
+                "code" => "general"
+            ],
+            "create_installation_order" => [
+                "field" => "boolean-field",
+                "label" => "Create Installation Order when Creating a Service",
+                "placeholder" => "Create Installation Order",
+            ],
+            "notify_user_service_creation" => [
+                "field" => "boolean-field",
+                "label" => "Notify User when Service is Created",
+                "placeholder" => "Notify User when Service is Created",
+            ],
+            "show_services_in_customer_section" => [
+                "field" => "boolean-field",
+                "label" => "Show Services in Customer Section",
+                "placeholder" => "Show Services in Customer Section",
+            ],
+        ],
+        "contract" => [
+            "setting" => [
+                "label" => "Contacts",
+                "class" => "form-control",
+                "code" => "contract"
+            ],
+            "enabled" => [
+                "field" => "boolean-field",
+                "label" => "enable the use of contracts",
+                "placeholder" => "Create Installation Order",
+            ],
+            "contract_template" => [
+                "field" => "select-field",
+                "label" => "Contract Template",
+                "options" => \App\Settings\Config\Sources\HtmlTemplate::class
+            ],
+
+            "representative_signature" => [
+                "field" => "image-field",
+                "label" => "Company Representative Signature",
+                "placeholder" => "Upload Signature",
+                "accept" => "image/*", // Limits file types to images
+            ],
+            "representative_name" => [
+                "field" => "text-field",
+                "label" => "Representative Name",
+                "placeholder" => "Enter the Representative's Name",
+            ],
+            "representative_document" => [
+                "field" => "text-field",
+                "label" => "Representative Document",
+                "placeholder" => "Enter the Representative's Document",
+            ],
+            "representative_role" => [
+                "field" => "text-field",
+                "label" => "Representative Role",
+                "placeholder" => "Enter the Representative's Role",
+
+            ]
+        ],
+    ],
+
     "invoice" => [
         "setting" => [
             "label" => "Invoices",

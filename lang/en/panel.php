@@ -21,7 +21,7 @@ return [
     'products' => 'Products',
     'suppliers' => 'Suppliers',
     'equipment_assignments' => 'Equipment Assignments',
-
+    'contract' => 'Contract',
     'customers' => 'Customers',
     'addresses' => 'Addresses',
     'tax_details' => 'Tax Details',
@@ -44,4 +44,5 @@ return [
     'plans' => 'Plans',
     'television_plans' => 'Television Plans',
     'telephonic_plans' => 'Telephonic Plans',
+    'html_template' => 'Html Template',
 ];

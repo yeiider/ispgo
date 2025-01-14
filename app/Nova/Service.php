@@ -22,6 +22,7 @@ use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Date;
+use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
@@ -113,6 +114,7 @@ class Service extends Resource
     {
         return [
             Text::make(__('service.support_contact'), 'support_contact'),
+
             BelongsTo::make(__('service.address'), 'address', Address::class)->hideFromIndex()->searchable(),
             Text::make(__('service.billing_cycle'), 'billing_cycle'),
             Textarea::make(__('service.service_contract'), 'service_contract'),

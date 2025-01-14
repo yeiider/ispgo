@@ -12,6 +12,7 @@ import Wompi from "@/components/checkout/PaymentMethods/Wompi.tsx";
 
 interface Props {
   navigation: (step: number) => void;
+  invoice: Invoice|null
 }
 
 const componentsMap: Record<string, React.ComponentType<any>> = {
@@ -27,16 +28,17 @@ export function RenderPaymentComponent({paymentMethod, ...restProps}: {
   return Component ? <Component paymentMethod={paymentMethod} {...restProps} /> : null;
 }
 
-export default function PaymentMethods({navigation}: Props) {
-  const invoice: Invoice | object = JSON.parse(localStorage.getItem("invoice") || '{}');
+export default function PaymentMethods({navigation, invoice}: Props) {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [methodSelected, setMethodSelected] = useState<PaymentMethod | null>(null);
 
   useEffect(() => {
-    if (!Object.keys(invoice).length) {
-      toast.warning(__('No invoice found'), {
+    console.log(invoice)
+
+    if (!invoice || !Object.keys(invoice).length) {
+      toast.warning("No invoice found", {
         classNames: {
           icon: 'text-yellow-500'
         }

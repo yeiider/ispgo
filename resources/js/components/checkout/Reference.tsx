@@ -29,9 +29,10 @@ import {toast} from "sonner"
 
 interface Props {
   navigation: (step: number) => void;
+  onSetInvoice:  React.Dispatch<React.SetStateAction<Invoice | null>>
 }
 
-export default function Reference({navigation}: Props) {
+export default function Reference({navigation, onSetInvoice}: Props) {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -62,7 +63,8 @@ export default function Reference({navigation}: Props) {
         },
       });
       setInvoice(response.data.invoice);
-      window.localStorage.setItem('invoice', JSON.stringify(response.data.invoice))
+      onSetInvoice(response.data.invoice);
+
     } catch (e: any) {
       toast.error(e.response?.data?.message || 'Error occurred', {
         classNames: {
@@ -90,6 +92,7 @@ export default function Reference({navigation}: Props) {
 
     if (Object.keys(invoice).length > 0) {
       setInvoice(invoice);
+      onSetInvoice(invoice);
     }
 
   }, [])

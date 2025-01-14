@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Nova\Box;
+use App\Nova\Contract;
 use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
@@ -14,6 +15,7 @@ use App\Nova\Finance\CashRegister;
 use App\Nova\Finance\Expense;
 use App\Nova\Finance\Income;
 use App\Nova\Finance\Transaction;
+use App\Nova\HtmlTemplate;
 use App\Nova\Installation;
 use App\Nova\Inventory\Category;
 use App\Nova\Inventory\EquipmentAssignment;
@@ -25,7 +27,6 @@ use App\Nova\Invoice\DailyInvoiceBalance;
 use App\Nova\Invoice\Invoice;
 use App\Nova\Invoice\PaymentPromise;
 use App\Nova\Lenses\InstallationsLens;
-use App\Nova\Lenses\TelephonicPlanLens;
 use App\Nova\Lenses\TelephonicServiceLens;
 use App\Nova\Lenses\TelevisionPlanLens;
 use App\Nova\Lenses\TelevisionServiceLens;
@@ -33,7 +34,6 @@ use App\Nova\Lenses\UninstallationsLens;
 use App\Nova\PageBuilder\Pages;
 use App\Nova\Plan;
 use App\Nova\Router;
-use App\Nova\Scope;
 use App\Nova\Service;
 use App\Nova\Ticket;
 use App\NovaPermissions;
@@ -41,8 +41,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Ispgo\Mikrotik\Mikrotik;
 use Ispgo\SettingsManager\SettingsManager;
-
 use Ispgo\Smartolt\Smartolt;
+use Laravel\Nova\Exceptions\NovaException;
 use Laravel\Nova\Menu\MenuGroup;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
@@ -78,6 +78,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     ]),
                     MenuGroup::make(__('panel.all_services'), [
                         MenuItem::resource(Service::class),
+                        MenuItem::resource(Contract::class)->name(__('panel.contract')),
                         MenuItem::lens(Service::class, TelephonicServiceLens::class)->name(__('panel.telephonic_services')),
                         MenuItem::lens(Service::class, TelevisionServiceLens::class)->name(__('panel.television_services')),
                         MenuItem::lens(Installation::class, InstallationsLens::class)->name(__('panel.installations')),
@@ -111,6 +112,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('panel.content'), [
                     MenuItem::resource(Pages::class)->name(__('panel.pages')),
                     MenuItem::resource(EmailTemplate::class)->name(__('panel.email_templates')),
+                    MenuItem::resource(HtmlTemplate::class)->name(__('Html Template')),
                 ])->icon('desktop-computer')->collapsable(),
 
                 MenuSection::make(__('panel.inventory'), [
@@ -127,7 +129,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::lens(Plan::class, TelevisionPlanLens::class)->name(__('panel.television_plans')),
                 ])->icon('server')->collapsable(),
 
-                MenuSection::resource(Scope::class),
                 MenuSection::make(__('panel.settings_manager'))
                     ->path('/settings-manager')
                     ->icon('cog')->canSee(function ($request) {
@@ -141,7 +142,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::link(__('panel.DHCP_server_Ipv6'), 'mikrotik/dhcp-serve'),
                 ])->icon('cog')->collapsable(),
 
-                $this->getNovaPermissionsMenu($request), // Agregar menú de NovaPermissions
+                $this->getNovaPermissionsMenu($request),
             ];
         });
     }
@@ -206,7 +207,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         parent::register();
     }
@@ -214,10 +215,11 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     /**
      * Get the Nova Permissions menu.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Laravel\Nova\Menu\MenuSection
+     * @param Request $request
+     * @return MenuSection
+     * @throws NovaException
      */
-    protected function getNovaPermissionsMenu(Request $request)
+    protected function getNovaPermissionsMenu(Request $request): MenuSection
     {
         $novaPermissions = new NovaPermissions();
 

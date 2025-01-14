@@ -173,6 +173,9 @@
     "Are you sure to pay": "Are you sure to pay",
     "Confirm": "Confirm",
     "Cancel": "Cancel",
+    "Oauth Clients": "Oauth Clients",
+    "The contract has been sent to the customer.": "The contract has been sent to the customer.",
+    "Send contract to client": "Send contract to client",
     "Invoice": "Invoice",
     "Customers": "Customers",
     "No customers found": "No customers found",
@@ -284,6 +287,20 @@
     "Update & Continue Editing": "Update & Continue Editing",
     "Update Setting": "Update Setting",
     "Settings Manager": "Settings Manager",
-    "Updated At": "Updated At"
-
+    "Updated At": "Updated At",
+    "General Service Settings": "General Service Settings",
+    "Create Installation Order when Creating a Service": "Create Installation Order when Creating a Service",
+    "Notify User when Service is Created": "Notify User when Service is Created",
+    "Show Services in Customer Section": "Show Services in Customer Section",
+    "Contacts": "Contacts",
+    "enable the use of contracts": "enable the use of contracts",
+    "Contract Template": "Contract Template",
+    "Is Active": "Is Active",
+    "Subject": "Subject",
+    "Body": "Body",
+    "Styles": "Styles",
+    "Entities Variables": "Entities Variables",
+    "Test Email": "Test Email",
+    "Email Templates": "Email Templates",
+    "Html Template": "Html Template"
 }
