@@ -17,23 +17,8 @@ class CreateFiscalRegimesTable extends Migration
         });
 
         DB::table('fiscal_regimes')->insert([
-            ['code' => 'general', 'name' => 'General Regime'],
-            ['code' => 'simplified', 'name' => 'Simplified Regime'],
-            ['code' => 'small_contributor', 'name' => 'Small Contributor Regime'],
-            ['code' => 'large_contributor', 'name' => 'Large Contributor Regime'],
-            ['code' => 'self_employed', 'name' => 'Self-Employed Regime'],
-            ['code' => 'corporate', 'name' => 'Corporate Regime'],
-            ['code' => 'non_profit', 'name' => 'Non-Profit Regime'],
-            ['code' => 'trust', 'name' => 'Trust Regime'],
-            ['code' => 'partnership', 'name' => 'Partnership Regime'],
-            ['code' => 'foreign', 'name' => 'Foreign Regime'],
-            ['code' => 'individual', 'name' => 'Individual Regime'],
-            ['code' => 'freelancer', 'name' => 'Freelancer Regime'],
-            ['code' => 'agricultural', 'name' => 'Agricultural Regime'],
-            ['code' => 'micro_enterprise', 'name' => 'Micro Enterprise Regime'],
-            ['code' => 'special', 'name' => 'Special Regime'],
-            ['code' => 'transitional', 'name' => 'Transitional Regime'],
-            ['code' => 'private', 'name' => 'Private Regime']
+            ['code' => 'general', 'name' => 'Regimen común'],
+            ['code' => 'simplified', 'name' => 'Regimen simplificado'],
         ]);
 
     }

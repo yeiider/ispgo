@@ -26,6 +26,9 @@ php artisan optimize:clear && php artisan storage:link
 echo "Ejecutando migraciones..."
 php artisan migrate --force
 
+
+php artisan db:seed --force
+
 echo "Verificando la licencia de Laravel Nova..."
 php artisan nova:check-license
 
