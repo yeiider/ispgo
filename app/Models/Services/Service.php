@@ -16,6 +16,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Service is an Eloquent model that represents a service entity in the application.
+ * It contains methods for managing relationships and business logic,
+ * such as generating invoices, handling service actions, and modifying service status.
+ */
 class Service extends Model
 {
     use HasFactory;
@@ -198,6 +203,18 @@ class Service extends Model
     public static function getAllActiveServicesForInvoiceMonthly()
     {
         return self::where('service_status', '!=', 'free')->get();
+    }
+
+
+    /**
+     * Retrieve services associated with a specific customer ID.
+     *
+     * @param int $id The ID of the customer whose services are being retrieved.
+     * @return \Illuminate\Support\Collection The collection of services associated with the customer.
+     */
+    public static function getServicesByCustomerID(int $id): \Illuminate\Support\Collection
+    {
+        return self::where('customer_id', $id)->get();
     }
 
 }

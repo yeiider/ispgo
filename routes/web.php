@@ -64,6 +64,7 @@ Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('
     Route::get('/logout', [AuthController::class, 'logout'])->name('customer.logout');
     Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets');
     Route::get('/tickets/create', [TicketsController::class, 'create'])->name('tickets.create');
+    Route::post('/tickets/store', [TicketsController::class, 'store'])->name('tickets.store');
     Route::get('/invoices', [CustomerInvoiceController::class, 'index'])->name('invoices');
     Route::get('/address-book', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'index'])->name('addresses');
     Route::get('/address-book/create', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'create'])->name('address.create');

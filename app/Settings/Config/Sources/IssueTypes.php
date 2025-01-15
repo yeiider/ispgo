@@ -10,9 +10,9 @@ class IssueTypes implements ConfigProviderInterface
     static public function getConfig(): array
     {
         return [
-            ["label" => "Connectivity", "value" => "connectivity"],
-            ["label" => "Billing", "value" => "billing"],
-            ["label" => "Configuration", "value" => "configuration"]
+            ["label" => __("Connectivity"), "value" => "connectivity"],
+            ["label" => __("Billing"), "value" => "billing"],
+            ["label" => __("Configuration"), "value" => "configuration"]
         ];
     }
 }

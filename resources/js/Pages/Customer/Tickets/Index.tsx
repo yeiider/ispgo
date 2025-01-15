@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {__} from "@/translation.ts"
-import {usePage} from "@inertiajs/react"
+import {usePage, Link} from "@inertiajs/react"
 import {
   Pagination,
   PaginationContent,
@@ -20,6 +20,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
+import {Button} from "@/components/ui/button.tsx";
+import {ListPlus} from "lucide-react";
 
 type Props = {
   tickets: {
@@ -37,6 +39,7 @@ type Props = {
     to: any
     total: number
   }
+  allowCustomerCreateTickets: Boolean
 }
 
 interface Ticket {
@@ -57,17 +60,22 @@ interface Link {
 }
 
 export default function Index() {
-  const {tickets} = usePage<Props>().props;
+  const {tickets, allowCustomerCreateTickets} = usePage<Props>().props;
 
   return (
     <CustomerLayout>
       <div className="flex flex-col gap-4 justify-between">
         <h1 className="text-3xl font-semibold text-slate-950">Tickets</h1>
-        <div className="actions hidden">
-          <a href="ticketCreateUrl"
-             className="btn btn-outline-primary mt-4">
-            <span>Create tickets</span>
-          </a>
+        <div className="actions">
+          {allowCustomerCreateTickets && (
+            <Button asChild>
+              <Link href="/customer-account/tickets/create"
+                    className="">
+                <span>Create tickets</span>
+                <ListPlus/>
+              </Link>
+            </Button>
+          )}
         </div>
         <div>
           <Table>

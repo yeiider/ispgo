@@ -1,0 +1,31 @@
+export interface Service {
+  id: number
+  router_id: number
+  customer_id: number
+  plan_id: number
+  service_ip: string
+  username_router: string
+  password_router: string
+  service_status: string
+  activation_date: any
+  deactivation_date: string
+  bandwidth: number
+  mac_address: string
+  installation_date: any
+  service_notes: any
+  contract_id: number
+  support_contact: any
+  service_location: string
+  service_type: string
+  static_ip: number
+  data_limit: any
+  last_maintenance: string
+  billing_cycle: any
+  service_priority: string
+  assigned_technician: number
+  service_contract: any
+  created_by: any
+  updated_by: any
+  created_at: string
+  updated_at: string
+}
