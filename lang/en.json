@@ -305,5 +305,11 @@
     "Html Template": "Html Template",
     "Back": "Back",
     "Connectivity": "Connectivity",
-    "Configuration": "Configuration"
+    "Configuration": "Configuration",
+    "Select a Issue Type": "Select a Issue Type",
+    "Issue Type": "Issue Type",
+    "Select a service": "Select a service",
+    "Service": "Service",
+    "Date Of Birth": "Date Of Birth",
+    "Delete": "Delete"
 }

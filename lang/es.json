@@ -305,5 +305,11 @@
     "Html Template": "Plantilla HTML",
     "Back": "Atrás",
     "Connectivity": "Conectividad",
-    "Configuration": "Configuración"
+    "Configuration": "Configuración",
+    "Select a Issue Type": "Selecciona un tipo de problema",
+    "Issue Type": "Tipo de problema",
+    "Select a service": "Selecciona un servicio",
+    "Service": "Servicio",
+    "Date Of Birth": "Fecha de nacimiento",
+    "Delete": "Eliminar"
 }

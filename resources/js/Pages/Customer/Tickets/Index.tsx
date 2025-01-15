@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/pagination"
 import {Button} from "@/components/ui/button.tsx";
 import {ListPlus} from "lucide-react";
+import {useEffect} from "react";
+import {toast} from "sonner";
 
 type Props = {
   tickets: {
@@ -39,7 +41,16 @@ type Props = {
     to: any
     total: number
   }
-  allowCustomerCreateTickets: Boolean
+  allowCustomerCreateTickets: Boolean;
+  flash: {
+    status: Response | null,
+  }
+}
+
+interface Response {
+  message: string;
+  status_code: number;
+  type: 'success' | 'error' | 'info' | 'warning';
 }
 
 interface Ticket {
@@ -60,7 +71,18 @@ interface Link {
 }
 
 export default function Index() {
-  const {tickets, allowCustomerCreateTickets} = usePage<Props>().props;
+  const {tickets, allowCustomerCreateTickets, flash} = usePage<Props>().props;
+
+  useEffect(() => {
+    if (flash.status) {
+      const toastType = flash.status.type as keyof typeof toast;
+      //@ts-ignore
+      toast[toastType](flash.status.message, {
+        position: 'top-right',
+      });
+    }
+  })
+
 
   return (
     <CustomerLayout>
@@ -103,32 +125,35 @@ export default function Index() {
             <TableFooter>
               <TableRow>
                 <TableCell colSpan={5}>
-                  <Pagination>
-                    <PaginationContent>
+                  {tickets.data.length && (
+                    <Pagination>
+                      <PaginationContent>
 
-                      <PaginationPrevious
-                        className={!tickets.prev_page_url ? 'disabled' : ''}
-                        href={tickets.prev_page_url || '#'}
-                      >
-                        <span>{__('Previous')}</span>
-                      </PaginationPrevious>
-                      {tickets.links.map((link, index) => (
-                        <PaginationItem key={index}>
-                          {link.url ? (
-                            <PaginationLink isActive={link.active} href={link.url}>{link.label}</PaginationLink>
-                          ) : (
-                            <PaginationEllipsis>{link.label}</PaginationEllipsis>
-                          )}
-                        </PaginationItem>
-                      ))}
-                      <PaginationNext
-                        className={!tickets.prev_page_url ? 'disabled' : ''}
-                        href={tickets.next_page_url || '#'}
-                      >
-                        <span>{__('Next')}</span>
-                      </PaginationNext>
-                    </PaginationContent>
-                  </Pagination>
+                        <PaginationPrevious
+                          className={!tickets.prev_page_url ? 'disabled' : ''}
+                          href={tickets.prev_page_url || '#'}
+                        >
+                          <span>{__('Previous')}</span>
+                        </PaginationPrevious>
+                        {tickets.links.map((link, index) => (
+                          <PaginationItem key={index}>
+                            {link.url ? (
+                              <PaginationLink isActive={link.active} href={link.url}>{link.label}</PaginationLink>
+                            ) : (
+                              <PaginationEllipsis>{link.label}</PaginationEllipsis>
+                            )}
+                          </PaginationItem>
+                        ))}
+
+                        <PaginationNext
+                          className={!tickets.prev_page_url ? 'disabled' : ''}
+                          href={tickets.next_page_url || '#'}
+                        >
+                          <span>{__('Next')}</span>
+                        </PaginationNext>
+                      </PaginationContent>
+                    </Pagination>
+                  )}
                 </TableCell>
               </TableRow>
             </TableFooter>

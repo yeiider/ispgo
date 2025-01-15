@@ -105,7 +105,7 @@ export default function Index() {
                   <TableCell className="flex items-center gap-4">
                     <Link href={`/customer-account/address-book/edit/${item.id}`}
                           className="text-yellow-500 flex items-center gap-2">
-                      <PencilLine className="text-yellow-500" />
+                      <PencilLine className="text-yellow-500"/>
                       <span>{__('Edit')}</span>
                     </Link>
                     {address_book.data.length > 1 && (
@@ -113,7 +113,7 @@ export default function Index() {
                         setIsOpen(true);
                         setId(item.id);
                       }}>
-                        <Trash className="text-red-500" />
+                        <Trash className="text-red-500"/>
                         <span className="text-red-500">{__('Delete')}</span>
                       </Button>
                     )}
@@ -124,31 +124,33 @@ export default function Index() {
             <TableFooter>
               <TableRow>
                 <TableCell colSpan={7}>
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationPrevious
-                        className={!address_book.prev_page_url ? 'disabled' : ''}
-                        href={address_book.prev_page_url || '#'}
-                      >
-                        <span>{__('Previous')}</span>
-                      </PaginationPrevious>
-                      {address_book.links.map((link, index) => (
-                        <PaginationItem key={index}>
-                          {link.url ? (
-                            <PaginationLink isActive={link.active} href={link.url}>{link.label}</PaginationLink>
-                          ) : (
-                            <PaginationEllipsis>{link.label}</PaginationEllipsis>
-                          )}
-                        </PaginationItem>
-                      ))}
-                      <PaginationNext
-                        className={!address_book.prev_page_url ? 'disabled' : ''}
-                        href={address_book.next_page_url || '#'}
-                      >
-                        <span>{__('Next')}</span>
-                      </PaginationNext>
-                    </PaginationContent>
-                  </Pagination>
+                  {address_book.data.length && (
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationPrevious
+                          className={!address_book.prev_page_url ? 'disabled' : ''}
+                          href={address_book.prev_page_url || '#'}
+                        >
+                          <span>{__('Previous')}</span>
+                        </PaginationPrevious>
+                        {address_book.links.map((link, index) => (
+                          <PaginationItem key={index}>
+                            {link.url ? (
+                              <PaginationLink isActive={link.active} href={link.url}>{link.label}</PaginationLink>
+                            ) : (
+                              <PaginationEllipsis>{link.label}</PaginationEllipsis>
+                            )}
+                          </PaginationItem>
+                        ))}
+                        <PaginationNext
+                          className={!address_book.prev_page_url ? 'disabled' : ''}
+                          href={address_book.next_page_url || '#'}
+                        >
+                          <span>{__('Next')}</span>
+                        </PaginationNext>
+                      </PaginationContent>
+                    </Pagination>
+                  )}
                 </TableCell>
               </TableRow>
             </TableFooter>

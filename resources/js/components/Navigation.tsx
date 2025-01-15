@@ -4,6 +4,7 @@ import {__} from "@/translation.ts";
 import {useEffect, useState} from "react";
 import {twMerge} from "tailwind-merge";
 import {BadgeDollarSign, SatelliteDish} from "lucide-react";
+import ModeToggle from "@/components/ModeToggle.tsx";
 
 type IRoot = {
   errors: Errors
@@ -130,6 +131,9 @@ export default function Navigation() {
               {__('Payments portal')}
               <BadgeDollarSign size={16}/>
             </Link>
+            <div className="mr-2">
+              <ModeToggle/>
+            </div>
           </div>
         </div>
       </nav>

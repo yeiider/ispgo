@@ -12,8 +12,6 @@ type Props = {
 }
 export default function Create() {
   const props = usePage<Props>().props;
-  console.log(props)
-
 
   return (
     <CustomerLayout>

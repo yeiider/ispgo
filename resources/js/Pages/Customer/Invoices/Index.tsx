@@ -163,27 +163,29 @@ export default function Index() {
             <TableFooter>
               <TableRow>
                 <TableCell colSpan={8}>
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationPrevious
-                        className={!invoices.prev_page_url ? 'disabled' : ''}
-                        href={invoices.prev_page_url || '#'}
-                      />
-                      {invoices.links.map((link, index) => (
-                        <PaginationItem key={index}>
-                          {link.url ? (
-                            <PaginationLink isActive={link.active} href={link.url}>{link.label}</PaginationLink>
-                          ) : (
-                            <PaginationEllipsis>{link.label}</PaginationEllipsis>
-                          )}
-                        </PaginationItem>
-                      ))}
-                      <PaginationNext
-                        className={!invoices.prev_page_url ? 'disabled' : ''}
-                        href={invoices.next_page_url || '#'}
-                      />
-                    </PaginationContent>
-                  </Pagination>
+                  {invoices.data.length && (
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationPrevious
+                          className={!invoices.prev_page_url ? 'disabled' : ''}
+                          href={invoices.prev_page_url || '#'}
+                        />
+                        {invoices.links.map((link, index) => (
+                          <PaginationItem key={index}>
+                            {link.url ? (
+                              <PaginationLink isActive={link.active} href={link.url}>{link.label}</PaginationLink>
+                            ) : (
+                              <PaginationEllipsis>{link.label}</PaginationEllipsis>
+                            )}
+                          </PaginationItem>
+                        ))}
+                        <PaginationNext
+                          className={!invoices.prev_page_url ? 'disabled' : ''}
+                          href={invoices.next_page_url || '#'}
+                        />
+                      </PaginationContent>
+                    </Pagination>
+                  )}
                 </TableCell>
               </TableRow>
             </TableFooter>

@@ -65,6 +65,7 @@ Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('
     Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets');
     Route::get('/tickets/create', [TicketsController::class, 'create'])->name('tickets.create');
     Route::post('/tickets/store', [TicketsController::class, 'store'])->name('tickets.store');
+    Route::get('/tickets/edit/{id}', [TicketsController::class, 'edit'])->name('tickets.edit');
     Route::get('/invoices', [CustomerInvoiceController::class, 'index'])->name('invoices');
     Route::get('/address-book', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'index'])->name('addresses');
     Route::get('/address-book/create', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'create'])->name('address.create');
@@ -73,7 +74,7 @@ Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('
     Route::put('/address-book/update/{id}', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'update'])->name('address.update');
     Route::delete('/address-book/delete/{id}', [\App\Http\Controllers\CustomerAccount\AddressBook::class, 'destroy'])->name('address.destroy');
     Route::get('/customer/edit', [CustomerController::class, 'edit'])->name('customer.edit');
-    Route::put('/customer/update', [CustomerController::class, 'update'])->name('customer.update');
+    Route::put('/customer/update/{id}', [CustomerController::class, 'update'])->name('customer.update');
     Route::put('/customer/change-password', [CustomerController::class, 'changePassword'])->name('customer.changePassword');
 });
 

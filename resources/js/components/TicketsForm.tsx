@@ -1,5 +1,5 @@
 import {z} from "zod";
-import {useForm as inertiaUseForm, router} from "@inertiajs/react";
+import {useForm as inertiaUseForm} from "@inertiajs/react";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
@@ -10,15 +10,10 @@ import {Input} from "@/components/ui/input.tsx";
 import {Option} from "@/interfaces/Option.ts";
 import {Textarea} from "@/components/ui/textarea.tsx";
 import React, {FormEvent, useState} from "react";
-import {BadgeX, File, Server} from "lucide-react";
+import {Loader2, Server} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
-
-type FileType = {
-  type: string;
-  url: string;
-  name: string;
-  extension: string;
-}
+import {FileType} from "@/types/FileType.ts";
+import FilePreview from "@/components/FilePreview.tsx";
 
 export default function TicketsForm({ticket, services, issueTypes}: {
   ticket?: any;
@@ -34,7 +29,7 @@ export default function TicketsForm({ticket, services, issueTypes}: {
     contact_method: z.string().min(4),
   })
 
-  const {data, setData, post, put} = inertiaUseForm({
+  const {data, setData, post, put, processing} = inertiaUseForm({
     service_id: ticket?.service_id || "",
     issue_type: ticket?.issue_type || "",
     title: ticket?.title || "",
@@ -49,37 +44,22 @@ export default function TicketsForm({ticket, services, issueTypes}: {
     defaultValues: data,
   })
 
-  const [loading, setLoading] = useState(false);
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     console.log(values)
 
-
     if (typeof ticket !== "undefined") {
-      //put(`/customer-account/tickets/update/${ticket.id}`)
-      //router.put(`/customer-account/tickets/update/${ticket.id}`,)
-
-
+      put(`/customer-account/tickets/update/${ticket.id}`, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
     } else {
       post("/customer-account/tickets/store", {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       })
-      /*router.post("/customer-account/tickets/store",
-        values,
-        {
-          forceFormData: true,
-          onSuccess: () => {
-            //form.reset();
-          },
-          onProgress: () => {
-            setLoading(true);
-          },
-          onFinish: () => {
-            setLoading(false)
-          }
-        },
-      );*/
     }
   }
 
@@ -102,7 +82,6 @@ export default function TicketsForm({ticket, services, issueTypes}: {
         }
       }
       reader.readAsDataURL(file);
-
     } else {
       setFile(null);
     }
@@ -140,7 +119,7 @@ export default function TicketsForm({ticket, services, issueTypes}: {
                   }} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a service"/>
+                        <SelectValue placeholder={__('Select a service')}/>
                       </SelectTrigger>
                     </FormControl>
 
@@ -175,7 +154,7 @@ export default function TicketsForm({ticket, services, issueTypes}: {
                   }} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a Issue Type"/>
+                        <SelectValue placeholder={__('Select a Issue Type')}/>
                       </SelectTrigger>
                     </FormControl>
 
@@ -217,7 +196,13 @@ export default function TicketsForm({ticket, services, issueTypes}: {
                 <FormItem>
                   <FormLabel htmlFor="description">{__('Description')}</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Lorem ipsum" {...field} onInput={handleInput}/>
+                    <Textarea placeholder="Lorem ipsum" {...field} onInput={(e) => {
+                      field.onChange(e);
+                      setData({
+                        ...data,
+                        description: e.currentTarget.value,
+                      });
+                    }}/>
                   </FormControl>
                   <FormMessage/>
                 </FormItem>
@@ -235,7 +220,10 @@ export default function TicketsForm({ticket, services, issueTypes}: {
                     <Input type="file" {...field} onInput={(e) => {
                       field.onChange(e);
                       previewField(e);
-                      handleInput(e)
+                      setData({
+                        ...data,
+                        attachments: e.currentTarget.files?.[0], // Incluye el archivo completo
+                      });
                     }}/>
                   </FormControl>
                   <FormMessage/>
@@ -262,40 +250,21 @@ export default function TicketsForm({ticket, services, issueTypes}: {
             />
           </div>
         </div>
-        <Button type="submit" className="mt-4">
-          <Server/>
-          <span>{__(ticket ? 'Save Changes' : 'Save Ticket')}</span>
+        <Button type="submit" className="mt-4" disabled={processing}>
+          {!processing ? (
+            <>
+              <Server/>
+              <span>{__(ticket ? 'Save Changes' : 'Save Ticket')}</span>
+            </>
+          ) : (
+            <>
+              <Loader2 className="animate-spin"/>
+              <span>{__('Please wait')}</span>
+            </>
+          )}
         </Button>
       </form>
     </Form>
   )
 }
 
-export function FilePreview({file, handlerRemoveFile}: {
-  file: FileType;
-  handlerRemoveFile: () => void;
-}) {
-  return (
-    <div className="mt-4 border rounded-md p-2 md:p-3 max-w-[16rem] relative">
-      {file.type.includes('image') ? (
-        <img
-          src={file.url}
-          alt="Preview"
-          className="w-full object-contain rounded"
-        />
-      ) : (
-        <>
-          <div className="flex justify-center">
-            <File size={100} strokeWidth={1}/>
-          </div>
-          <p className="mt-3 text-sm text-gray-500">{file.name}</p>
-        </>
-      )}
-      <div className="absolute top-[-5px] right-[-10px]">
-        <button type="button" onClick={handlerRemoveFile}>
-          <BadgeX/>
-        </button>
-      </div>
-    </div>
-  );
-}

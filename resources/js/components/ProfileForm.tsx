@@ -38,7 +38,7 @@ type Props = {
 
 export default function ProfileForm() {
 
-  const {documentTypes, customer, routeUpdateCustomer} = usePage<Props>().props;
+  const {documentTypes, customer} = usePage<Props>().props;
 
 
   const formSchema = z.object({
@@ -46,6 +46,7 @@ export default function ProfileForm() {
     last_name: z.string().min(3),
     document_type: z.string().min(1),
     identity_document: z.string().min(3),
+    date_of_birth: z.string().min(3),
     email_address: z.string().email({
       message: __("The email must be a valid email address.")
     }),
@@ -69,7 +70,7 @@ export default function ProfileForm() {
 
 
   const onSubmit = async () => {
-    put(routeUpdateCustomer)
+    put(`/customer-account/customer/update/${customer?.id}`)
   }
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData({
@@ -148,6 +149,19 @@ export default function ProfileForm() {
                 <FormLabel htmlFor="identity_document">{__('Identity Document')}</FormLabel>
                 <FormControl>
                   <Input type="text" placeholder="1234567" {...field} onInput={handleInput}/>
+                </FormControl>
+                <FormMessage/>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="date_of_birth"
+            render={({field}) => (
+              <FormItem>
+                <FormLabel htmlFor="identity_document">{__('Date Of Birth')}</FormLabel>
+                <FormControl>
+                  <Input id="date_of_birth" type="date" {...field} onInput={handleInput}/>
                 </FormControl>
                 <FormMessage/>
               </FormItem>

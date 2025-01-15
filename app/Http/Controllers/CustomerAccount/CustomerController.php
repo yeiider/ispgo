@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CustomerAccount;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customers\Customer;
 use App\Settings\Config\Sources\DocumentType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -16,18 +17,14 @@ class CustomerController extends Controller
     public function edit(): \Inertia\Response
     {
         $documentTypes = DocumentType::getConfig();
-        $routeUpdateCustomer = route('customer.update');
         $routeChangePassword = route('customer.changePassword');
         return Inertia::render('Customer/Edit',
-            compact('documentTypes', 'routeUpdateCustomer', 'routeChangePassword')
+            compact('documentTypes', 'routeChangePassword')
         );
     }
 
-    public function update(Request $request)
+    public function update(Request $request, $id): RedirectResponse
     {
-
-        $customer = $this->getCustomer();
-
         $request->validate([
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
@@ -36,18 +33,22 @@ class CustomerController extends Controller
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('customers')->ignore($customer->id),
+                Rule::unique('customers')->ignore($id),
             ],
         ]);
 
-        $customer->update($request->only(
+        $customer = Customer::findOrFail($id);
+
+        $customer->update($request->only([
             'first_name',
             'last_name',
             'email_address',
             'date_of_birth',
             'phone_number',
-            'document_type'
-        ));
+            'document_type',
+            'identity_document'
+        ]));
+
 
         return redirect()->route('index');
     }
