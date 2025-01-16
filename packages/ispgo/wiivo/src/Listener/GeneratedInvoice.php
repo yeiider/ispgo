@@ -11,45 +11,17 @@ use Ispgo\Wiivo\ServiceWiivo;
 use Ispgo\Wiivo\WiivoConfigProvider;
 use Illuminate\Support\Facades\Log;
 use Laravel\Nova\Notifications\NovaNotification;
+use App\PaymentMethods\Wompi;
 
 class GeneratedInvoice implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    /**
-     * The name of the queue the job should be sent to.
-     *
-     * @var string|null
-     */
     public $queue = 'redis';
-
-    /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
     public $tries = 3;
-
-    /**
-     * The number of seconds the job can run before timing out.
-     *
-     * @var int
-     */
     public $timeout = 120;
-
-    /**
-     * The number of seconds to delay the job.
-     *
-     * @var int
-     */
     public $delay = 10;
 
-    /**
-     * Handle the event.
-     *
-     * @param InvoiceCreated $event
-     * @return void
-     */
     public function handle(InvoiceCreated $event): void
     {
         try {
@@ -69,38 +41,37 @@ class GeneratedInvoice implements ShouldQueue
     }
 
     /**
-     * Prepare the payload for notification.
-     *
-     * @param Invoice $invoice
-     * @return array
+     * @throws \Exception
      */
     private function preparePayload(Invoice $invoice): array
     {
         $customerName = $invoice->full_name;
         $phonePrefix = WiivoConfigProvider::getTelephonePrefix();
         $phone = $phonePrefix . $invoice->customer->phone_number;
-        $dueDate = $invoice->due_date->format('Y-m-d'); // Fecha límite de pago
+        $dueDate = $invoice->due_date->format('Y-m-d');
+
         $messageTemplate = WiivoConfigProvider::getNotifyInvoiceTemplate();
 
-        // Reemplazar las variables en el mensaje
+        // Verificar si la plantilla contiene `{payment_link}`
+        $paymentLink = null;
+        if (str_contains($messageTemplate, '{payment_link}')) {
+            $paymentLink = Wompi::getPaymentLink($invoice);
+        }
+
         $message = str_replace(
-            ['{name}', '{due_date}'],
-            [$customerName, $dueDate],
+            ['{name}', '{due_date}', '{payment_link}'],
+            [
+                $customerName,
+                $dueDate,
+                $paymentLink ?: 'N/A'],
             $messageTemplate
         );
 
-        Log::info($message.$phone);
+        Log::info($message . $phone);
 
         return ["message" => $message, 'phone' => $phone];
     }
 
-    /**
-     * Notify about an error.
-     *
-     * @param int $invoiceId
-     * @param string $errorMessage
-     * @return void
-     */
     private function notifyError(int $invoiceId, string $errorMessage): void
     {
         $admin = \App\Models\User::where('role', 'super-admin')->first();

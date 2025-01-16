@@ -19,12 +19,14 @@ class Invoice extends Model
     const STATUS_PAID = "paid";
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date','full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id'
+        'issue_date', 'due_date','full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
+        'payment_link','expiration_date'
     ];
 
     protected $casts = [
         "due_date" => 'date',
         "issue_date" => 'date',
+        "expiration_date" => 'date',
         "additional_information" => 'array'
     ];
     protected $appends = ['full_name', 'email_address'];
