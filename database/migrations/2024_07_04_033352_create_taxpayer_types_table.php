@@ -17,19 +17,18 @@ class CreateTaxpayerTypesTable extends Migration
         });
 
         DB::table('taxpayer_types')->insert([
-            ['code' => 'individual', 'name' => 'Individual'],
-            ['code' => 'corporation', 'name' => 'Corporation'],
-            ['code' => 'sole_proprietorship', 'name' => 'Sole Proprietorship'],
-            ['code' => 'partnership', 'name' => 'Partnership'],
-            ['code' => 'trust', 'name' => 'Trust'],
-            ['code' => 'estate', 'name' => 'Estate'],
-            ['code' => 'non_profit', 'name' => 'Non-Profit Organization'],
-            ['code' => 'government', 'name' => 'Government Entity'],
-            ['code' => 'foreign', 'name' => 'Foreign Entity'],
-            ['code' => 'freelancer', 'name' => 'Freelancer'],
-            ['code' => 'self_employed', 'name' => 'Self-Employed'],
-            ['code' => 'small_business', 'name' => 'Small Business'],
-            ['code' => 'large_business', 'name' => 'Large Business']
+            ['code' => 'personas_naturales', 'name' => 'Personas Naturales'],
+            ['code' => 'personas_juridicas', 'name' => 'Personas Jurídicas'],
+            ['code' => 'regimen_simple', 'name' => 'Régimen Simple de Tributación'],
+            ['code' => 'regimen_ordinario', 'name' => 'Régimen Ordinario'],
+            ['code' => 'entidades_sin_animo_de_lucro', 'name' => 'Entidades Sin Ánimo de Lucro'],
+            ['code' => 'entidades_gubernamentales', 'name' => 'Entidades Gubernamentales'],
+            ['code' => 'grandes_contribuyentes', 'name' => 'Grandes Contribuyentes'],
+            ['code' => 'micro_empresas', 'name' => 'Microempresas'],
+            ['code' => 'pequenas_y_medianas_empresas', 'name' => 'Pequeñas y Medianas Empresas (PYMES)'],
+            ['code' => 'consorcios_y_uniones_temporales', 'name' => 'Consorcios y Uniones Temporales'],
+            ['code' => 'profesionales_independientes', 'name' => 'Profesionales Independientes'],
+            ['code' => 'regimen_especial', 'name' => 'Régimen Especial']
         ]);
     }
 

@@ -37,12 +37,12 @@ class Wompi extends AbstractPaymentMethod
         return self::FIELD_NAME;
     }
 
-    public static function getEnvironment(): string | null
+    public static function getEnvironment(): string|null
     {
         return ConfigHelper::getConfigValue(self::PATH . 'env');
     }
 
-    public static function getPublicKey(): string | null
+    public static function getPublicKey(): string|null
     {
         if (self::getEnvironment() === 'sandbox') {
             return ConfigHelper::getConfigValue(self::PATH . 'public_key_sandbox');
@@ -114,7 +114,7 @@ class Wompi extends AbstractPaymentMethod
 
     public static function generatedLinkPayment($invoice)
     {
-        $expires_at = Carbon::now('UTC')->addHours(3)->format('Y-m-d\TH:i:s');
+        $expires_at = Carbon::now('UTC')->addDays(10)->format('Y-m-d\TH:i:s');
 
         $payload = [
             "name" => "Invoice",
@@ -154,5 +154,22 @@ class Wompi extends AbstractPaymentMethod
             }
         } catch (GuzzleException $e) {
         }
+    }
+
+    /**
+     * @throws Exception
+     * @throws \Exception
+     */
+    public static function getPaymentLink($invoice): ?string
+    {
+        $link = Wompi::generatedLinkPayment($invoice);
+        if (isset($link['data']['id'])) {
+            $expires_at = $link['data']['expires_at'];
+            $invoice->payment_link = $link['data']['id'];
+            $invoice->expires_at = $expires_at;
+            $invoice->save();
+            return "https://checkout.wompi.co/l/" . $link['data']['id'];
+        }
+        return null;
     }
 }

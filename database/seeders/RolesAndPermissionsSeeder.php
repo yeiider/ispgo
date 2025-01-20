@@ -41,7 +41,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'CashRegister',
             'Expense',
             'Income',
-            'Transaction'
+            'Transaction',
+            'TemplateEmail',
+            'TemplateHtml',
+            'Contract'
         ]);
         Permission::create(['group' => "System Setting", 'name' => 'Setting']);
         $collection->each(function ($item) {
