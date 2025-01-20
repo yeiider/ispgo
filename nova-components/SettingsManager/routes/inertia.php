@@ -19,7 +19,7 @@ Route::get('/', function (NovaRequest $request) {
 });
 
 Route::get('/scope/{scope}/section/{section}', function (NovaRequest $request, $scope, $section) {
-    $scope = $scope ?? 1;
+    $scope = $scope ?? 0;
 
     return inertia('SettingsManager', [
             'scope' => $scope,

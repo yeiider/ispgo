@@ -31,7 +31,7 @@ export default {
     },
     scope: {
       type: String,
-      default: ''
+      default: window.localStorage.getItem('scope') ?? ''
     }
   },
   data() {
@@ -52,7 +52,7 @@ export default {
       let scope = this.scope;
 
       if (typeof this.scope === 'undefined' || this.scope === '') {
-        scope = 1;
+        scope = 0;
       }
 
       url += `/scope/${encodeURIComponent(scope)}`;

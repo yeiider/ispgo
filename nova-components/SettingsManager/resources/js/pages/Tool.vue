@@ -4,7 +4,7 @@
       <heading class="mb-2 md:mb-0">{{ heading }}</heading>
       <Dropdown
         :options="scopes"
-        :selected="scope? scope : 0"
+        :selected="defaultScope"
         @option-selected="handleSelection"
       />
     </div>
@@ -86,6 +86,7 @@ export default {
       },
       isOpen: [],
       scopes: [],
+      defaultScope: window.localStorage.getItem('scope') ?? 0
     };
   },
   mounted() {
@@ -118,6 +119,7 @@ export default {
       } else {
         window.location.href = `${url}/scope/${scope}/section/${this.section ?? 'general'}`;
       }
+      window.localStorage.setItem('scope', scope);
     },
 
     updateFieldValue({key, value}) {
