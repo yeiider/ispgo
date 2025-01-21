@@ -402,26 +402,18 @@ return [
                 'label' => 'Integrity',
                 'placeholder' => 'Integrity',
             ],
-            'url_status_sandbox' => [
-                'field' => 'text-field',
-                'label' => 'Status Url Sandbox',
-                'placeholder' => 'Status Url',
-            ],
+
             'event_secret_sandbox' => [
                 'field' => 'text-field',
                 'label' => 'Event Secret Sandbox',
-                'placeholder' => 'Status Url',
+                'placeholder' => 'Event Secret Sandbox',
             ],
             'event_secret' => [
                 'field' => 'text-field',
-                'label' => 'Event Secret Sandbox',
-                'placeholder' => 'Status Url',
+                'label' => 'Event Secret',
+                'placeholder' => 'Event Secret',
             ],
-            'url_status' => [
-                'field' => 'text-field',
-                'label' => 'Status Url',
-                'placeholder' => 'Status Url',
-            ],
+
             'confirmation_url' => [
                 'field' => 'text-field',
                 'label' => 'Confirmation URL',

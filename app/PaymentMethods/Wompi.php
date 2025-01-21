@@ -69,9 +69,9 @@ class Wompi extends AbstractPaymentMethod
     public static function getStatusUrl(): string
     {
         if (self::getEnvironment() === 'sandbox') {
-            return ConfigHelper::getConfigValue(self::PATH . 'url_status_sandbox');
+            return "https://sandbox.wompi.co/v1/transactions/";
         }
-        return ConfigHelper::getConfigValue(self::PATH . 'url_status');
+        return "https://production.wompi.co/v1/transactions/";
     }
 
     public static function getConfirmationUrl(): ?string
