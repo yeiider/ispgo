@@ -30,6 +30,27 @@ class WompiController extends Controller
         return redirect()->route('checkout.index');
     }
 
+    public function confirmationLink(Request $request, $incrementId): \Illuminate\Http\RedirectResponse
+    {
+        $id = $request->get("id");
+
+        if (!$id) {
+            session(['payment_data' => ["status" => "PENDING"]]);
+            return redirect()->route('checkout.index');
+        }
+
+        $response = Http::get(\App\PaymentMethods\Wompi::getStatusUrl() . $id)->json();
+        $data = \App\PaymentMethods\Wompi::processResponse($response);
+
+
+        if ($data["status"] === "APPROVED") {
+            $this->registerPaying($data,$incrementId);
+        }
+
+        session(['payment_data' => $data]);
+        return redirect()->route('checkout.index');
+    }
+
     public function signature(Request $request)
     {
         $request->validate([
@@ -83,9 +104,9 @@ class WompiController extends Controller
         return hash_equals($calculatedSignature, $signature);
     }
 
-    private function registerPaying(array $data): void
+    private function registerPaying(array $data, $incrementId=null): void
     {
-        $invoice = Invoice::where("increment_id", $data["reference"])->firstOrFail();
+        $invoice = Invoice::where("increment_id", $incrementId??$data["reference"])->firstOrFail();
         $amount = $data["amount"];
         $invoice->applyPayment($amount, $data['payment_method_type'], $data);
     }

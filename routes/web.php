@@ -31,6 +31,7 @@ Route::post('/payment/payu/signature', [\App\Http\Controllers\Payments\Payu::cla
 //Wompi
 Route::post('/payment/wompi/signature', [\App\Http\Controllers\Payments\WompiController::class, 'signature'])->name('wompi.signature');
 Route::get('/payment/wompi/confirmation', [\App\Http\Controllers\Payments\WompiController::class, 'confirmation'])->name('wompi.confirmation');
+Route::get('/payment/wompi/confirmation-link/{incrementId}', [\App\Http\Controllers\Payments\WompiController::class, 'confirmationLink'])->name('wompi.confirmation.link');
 Route::post('/payment/handlewompievent', [\App\Http\Controllers\Payments\WompiController::class, 'handlewompievent'])->name('wompi.handlewompievent');
 
 
