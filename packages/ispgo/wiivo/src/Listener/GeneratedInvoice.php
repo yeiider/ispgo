@@ -32,10 +32,8 @@ class GeneratedInvoice implements ShouldQueue
                 $wiivoService->sendMessage($payload);
             }
         } catch (ConnectionException $e) {
-            $this->notifyError($event->invoice->id, $e->getMessage());
             Log::error("Failed to send invoice notification for invoice ID {$event->invoice->id}: " . $e->getMessage());
         } catch (\Exception $e) {
-            $this->notifyError($event->invoice->id, $e->getMessage());
             Log::error("An error occurred while handling InvoiceCreated event for invoice ID {$event->invoice->id}: " . $e->getMessage());
         }
     }

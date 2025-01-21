@@ -166,7 +166,7 @@ class Wompi extends AbstractPaymentMethod
         if (isset($link['data']['id'])) {
             $expires_at = $link['data']['expires_at'];
             $invoice->payment_link = $link['data']['id'];
-            $invoice->expires_at = $expires_at;
+            $invoice->expiration_date = $expires_at;
             $invoice->save();
             return "https://checkout.wompi.co/l/" . $link['data']['id'];
         }
