@@ -124,7 +124,7 @@ class Wompi extends AbstractPaymentMethod
             "currency" => config('nova.currency'),
             "amount_in_cents" => intval($invoice->total) * 100,
             "expires_at" => $expires_at,
-            "redirect_url" => self::getConfirmationUrl()."/".$invoice->increment_id,
+            "redirect_url" => self::getConfirmationUrl()."-link/".$invoice->increment_id,
             "image_url" => null,
             "sku" => $invoice->increment_id,
             "reference" => $invoice->increment_id
