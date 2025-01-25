@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\BoxApi;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Controllers\CustomerAccount\InvoiceController as CustomerInvoiceController;
+use App\Http\Controllers\CustomerExportController;
 
 
 
@@ -58,6 +59,8 @@ Route::middleware('guest:customer')->prefix('customer')->group(function () {
     Route::get('/password/create/{token}', [AuthController::class, 'showCreatePassword'])->name('customer.password.create');
     Route::post('/password/create', [AuthController::class, 'createPassword'])->name('customer.password.create.post');
 });
+
+Route::get('/export-customers', [CustomerExportController::class, 'exportCsv'])->name('customers.export');
 
 Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('customer-account')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');

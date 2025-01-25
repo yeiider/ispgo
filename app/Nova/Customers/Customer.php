@@ -104,7 +104,10 @@ class Customer extends Resource
                 $model = $models->first();
                 $template = EmailTemplate::find(3); // ID de la plantilla de bienvenida
                 Mail::to($model->email_address)->send(new DynamicEmail(["customer" => $model], $template));
-            })->showInline()
+            })->showInline(),
+            Action::downloadUrl('Exportar Clientes', function () {
+                return route('customers.export');
+            })->standalone(),
         ];
     }
 
