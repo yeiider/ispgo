@@ -126,7 +126,7 @@ class Invoice extends Resource
 
     public static function authorizedToCreate(Request $request)
     {
-        return false;
+        return true;
     }
 
     public function authorizedToUpdate(Request $request)
