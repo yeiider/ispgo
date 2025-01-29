@@ -68,7 +68,7 @@
                 <table>
                     <tr>
                         <td class="title">
-                            <h2>Invoice</h2>
+                            <img src="{{asset(\App\Settings\GeneralProviderConfig::getCompanyLogo())}}" alt="">
                         </td>
                         <td>
                             Invoice #: {{ $invoice->id }}<br>
@@ -88,8 +88,10 @@
                             {{ $invoice->customer->email_address }}<br>
                         </td>
                         <td>
-                            Your Company<br>
-                            yourcompany@example.com
+
+                            {{\App\Settings\GeneralProviderConfig::getCompanyName()}}<br>
+                            {{\App\Settings\GeneralProviderConfig::getCompanyEmail()}}<br>
+
                         </td>
                     </tr>
                 </table>

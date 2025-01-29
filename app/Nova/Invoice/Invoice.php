@@ -6,6 +6,7 @@ use App\Nova\Actions\Invoice\ApplyDiscount;
 use App\Nova\Actions\Invoice\DownloadInvoicePdf;
 use App\Nova\Actions\Invoice\RegisterPayment;
 use App\Nova\Actions\Invoice\RegisterPaymentPromise;
+use App\Nova\Actions\Invoice\SendInvoiceByWhatsapp;
 use App\Nova\Customers;
 use App\Nova\Filters\Invoice\InvoiceStatusFilter;
 use App\Nova\Metrics\Invoice\InvoicesStatus;
@@ -90,7 +91,8 @@ class Invoice extends Resource
             (new DownloadInvoicePdf())->showInline(),
             DestructiveAction::using(__('invoice.cancel_invoice'), function (ActionFields $fields, Collection $models) {
                 $models->each->canceled();
-            })->showInline()
+            })->showInline(),
+            (new SendInvoiceByWhatsapp())->showInline()
         ];
     }
 
