@@ -99,6 +99,8 @@ class SendInvoiceByWhatsapp extends Action implements ShouldQueue
         $phonePrefix = WiivoConfigProvider::getTelephonePrefix();
         $phone = $phonePrefix . $invoice->customer->phone_number;
         $dueDate = $invoice->due_date->format('Y-m-d');
+        $reference = $invoice->increment_id;
+        $amount = number_format($invoice->amount, 2, ',', '.');
 
         $messageTemplate = WiivoConfigProvider::getNotifyInvoiceTemplate();
 
@@ -109,11 +111,13 @@ class SendInvoiceByWhatsapp extends Action implements ShouldQueue
         }
 
         $message = str_replace(
-            ['{name}', '{due_date}', '{payment_link}'],
+            ['{name}', '{due_date}', '{payment_link}', '{reference}','{amount}'],
             [
                 $customerName,
                 $dueDate,
-                $paymentLink ?: 'N/A'
+                $paymentLink ?: 'N/A',
+                $reference,
+                $amount
             ],
             $messageTemplate
         );
