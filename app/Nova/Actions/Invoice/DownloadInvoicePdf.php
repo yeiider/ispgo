@@ -12,6 +12,8 @@ use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Illuminate\Support\Facades\File;
+
 
 class DownloadInvoicePdf extends Action
 {
@@ -29,7 +31,14 @@ class DownloadInvoicePdf extends Action
         foreach ($models as $invoice) {
             /** @var Invoice $invoice */
             $pdf = PDF::loadView('invoices.pdf', ['invoice' => $invoice]);
+
             $pdfContent = $pdf->output();
+
+            $directoryPath = storage_path('app/public/invoices');
+
+            if (!File::exists($directoryPath)) {
+                File::makeDirectory($directoryPath, 0755, true);
+            }
 
             // Guardar el archivo PDF en el servidor (opcional)
             $fileName = 'invoice_' . $invoice->id . '.pdf';

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Helpers\QrCodeHelper;
+use App\Helpers\Utils;
 use App\Http\Controllers\Controller;
 use App\Models\Box;
 use App\Models\DailyBox;
@@ -137,4 +138,28 @@ class InvoiceController extends Controller
             'site' => GeneralProviderConfig::getCompanyUrl()
         ];
     }
+
+    public function previewInvoice(Request $request, $id)
+    {
+        $invoice = Invoice::where('increment_id', $id)
+            ->with('customer')
+            ->first();
+
+        if (!$invoice) {
+            abort(404);
+        }
+
+        $companyName = GeneralProviderConfig::getCompanyName() ?? env('APP_NAME');
+        $companyEmail = GeneralProviderConfig::getCompanyEmail() ?? env('MAIL_FROM_ADDRESS');
+        $companyPhone = GeneralProviderConfig::getCompanyPhone() ?? null;
+
+        $invoice->total = Utils::priceFormat($invoice->total);
+        $invoice->subtotal = Utils::priceFormat($invoice->subtotal);
+        $invoice->tax = Utils::priceFormat($invoice->tax);
+
+
+        return view('invoices.preview', compact('invoice', 'companyName', 'companyEmail', 'companyPhone'));
+    }
+
+
 }

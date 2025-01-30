@@ -103,3 +103,6 @@ Route::post('/email/verification-notification', function (Request $request) {
 Route::get('/401', function () {
     abort(401, 'Unauthorized');
 })->name('error.401');
+
+
+Route::get('/preview-invoice/{id}', [InvoiceController::class, 'previewInvoice']);

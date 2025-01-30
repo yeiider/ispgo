@@ -19,25 +19,25 @@ class Signed extends Controller
     {
         // Validar si los contratos están habilitados en la configuración
         if (!ServiceProviderConfig::enableContracts()) {
-            return abort(404, 'Contracts are not enabled.');
+            abort(404, 'Contracts are not enabled.');
         }
 
         // Verificar si el contrato existe
         $contract = Contract::find($contractId);
         if (!$contract) {
-            return abort(404, "Contract with ID {$contractId} not found.");
+            abort(404, "Contract with ID {$contractId} not found.");
         }
 
         // Verificar si el contrato posee un servicio asociado
         $service = $contract->service;
         if (!$service) {
-            return abort(404, "Service not found for contract ID {$contractId}.");
+            abort(404, "Service not found for contract ID {$contractId}.");
         }
 
         // Obtener el ID de la plantilla desde la configuración
         $templateId = ServiceProviderConfig::contractTemplate();
         if (is_null($templateId)) {
-            return abort(400, 'Contract template ID is not configured.');
+            abort(400, 'Contract template ID is not configured.');
         }
 
         // Construir el HTML de la plantilla
