@@ -2,17 +2,18 @@
 
 namespace App\Nova\Actions\Invoice;
 
+use App\Helpers\Utils;
 use App\Models\Invoice\Invoice;
+use App\Settings\GeneralProviderConfig;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Illuminate\Support\Facades\File;
 
 
 class DownloadInvoicePdf extends Action
@@ -30,25 +31,40 @@ class DownloadInvoicePdf extends Action
     {
         foreach ($models as $invoice) {
             /** @var Invoice $invoice */
-            $pdf = PDF::loadView('invoices.pdf', ['invoice' => $invoice]);
 
-            $pdfContent = $pdf->output();
+            $fileName = "invoice_{$invoice->increment_id}_{$invoice->status}.pdf";
+            $filePath = "public/invoices/pdf/{$fileName}";
+            $filePathOut = "/storage/invoices/pdf/{$fileName}";
 
-            $directoryPath = storage_path('app/public/invoices');
-
-            if (!File::exists($directoryPath)) {
-                File::makeDirectory($directoryPath, 0755, true);
+            if (Storage::exists($filePath)) {
+                return ActionResponse::download($fileName, url($filePathOut));
             }
 
-            // Guardar el archivo PDF en el servidor (opcional)
-            $fileName = 'invoice_' . $invoice->id . '.pdf';
-            $path = storage_path('app/public/invoices/' . $fileName);
-            file_put_contents($path, $pdfContent);
 
-            // Proporcionar la URL de descarga al usuario
-            $url = asset('storage/invoices/' . $fileName);
+            $companyName = GeneralProviderConfig::getCompanyName() ?? env('APP_NAME');
+            $companyEmail = GeneralProviderConfig::getCompanyEmail() ?? env('MAIL_FROM_ADDRESS');
+            $companyPhone = GeneralProviderConfig::getCompanyPhone() ?? null;
 
-            return ActionResponse::download($fileName, $url);
+            $imgPath = public_path('img/invoice.svg');
+
+            if (file_exists($imgPath)) {
+                $imgContent = file_get_contents($imgPath);
+                $img = base64_encode($imgContent);
+                $img = 'data:image/svg+xml;base64,' . $img;
+            } else {
+                $img = '';
+            }
+
+            $options = ['locale' => 'es', 'currency' => 'COP'];
+            $invoice->total = Utils::priceFormat($invoice->total, $options);
+            $invoice->subtotal = Utils::priceFormat($invoice->subtotal, $options);
+            $invoice->tax = Utils::priceFormat($invoice->tax, $options);
+
+            $pdfContent = Pdf::loadView('invoices.preview', compact('invoice', 'companyName', 'companyEmail', 'companyPhone', 'img'));
+            Storage::put($filePath, $pdfContent->output());
+
+            $fileName = "invoice_{$invoice->increment_id}_{$invoice->status}.pdf";
+            return ActionResponse::download($fileName, url($filePathOut));
         }
 
         return Action::message('No invoices were selected.');

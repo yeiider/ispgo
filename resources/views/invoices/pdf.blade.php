@@ -5,178 +5,484 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>{{__('Invoice')}}</title>
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
             margin: 0;
             padding: 0;
         }
-
+        /* Estilos generales */
         .container {
-            max-width: 700px;
-            margin: 20px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 1rem;
+            pointer-events: auto;
+
         }
 
-        .card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 20px;
+        .dark .container {
+            background-color: #262626; /* neutral-800 */
+        }
+
+        /* Estilos para la sección superior */
+        .top-section {
+            position: relative;
+            overflow: hidden;
+            min-height: 8rem; /* min-h-32 */
+            background-color: #111827; /* gray-900 */
             text-align: center;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
         }
 
-        .card img {
-            max-width: 100px;
+        .dark .top-section {
+            background-color: #0a0a0a; /* neutral-950 */
         }
 
-        h2 {
-            font-size: 24px;
-            font-weight: bold;
+        .top-section figure {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin-bottom: -1px; /* -mb-px */
         }
 
-        .text-muted {
-            color: #6c757d;
+        .top-section svg {
+            fill: white;
         }
 
-        .table {
+        .dark .top-section svg {
+            fill: #262626; /* neutral-800 */
+        }
+
+        /* Estilos para el círculo con ícono */
+        .icon-circle {
+            position: relative;
+            z-index: 10;
+            margin-top: -3rem; /* -mt-12 */
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 62px; /* size-[62px] */
+            height: 62px; /* size-[62px] */
+            border-radius: 50%;
+            border: 1px solid #e5e7eb; /* gray-200 */
+            background-color: white;
+            color: #374151; /* gray-700 */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            text-align: center;
+            align-content: center;
+        }
+
+        .dark .icon-circle {
+            background-color: #262626; /* neutral-800 */
+            border-color: #404040; /* neutral-700 */
+            color: #a3a3a3; /* neutral-400 */
+        }
+
+        .icon-circle img {
+            flex-shrink: 0;
+            width: 1.5rem; /* size-6 */
+            height: 1.5rem; /* size-6 */
+            margin-top: 25%;
+            margin-bottom: auto;
+        }
+
+        /* Estilos para el contenido */
+        .content {
+            padding: 1rem; /* p-4 */
+        }
+
+        @media (min-width: 640px) {
+            .content {
+                padding: 1.75rem; /* sm:p-7 */
+            }
+        }
+
+        .content h3 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            color: #1f2937; /* gray-800 */
+            margin-bottom: 0.5rem;
+        }
+
+        .dark .content h3 {
+            color: #e5e5e5; /* neutral-200 */
+        }
+
+        .content p {
+            font-size: 0.875rem; /* text-sm */
+            color: #6b7280; /* gray-500 */
+        }
+
+        .dark .content p {
+            color: #a3a3a3; /* neutral-500 */
+        }
+
+        /* Estilos para la sección de detalles */
+        .details-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 1.25rem; /* gap-5 */
+            margin-top: 1.25rem; /* mt-5 */
+        }
+
+        @media (min-width: 640px) {
+            .details-grid {
+                grid-template-columns: repeat(3, 1fr); /* sm:grid-cols-3 */
+                margin-top: 2.5rem; /* sm:mt-10 */
+            }
+        }
+
+        .details-grid span {
+            display: block;
+            font-size: 0.75rem; /* text-xs */
+            text-transform: uppercase;
+        }
+
+        .details-grid .value {
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            color: #1f2937; /* gray-800 */
+        }
+
+        .dark .details-grid .value {
+            color: #e5e5e5; /* neutral-200 */
+        }
+
+        /* Estilos para el estado de la factura */
+        .status {
+            display: inline-block;
+            align-items: center;
+            padding: 0.5rem 1rem; /* px-4 py-2 */
+            border-radius: 9999px; /* rounded-full */
+            max-width: fit-content;
+            width: fit-content;
+        }
+
+        .status.paid {
+            background-color: #f0fdf4; /* bg-green-50 */
+            color: #22c55e; /* text-green-500 */
+
+            span {
+                color: #22c55e;
+            }
+        }
+
+        .status.unpaid {
+            background-color: #fefce8; /* bg-yellow-50 */
+            color: #eab308; /* text-yellow-500 */
+
+            span {
+                color: #eab308;
+            }
+        }
+
+        .status.canceled {
+            background-color: #fef2f2; /* bg-red-50 */
+            color: #ef4444; /* text-red-500 */
+
+            span {
+                color: #ef4444;
+            }
+        }
+
+        /* Estilos para la lista de resumen */
+        .summary-list {
+            margin-top: 1.25rem; /* mt-5 */
+        }
+
+        @media (min-width: 640px) {
+            .summary-list {
+                margin-top: 2.5rem; /* sm:mt-10 */
+            }
+        }
+
+        .summary-list h4 {
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 600; /* font-semibold */
+            text-transform: uppercase;
+            color: #1f2937; /* gray-800 */
+        }
+
+        .dark .summary-list h4 {
+            color: #e5e5e5; /* neutral-200 */
+        }
+
+        .summary-list ul {
+            display: flex;
+            flex-direction: column;
+            margin-top: 0.75rem; /* mt-3 */
+        }
+
+        .summary-list li {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem; /* gap-x-2 */
+            padding: 0.75rem 1rem; /* py-3 px-4 */
+            font-size: 0.875rem; /* text-sm */
+            border: 1px solid #e5e7eb; /* border */
+            color: #1f2937; /* gray-800 */
+            margin-top: -1px; /* -mt-px */
+        }
+
+        .summary-list li:first-child {
+            border-top-left-radius: 0.5rem; /* first:rounded-t-lg */
+            border-top-right-radius: 0.5rem; /* first:rounded-t-lg */
+            margin-top: 0; /* first:mt-0 */
+        }
+
+        .summary-list li:last-child {
+            border-bottom-left-radius: 0.5rem; /* last:rounded-b-lg */
+            border-bottom-right-radius: 0.5rem; /* last:rounded-b-lg */
+        }
+
+        .dark .summary-list li {
+            border-color: #404040; /* dark:border-neutral-700 */
+            color: #e5e5e5; /* dark:text-neutral-200 */
+        }
+
+        .summary-list li.bg-gray-50 {
+            background-color: #f9fafb; /* bg-gray-50 */
+        }
+
+        .dark .summary-list li.bg-gray-50 {
+            background-color: #262626; /* dark:bg-neutral-800 */
+        }
+
+        .summary-list li .total {
+            font-size: 1.125rem; /* text-[18px] */
+            font-weight: 500; /* font-medium */
+            color: #1f2937; /* gray-900 */
+        }
+
+        .dark .summary-list li .total {
+            color: #e5e5e5; /* dark:text-neutral-200 */
+        }
+
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            border-spacing: 0;
         }
 
-        .table th, .table td {
-            border: 1px solid #dee2e6;
-            padding: 10px;
+        table.summary tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        table.summary tbody th {
             text-align: left;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-collapse: collapse;
+            border-right: none;
         }
 
-        .table th {
-            background-color: #f8f9fa;
+        table.summary tbody td {
+            text-align: right;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-collapse: collapse;
+            border-left: none;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 8px 12px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 5px;
+
+        /* Estilos para el pie de página */
+        .footer {
+            margin-top: 1.25rem; /* mt-5 */
         }
 
-        .bg-success {
-            background-color: #28a745;
-            color: #fff;
+        @media (min-width: 640px) {
+            .footer {
+                margin-top: 2.5rem; /* sm:mt-10 */
+            }
         }
 
-        .btn-dark {
-            background-color: #343a40;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 10px;
-            cursor: pointer;
+        .footer p {
+            font-size: 0.875rem; /* text-sm */
+            color: #6b7280; /* gray-500 */
         }
 
-        .btn-dark:hover {
-            background-color: #23272b;
+        .dark .footer p {
+            color: #a3a3a3; /* neutral-500 */
         }
 
-        .mt-4 {
-            margin-top: 1.5rem;
+        .footer a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem; /* gap-x-1.5 */
+            color: #2563eb; /* blue-600 */
+            text-decoration: underline;
+            text-decoration-thickness: 2px; /* decoration-2 */
+            font-weight: 500; /* font-medium */
         }
 
-        hr {
-            margin: 20px 0;
-            border: 0;
-            border-top: 1px solid #ddd;
+        .dark .footer a {
+            color: #3b82f6; /* dark:text-blue-500 */
         }
 
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer a:focus {
+            outline: none;
+            text-decoration: underline;
+        }
     </style>
+
 </head>
 <body>
-    <div class="container">
-        <div class="card shadow p-4 text-center">
+<div class="container">
+    <div class="top-section">
+        <figure>
+            <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                 viewBox="0 0 1920 100.1">
+                <path fill="currentColor" class="fill-white dark:fill-neutral-800"
+                      d="M0,0c0,0,934.4,93.4,1920,0v100.1H0L0,0z"></path>
+            </svg>
+        </figure>
+    </div>
+
+    <div class="icon-circle">
+        <img src="{{$img}}" alt="Logo">
+    </div>
+
+    <div class="content">
+        <div class="text-center">
+            <h3 id="hs-ai-modal-label" class="text-lg font-semibold text-gray-800 dark:text-neutral-200">
+                {{__('Invoice')}}
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-neutral-500">
+                {{__('Reference')}} #{{$invoice->increment_id}}
+            </p>
+        </div>
+
+        <table>
+            <tbody>
+            <tr>
+                <td><span
+                        class="block text-xs uppercase text-gray-500 dark:text-neutral-500">{{__('Total')}}:</span>
+                </td>
+                <td><span class="block text-xs uppercase text-gray-500 dark:text-neutral-500">{{__('Status paid')}}:</span>
+                </td>
+                <td><span class="block text-xs uppercase text-gray-500 dark:text-neutral-500">{{__('Customer')}}:</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="value">{{$invoice->total}}</span>
+                </td>
+                <td>
+                    <div class="value" style="text-transform: uppercase; max-width: fit-content;">
+                        @if($invoice->status === 'paid')
+                            <div class="status paid">
+                                <span>{{__('Paid')}}</span>
+                            </div>
+                        @elseif($invoice->status === 'unpaid')
+                            <div class="status unpaid">
+                                <span>{{__('Unpaid')}}</span>
+                            </div>
+                        @elseif($invoice->status === 'canceled')
+                            <div class="status canceled">
+                                <span>{{__('Canceled')}}</span>
+                            </div>
+                        @endif
+                    </div>
+                </td>
+                <td>
+                    <div class="flex items-center gap-x-2">
+                        <span class="value">{{$invoice->full_name}}</span>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
 
-            <h2 class="fw-bold mt-3">Factura</h2>
-            <p class="text-muted">Referencia {{ $invoice->increment_id }}</p>
+        <div class="details-grid" style="display: none">
+            <div>
+                <span class="block text-xs uppercase text-gray-500 dark:text-neutral-500">Total</span>
+                <span class="value">{{$invoice->total}}</span>
+            </div>
 
-            <div class="d-flex justify-content-between align-items-center mt-4">
-                <div>
-                    <p><strong>TOTAL</strong><br>{{ $invoice->amount }}</p>
-                </div>
-                <div>
-                    <p><strong>ESTADO DE PAGO:</strong><br> <span class="badge bg-success"><</span></p>
-                </div>
-                <div>
-                    <p><strong>CLIENTE:</strong><br> Yeider Adrian Mina</p>
+            <div>
+                <span class="block text-xs uppercase text-gray-500 dark:text-neutral-500">{{__('Status paid')}}:</span>
+                <div class="value">
+                    @if($invoice->status === 'paid')
+                        <div class="status paid">
+                            <span>{{__('Paid')}}</span>
+                        </div>
+                    @elseif($invoice->status === 'unpaid')
+                        <div class="status unpaid">
+                            <span>{{__('Unpaid')}}</span>
+                        </div>
+                    @elseif($invoice->status === 'canceled')
+                        <div class="status canceled">
+                            <span>{{__('Canceled')}}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
 
-            <hr>
+            <div>
+                <span class="block text-xs uppercase text-gray-500 dark:text-neutral-500">{{__('Customer')}}:</span>
+                <div class="flex items-center gap-x-2">
+                    <span class="value">{{$invoice->full_name}}</span>
+                </div>
+            </div>
+        </div>
 
-            <h5>Resumen</h5>
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th>Descripción</th>
-                    <th>Monto</th>
-                </tr>
-                </thead>
+        <div class="summary-list">
+            <h4>{{__('Summary')}}</h4>
+            <table class="summary">
                 <tbody>
                 <tr>
-                    <td>Impuestos</td>
-                    <td>$0.00</td>
+                    <th><span>{{__('Tax')}}</span></th>
+                    <td><span>{{$invoice->tax}}</span></td>
                 </tr>
                 <tr>
-                    <td><strong>Cantidad</strong></td>
-                    <td><strong>$105,000.00</strong></td>
+                    <th><span>{{__('Amount')}}</span></th>
+                    <td><span>{{$invoice->amount}}</span></td>
                 </tr>
                 <tr>
-                    <td>Descuento</td>
-                    <td>$0.00</td>
+                    <th><span>{{__('Discount')}}</span></th>
+                    <td><span>{{$invoice->discount}}</span></td>
                 </tr>
                 <tr>
-                    <td><strong>SubTotal</strong></td>
-                    <td><strong>$105,000.00</strong></td>
+                    <th><span>SubTotal</span></th>
+                    <td><span>{{$invoice->subtotal}}</span></td>
                 </tr>
                 <tr>
-                    <td><strong>Total</strong></td>
-                    <td><strong>$105,000.00</strong></td>
+                    <th><span class="total">Total</span></th>
+                    <td><span class="total">{{$invoice->total}}</span></td>
                 </tr>
+
                 </tbody>
             </table>
+        </div>
 
-            <div class="text-center mt-4">
-                <p>Escanea el código QR para más información</p>
-                <img src="{!! \App\Helpers\QrCodeHelper::generateQrCode("0000000015") !!}" alt="QR Code" class="img-fluid">
-            </div>
+        <div class="footer">
+            <p>
+                @if($companyEmail)
+                    {{__('If you have any questions, please contact at ')}}
+                    <a href="mailto:{{$companyEmail}}">{{$companyEmail}}</a>
+                @endif
 
-            <button class="btn btn-dark mt-3">Continuar</button>
-
-            <hr>
-
-            <h5>Términos y Condiciones</h5>
-            <p class="text-muted">Esta factura es un documento válido y debe ser pagada en la fecha indicada. Cualquier consulta o reclamo debe realizarse dentro de los 5 días hábiles posteriores a la emisión. El incumplimiento en el pago puede generar intereses adicionales.</p>
-
-            <h5>Datos de la Empresa</h5>
-            <p class="text-muted">
-                <strong>ISP Solutions S.A.S</strong><br>
-                NIT: 900123456-7<br>
-                Dirección: Av. Principal 456, Bogotá<br>
-                Teléfono: +57 1 234 5678<br>
-                Email: contacto@isp-solutions.com
+                @if($companyPhone)
+                    {{__(' or call at ')}}
+                    <a href="tel:{{$companyPhone}}">{{$companyPhone}}</a>
+                @endif
             </p>
-
-            <p class="mt-4">Si tiene alguna pregunta, comuníquese a <a href="mailto:contacto@isp-solutions.com">contacto@isp-solutions.com</a> o llame al <strong>+57 1 234 5678</strong></p>
         </div>
     </div>
+</div>
 </body>
 </html>
