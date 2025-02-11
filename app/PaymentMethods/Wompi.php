@@ -119,7 +119,7 @@ class Wompi extends AbstractPaymentMethod
         $payload = [
             "name" => "Invoice",
             "description" => "Pago de factura",
-            "single_use" => false,
+            "single_use" => true,
             "collect_shipping" => false,
             "currency" => config('nova.currency'),
             "amount_in_cents" => intval($invoice->total) * 100,
