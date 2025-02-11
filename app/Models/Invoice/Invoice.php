@@ -20,7 +20,7 @@ class Invoice extends Model
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
         'issue_date', 'due_date','full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
-        'payment_link','expiration_date'
+        'payment_link','expiration_date','customer_name'
     ];
 
     protected $casts = [
@@ -34,6 +34,10 @@ class Invoice extends Model
     public function getFullNameAttribute()
     {
         return ucfirst("{$this->customer->first_name} {$this->customer->last_name}");
+    }
+    public function getInvoiceFullNameDescriptionsAttribute()
+    {
+        return $this->increment_id .' - '.  ucfirst("{$this->customer->first_name} {$this->customer->last_name}");
     }
 
     public function getEmailAddressAttribute()
@@ -185,6 +189,10 @@ class Invoice extends Model
             $model->created_by = Auth::id();
             $model->updated_by = Auth::id();
             $model->increment_id = self::generateIncrementId();
+            if ($model->customer) {
+                $model->customer_name = $model->customer->first_name . ' ' . $model->customer->last_name;
+            }
+
         });
         static::created(function ($model) {
             event(new InvoiceCreated($model));

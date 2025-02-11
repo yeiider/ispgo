@@ -77,4 +77,5 @@ return [
     'contact_method' => 'Contact Method',
     'url_key' => 'URL Key',
     'categories' => 'Categories',
+    'installation' => 'Installation',
 ];

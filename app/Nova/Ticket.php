@@ -3,7 +3,7 @@
 namespace App\Nova;
 
 use App\Models\User;
-use App\Nova\Actions\Invoice\AssignmentTickets;
+use App\Nova\Actions\AssignmentTickets;
 use App\Nova\Customers\Customer;
 use App\Nova\Filters\PriorityTickets;
 use App\Nova\Filters\StatusTickets;
@@ -69,7 +69,7 @@ class Ticket extends Resource
                     'connectivity' => __('attribute.connectivity'),
                     'billing' => __('attribute.billing'),
                     'configuration' => __('attribute.configuration'),
-                    // Add more issue types as needed
+                    'installation' => __('attribute.installation'),
                 ])
                 ->displayUsingLabels()
                 ->rules('required'),

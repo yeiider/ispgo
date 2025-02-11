@@ -21,7 +21,8 @@ class Address extends Model
         'latitude',
         'longitude',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'customer_name'
     ];
 
     public function customer()
@@ -41,6 +42,10 @@ class Address extends Model
         static::creating(function ($model) {
             $model->created_by = Auth::id();
             $model->updated_by = Auth::id();
+            if ($model->customer) {
+                $model->customer_name = $model->customer->first_name . ' ' . $model->customer->last_name;
+            }
+
         });
 
         static::updating(function ($model) {

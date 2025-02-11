@@ -77,5 +77,6 @@ return [
     'attachments' => 'Adjuntos',
     'contact_method' => 'Método de Contacto',
     'url_key' => 'Clave URL',
-    'categories' => 'Categorías'
+    'categories' => 'Categorías',
+    'installation' => 'Instalacion'
 ];

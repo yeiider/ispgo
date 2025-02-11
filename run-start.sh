@@ -31,4 +31,6 @@ php artisan migrate --force
 echo "Verificando la licencia de Laravel Nova..."
 php artisan nova:check-license
 
+php artisan addresses:populate-customer-name
+php artisan invoices:populate-customer-name
 echo "¡Script completado con éxito!"

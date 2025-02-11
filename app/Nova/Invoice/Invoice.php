@@ -32,10 +32,10 @@ class Invoice extends Resource
 {
     public static $model = \App\Models\Invoice\Invoice::class;
 
-    public static $title = 'id';
+    public static $title = 'invoice_full_name_descriptions';
 
     public static $search = [
-        'id', 'amount', 'issue_date', 'status'
+        'id', 'amount', 'issue_date', 'status','customer_name'
     ];
 
     public function fields(NovaRequest $request): array
