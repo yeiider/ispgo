@@ -29,7 +29,7 @@ import {toast} from "sonner"
 
 interface Props {
   navigation: (step: number) => void;
-  onSetInvoice:  React.Dispatch<React.SetStateAction<Invoice | null>>
+  onSetInvoice: React.Dispatch<React.SetStateAction<Invoice | null>>
 }
 
 export default function Reference({navigation, onSetInvoice}: Props) {
@@ -52,10 +52,37 @@ export default function Reference({navigation, onSetInvoice}: Props) {
     defaultValues: data,
   })
 
+  const searchInvoice = async (reference: string) => {
+    setLoading(true)
+    try {
+      const response = await axios.get('/invoice/search', {
+        params: {
+          input: reference,
+        },
+      });
+      setInvoice(response.data.invoice);
+      onSetInvoice(response.data.invoice);
+
+    } catch (e: any) {
+      toast.error(e.response?.data?.message || 'Error occurred', {
+        classNames: {
+          toast: "bg-red-100",
+          title: "text-red-500",
+          icon: "text-red-500",
+        }
+      })
+      setInvoice(null)
+      localStorage.removeItem('invoice')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    setLoading(true)
+    await searchInvoice(values.reference)
+    /*setLoading(true)
     try {
       const response = await axios.get('/invoice/search', {
         params: {
@@ -77,7 +104,7 @@ export default function Reference({navigation, onSetInvoice}: Props) {
       localStorage.removeItem('invoice')
     } finally {
       setLoading(false)
-    }
+    }*/
   }
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +129,18 @@ export default function Reference({navigation, onSetInvoice}: Props) {
   }
 
   const continueTitle = __('Continue');
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const invoiceParam = urlParams.get('invoice');
+
+    if (invoiceParam) {
+      form.setValue('reference', invoiceParam)
+      searchInvoice(invoiceParam).then(function () {
+        console.log('Invoice parameter:', invoiceParam);
+      })
+    }
+  }, []);
 
   return (
     <div>
