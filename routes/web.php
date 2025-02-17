@@ -105,4 +105,6 @@ Route::get('/401', function () {
 })->name('error.401');
 
 
-Route::get('/preview-invoice/{id}', [InvoiceController::class, 'previewInvoice']);
+Route::get('/preview-invoice/{id}', [InvoiceController::class, 'previewInvoice'])->name('preview.invoice');
+
+Route::get('/preview-invoice-email/{id}', [InvoiceController::class, 'previewInvoiceEmail']);

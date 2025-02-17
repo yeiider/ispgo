@@ -143,9 +143,7 @@ class InvoiceController extends Controller
 
     public function previewInvoice($id): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $invoice = Invoice::where('increment_id', $id)
-            ->with('customer')
-            ->first();
+        $invoice = $this->getInvoice($id);
 
         if (!$invoice) {
             abort(404, __('Invoice not found'));
@@ -190,5 +188,44 @@ class InvoiceController extends Controller
 
     }
 
+    public function previewInvoiceEmail($id): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    {
+        $invoice = $this->getInvoice($id);
+
+        if (!$invoice) {
+            abort(404, __('Invoice not found'));
+        }
+
+        $urlCheckout = route('checkout.index') . '?invoice=' . $invoice->increment_id;
+        $qrBase64 = QrCodeHelper::generateQrCode($invoice->increment_id);
+
+        $url = Utils::generateFormattedUrl(env('APP_URL'));
+        $issueMonth = Utils::getMonthFormDate($invoice->issue_date);
+        $totalAmount = Utils::priceFormat($invoice->total, ['locale' => 'es', 'currency' => 'COP']);
+        $dueDate = Utils::formatToDayAndMonth($invoice->due_date);
+        $previewInvoice = route('preview.invoice', $invoice->increment_id);
+
+
+        return view('emails.invoice',
+            compact(
+                'invoice',
+                'urlCheckout',
+                'qrBase64',
+                'url',
+                'issueMonth',
+                'totalAmount',
+                'dueDate',
+                'previewInvoice'
+            )
+        );
+    }
+
+
+    private function getInvoice(int|string $id)
+    {
+        return Invoice::where('increment_id', $id)
+            ->with('customer')
+            ->first();
+    }
 
 }
