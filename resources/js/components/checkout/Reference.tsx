@@ -82,29 +82,6 @@ export default function Reference({navigation, onSetInvoice}: Props) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     await searchInvoice(values.reference)
-    /*setLoading(true)
-    try {
-      const response = await axios.get('/invoice/search', {
-        params: {
-          input: values.reference,
-        },
-      });
-      setInvoice(response.data.invoice);
-      onSetInvoice(response.data.invoice);
-
-    } catch (e: any) {
-      toast.error(e.response?.data?.message || 'Error occurred', {
-        classNames: {
-          toast: "bg-red-100",
-          title: "text-red-500",
-          icon: "text-red-500",
-        }
-      })
-      setInvoice(null)
-      localStorage.removeItem('invoice')
-    } finally {
-      setLoading(false)
-    }*/
   }
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,7 +114,7 @@ export default function Reference({navigation, onSetInvoice}: Props) {
     if (invoiceParam) {
       form.setValue('reference', invoiceParam)
       searchInvoice(invoiceParam).then(function () {
-        console.log('Invoice parameter:', invoiceParam);
+        console.log('Search finally:', invoiceParam);
       })
     }
   }, []);

@@ -1,5 +1,5 @@
 import {__} from "@/translation.ts";
-import {useEffect, useMemo, useState} from "react";
+import {useMemo, useState} from "react";
 import {useStepper} from "headless-stepper";
 import StepsNavigate from "@/components/checkout/StepsNavigate.tsx";
 import Reference from "@/components/checkout/Reference.tsx";

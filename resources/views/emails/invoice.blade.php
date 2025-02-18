@@ -4,210 +4,210 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __('Factura') }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .hero {
-            background-image: url("/img/invoice/woman-holding-paper-looking.jpg");
-            background-size: cover;
-            background-position: center;
-            height: 500px;
-            border-radius: 10px 10px 0 0;
-        }
-
-        .header {
-
-            padding: 20px 0;
-        }
-
-        .header img {
-            max-width: 110px;
-        }
-
-        .sub-header {
-            max-width: 50%;
-        }
-
-        .sub-header .icon {
-            display: flex;
-            justify-content: center;
-        }
-
-        .sub-header .icon svg {
-            color: white;
-        }
-
-        .title {
-            background: rgb(0, 212, 255);
-            background: linear-gradient(90deg, rgba(0, 212, 255, 1) 0%, rgba(0, 121, 176, 1) 94%);
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
-        }
-
-        .bg-gradient {
-            background: rgb(0, 212, 255);
-            background: linear-gradient(90deg, rgba(0, 212, 255, 1) 0%, rgba(0, 121, 176, 1) 94%);
-            border-top-right-radius: 10px;
-        }
-
-        .sub-header .content {
-            color: white;
-
-        }
-
-        .sub-header .content p {
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .sub-header .content a {
-            color: white;
-        }
-
-        .content {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .content-info {
-            padding: 20px;
-        }
-
-        .info {
-            margin: 20px 0;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-column-gap: 0;
-            grid-row-gap: 0;
-        }
-
-        .info div {
-            text-align: center;
-            padding: 0 30px;
-            color: #666;
-        }
-
-        .info div strong {
-            color: #0ea5e9;
-        }
-
-        .info div:nth-child(2) {
-            border-left: 1px solid #ccc;
-            border-right: 1px solid #ccc;
-        }
-
-        .info div p {
-            margin: 8px 0;
-            font-size: 14px;
-        }
-
-        .info div p:last-child {
-            font-size: 16px;
-            color: #0a0a0a;
-            text-transform: capitalize;
-        }
-
-        .payment-methods {
-            text-align: center;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            display: flex;
-            align-content: center;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .payment-methods .title {
-            border-radius: 6px;
-            width: 100%;
-        }
-
-        .payment-methods .payment-method {
-            width: 30%;
-        }
-
-        .payment-methods .payment-method .qr {
-            border: solid 1px #ccc;
-            margin-bottom: 10px;
-        }
-
-        .payment-methods .payment-method .qr img {
-            width: 100%;
-            height: auto;
-        }
-
-        .payment-methods .payment-method .wompi {
-            border: solid 1px #ccc;
-        }
-
-        .payment-methods .payment-method .wompi svg {
-            height: 50px;
-        }
-
-        .payment-methods .payment-info {
-            width: 70%;
-        }
-
-        .payment-methods .payment-info p {
-            margin: 3px 0;
-            font-size: 14px;
-        }
-
-        .payment-methods .payment-info p:first-child {
-            font-size: 14px;
-            color: #0a0a0a;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-
-        .buttons {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .buttons a {
-            text-decoration: none;
-            background: #0ea5e9;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin: 5px;
-            display: inline-block;
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 14px;
-            margin-top: 20px;
-            color: #666;
-        }
-    </style>
 </head>
 <body>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero {
+
+        background-size: cover;
+        background-position: center;
+        height: 500px;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .header {
+
+        padding: 20px 0;
+    }
+
+    .header img {
+        max-width: 110px;
+    }
+
+    .sub-header {
+        max-width: 50%;
+    }
+
+    .sub-header .icon {
+        display: flex;
+        justify-content: center;
+    }
+
+    .sub-header .icon svg {
+        color: white;
+    }
+
+    .title {
+        background: rgb(0, 212, 255);
+        background: linear-gradient(90deg, rgba(0, 212, 255, 1) 0%, rgba(0, 121, 176, 1) 94%);
+        color: white;
+        padding: 10px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    .bg-gradient {
+        background: rgb(0, 212, 255);
+        background: linear-gradient(90deg, rgba(0, 212, 255, 1) 0%, rgba(0, 121, 176, 1) 94%);
+        border-top-right-radius: 10px;
+    }
+
+    .sub-header .content {
+        color: white;
+
+    }
+
+    .sub-header .content p {
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .sub-header .content a {
+        color: white;
+    }
+
+    .content {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .content-info {
+        padding: 20px;
+    }
+
+    .info {
+        margin: 20px 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-column-gap: 0;
+        grid-row-gap: 0;
+    }
+
+    .info div {
+        text-align: center;
+        padding: 0 30px;
+        color: #666;
+    }
+
+    .info div strong {
+        color: #0ea5e9;
+    }
+
+    .info div:nth-child(2) {
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+    }
+
+    .info div p {
+        margin: 8px 0;
+        font-size: 14px;
+    }
+
+    .info div p:last-child {
+        font-size: 16px;
+        color: #0a0a0a;
+        text-transform: capitalize;
+    }
+
+    .payment-methods {
+        text-align: center;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 20px;
+        display: flex;
+        align-content: center;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .payment-methods .title {
+        border-radius: 6px;
+        width: 100%;
+    }
+
+    .payment-methods .payment-method {
+        width: 30%;
+    }
+
+    .payment-methods .payment-method .qr {
+        border: solid 1px #ccc;
+        margin-bottom: 10px;
+    }
+
+    .payment-methods .payment-method .qr img {
+        width: 100%;
+        height: auto;
+    }
+
+    .payment-methods .payment-method .wompi {
+        border: solid 1px #ccc;
+    }
+
+    .payment-methods .payment-method .wompi svg {
+        height: 50px;
+    }
+
+    .payment-methods .payment-info {
+        width: 70%;
+    }
+
+    .payment-methods .payment-info p {
+        margin: 3px 0;
+        font-size: 14px;
+    }
+
+    .payment-methods .payment-info p:first-child {
+        font-size: 14px;
+        color: #0a0a0a;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    .buttons {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .buttons a {
+        text-decoration: none;
+        background: #0ea5e9;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin: 5px;
+        display: inline-block;
+    }
+
+    .footer {
+        text-align: center;
+        font-size: 14px;
+        margin-top: 20px;
+        color: #666;
+    }
+</style>
 <div class="container">
-    <div class="hero">
+    <div class="hero" style="background-image: url({{$bgImage}});">
         <div class="header">
-                <img src="{{asset('/img/logo.svg')}}" alt="Raíces">
+                <img src="{{$logo}}" alt="Raíces">
         </div>
         <div class="sub-header">
             <div class="icon">

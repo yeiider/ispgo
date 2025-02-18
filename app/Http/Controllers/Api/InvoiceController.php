@@ -162,9 +162,9 @@ class InvoiceController extends Controller
         $imgPath = public_path('img/invoice.svg');
 
         if (file_exists($imgPath)) {
-            $imgContent = file_get_contents($imgPath); // Cargar contenido del archivo
-            $img = base64_encode($imgContent); // Convertir el contenido a Base64
-            $img = 'data:image/svg+xml;base64,' . $img; // Opcional: Asegurarte que sea una fuente Base64 válida
+            $imgContent = file_get_contents($imgPath);
+            $img = base64_encode($imgContent);
+            $img = 'data:image/svg+xml;base64,' . $img;
         } else {
             $img = ''; // Manejo cuando el archivo no existe
         }
@@ -204,7 +204,8 @@ class InvoiceController extends Controller
         $totalAmount = Utils::priceFormat($invoice->total, ['locale' => 'es', 'currency' => 'COP']);
         $dueDate = Utils::formatToDayAndMonth($invoice->due_date);
         $previewInvoice = route('preview.invoice', $invoice->increment_id);
-
+        $bgImage = asset('img/invoice/woman-holding-paper-looking.jpg');
+        $logo =asset('/img/logo.svg');
 
         return view('emails.invoice',
             compact(
@@ -215,7 +216,9 @@ class InvoiceController extends Controller
                 'issueMonth',
                 'totalAmount',
                 'dueDate',
-                'previewInvoice'
+                'previewInvoice',
+                'bgImage',
+                'logo'
             )
         );
     }

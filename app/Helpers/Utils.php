@@ -105,4 +105,13 @@ class Utils
         return \Carbon\Carbon::parse($date)->translatedFormat('d \d\e F');
     }
 
+    public static function imageToBase64(string $path): string
+    {
+        if (file_exists($path)) {
+            $img = base64_encode(file_get_contents($path));
+            return 'data:image/svg+xml;base64,' . $img;
+        }
+        return '';
+    }
+
 }
