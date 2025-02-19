@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Restablecimiento de Contraseña</title>
+    <title>{{__('Password Reset')}}</title>
     <style>
         body {
             font-family: Arial, sans-serif;

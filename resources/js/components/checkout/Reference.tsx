@@ -29,7 +29,7 @@ import {toast} from "sonner"
 
 interface Props {
   navigation: (step: number) => void;
-  onSetInvoice:  React.Dispatch<React.SetStateAction<Invoice | null>>
+  onSetInvoice: React.Dispatch<React.SetStateAction<Invoice | null>>
 }
 
 export default function Reference({navigation, onSetInvoice}: Props) {
@@ -52,14 +52,12 @@ export default function Reference({navigation, onSetInvoice}: Props) {
     defaultValues: data,
   })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+  const searchInvoice = async (reference: string) => {
     setLoading(true)
     try {
       const response = await axios.get('/invoice/search', {
         params: {
-          input: values.reference,
+          input: reference,
         },
       });
       setInvoice(response.data.invoice);
@@ -78,6 +76,12 @@ export default function Reference({navigation, onSetInvoice}: Props) {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
+    await searchInvoice(values.reference)
   }
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +106,18 @@ export default function Reference({navigation, onSetInvoice}: Props) {
   }
 
   const continueTitle = __('Continue');
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const invoiceParam = urlParams.get('invoice');
+
+    if (invoiceParam) {
+      form.setValue('reference', invoiceParam)
+      searchInvoice(invoiceParam).then(function () {
+        console.log('Search finally:', invoiceParam);
+      })
+    }
+  }, []);
 
   return (
     <div>

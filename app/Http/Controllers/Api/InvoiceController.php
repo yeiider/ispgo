@@ -143,9 +143,7 @@ class InvoiceController extends Controller
 
     public function previewInvoice($id): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $invoice = Invoice::where('increment_id', $id)
-            ->with('customer')
-            ->first();
+        $invoice = $this->getInvoice($id);
 
         if (!$invoice) {
             abort(404, __('Invoice not found'));
@@ -164,9 +162,9 @@ class InvoiceController extends Controller
         $imgPath = public_path('img/invoice.svg');
 
         if (file_exists($imgPath)) {
-            $imgContent = file_get_contents($imgPath); // Cargar contenido del archivo
-            $img = base64_encode($imgContent); // Convertir el contenido a Base64
-            $img = 'data:image/svg+xml;base64,' . $img; // Opcional: Asegurarte que sea una fuente Base64 válida
+            $imgContent = file_get_contents($imgPath);
+            $img = base64_encode($imgContent);
+            $img = 'data:image/svg+xml;base64,' . $img;
         } else {
             $img = ''; // Manejo cuando el archivo no existe
         }
@@ -190,5 +188,47 @@ class InvoiceController extends Controller
 
     }
 
+    public function previewInvoiceEmail($id): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    {
+        $invoice = $this->getInvoice($id);
+
+        if (!$invoice) {
+            abort(404, __('Invoice not found'));
+        }
+
+        $urlCheckout = route('checkout.index') . '?invoice=' . $invoice->increment_id;
+        $qrBase64 = QrCodeHelper::generateQrCode($invoice->increment_id);
+
+        $url = Utils::generateFormattedUrl(env('APP_URL'));
+        $issueMonth = Utils::getMonthFormDate($invoice->issue_date);
+        $totalAmount = Utils::priceFormat($invoice->total, ['locale' => 'es', 'currency' => 'COP']);
+        $dueDate = Utils::formatToDayAndMonth($invoice->due_date);
+        $previewInvoice = route('preview.invoice', $invoice->increment_id);
+        $bgImage = asset('img/invoice/woman-holding-paper-looking.jpg');
+        $logo =asset('/img/logo.svg');
+
+        return view('emails.invoice',
+            compact(
+                'invoice',
+                'urlCheckout',
+                'qrBase64',
+                'url',
+                'issueMonth',
+                'totalAmount',
+                'dueDate',
+                'previewInvoice',
+                'bgImage',
+                'logo'
+            )
+        );
+    }
+
+
+    private function getInvoice(int|string $id)
+    {
+        return Invoice::where('increment_id', $id)
+            ->with('customer')
+            ->first();
+    }
 
 }
