@@ -35,6 +35,10 @@ use App\Nova\PageBuilder\Pages;
 use App\Nova\Plan;
 use App\Nova\Router;
 use App\Nova\Service;
+use App\Nova\SupportTickets\BoardResourceNova;
+use App\Nova\SupportTickets\ColumnResourceNova;
+use App\Nova\SupportTickets\LabelResourceNova;
+use App\Nova\SupportTickets\TaskResourceNova;
 use App\Nova\Ticket;
 use App\NovaPermissions;
 use Illuminate\Http\Request;
@@ -107,6 +111,13 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make(__('panel.tickets'), [
                     MenuItem::resource(Ticket::class)->name(__('panel.tickets')),
+                ])->icon('support')->collapsable(),
+
+                MenuSection::make(__('panel.tickets_board'), [
+                    MenuItem::resource(BoardResourceNova::class)->name(__('panel.tickets_boards')),
+                    MenuItem::resource(ColumnResourceNova::class)->name(__('panel.tickets_columns')),
+                    MenuItem::resource(TaskResourceNova::class)->name(__('panel.tickets_tasks')),
+                    MenuItem::resource(LabelResourceNova::class)->name(__('panel.tickets_labels')),
                 ])->icon('support')->collapsable(),
 
                 MenuSection::make(__('panel.content'), [

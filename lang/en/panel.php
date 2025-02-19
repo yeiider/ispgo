@@ -45,4 +45,9 @@ return [
     'television_plans' => 'Television Plans',
     'telephonic_plans' => 'Telephonic Plans',
     'html_template' => 'Html Template',
+    'tickets_boards' => 'Tickets Boards',
+    'tickets_columns' => 'Tickets Columns',
+    'tickets_tasks' => 'Tickets Tasks',
+    'tickets_labels' => 'Tickets Labels',
+    'tickets_board' => 'Tickets Board',
 ];
