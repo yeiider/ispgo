@@ -43,8 +43,6 @@ class SendInvoiceEmail extends Command
             ->with('customer')
             ->first();
 
-        //dd($invoice->toArray());
-
         $emailTemplate = EmailTemplate::where('id', $templateId)->first();
 
         $this->info('Buscando factura con increment_id ' . $incrementId . ' ' . $templateId);
