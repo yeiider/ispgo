@@ -313,5 +313,7 @@
     "Service": "Service",
     "Date Of Birth": "Date Of Birth",
     "Delete": "Delete",
-    "Send invoice by email": "Send invoice by email"
+    "Send invoice by email": "Send invoice by email",
+    "Email sent successfully!": "Email sent successfully!",
+    "Email template not found!": "Email template not found!"
 }

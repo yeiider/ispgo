@@ -46,7 +46,7 @@ class SendInvoiceNotification extends Action
              */
             Utils::sendInvoiceEmail($invoice, $emailTemplate, $img_header);
         }
-        return Action::message('Email sent successfully!');
+        return Action::message(__('Email sent successfully!'));
     }
 
     /**

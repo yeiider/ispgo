@@ -196,10 +196,8 @@
                 <p>{{$invoice->due_date_formatted}}</p>
             </div>
         </div>
+        <p class="title"><strong>Canales y medios disponibles para pagar tu factura</strong></p>
         <div class="payment-methods">
-            <div class="title">
-                <p class=""><strong>Canales y medios disponibles para pagar tu factura</strong></p>
-            </div>
             <div class="payment-method">
                 <div class="qr">
                     <img src="{{$invoice->qr_image}}" alt="QR"/>
