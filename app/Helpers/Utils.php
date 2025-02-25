@@ -7,8 +7,14 @@
 
 namespace App\Helpers;
 
+use App\Mail\DynamicEmail;
+use App\Models\Invoice\Invoice;
+use Illuminate\Support\Facades\Mail;
+
 class Utils
 {
+
+    private const PATH_QR_INVOICE = 'app/public/';
 
     /**
      * Formats a price string into a localized currency format.
@@ -111,6 +117,41 @@ class Utils
             return 'data:image/svg+xml;base64,' . $img;
         }
         return '';
+    }
+
+
+    public static function sendInvoiceEmail(Invoice $invoice, $emailTemplate, $img_header): void
+    {
+        $dynamicEmail = new DynamicEmail(['invoice' => $invoice], $emailTemplate, $img_header);
+        $imagePath = Utils::generateQrCodeInvoice($invoice);
+
+        $dynamicEmail->attach($imagePath, [
+            'as' => 'invoice-qr.png',
+            'mime' => 'image/png'
+        ])->with([
+            'imagePath' => $imagePath,
+        ]);
+
+        Mail::to($invoice->email_address)->send(
+            $dynamicEmail
+        );
+        Utils::unlinkQrCode($invoice);
+    }
+
+
+    public static function generateQrCodeInvoice(Invoice $invoice): string
+    {
+        $base64Image = QrCodeHelper::generateQrCode($invoice->url_pay);
+        list(, $base64Image) = explode(',', $base64Image);
+
+        $imagePath = storage_path(self::PATH_QR_INVOICE . 'temp_qr' . $invoice->increment_id . '.png');
+        file_put_contents($imagePath, base64_decode($base64Image));
+        return $imagePath;
+    }
+
+    public static function unlinkQrCode(Invoice $invoice): void
+    {
+        unlink(storage_path(self::PATH_QR_INVOICE . 'temp_qr' . $invoice->increment_id . '.png'));
     }
 
 }

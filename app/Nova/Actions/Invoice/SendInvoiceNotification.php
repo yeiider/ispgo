@@ -2,7 +2,7 @@
 
 namespace App\Nova\Actions\Invoice;
 
-use App\Mail\DynamicEmail;
+use App\Helpers\Utils;
 use App\Models\EmailTemplate;
 use App\Models\Invoice\Invoice;
 use App\Settings\InvoiceProviderConfig;
@@ -10,7 +10,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Mail;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
@@ -45,9 +44,7 @@ class SendInvoiceNotification extends Action
             /**
              * @var Invoice $invoice
              */
-            //dd($invoice);
-
-            Mail::to($invoice->email_address)->send(new DynamicEmail(['invoice' => $invoice], $emailTemplate, $img_header));
+            Utils::sendInvoiceEmail($invoice, $emailTemplate, $img_header);
         }
         return Action::message('Email sent successfully!');
     }

@@ -196,28 +196,21 @@ class InvoiceController extends Controller
             abort(404, __('Invoice not found'));
         }
 
-        $urlCheckout = route('checkout.index') . '?invoice=' . $invoice->increment_id;
-        $qrBase64 = QrCodeHelper::generateQrCode($invoice->increment_id);
+        $url_pay = route('checkout.index') . '?invoice=' . $invoice->increment_id;
+        $qr_image = QrCodeHelper::generateQrCode($invoice->increment_id);
 
         $url = Utils::generateFormattedUrl(env('APP_URL'));
-        $issueMonth = Utils::getMonthFormDate($invoice->issue_date);
-        $totalAmount = Utils::priceFormat($invoice->total, ['locale' => 'es', 'currency' => 'COP']);
+        $issue_month = Utils::getMonthFormDate($invoice->issue_date);
+        $total_amount = Utils::priceFormat($invoice->total, ['locale' => 'es', 'currency' => 'COP']);
         $due_date = Utils::formatToDayAndMonth($invoice->due_date);
-        $previewInvoice = route('preview.invoice', $invoice->increment_id);
-        $imgHeader = asset('img/invoice/email-header.jpeg');
+        $url_preview = route('preview.invoice', $invoice->increment_id);
+        $img_header = asset('img/invoice/email-header.jpeg');
 
 
         return view('emails.invoice',
             compact(
                 'invoice',
-                'urlCheckout',
-                'qrBase64',
-                'url',
-                'issueMonth',
-                'totalAmount',
-                'due_date',
-                'previewInvoice',
-                'imgHeader',
+                'img_header',
             )
         );
     }
