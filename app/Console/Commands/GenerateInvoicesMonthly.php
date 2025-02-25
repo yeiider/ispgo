@@ -26,7 +26,7 @@ class GenerateInvoicesMonthly extends Command
         if ($currentDate->day == $billingDate) {
             $this->info("[EVERYDAY] Iniciando generación de facturas para servicios...");
 
-            Service::where('service_status', '!=', 'free')
+            Service::whereNotIn('service_status', ['free', 'pending'])
                 ->chunk(50, function ($services) {
                     foreach ($services as $service) {
                         try {
