@@ -100,6 +100,7 @@
         border-radius: 5px;
         margin-top: 20px;
         display: flex;
+        --webkit-display: flex;
         align-content: center;
         justify-content: space-between;
         -webkit-justify-content: space-between;
@@ -196,7 +197,9 @@
             </div>
         </div>
         <div class="payment-methods">
-            <p class="title"><strong>Canales y medios disponibles para pagar tu factura</strong></p>
+            <div class="title">
+                <p class=""><strong>Canales y medios disponibles para pagar tu factura</strong></p>
+            </div>
             <div class="payment-method">
                 <div class="qr">
                     <img src="{{$invoice->qr_image}}" alt="QR"/>

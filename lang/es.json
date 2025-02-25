@@ -312,5 +312,6 @@
     "Select a service": "Selecciona un servicio",
     "Service": "Servicio",
     "Date Of Birth": "Fecha de nacimiento",
-    "Delete": "Eliminar"
+    "Delete": "Eliminar",
+    "Send invoice by email": "Enviar factura por correo electrónico"
 }

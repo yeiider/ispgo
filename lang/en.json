@@ -312,5 +312,6 @@
     "Select a service": "Select a service",
     "Service": "Service",
     "Date Of Birth": "Date Of Birth",
-    "Delete": "Delete"
+    "Delete": "Delete",
+    "Send invoice by email": "Send invoice by email"
 }
