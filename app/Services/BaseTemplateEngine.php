@@ -101,6 +101,9 @@ abstract class BaseTemplateEngine
     protected function handleUrl($expression)
     {
         preg_match('/url\(([^)]+)\)/', $expression, $matches);
+        if (!isset($matches[1])) {
+            return $expression;
+        }
         $urlPath = trim($matches[1], "'");
         return url($urlPath);
     }

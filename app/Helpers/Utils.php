@@ -98,7 +98,6 @@ class Utils
      * @param string $date The input date in a valid PHP date format (e.g., 'Y-m-d', 'd/m/Y').
      * @return string The formatted date in the "day de month" format.
      *
-     * @throws \Exception If the provided date is invalid.
      **/
     public static function formatToDayAndMonth(string $date): string
     {

@@ -202,10 +202,10 @@ class InvoiceController extends Controller
         $url = Utils::generateFormattedUrl(env('APP_URL'));
         $issueMonth = Utils::getMonthFormDate($invoice->issue_date);
         $totalAmount = Utils::priceFormat($invoice->total, ['locale' => 'es', 'currency' => 'COP']);
-        $dueDate = Utils::formatToDayAndMonth($invoice->due_date);
+        $due_date = Utils::formatToDayAndMonth($invoice->due_date);
         $previewInvoice = route('preview.invoice', $invoice->increment_id);
-        $bgImage = asset('img/invoice/woman-holding-paper-looking.jpg');
-        $logo =asset('/img/logo.svg');
+        $imgHeader = asset('img/invoice/email-header.jpeg');
+
 
         return view('emails.invoice',
             compact(
@@ -215,10 +215,9 @@ class InvoiceController extends Controller
                 'url',
                 'issueMonth',
                 'totalAmount',
-                'dueDate',
+                'due_date',
                 'previewInvoice',
-                'bgImage',
-                'logo'
+                'imgHeader',
             )
         );
     }

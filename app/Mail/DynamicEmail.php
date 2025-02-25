@@ -14,12 +14,14 @@ class DynamicEmail extends Mailable
 
     protected $data;
     protected $template;
+    protected $img_header;
     protected $mailConfig;
 
-    public function __construct($data, EmailTemplate $template)
+    public function __construct($data, EmailTemplate $template, string|null $img_header = null)
     {
         $this->data = $data;
         $this->template = $template;
+        $this->img_header = $img_header;
     }
 
     public function build(): DynamicEmail
@@ -32,6 +34,7 @@ class DynamicEmail extends Mailable
             ->with([
                 'content' => $content,
                 'styles' => $this->template->styles,
+                'img_header' => $this->img_header,
             ])
             ->subject($subject);
     }

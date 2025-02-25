@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('Factura') }}</title>
+    <title>{{ __('Factura'). ' #'.$invoice->increment_id }}</title>
 </head>
 <body>
 <style>
@@ -23,33 +23,14 @@
     }
 
     .hero {
-
         background-size: cover;
-        background-position: center;
+        background-position: left;
         height: 500px;
         border-radius: 10px 10px 0 0;
     }
 
-    .header {
-
-        padding: 20px 0;
-    }
-
     .header img {
         max-width: 110px;
-    }
-
-    .sub-header {
-        max-width: 50%;
-    }
-
-    .sub-header .icon {
-        display: flex;
-        justify-content: center;
-    }
-
-    .sub-header .icon svg {
-        color: white;
     }
 
     .title {
@@ -70,11 +51,6 @@
         border-top-right-radius: 10px;
     }
 
-    .sub-header .content {
-        color: white;
-
-    }
-
     .sub-header .content p {
         font-size: 14px;
         font-weight: bold;
@@ -82,11 +58,6 @@
 
     .sub-header .content a {
         color: white;
-    }
-
-    .content {
-        text-align: center;
-        padding: 20px;
     }
 
     .content-info {
@@ -205,29 +176,8 @@
     }
 </style>
 <div class="container">
-    <div class="hero" style="background-image: url({{$bgImage}});">
-        <div class="header">
-                <img src="{{$logo}}" alt="Raíces">
-        </div>
-        <div class="sub-header">
-            <div class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-                     class="lucide lucide-file-text">
-                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-                    <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
-                    <path d="M10 9H8"/>
-                    <path d="M16 13H8"/>
-                    <path d="M16 17H8"/>
-                </svg>
-            </div>
-            <div class="title">LLEGÓ TU FACTURA RAÍCES</div>
-            <div class="content">
-                <p>Paga fácil, rápido y seguro desde nuestra web:</p>
-                <p><a href="{{$url->value}}">{{$url->label}}</a></p>
-            </div>
-        </div>
-    </div>
+    <div class="hero" style="background-image: url({{$img_header}})"></div>
+    <!-- Renderizar contenido aquí -->
     <div class="content-info">
         <div class="info">
             <div class="month">
@@ -244,7 +194,7 @@
                     <path d="M17 18h.01"/>
                 </svg>
                 <p><strong>Mes</strong></p>
-                <p>{{$issueMonth}}</p>
+                <p>{{$issue_month}}</p>
             </div>
             <div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none"
@@ -258,7 +208,7 @@
                     <circle cx="6" cy="5" r="3"/>
                 </svg>
                 <p><strong>Valor a pagar</strong></p>
-                <p>{{$totalAmount}}</p>
+                <p>{{$total_amount}}</p>
             </div>
             <div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none"
@@ -272,14 +222,14 @@
                     <circle cx="16" cy="16" r="6"/>
                 </svg>
                 <p><strong>Límite de pago</strong></p>
-                <p>{{$dueDate}}</p>
+                <p>{{$due_date}}</p>
             </div>
         </div>
         <div class="payment-methods">
             <p class="title"><strong>Canales y medios disponibles para pagar tu factura</strong></p>
             <div class="payment-method">
                 <div class="qr">
-                    <img src="{{$qrBase64}}" alt="QR"/>
+                    <img src="{{$qr_image}}" alt="QR"/>
                 </div>
                 <div class="wompi">
                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="65"
@@ -317,8 +267,8 @@
             </div>
         </div>
         <div class="buttons">
-            <a class="bg-gradient" href="{{$previewInvoice}}" target="_blank">VER TU FACTURA</a>
-            <a class="bg-gradient" href="{{$urlCheckout}}" target="_blank">PAGAR TU FACTURA</a>
+            <a class="bg-gradient" href="{{$url_preview}}" target="_blank">VER TU FACTURA</a>
+            <a class="bg-gradient" href="{{$url_pay}}" target="_blank">PAGAR TU FACTURA</a>
         </div>
         <div class="footer">
             ¡Tu pago quedará registrado de inmediato!

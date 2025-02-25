@@ -5,6 +5,8 @@ namespace App\Models\Invoice;
 use App\Events\InvoiceCreated;
 use App\Events\InvoicePaid;
 use App\Events\InvoiceUpdateStatus;
+use App\Helpers\QrCodeHelper;
+use App\Helpers\Utils;
 use App\Models\Customers\Customer;
 use App\Models\Services\Service;
 use App\Models\User;
@@ -19,8 +21,8 @@ class Invoice extends Model
     const STATUS_PAID = "paid";
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date','full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
-        'payment_link','expiration_date','customer_name'
+        'issue_date', 'due_date', 'full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
+        'payment_link', 'expiration_date', 'customer_name'
     ];
 
     protected $casts = [
@@ -29,15 +31,16 @@ class Invoice extends Model
         "expiration_date" => 'date',
         "additional_information" => 'array'
     ];
-    protected $appends = ['full_name', 'email_address'];
+    protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay'];
 
     public function getFullNameAttribute()
     {
         return ucfirst("{$this->customer->first_name} {$this->customer->last_name}");
     }
+
     public function getInvoiceFullNameDescriptionsAttribute()
     {
-        return $this->increment_id .' - '.  ucfirst("{$this->customer->first_name} {$this->customer->last_name}");
+        return $this->increment_id . ' - ' . ucfirst("{$this->customer->first_name} {$this->customer->last_name}");
     }
 
     public function getEmailAddressAttribute()
@@ -181,7 +184,7 @@ class Invoice extends Model
         $this->save();
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
@@ -195,6 +198,7 @@ class Invoice extends Model
 
         });
         static::created(function ($model) {
+            $model->load('customer');
             event(new InvoiceCreated($model));
         });
         static::updating(function ($model) {
@@ -232,4 +236,68 @@ class Invoice extends Model
             ]);
         }
     }
+
+    /**
+     * Generate QR Code for the increment ID.
+     *
+     * @return string Generated QR Code as a string.
+     */
+    public function getQrImageAttribute(): string
+    {
+        return QrCodeHelper::generateQrCode($this->increment_id);
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getIssueMonthFormattedAttribute(): string
+    {
+        return Utils::getMonthFormDate($this->issue_date);
+    }
+
+
+    /**
+     * Get the total amount formatted as a string.
+     *
+     * @return string
+     */
+    public function getTotalFormattedAttribute(): string
+    {
+        return Utils::priceFormat($this->total, ['locale' => 'es', 'currency' => 'COP']);
+    }
+
+
+    /**
+     * Get the formatted due date as a string.
+     *
+     * @return string
+     */
+    public function getDueDateFormattedAttribute(): string
+    {
+        return Utils::formatToDayAndMonth($this->due_date);
+    }
+
+
+    /**
+     * Get the URL preview for the invoice.
+     *
+     * @return string
+     */
+    public function getUrlPreviewAttribute(): string
+    {
+        return route('preview.invoice', $this->increment_id);
+    }
+
+    /**
+     * Get the payment URL for the invoice as a string.
+     *
+     * @return string
+     */
+    public function getUrlPayAttribute(): string
+    {
+        return route('checkout.index') . '?invoice=' . $this->increment_id;
+    }
+
+
 }
