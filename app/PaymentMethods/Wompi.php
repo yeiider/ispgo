@@ -114,6 +114,7 @@ class Wompi extends AbstractPaymentMethod
 
     public static function generatedLinkPayment($invoice)
     {
+
         $expires_at = Carbon::now('UTC')->addDays(10)->format('Y-m-d\TH:i:s');
 
         $payload = [
@@ -158,19 +159,33 @@ class Wompi extends AbstractPaymentMethod
     }
 
     /**
-     * @throws Exception
      * @throws \Exception
      */
     public static function getPaymentLink($invoice): ?string
     {
+        // Verificar si ya existe un enlace de pago y si no ha expirado
+        if ($invoice->payment_link && $invoice->expiration_date) {
+            $currentDate = Carbon::now('UTC'); // Fecha y hora actual
+            $expirationDate = Carbon::parse($invoice->expiration_date);
+
+            if ($currentDate->lessThan($expirationDate)) {
+                // Retornar el enlace actual si aún no ha expirado
+                return "https://checkout.wompi.co/l/" . $invoice->payment_link;
+            }
+        }
+
+        // Generar un nuevo enlace si no existe uno o si ya expiró
         $link = Wompi::generatedLinkPayment($invoice);
+
         if (isset($link['data']['id'])) {
             $expires_at = $link['data']['expires_at'];
             $invoice->payment_link = $link['data']['id'];
             $invoice->expiration_date = $expires_at;
             $invoice->save();
+
             return "https://checkout.wompi.co/l/" . $link['data']['id'];
         }
-        return null;
+
+        return null; // Retorna null si no se puede generar un enlace de pago válido
     }
 }
