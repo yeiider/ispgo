@@ -48,7 +48,7 @@ class GeneratedInvoice implements ShouldQueue
         $phone = $phonePrefix . $invoice->customer->phone_number;
         $dueDate = $invoice->due_date->format('Y-m-d');
         $reference = $invoice->increment_id;
-        $amount = number_format($invoice->amount, 2, ',', '.');
+        $amount = number_format($invoice->total, 2, ',', '.');
 
         $messageTemplate = WiivoConfigProvider::getNotifyInvoiceTemplate();
 
