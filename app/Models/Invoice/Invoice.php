@@ -80,9 +80,11 @@ class Invoice extends Model
 
     public static function findByDniOrInvoiceId($input)
     {
-        return self::whereHas('customer', function ($query) use ($input) {
-            $query->where('identity_document', $input);
-        })->orWhere('increment_id', $input)->orderBy('id', 'desc')->first();
+        return self::where(function ($query) use ($input) {
+            $query->whereHas('customer', function ($query) use ($input) {
+                $query->where('identity_document', $input);
+            })->orWhere('increment_id', $input);
+        })->where('status', 'unpaid')->orderBy('id', 'desc')->first();
     }
 
     public static function searchInvoice($input)
