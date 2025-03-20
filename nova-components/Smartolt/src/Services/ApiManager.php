@@ -105,6 +105,22 @@ class ApiManager
         // Agrega otras validaciones según los requisitos de la API
     }
 
+    public function getAllOnus(): \GuzzleHttp\Promise\PromiseInterface|Response
+    {
+
+        $endpoint = 'api/onu/get_all_onus_details';
+        $queryParams = ['olt_id' => 19];
+
+        try {
+            $response = Http::withHeaders(['X-Token' => $this->token])
+                ->get($this->baseUrl . $endpoint, $queryParams);
+
+            return $response;
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
     /**
      * Validar el número de serie de la ONU.
      *
