@@ -82,7 +82,7 @@ class Invoice extends Model
     {
         return self::whereHas('customer', function ($query) use ($input) {
             $query->where('identity_document', $input);
-        })->orWhere('increment_id', $input)->first();
+        })->orWhere('increment_id', $input)->orderBy('id', 'desc')->first();
     }
 
     public static function searchInvoice($input)
@@ -93,7 +93,7 @@ class Invoice extends Model
                 $query->where('identity_document', 'LIKE', "%{$input}%")
                     ->orWhere('first_name', 'LIKE', "%{$input}%");
             })
-                ->orWhere('increment_id', 'LIKE', "%{$input}%");
+                ->orWhere('increment_id', 'LIKE', "%{$input}%")->orddBy('id', 'desc');
         })
             ->get();
     }

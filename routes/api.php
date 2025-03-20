@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\Api\InvoiceApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -20,6 +21,8 @@ Route::middleware('auth:api')->group(function () {
     });
     Route::post('/customers', [CustomerController::class, 'store']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/v1/invoice/search', [InvoiceApi::class, 'searchInvoices']);
+    Route::post('/v1/invoice/pay', [InvoiceApi::class, 'registerPayment']);
     Route::apiResource('tasks', TaskControllerApi::class);
     Route::apiResource('comments', TaskCommentController::class);
     Route::apiResource('attachments', TaskAttachmentController::class);
