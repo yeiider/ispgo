@@ -3,6 +3,7 @@
 namespace Ispgo\Smartolt\Listeners;
 
 use App\Events\ServiceUpdateStatus;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
@@ -10,6 +11,12 @@ use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 class ServiceOltManagerListener
 {
 
+    use InteractsWithQueue;
+
+    public $queue = 'redis';
+    public $tries = 3;
+    public $timeout = 120;
+    public $delay = 10;
     /**
      * Handle the event.
      *

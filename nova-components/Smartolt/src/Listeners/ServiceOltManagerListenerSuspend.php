@@ -5,13 +5,19 @@ namespace Ispgo\Smartolt\Listeners;
 use App\Events\ServiceSuspend;
 use App\Events\ServiceUpdateStatus;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 use Ispgo\Smartolt\Services\ApiManager;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 
 class ServiceOltManagerListenerSuspend
 {
+    use InteractsWithQueue;
 
+    public $queue = 'redis';
+    public $tries = 3;
+    public $timeout = 120;
+    public $delay = 10;
     /**
      * Handle the event.
      *
