@@ -31,6 +31,7 @@ class ServiceOltManagerListener
             return;
         }
 
+
         $service = $event->service;
 
         // Verificar que el servicio tenga un número de serie válido
@@ -42,6 +43,7 @@ class ServiceOltManagerListener
         // Determinar la acción (enable o disable) según el estado del servicio
         $action = $service->service_status === 'active' ? 'enable' : 'disable';
 
+        Log::info("Se ha guardado la information de sn {$service->sn}");
         // Agregar el SN del servicio a la lista correspondiente en caché
         if ($service->service_status === "active" || $service->service_status === "suspended"){
             $this->addToBatch($service->sn, $action);
