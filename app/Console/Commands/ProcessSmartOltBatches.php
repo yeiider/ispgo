@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\SmartOltBatch;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Ispgo\Smartolt\Jobs\ProcessSmartOltBatch;
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Support\Facades\Log;
 
@@ -14,24 +16,18 @@ class ProcessSmartOltBatches extends Command
 
     public function handle()
     {
-        $actions = ['enable', 'disable'];
+        $batches = SmartOltBatch::all();
+        $delay = 0;
 
-        foreach ($actions as $action) {
-            $cacheKey = "smartolt_batch_{$action}";
+        foreach ($batches as $batch) {
+            $chunks = array_chunk($batch->sn_list, 10);
 
-            $snList = Cache::pull($cacheKey, []);
-
-            if (!empty($snList)) {
-                // Dividir la lista en lotes de 10
-                $chunks = array_chunk($snList, 10);
-                $delay = 0;
-
-                foreach ($chunks as $chunk) {
-                    // Programar el envío del lote con un retraso
-                    $this->dispatchBatch($chunk, $action, $delay);
-                    $delay += 10; // Incrementar el retraso para el siguiente lote
-                }
+            foreach ($chunks as $chunk) {
+                dispatch(new ProcessSmartOltBatch($chunk, $batch->action))->delay(now()->addSeconds($delay))->onQueue('redis');
+                $delay += 10;
             }
+
+            $batch->delete(); // Eliminar después de procesar
         }
     }
 

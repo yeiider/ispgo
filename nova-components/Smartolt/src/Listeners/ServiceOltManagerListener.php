@@ -3,6 +3,7 @@
 namespace Ispgo\Smartolt\Listeners;
 
 use App\Events\ServiceUpdateStatus;
+use App\Models\SmartOltBatch;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -60,15 +61,21 @@ class ServiceOltManagerListener
      */
     private function addToBatch(string $sn, string $action): void
     {
-        $cacheKey = "smartolt_batch_{$action}";
-        // Obtener la lista actual de SNs para la acción
-        $snList = Cache::get($cacheKey, []);
+        $existing = SmartOltBatch::where('action', $action)->orderByDesc('id')->first();
 
-        // Agregar el SN si no está ya en la lista
-        if (!in_array($sn, $snList)) {
-            $snList[] = $sn;
-            Cache::put($cacheKey, $snList, now()->addMinutes(10));
-            Log::info("Agregado SN {$sn} al lote de acción '{$action}'.");
+        if (!$existing || count($existing->sn_list) >= 10) {
+            $existing = SmartOltBatch::create([
+                'action' => $action,
+                'sn_list' => [$sn],
+            ]);
+        } else {
+            $list = $existing->sn_list;
+            if (!in_array($sn, $list)) {
+                $list[] = $sn;
+                $existing->update(['sn_list' => $list]);
+            }
         }
+
+        Log::info("Agregado SN {$sn} a batch DB con acción '{$action}'");
     }
 }
