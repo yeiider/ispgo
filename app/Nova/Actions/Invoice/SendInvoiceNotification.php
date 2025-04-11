@@ -22,7 +22,7 @@ class SendInvoiceNotification extends Action
 
     public function name(): string
     {
-        return __('Send invoice by email');
+        return __('invoice.send_notification');
     }
 
     /**

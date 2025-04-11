@@ -21,8 +21,8 @@ class ApplyDiscount extends Action
     /**
      * Perform the action on the given models.
      *
-     * @param  \Laravel\Nova\Fields\ActionFields  $fields
-     * @param  \Illuminate\Support\Collection  $models
+     * @param \Laravel\Nova\Fields\ActionFields $fields
+     * @param \Illuminate\Support\Collection $models
      * @return mixed
      */
     public function handle(ActionFields $fields, Collection $models)
@@ -65,7 +65,7 @@ class ApplyDiscount extends Action
      * @param NovaRequest $request
      * @return array
      */
-    public function fields(NovaRequest $request)
+    public function fields(NovaRequest $request): array
     {
         return [
             Number::make('Discount')
@@ -77,5 +77,10 @@ class ApplyDiscount extends Action
             Boolean::make('Include Tax')
                 ->rules('required', 'boolean'),
         ];
+    }
+
+    public function name(): \Illuminate\Foundation\Application|\Stringable|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('invoice.apply_discount');
     }
 }

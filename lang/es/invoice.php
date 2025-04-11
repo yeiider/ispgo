@@ -18,4 +18,11 @@ return [
     'cancel_invoice' => 'Cancelar Factura',
     'payment_method' => 'Método de Pago',
     'notes' => 'Notas',
+    'apply_discount' => 'Aplicar Descuento',
+    'download_pdf' => 'Descargar PDF',
+    'register_payment' => 'Registrar Pago',
+    'register_payment_by_promise' => 'Registrar Pago por Promesa',
+    'register_payment_promise' => 'Registrar Pago por Promesa',
+    'send_by_whatsapp' => 'Enviar por WhatsApp',
+    'send_notification' => 'Enviar Notificación'
 ];

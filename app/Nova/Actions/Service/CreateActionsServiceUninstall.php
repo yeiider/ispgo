@@ -58,4 +58,9 @@ class CreateActionsServiceUninstall extends Action
             TextArea::make('Note')
         ];
     }
+
+    public function name()
+    {
+        return __('service.actions.uninstall');
+    }
 }

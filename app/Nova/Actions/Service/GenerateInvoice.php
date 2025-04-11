@@ -33,8 +33,6 @@ class GenerateInvoice extends Action
         } else {
             return ActionResponse::visit('/resources/invoices/'.$invoice->id);
         }
-
-
     }
 
 
@@ -50,5 +48,10 @@ class GenerateInvoice extends Action
             Text::make('Notes')
                 ->nullable(),
         ];
+    }
+
+    public function name()
+    {
+        return __('service.actions.generate_invoice');
     }
 }

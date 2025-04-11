@@ -71,7 +71,7 @@ class TelephonicServiceLens extends Lens
                 'success' => 'check-circle',
                 'info' => 'status-offline',
                 'warning' => 'clock',
-            ]),
+            ])->required(),
             Currency::make(__('Monthly Price'), 'monthly_price')
                 ->sortable()
                 ->rules('required'),
