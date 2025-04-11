@@ -33,7 +33,7 @@ class RegisterPaymentPromise extends Action
             }
             $promise = $model->createPromisePayment($fields->date_to_make_payment, $fields->notes);
             if ($promise) {
-                if (InvoiceProviderConfig::enableServiceByPaymentPromise()){
+                if (InvoiceProviderConfig::enableServiceByPaymentPromise()) {
                     $model->service->activate();
                 }
             }
@@ -57,5 +57,10 @@ class RegisterPaymentPromise extends Action
             Date::make(__("Date to make payment"))->rules('required'),
             Textarea::make(__("Notes")),
         ];
+    }
+
+    public function name(): \Illuminate\Foundation\Application|\Stringable|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('invoice.register_payment_promise');
     }
 }

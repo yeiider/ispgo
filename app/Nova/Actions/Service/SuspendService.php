@@ -34,8 +34,13 @@ class SuspendService extends Action
      * @param NovaRequest $request
      * @return array
      */
-    public function fields(NovaRequest $request)
+    public function fields(NovaRequest $request): array
     {
         return [];
+    }
+
+    public function name(): \Illuminate\Foundation\Application|\Stringable|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('service.actions.suspend');
     }
 }

@@ -58,4 +58,9 @@ class CreateActionsServiceInstall extends Action
             TextArea::make('Note')
         ];
     }
+
+    public function name()
+    {
+        return __('service.actions.install');
+    }
 }

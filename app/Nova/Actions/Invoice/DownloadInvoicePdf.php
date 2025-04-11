@@ -80,4 +80,9 @@ class DownloadInvoicePdf extends Action
     {
         return [];
     }
+
+    public function name()
+    {
+        return __('invoice.download_pdf');
+    }
 }

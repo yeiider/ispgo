@@ -27,5 +27,11 @@ return [
     'service_details' => 'Detalles del Servicio',
     'billing_and_contract_information' => 'Información de Facturación y del Contrato',
     'technical_information' => 'Información Técnica',
-
+    'actions' => [
+        'install' => 'Instalar',
+        'uninstall' => 'Desinstalar',
+        'generate_invoice' => 'Generar Factura',
+        'suspend' => 'Suspendido',
+        'activate' => 'Activar',
+    ]
 ];

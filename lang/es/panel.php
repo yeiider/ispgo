@@ -44,4 +44,10 @@ return [
     'plans' => 'Planes',
     'television_plans' => 'Planes de Televisión',
     'telephonic_plans' => 'Planes Telefónicos',
+    'html_template' => 'Plantilla HTML',
+    'tickets_boards' => 'Tableros de Tickets',
+    'tickets_columns' => 'Columnas de Tickets',
+    'tickets_tasks' => 'Tareas de Tickets',
+    'tickets_labels' => 'Etiquetas de Tickets',
+    'tickets_board' => 'Tablero de Tickets',
 ];

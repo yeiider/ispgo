@@ -21,10 +21,10 @@ class SendInvoiceByWhatsapp extends Action implements ShouldQueue
 {
     use InteractsWithQueue, Queueable;
 
-  public function __construct()
-  {
-      $this->onQueue('redis');
-  }
+    public function __construct()
+    {
+        $this->onQueue('redis');
+    }
 
     /**
      * Define un nombre amigable para la acción.
@@ -33,7 +33,7 @@ class SendInvoiceByWhatsapp extends Action implements ShouldQueue
      */
     public function name(): string
     {
-        return 'Enviar Factura por WhatsApp';
+        return __('invoice.send_by_whatsapp');
     }
 
 
@@ -111,7 +111,7 @@ class SendInvoiceByWhatsapp extends Action implements ShouldQueue
         }
 
         $message = str_replace(
-            ['{name}', '{due_date}', '{payment_link}', '{reference}','{amount}'],
+            ['{name}', '{due_date}', '{payment_link}', '{reference}', '{amount}'],
             [
                 $customerName,
                 $dueDate,

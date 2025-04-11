@@ -41,8 +41,8 @@ class DailyBox extends Resource
                 ->sortable()
                 ->rules('required', 'numeric', 'min:0'),
 
-            Textarea::make(__('attribute.transactions'), 'transactions')
-                ->hideFromIndex(),
+            /*Textarea::make(__('attribute.transactions'), 'transactions')
+                ->hideFromIndex(),*/
         ];
     }
 

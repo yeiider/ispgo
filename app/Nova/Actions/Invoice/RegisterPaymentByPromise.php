@@ -24,11 +24,11 @@ class RegisterPaymentByPromise extends Action
     public function handle(ActionFields $fields, Collection $models)
     {
         foreach ($models as $model) {
-            if ($model->status!=="fulfilled"){
+            if ($model->status !== "fulfilled") {
                 $model->invoice->applyPayment();
                 $model->status = 'fulfilled';
                 $model->save();
-            }else{
+            } else {
                 return ActionResponse::danger(__('It is only allowed to record payments for promises that have not been paid'));
 
             }
@@ -47,5 +47,10 @@ class RegisterPaymentByPromise extends Action
     public function fields(NovaRequest $request)
     {
         return [];
+    }
+
+    public function name(): \Illuminate\Foundation\Application|\Stringable|array|string|\Illuminate\Contracts\Translation\Translator|null
+    {
+        return __('invoice.register_payment_by_promise');
     }
 }
