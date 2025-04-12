@@ -31,19 +31,28 @@ class SendWhatsAppMessage extends Action
 
             $numeroOriginal = trim($customer->phone_number);
 
-            // Ignorar números con "+" (probablemente internacionales)
+            // Ignorar si inicia con "+"
             if (str_starts_with($numeroOriginal, '+')) {
                 $errores[] = "ID {$model->id}: Número internacional no permitido ($numeroOriginal).";
                 continue;
             }
 
-            // Limpiar y agregar código país
-            $phone = '57' . preg_replace('/\D/', '', $numeroOriginal);
+            // Limpiar el número (quitar espacios, guiones, etc.)
+            $numeroLimpio = preg_replace('/\D/', '', $numeroOriginal);
 
-            // Obtener nombre en mayúsculas
+            // Validar que empiece por "3"
+            if (!str_starts_with($numeroLimpio, '3')) {
+                $errores[] = "ID {$model->id}: El número no es colombiano válido ($numeroOriginal).";
+                continue;
+            }
+
+            // Agregar código país
+            $phone = '57' . $numeroLimpio;
+
+            // Nombre en mayúsculas
             $nombre = strtoupper(optional($customer)->first_name ?? 'CLIENTE');
 
-            // Reemplazar variable {{ nombre }}
+            // Reemplazar {{ nombre }}
             $message = str_replace('{{ nombre }}', $nombre, $fields->message);
 
             $payload = [
@@ -55,17 +64,18 @@ class SendWhatsAppMessage extends Action
                 $wiivo = new ServiceWiivo();
                 $wiivo->sendMessage($payload);
             } catch (\Throwable $e) {
-                $errores[] = "ID {$model->id}: Error al enviar mensaje a $phone - {$e->getMessage()}";
+                $errores[] = "ID {$model->id}: Error al enviar a $phone - {$e->getMessage()}";
                 continue;
             }
         }
 
         if (!empty($errores)) {
-            return Action::danger("Se enviaron algunos mensajes, pero ocurrieron errores:\n" . implode("\n", $errores));
+            return Action::danger("Algunos mensajes no se enviaron:\n" . implode("\n", $errores));
         }
 
         return Action::message('Todos los mensajes se enviaron correctamente.');
     }
+
 
 
     public function fields(\Laravel\Nova\Http\Requests\NovaRequest $request): array
