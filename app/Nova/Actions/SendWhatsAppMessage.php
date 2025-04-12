@@ -19,19 +19,31 @@ class SendWhatsAppMessage extends Action
 
     public function handle(ActionFields $fields, Collection $models)
     {
+        $errores = [];
+
         foreach ($models as $model) {
             $customer = $model->customer;
 
             if (!$customer || !$customer->phone_number) {
-                return Action::danger("El cliente no tiene número de teléfono registrado.");
+                $errores[] = "ID {$model->id}: El cliente no tiene número de teléfono.";
+                continue;
             }
 
-            $phone = '57' . preg_replace('/\D/', '', $customer->phone_number);
+            $numeroOriginal = trim($customer->phone_number);
 
-            // Obtener nombre del cliente en mayúsculas si existe
+            // Ignorar números con "+" (probablemente internacionales)
+            if (str_starts_with($numeroOriginal, '+')) {
+                $errores[] = "ID {$model->id}: Número internacional no permitido ($numeroOriginal).";
+                continue;
+            }
+
+            // Limpiar y agregar código país
+            $phone = '57' . preg_replace('/\D/', '', $numeroOriginal);
+
+            // Obtener nombre en mayúsculas
             $nombre = strtoupper(optional($customer)->first_name ?? 'CLIENTE');
 
-            // Reemplazar variable {{ nombre }} en el mensaje
+            // Reemplazar variable {{ nombre }}
             $message = str_replace('{{ nombre }}', $nombre, $fields->message);
 
             $payload = [
@@ -42,13 +54,19 @@ class SendWhatsAppMessage extends Action
             try {
                 $wiivo = new ServiceWiivo();
                 $wiivo->sendMessage($payload);
-            } catch (\Exception $e) {
-                return Action::danger("Error al enviar mensaje: " . $e->getMessage());
+            } catch (\Throwable $e) {
+                $errores[] = "ID {$model->id}: Error al enviar mensaje a $phone - {$e->getMessage()}";
+                continue;
             }
         }
 
-        return Action::message('Mensaje(s) enviado(s) correctamente.');
+        if (!empty($errores)) {
+            return Action::danger("Se enviaron algunos mensajes, pero ocurrieron errores:\n" . implode("\n", $errores));
+        }
+
+        return Action::message('Todos los mensajes se enviaron correctamente.');
     }
+
 
     public function fields(\Laravel\Nova\Http\Requests\NovaRequest $request): array
     {
