@@ -18,6 +18,7 @@ use Ispgo\Mikrotik\Nova\Actions\MikrotikAction;
 use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
 use Ispgo\Smartolt\Nova\Actions\LoadPlanSmartOlt;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
+use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
@@ -160,7 +161,10 @@ class Service extends Resource
             }),
             (new LoadPlanSmartOlt())->canSee(function () {
                 return ProviderSmartOlt::getEnabled();
-            })
+            }),
+            Action::downloadUrl('Exportar Servicioss', function () {
+                return route('service.export');
+            })->standalone(),
         ];
     }
 

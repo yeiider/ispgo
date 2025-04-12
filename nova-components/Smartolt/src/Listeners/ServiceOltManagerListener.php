@@ -7,6 +7,7 @@ use App\Models\SmartOltBatch;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Ispgo\Smartolt\Services\ApiManager;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 
 class ServiceOltManagerListener
@@ -18,6 +19,7 @@ class ServiceOltManagerListener
     public $tries = 3;
     public $timeout = 120;
     public $delay = 10;
+
     /**
      * Handle the event.
      *
@@ -46,36 +48,33 @@ class ServiceOltManagerListener
 
         Log::info("Se ha guardado la information de sn {$service->sn}");
         // Agregar el SN del servicio a la lista correspondiente en caché
-        if ($service->service_status === "active" || $service->service_status === "suspended"){
-            $this->addToBatch($service->sn, $action);
+        if ($service->service_status === "active" || $service->service_status === "suspended") {
+            $this->processImmediate($service->sn, $action);
         }
 
     }
 
-    /**
-     * Agrega el número de serie a la lista de acciones en caché.
-     *
-     * @param string $sn
-     * @param string $action
-     * @return void
-     */
-    private function addToBatch(string $sn, string $action): void
+    private function processImmediate(string $sn, string $action): void
     {
-        $existing = SmartOltBatch::where('action', $action)->orderByDesc('id')->first();
-
-        if (!$existing || count($existing->sn_list) >= 10) {
-            $existing = SmartOltBatch::create([
-                'action' => $action,
-                'sn_list' => [$sn],
-            ]);
-        } else {
-            $list = $existing->sn_list;
-            if (!in_array($sn, $list)) {
-                $list[] = $sn;
-                $existing->update(['sn_list' => $list]);
+        $apiManager = new ApiManager();
+        try {
+            if ($action === 'enable') {
+                $response = $apiManager->enableOnu($sn);
+            } else {
+                $response = $apiManager->disableOnu($sn);
             }
-        }
 
-        Log::info("Agregado SN {$sn} a batch DB con acción '{$action}'");
+            if ($response->successful()) {
+                Log::info("Acción '{$action}' ejecutada correctamente para {$sn}", [
+                    'response' => $response->body(),
+                ]);
+            } else {
+                Log::error("Error ejecutando acción '{$action}' para {$sn}", [
+                    'response' => $response->body(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error("Excepción al ejecutar acción '{$action}' para {$sn}: {$e->getMessage()}");
+        }
     }
 }
