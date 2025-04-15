@@ -1,14 +1,95 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "API Documentation for Your IspGo Application",
-        "description": "This is the OpenAPI definition for your application's APIs, including endpoints for managing resources like Boxes and Users.",
+        "title": "API Documentation for Your ISO GO Application",
+        "description": "This is the OpenAPI definition for your application's APIs, including endpoints for managing resources like Boxes and Users and more.",
         "contact": {
             "email": "support@yourapp.com"
         },
         "version": "1.0.0"
     },
     "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log in a user",
+                "description": "Log in a user.",
+                "operationId": "44212a9096e4b09358281e9ec8a0701d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "description": "User's email or username",
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "description": "User's password",
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login with access token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "description": "OAuth access token",
+                                            "type": "string"
+                                        },
+                                        "token_type": {
+                                            "description": "Type of token",
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "expires_in": {
+                                            "description": "Token expiration time in seconds",
+                                            "type": "integer",
+                                            "example": 3600
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Invalid credentials"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/boxes": {
             "get": {
                 "tags": [
@@ -6060,6 +6141,180 @@
                 }
             }
         },
+        "/api/task-attachments": {
+            "get": {
+                "tags": [
+                    "Task Attachments"
+                ],
+                "summary": "List all task attachments",
+                "description": "Retrieve all task attachments.",
+                "operationId": "039cf2674a082ee220cd9e58d56ca3e1",
+                "responses": {
+                    "200": {
+                        "description": "List of task attachments retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TaskAttachmentResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Task Attachments"
+                ],
+                "summary": "Create a new task attachment",
+                "description": "Create a new task attachment.",
+                "operationId": "18b524eabd77e59e1cfdb5feaaedcb82",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaskAttachmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Task attachment created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaskAttachmentResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/task-attachments/{id}": {
+            "get": {
+                "tags": [
+                    "Task Attachments"
+                ],
+                "summary": "Get a task attachment by ID",
+                "description": "Retrieve a specific task attachment by ID.",
+                "operationId": "9dd08812478fb82f45ec91ea19514dc1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Task attachment ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Task attachment retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaskAttachmentResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Task attachment not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Task Attachments"
+                ],
+                "summary": "Update a task attachment",
+                "description": "Update an existing task attachment.",
+                "operationId": "6c6cc0a28399b0db1f96629cf5d21b31",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Task attachment ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaskAttachmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Task attachment updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaskAttachmentResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation error"
+                    },
+                    "404": {
+                        "description": "Task attachment not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Task Attachments"
+                ],
+                "summary": "Delete a task attachment",
+                "description": "Delete a task attachment.",
+                "operationId": "917fecb9778a31cead7bb1a2a534a4c7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Task attachment ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Task attachment deleted successfully"
+                    },
+                    "404": {
+                        "description": "Task attachment not found"
+                    }
+                }
+            }
+        },
         "/api/task-comments": {
             "get": {
                 "tags": [
@@ -9570,6 +9825,61 @@
                     }
                 ]
             },
+            "TaskAttachmentRequest": {
+                "title": "Task Attachment Request Schema",
+                "description": "Schema for creating or updating a task attachment",
+                "required": [
+                    "task_id",
+                    "file_path",
+                    "file_name",
+                    "uploaded_by"
+                ],
+                "properties": {
+                    "task_id": {
+                        "description": "ID of the related task",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "file_path": {
+                        "description": "Path to the attached file",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "/uploads/task_1/file.pdf"
+                    },
+                    "file_name": {
+                        "description": "Name of the attached file",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "file.pdf"
+                    },
+                    "uploaded_by": {
+                        "description": "ID of the user who uploaded the file",
+                        "type": "integer",
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            },
+            "TaskAttachmentResource": {
+                "title": "Task Attachment Resource Schema",
+                "description": "Representation of a task attachment",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/TaskAttachmentRequest"
+                    },
+                    {
+                        "properties": {
+                            "id": {
+                                "description": "Unique identifier of the task attachment",
+                                "type": "integer",
+                                "example": 100
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
             "TaskCommentRequest": {
                 "title": "Task Comment Request Schema",
                 "description": "Schema for creating or updating a task comment",
@@ -9871,9 +10181,29 @@
                 },
                 "type": "object"
             }
+        },
+        "securitySchemes": {
+            "passport": {
+                "type": "oauth2",
+                "description": "Laravel passport oauth2 security.",
+                "in": "header",
+                "scheme": "https",
+                "flows": {
+                    "password": {
+                        "authorizationUrl": "http://localhost/oauth/authorize",
+                        "tokenUrl": "http://localhost/oauth/token",
+                        "refreshUrl": "http://localhost/token/refresh",
+                        "scopes": []
+                    }
+                }
+            }
         }
     },
     "tags": [
+        {
+            "name": "Authentication",
+            "description": "API Endpoints for user authentication"
+        },
         {
             "name": "Boxes",
             "description": "API Endpoints for managing boxes"
@@ -10013,6 +10343,10 @@
         {
             "name": "LabelTasks",
             "description": "API Endpoints for managing label-task relationships"
+        },
+        {
+            "name": "Task Attachments",
+            "description": "API Endpoints for managing task attachments"
         },
         {
             "name": "Task Comments",

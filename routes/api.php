@@ -32,8 +32,9 @@ Route::middleware('auth:api')->group(function () {
 |--------------------------------------------------------------------------
 */
 
+Route::post('/login', [\App\Http\Controllers\API\AuthController::class, 'login']);
 Route::prefix('v1')
-    //->middleware('auth:api')
+    ->middleware('auth:api')
     ->group(base_path('routes/api_v1.php'));
 
 
