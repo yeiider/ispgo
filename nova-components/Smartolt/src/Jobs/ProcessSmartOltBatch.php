@@ -40,6 +40,7 @@ class ProcessSmartOltBatch implements ShouldQueue
     {
         $apiManager = new ApiManager();
         $payload = ['onus_external_ids' => implode(',', $this->snList)];
+        Log::info("procesando lote ". implode(',', $this->snList));
 
         try {
             if ($this->action === 'enable') {

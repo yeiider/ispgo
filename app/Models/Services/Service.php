@@ -96,6 +96,7 @@ class Service extends Model
                 $service->updated_by = Auth::id();
                 event(new ServiceUpdateStatus($service));
             }
+            event(new ServiceUpdateStatus($service));
         });
     }
 

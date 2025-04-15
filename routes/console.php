@@ -17,7 +17,7 @@ Schedule::command('invoice:generate_everyday')->dailyAt('00:00');
 
 Schedule::command('app:syncronizar-datos-onu')->dailyAt('01:00');
 
-Schedule::command('smartolt:process_batches')->everyMinute();
+//Schedule::command('smartolt:process_batches')->everyMinute();
 
 Schedule::command('services:suspend_everyday')->dailyAt('00:00');
 

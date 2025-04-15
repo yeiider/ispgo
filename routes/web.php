@@ -61,6 +61,7 @@ Route::middleware('guest:customer')->prefix('customer')->group(function () {
 });
 
 Route::get('/export-customers', [CustomerExportController::class, 'exportCsv'])->name('customers.export');
+Route::get('/export-service', [CustomerExportController::class, 'exportServiceCsv'])->name('service.export');
 
 Route::middleware([\App\Http\Middleware\RedirectIfNotCustomer::class])->prefix('customer-account')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');

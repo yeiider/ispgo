@@ -3,12 +3,22 @@
 namespace Ispgo\Smartolt\Listeners;
 
 use App\Events\ServiceUpdateStatus;
+use App\Models\SmartOltBatch;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Ispgo\Smartolt\Services\ApiManager;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 
 class ServiceOltManagerListener
 {
+
+    use InteractsWithQueue;
+
+    public $queue = 'redis';
+    public $tries = 3;
+    public $timeout = 120;
+    public $delay = 10;
 
     /**
      * Handle the event.
@@ -24,6 +34,7 @@ class ServiceOltManagerListener
             return;
         }
 
+
         $service = $event->service;
 
         // Verificar que el servicio tenga un número de serie válido
@@ -35,31 +46,35 @@ class ServiceOltManagerListener
         // Determinar la acción (enable o disable) según el estado del servicio
         $action = $service->service_status === 'active' ? 'enable' : 'disable';
 
+        Log::info("Se ha guardado la information de sn {$service->sn}");
         // Agregar el SN del servicio a la lista correspondiente en caché
-        if ($service->service_status === "active" || $service->service_status === "suspended"){
-            $this->addToBatch($service->sn, $action);
+        if ($service->service_status === "active" || $service->service_status === "suspended") {
+            $this->processImmediate($service->sn, $action);
         }
 
     }
 
-    /**
-     * Agrega el número de serie a la lista de acciones en caché.
-     *
-     * @param string $sn
-     * @param string $action
-     * @return void
-     */
-    private function addToBatch(string $sn, string $action): void
+    private function processImmediate(string $sn, string $action): void
     {
-        $cacheKey = "smartolt_batch_{$action}";
-        // Obtener la lista actual de SNs para la acción
-        $snList = Cache::get($cacheKey, []);
+        $apiManager = new ApiManager();
+        try {
+            if ($action === 'enable') {
+                $response = $apiManager->enableOnu($sn);
+            } else {
+                $response = $apiManager->disableOnu($sn);
+            }
 
-        // Agregar el SN si no está ya en la lista
-        if (!in_array($sn, $snList)) {
-            $snList[] = $sn;
-            Cache::put($cacheKey, $snList, now()->addMinutes(10));
-            Log::info("Agregado SN {$sn} al lote de acción '{$action}'.");
+            if ($response->successful()) {
+                Log::info("Acción '{$action}' ejecutada correctamente para {$sn}", [
+                    'response' => $response->body(),
+                ]);
+            } else {
+                Log::error("Error ejecutando acción '{$action}' para {$sn}", [
+                    'response' => $response->body(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error("Excepción al ejecutar acción '{$action}' para {$sn}: {$e->getMessage()}");
         }
     }
 }
