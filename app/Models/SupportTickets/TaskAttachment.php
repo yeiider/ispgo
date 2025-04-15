@@ -10,7 +10,7 @@ class TaskAttachment extends Model
 {
     use HasFactory;
 
-    protected $table = 'task_attachment';
+    protected $table = 'task_attachments';
 
     protected $fillable = ['task_id', 'file_path', 'file_name', 'uploaded_by'];
 

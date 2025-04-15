@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Resource;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
@@ -55,6 +56,9 @@ class Client extends Resource
             // Si deseas mostrar el user_id, por si el client está asociado a un usuario
             // Text::make('User Id', 'user_id')
             //     ->nullable(),
+            Select::make(__('User'), 'user_id')
+                ->options(\App\Models\User::all()->pluck('name', 'id'))
+                ->displayUsingLabels(),
 
             Text::make('Provider')
                 ->withMeta(['value' => 'users'])  // Valor por defecto

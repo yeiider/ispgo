@@ -14,7 +14,7 @@ use OpenApi\Annotations as OA;
  *      )
  * )
  */
-class OpenApi
+final class OpenApi
 {
 
 }

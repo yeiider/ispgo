@@ -5,7 +5,7 @@ return [
     'documentations' => [
         'default' => [
             'api' => [
-                'title' => 'L5 Swagger UI',
+                'title' => 'ISP GO documentation API Swagger UI',
             ],
 
             'routes' => [
