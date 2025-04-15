@@ -237,7 +237,7 @@ export default function ContactUs() {
               <p className="mt-1 text-sm text-gray-500 dark:text-neutral-500">{__('Check out our development quickstart guide.')}</p>
               <a
                 className="mt-2 inline-flex items-center gap-x-2 text-sm font-medium text-gray-600 hover:text-gray-800 focus:outline-none focus:text-gray-800 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200"
-                href="#">
+                href="/api/documentation">
                 Contact sales
                 <ArrowRight size={16}
                             className="shrink-0 transition ease-in-out group-hover:translate-x-1 group-focus:translate-x-1"/>
