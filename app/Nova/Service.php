@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 
+use App\Nova\Actions\SendWhatsAppMessage;
 use App\Nova\Actions\Service\ActivateService;
 use App\Nova\Actions\Service\CreateActionsServiceInstall;
 use App\Nova\Actions\Service\CreateActionsServiceUninstall;
@@ -165,6 +166,7 @@ class Service extends Resource
             Action::downloadUrl('Exportar Servicioss', function () {
                 return route('service.export');
             })->standalone(),
+            new SendWhatsAppMessage(),
         ];
     }
 
