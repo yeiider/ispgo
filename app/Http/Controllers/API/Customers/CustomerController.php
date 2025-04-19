@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Customers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\CustomerRequest;
 use App\Http\Resources\Customers\CustomerResource;
-use App\Services\App\Models\Customers\CustomerService;
+use App\Services\Customers\CustomerService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

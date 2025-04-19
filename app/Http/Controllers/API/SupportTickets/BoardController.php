@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\SupportTickets;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupportTickets\BoardRequest;
 use App\Http\Resources\SupportTickets\BoardResource;
-use App\Services\App\Models\SupportTickets\BoardService;
+use App\Services\SupportTickets\BoardService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

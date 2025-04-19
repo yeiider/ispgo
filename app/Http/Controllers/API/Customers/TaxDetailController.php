@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Customers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\TaxDetailRequest;
 use App\Http\Resources\Customers\TaxDetailResource;
-use App\Services\App\Models\Customers\TaxDetailService;
+use App\Services\Customers\TaxDetailService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

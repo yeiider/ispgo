@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Inventory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\EquipmentAssignmentRequest;
 use App\Http\Resources\Inventory\EquipmentAssignmentResource;
-use App\Services\App\Models\Inventory\EquipmentAssignmentService;
+use App\Services\Inventory\EquipmentAssignmentService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

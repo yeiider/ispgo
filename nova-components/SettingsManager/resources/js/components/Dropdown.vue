@@ -42,6 +42,7 @@ export default {
       this.selectedOption = option.label
       this.isOpen = false
       this.$emit('option-selected', option)
+      console.log(this.options)
     },
     closeDropdown(e) {
       if (!this.$el.contains(e.target)) {
@@ -68,7 +69,7 @@ export default {
     <!-- Botón del dropdown -->
     <button
       @click="toggleDropdown"
-      class="flex items-center justify-between w-full px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      class="min-w-48 flex items-center justify-between w-full px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
       <span>{{ selectedOption || placeholder }}</span>
       <svg
@@ -106,5 +107,7 @@ export default {
 </template>
 
 <style scoped>
-
+  .min-w-48 {
+    min-width: 12rem;
+  }
 </style>

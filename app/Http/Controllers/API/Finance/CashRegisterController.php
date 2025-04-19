@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Finance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\CashRegisterRequest;
 use App\Http\Resources\Finance\CashRegisterResource;
-use App\Services\App\Models\Finance\CashRegisterService;
+use App\Services\Finance\CashRegisterService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

@@ -13,6 +13,14 @@ use OpenApi\Annotations as OA;
  *          email="support@yourapp.com"
  *      )
  * )
+ *
+ * @OA\SecurityScheme(
+ *      securityScheme="bearerAuth",
+ *      type="http",
+ *      scheme="bearer",
+ *      bearerFormat="JWT",
+ *      description="Use an access token obtained from /api/login"
+ *  )
  */
 final class OpenApi
 {

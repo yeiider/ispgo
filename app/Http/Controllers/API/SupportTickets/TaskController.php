@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\SupportTickets;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupportTickets\TaskRequest;
 use App\Http\Resources\SupportTickets\TaskResource;
-use App\Services\App\Models\SupportTickets\TaskService;
+use App\Services\SupportTickets\TaskService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

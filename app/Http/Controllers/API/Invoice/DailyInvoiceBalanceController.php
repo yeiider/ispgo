@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Invoice;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Invoice\DailyInvoiceBalanceRequest;
 use App\Http\Resources\Invoice\DailyInvoiceBalanceResource;
-use App\Services\App\Models\Invoice\DailyInvoiceBalanceService;
+use App\Services\Invoice\DailyInvoiceBalanceService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

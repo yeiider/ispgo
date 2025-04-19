@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Invoice;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Invoice\PaymentPromiseRequest;
 use App\Http\Resources\Invoice\PaymentPromiseResource;
-use App\Services\App\Models\Invoice\PaymentPromiseService;
+use App\Services\Invoice\PaymentPromiseService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

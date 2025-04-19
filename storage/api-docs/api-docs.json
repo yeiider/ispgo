@@ -10183,6 +10183,12 @@
             }
         },
         "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Use an access token obtained from /api/login",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            },
             "passport": {
                 "type": "oauth2",
                 "description": "Laravel passport oauth2 security.",

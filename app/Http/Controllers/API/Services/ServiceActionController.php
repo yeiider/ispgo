@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Services;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Services\ServiceActionRequest;
 use App\Http\Resources\Services\ServiceActionResource;
-use App\Services\App\Models\Services\ServiceActionService;
+use App\Services\Services\ServiceActionService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

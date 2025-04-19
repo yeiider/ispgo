@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Invoice;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Invoice\InvoiceRequest;
 use App\Http\Resources\Invoice\InvoiceResource;
-use App\Services\App\Models\Invoice\InvoiceService;
+use App\Services\Invoice\InvoiceService;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

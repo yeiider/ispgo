@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\SupportTickets;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupportTickets\TaskCommentRequest;
 use App\Http\Resources\SupportTickets\TaskCommentResource;
-use App\Services\App\Models\SupportTickets\TaskCommentService;
+use App\Services\SupportTickets\TaskCommentService;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

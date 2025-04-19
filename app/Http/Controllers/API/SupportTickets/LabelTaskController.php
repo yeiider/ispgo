@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\SupportTickets;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupportTickets\LabelTaskRequest;
 use App\Http\Resources\SupportTickets\LabelTaskResource;
-use App\Services\App\Models\SupportTickets\LabelTaskService;
+use App\Services\SupportTickets\LabelTaskService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Customers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\DocumentTypeRequest;
 use App\Http\Resources\Customers\DocumentTypeResource;
-use App\Services\App\Models\Customers\DocumentTypeService;
+use App\Services\Customers\DocumentTypeService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

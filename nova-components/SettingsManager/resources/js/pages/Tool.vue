@@ -144,7 +144,7 @@ export default {
       Nova.request().post('/settings-manager/settings/save', {
         fields: this.fields,
         section: this.section ?? 'general',
-        scope: this.scope ?? 1
+        scope: this.scope ?? 0
       }).then(response => {
         this.fetchSettings();
         if (response.data.success) {

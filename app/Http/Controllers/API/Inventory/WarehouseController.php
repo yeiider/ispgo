@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Inventory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\WarehouseRequest;
 use App\Http\Resources\Inventory\WarehouseResource;
-use App\Services\App\Models\Inventory\WarehouseService;
+use App\Services\Inventory\WarehouseService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

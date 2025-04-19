@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Finance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\TransactionRequest;
 use App\Http\Resources\Finance\TransactionResource;
-use App\Services\App\Models\Finance\TransactionService;
+use App\Services\Finance\TransactionService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

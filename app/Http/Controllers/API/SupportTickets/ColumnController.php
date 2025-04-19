@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\SupportTickets;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupportTickets\ColumnRequest;
 use App\Http\Resources\SupportTickets\ColumnResource;
-use App\Services\App\Models\SupportTickets\ColumnService;
+use App\Services\SupportTickets\ColumnService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

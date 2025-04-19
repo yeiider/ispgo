@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Finance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\IncomeRequest;
 use App\Http\Resources\Finance\IncomeResource;
-use App\Services\App\Models\Finance\IncomeService;
+use App\Services\Finance\IncomeService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

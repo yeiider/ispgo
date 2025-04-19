@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Inventory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\CategoryRequest;
 use App\Http\Resources\Inventory\CategoryResource;
-use App\Services\App\Models\Inventory\CategoryService;
+use App\Services\Inventory\CategoryService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

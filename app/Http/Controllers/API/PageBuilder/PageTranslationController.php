@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\PageBuilder;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PageBuilder\PageTranslationRequest;
 use App\Http\Resources\PageBuilder\PageTranslationResource;
-use App\Services\App\Models\PageBuilder\PageTranslationService;
+use App\Services\PageBuilder\PageTranslationService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

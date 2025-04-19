@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Customers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\AddressRequest;
 use App\Http\Resources\Customers\AddressResource;
-use App\Services\App\Models\Customers\AddressService;
+use App\Services\Customers\AddressService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

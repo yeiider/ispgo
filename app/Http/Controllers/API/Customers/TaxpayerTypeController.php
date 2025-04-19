@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Customers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\TaxpayerTypeRequest;
 use App\Http\Resources\Customers\TaxpayerTypeResource;
-use App\Services\App\Models\Customers\TaxpayerTypeService;
+use App\Services\Customers\TaxpayerTypeService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

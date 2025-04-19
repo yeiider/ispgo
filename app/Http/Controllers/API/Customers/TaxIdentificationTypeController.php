@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Customers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\TaxIdentificationTypeRequest;
 use App\Http\Resources\Customers\TaxIdentificationTypeResource;
-use App\Services\App\Models\Customers\TaxIdentificationTypeService;
+use App\Services\Customers\TaxIdentificationTypeService;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

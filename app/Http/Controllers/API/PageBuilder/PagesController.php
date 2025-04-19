@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\PageBuilder;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PageBuilder\PagesRequest;
 use App\Http\Resources\PageBuilder\PagesResource;
-use App\Services\App\Models\PageBuilder\PagesService;
+use App\Services\PageBuilder\PagesService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Invoice;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Invoice\CreditNoteRequest;
 use App\Http\Resources\Invoice\CreditNoteResource;
-use App\Services\App\Models\Invoice\CreditNoteService;
+use App\Services\Invoice\CreditNoteService;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

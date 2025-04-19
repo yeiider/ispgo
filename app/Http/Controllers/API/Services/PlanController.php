@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Services;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Services\PlanRequest;
 use App\Http\Resources\Services\PlanResource;
-use App\Services\App\Models\Services\PlanService;
+use App\Services\Services\PlanService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 

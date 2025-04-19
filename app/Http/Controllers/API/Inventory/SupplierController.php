@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\Inventory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\SupplierRequest;
 use App\Http\Resources\Inventory\SupplierResource;
-use App\Services\App\Models\Inventory\SupplierService;
+use App\Services\Inventory\SupplierService;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 
