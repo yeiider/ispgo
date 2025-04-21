@@ -6,6 +6,7 @@ import Features from "@/components/Features.tsx";
 import Clients from "@/components/Clients.tsx";
 import WhatIsIt from "@/components/WhatIsIt.tsx";
 import ContactUs from "@/components/ContactUs.tsx";
+import Plans from "@/components/Plans.tsx";
 
 type Props = {
   companyName: string;
@@ -25,6 +26,7 @@ export default function Welcome() {
         <IconSections/>
         <Features/>
         <WhatIsIt/>
+        <Plans />
         <FAQ/>
         <ContactUs />
       </div>
