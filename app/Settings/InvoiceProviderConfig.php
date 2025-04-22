@@ -43,6 +43,11 @@ class InvoiceProviderConfig
         return ConfigHelper::getConfigValue(self::PATH_INVOICE . 'send_email_create_invoice');
     }
 
+    public static function bccInvoiceTo()
+    {
+        return ConfigHelper::getConfigValue(self::PATH_INVOICE . 'bcc_invoice_to');
+    }
+
     public static function emailTemplateCreatedInvoice()
     {
         return ConfigHelper::getConfigValue(self::PATH_INVOICE . 'email_template_created_invoice');
