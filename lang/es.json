@@ -315,5 +315,6 @@
     "Delete": "Eliminar",
     "Send invoice by email": "Enviar factura por correo electrónico",
     "Email sent successfully!": "¡Correo electrónico enviado exitosamente!",
-    "Email template not found!": "¡No se encontró la plantilla de correo electrónico!"
+    "Email template not found!": "¡No se encontró la plantilla de correo electrónico!",
+    "BCC Invoice To": "Enviar copia de correos"
 }
