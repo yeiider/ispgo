@@ -13,6 +13,7 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\ActionResponse;
 use Laravel\Nova\Fields\ActionFields;
+use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class SendInvoiceNotification extends Action
@@ -40,19 +41,36 @@ class SendInvoiceNotification extends Action
 
         $emailTemplate = EmailTemplate::where('id', $templateId)->first();
         $img_header = asset('/img/invoice/email-header.jpeg');
+
+        $errors = []; // Array para almacenar los errores específicos de cada factura
+
         foreach ($models as $invoice) {
             /**
              * @var Invoice $invoice
              */
-            Utils::sendInvoiceEmail($invoice, $emailTemplate, $img_header);
+            try {
+                Utils::sendInvoiceEmail($invoice, $emailTemplate, $img_header);
+            } catch (\Exception $e) {
+                // Maneja el error y almacena información para el mensaje de respuesta
+                $errors[] = __('Error sending email for invoice #:id: :message', [
+                    'id' => $invoice->id,
+                    'message' => $e->getMessage(),
+                ]);
+            }
         }
-        return Action::message(__('Email sent successfully!'));
+
+        // Si hubo errores, los mostramos en el mensaje de respuesta
+        if (!empty($errors)) {
+            return ActionResponse::danger(__('Some emails failed to send! Details:') . ' ' . implode('; ', $errors));
+        }
+
+        return Action::message(__('All emails sent successfully!'));
     }
 
     /**
      * Get the fields available on the action.
      *
-     * @return array<int, \Laravel\Nova\Fields\Field>
+     * @return array<int, Field>
      */
     public function fields(NovaRequest $request): array
     {
