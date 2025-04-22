@@ -13,7 +13,6 @@ use Ispgo\Wiivo\ServiceWiivo;
 class SendWhatsAppMessage extends Action
 {
     use InteractsWithQueue, Queueable;
-    public $withoutActionEvents = true;
 
     public $name = 'Enviar mensaje WhatsApp';
 
