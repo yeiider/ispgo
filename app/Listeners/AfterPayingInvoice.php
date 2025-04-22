@@ -20,7 +20,7 @@ class AfterPayingInvoice implements ShouldQueue
      *
      * @var string|null
      */
-    public $queue = 'payment_notifications';
+    public $queue = 'redis';
 
     /**
      * The number of times the job may be attempted.
