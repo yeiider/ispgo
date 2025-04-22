@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\InvoiceCreated;
 use App\Events\InvoicePaid;
 use App\Listeners\AfterPayingInvoice;
+use App\Listeners\SendInvoiceNotification;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
@@ -27,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(
+            InvoiceCreated::class,
+            [SendInvoiceNotification::class, 'handle']
+        );
         Passport::enablePasswordGrant();
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
