@@ -41,6 +41,10 @@ class Welcome extends Controller
                             ->whereNull('promotion_end_date');
                     });
             })
-            ->get();
+            ->get()
+            ->map(function ($plan) {
+                $plan->plan_image = $plan->plan_image ? asset('storage/' . $plan->plan_image) : null;
+                return $plan;
+            });
     }
 }

@@ -9,6 +9,7 @@ import {
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Check} from "lucide-react";
+import Autoplay from "embla-carousel-autoplay"
 
 
 interface Plan {
@@ -63,12 +64,19 @@ export default function Plans() {
           <p>Gemini is evolving to be more than just the models. It supports an entire to the APIs and platforms helping
             developers and businesses innovate.</p>
         </div>
-        <Carousel className="mt-10">
+        <Carousel className="mt-10" plugins={[
+          Autoplay({
+            delay: 3000,
+          })
+        ]}>
           <CarouselContent className="-ml-1">
             {plans.map((plan, index) => (
               <CarouselItem key={index} className="pl-1 md:basis-1/2 lg:basis-1/3">
                 <Card>
                   <CardHeader>
+                    {plan.plan_image && (
+                      <img src={plan.plan_image} height="50" alt={plan.name}/>
+                    )}
                     <CardTitle className="font-medium">{plan.name}</CardTitle>
 
                     <span className="my-3 block text-2xl font-semibold">{plan.monthly_price} / mo</span>
@@ -86,8 +94,12 @@ export default function Plans() {
                     <ul className="list-outside space-y-3 text-sm">
                       {plan.extras_included && plan.extras_included.split('.').map((item, index) => (
                         <li key={index} className="flex items-center gap-2">
-                          <Check className="size-3"/>
-                          {item}
+                          {item.length > 1 && (
+                            <>
+                              <Check className="size-3"/>
+                              {item}
+                            </>
+                          )}
                         </li>
                       ))}
                     </ul>
