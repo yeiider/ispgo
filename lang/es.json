@@ -320,7 +320,7 @@
     "Create box": "Crear caja",
     "Create a new box for today. The box will be created with the amount that you specify.": "Crear una nueva caja para hoy. La caja se creará con la cantidad que especifiques.",
     "Start amount": "Cantidad inicial",
-    "The amount that will be added to the box when it is created.": "La cantidad que se añadirá a la caja cuando sea creada."
+    "The amount that will be added to the box when it is created.": "La cantidad que se añadirá a la caja cuando sea creada.",
     "Email template not found!": "¡No se encontró la plantilla de correo electrónico!",
     "BCC Invoice To": "Enviar copia de correos"
 }
