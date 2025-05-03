@@ -58,8 +58,8 @@ export default function MainContentPos() {
     setCustomerSelected(null);
   };
 
-  const handlerSetTodayBox = () => {
-
+  const handlerSetTodayBox = (box: TodayBox) => {
+    config.todayBox = box;
   }
 
   return (
@@ -122,7 +122,12 @@ export default function MainContentPos() {
           </div>
         </div>
       ) : (
-        <CreateDailyBoxForm onDailyBoxCreated={handlerSetTodayBox}/>
+        <>
+          <div className="flex justify-center items-center flex-col gap-4 min-h-[85vh]">
+            <CreateDailyBoxForm onDailyBoxCreated={handlerSetTodayBox} boxId={config.box?.id}/>
+            <p className="text-red-400 text-sm">{__('There are no boxes today')}</p>
+          </div>
+        </>
       )}
     </div>
   )

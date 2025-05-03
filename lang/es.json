@@ -315,5 +315,11 @@
     "Delete": "Eliminar",
     "Send invoice by email": "Enviar factura por correo electrónico",
     "Email sent successfully!": "¡Correo electrónico enviado exitosamente!",
-    "Email template not found!": "¡No se encontró la plantilla de correo electrónico!"
+    "Email template not found!": "¡No se encontró la plantilla de correo electrónico!",
+    "Create new box for today": "Crear una nueva caja para hoy",
+    "There are no boxes today": "No hay cajas para hoy.",
+    "Create box": "Crear caja",
+    "Create a new box for today. The box will be created with the amount that you specify.": "Crear una nueva caja para hoy. La caja se creará con la cantidad que especifiques.",
+    "Start amount": "Cantidad inicial",
+    "The amount that will be added to the box when it is created.": "La cantidad que se añadirá a la caja cuando sea creada."
 }

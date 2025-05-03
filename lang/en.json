@@ -315,5 +315,11 @@
     "Delete": "Delete",
     "Send invoice by email": "Send invoice by email",
     "Email sent successfully!": "Email sent successfully!",
-    "Email template not found!": "Email template not found!"
+    "Email template not found!": "Email template not found!",
+    "Create new box for today": "Create new box for today",
+    "There are no boxes today": "There are no boxes today",
+    "Create box": "Create box",
+    "Create a new box for today. The box will be created with the amount that you specify.": "Create a new box for today. The box will be created with the amount that you specify.",
+    "Start amount": "Start amount",
+    "The amount that will be added to the box when it is created.": "The amount that will be added to the box when it is created."
 }
