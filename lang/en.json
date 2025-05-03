@@ -237,6 +237,7 @@
     "Send Email when paying": "Send Email when paying",
     "Email template Paying": "Email template Paying",
     "Send Email when creating invoice": "Send Email when creating invoice",
+    "BCC Invoice To": "BCC Invoice To",
     "Attach PDF invoice": "Attach PDF invoice",
     "PayU Settings": "PayU Settings",
     "Enabled": "Enabled",

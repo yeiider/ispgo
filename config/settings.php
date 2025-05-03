@@ -295,6 +295,11 @@ return [
                 "label" => "Send Email when creating invoice",
                 "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ],
+            "bcc_invoice_to" => [
+                "field" => "text-field",
+                "label" => "BCC Invoice To",
+                "placeholder" => "BCC Invoice To",
+            ],
             "attach_invoice" => [
                 "field" => "boolean-field",
                 "label" => "Attach PDF invoice",

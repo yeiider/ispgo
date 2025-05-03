@@ -9,6 +9,7 @@ namespace App\Helpers;
 
 use App\Mail\DynamicEmail;
 use App\Models\Invoice\Invoice;
+use App\Settings\InvoiceProviderConfig;
 use Illuminate\Support\Facades\Mail;
 
 class Utils
@@ -124,7 +125,7 @@ class Utils
     {
         $dynamicEmail = new DynamicEmail(['invoice' => $invoice], $emailTemplate, $img_header);
         $imagePath = Utils::generateQrCodeInvoice($invoice);
-
+        $bccEmails = explode(",",InvoiceProviderConfig::bccInvoiceTo());
         $dynamicEmail->attach($imagePath, [
             'as' => 'invoice-qr.png',
             'mime' => 'image/png'
@@ -132,7 +133,7 @@ class Utils
             'imagePath' => $imagePath,
         ]);
 
-        Mail::to($invoice->email_address)->send(
+        Mail::to($invoice->email_address)->bcc($bccEmails)->send(
             $dynamicEmail
         );
         Utils::unlinkQrCode($invoice);
