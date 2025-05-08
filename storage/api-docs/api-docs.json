@@ -7144,7 +7144,12 @@
                     "404": {
                         "description": "Task attachment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -7191,7 +7196,12 @@
                     "404": {
                         "description": "Task attachment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -7218,17 +7228,22 @@
                     "404": {
                         "description": "Task attachment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/task-comments": {
+        "/api/v1/task-comments": {
             "get": {
                 "tags": [
                     "Task Comments"
                 ],
                 "summary": "List all task comments",
                 "description": "Retrieve all task comments.",
-                "operationId": "4b490d85dda1611ab7113d24e738b887",
+                "operationId": "5847236001e25d38bf172d39774bab74",
                 "responses": {
                     "200": {
                         "description": "List of task comments retrieved successfully",
@@ -7246,7 +7261,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -7254,7 +7274,7 @@
                 ],
                 "summary": "Create a new task comment",
                 "description": "Create a new task comment.",
-                "operationId": "8f9505cfed6d86ff0c51e73d403b39f0",
+                "operationId": "5c3af7a0422b4bc6be3473a4b26a746b",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -7282,17 +7302,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/task-comments/{id}": {
+        "/api/v1/task-comments/{id}": {
             "get": {
                 "tags": [
                     "Task Comments"
                 ],
                 "summary": "Get a task comment by ID",
                 "description": "Retrieve a specific task comment by ID.",
-                "operationId": "29c336d897ae4be355cdbfb3ad5e6dcc",
+                "operationId": "9abea8e475865d54b755c14040a9e86d",
                 "parameters": [
                     {
                         "name": "id",
@@ -7318,7 +7343,12 @@
                     "404": {
                         "description": "Task comment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -7326,7 +7356,7 @@
                 ],
                 "summary": "Update a task comment",
                 "description": "Update an existing task comment.",
-                "operationId": "52b490b611edfed631dc69ffe3e95f79",
+                "operationId": "ff2eb750b57d6059eb9125129b70e44e",
                 "parameters": [
                     {
                         "name": "id",
@@ -7365,7 +7395,12 @@
                     "404": {
                         "description": "Task comment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -7373,7 +7408,7 @@
                 ],
                 "summary": "Delete a task comment",
                 "description": "Delete a task comment.",
-                "operationId": "c716c57e601d57fb346589501c7b896e",
+                "operationId": "97a2bf08db861dbaf6b48c3d269a3cc7",
                 "parameters": [
                     {
                         "name": "id",
@@ -7392,17 +7427,22 @@
                     "404": {
                         "description": "Task comment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/tasks": {
+        "/api/v1/tasks": {
             "get": {
                 "tags": [
                     "Tasks"
                 ],
                 "summary": "List all tasks",
                 "description": "Retrieve all tasks.",
-                "operationId": "158a628873e482116cfcf394fd34c059",
+                "operationId": "e1b3e59b342a017d56640a4d229438a4",
                 "responses": {
                     "200": {
                         "description": "List of tasks retrieved successfully",
@@ -7420,7 +7460,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -7428,7 +7473,7 @@
                 ],
                 "summary": "Create a new task",
                 "description": "Create a new task.",
-                "operationId": "59e69952a94b1cdc74e9b5d91456dcd3",
+                "operationId": "e2bc7d72cdbacd0576cefda1d4613532",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -7456,17 +7501,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/tasks/{id}": {
+        "/api/v1/tasks/{id}": {
             "get": {
                 "tags": [
                     "Tasks"
                 ],
                 "summary": "Get a task by ID",
                 "description": "Retrieve a specific task by ID.",
-                "operationId": "5ac29d1f979e6ec03ce0bc30174ac4a0",
+                "operationId": "b76f265484f2c2c615b2843fca57586e",
                 "parameters": [
                     {
                         "name": "id",
@@ -7492,7 +7542,12 @@
                     "404": {
                         "description": "Task not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -7500,7 +7555,7 @@
                 ],
                 "summary": "Update a task",
                 "description": "Update an existing task.",
-                "operationId": "e15c0dd7869aff76e299c55a77c32c57",
+                "operationId": "be46e1909297eeeac322d7f561eb61f9",
                 "parameters": [
                     {
                         "name": "id",
@@ -7539,7 +7594,12 @@
                     "404": {
                         "description": "Task not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -7547,7 +7607,7 @@
                 ],
                 "summary": "Delete a task",
                 "description": "Delete a task.",
-                "operationId": "87e3f55c10c3a3486383410d035207d7",
+                "operationId": "20f968bc1407ed599a6fc9006c2b8302",
                 "parameters": [
                     {
                         "name": "id",
@@ -7566,7 +7626,12 @@
                     "404": {
                         "description": "Task not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/api/v1/tickets": {
