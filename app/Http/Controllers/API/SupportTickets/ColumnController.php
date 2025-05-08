@@ -60,9 +60,10 @@ class ColumnController extends Controller
      * Retrieve all columns.
      *
      * @OA\Get(
-     *     path="/api/columns",
+     *     path="/api/v1/columns",
      *     summary="List all columns",
      *     tags={"Columns"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of columns retrieved successfully",
@@ -86,9 +87,10 @@ class ColumnController extends Controller
      * Create a new column.
      *
      * @OA\Post(
-     *     path="/api/columns",
+     *     path="/api/v1/columns",
      *     summary="Create a new column",
      *     tags={"Columns"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/ColumnRequest")
@@ -122,9 +124,10 @@ class ColumnController extends Controller
      * Retrieve a specific column by ID.
      *
      * @OA\Get(
-     *     path="/api/columns/{id}",
+     *     path="/api/v1/columns/{id}",
      *     summary="Get a column by ID",
      *     tags={"Columns"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Column ID",
@@ -152,9 +155,10 @@ class ColumnController extends Controller
      * Update an existing column.
      *
      * @OA\Put(
-     *     path="/api/columns/{id}",
+     *     path="/api/v1/columns/{id}",
      *     summary="Update a column",
      *     tags={"Columns"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Column ID",
@@ -195,9 +199,10 @@ class ColumnController extends Controller
      * Delete a column.
      *
      * @OA\Delete(
-     *     path="/api/columns/{id}",
+     *     path="/api/v1/columns/{id}",
      *     summary="Delete a column",
      *     tags={"Columns"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Column ID",

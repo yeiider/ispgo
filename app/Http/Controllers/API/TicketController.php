@@ -78,9 +78,10 @@ class TicketController extends Controller
      * Retrieve all tickets.
      *
      * @OA\Get(
-     *     path="/api/tickets",
+     *     path="/api/v1/tickets",
      *     summary="List all tickets",
      *     tags={"Tickets"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of tickets retrieved successfully",
@@ -104,9 +105,10 @@ class TicketController extends Controller
      * Create a new ticket.
      *
      * @OA\Post(
-     *     path="/api/tickets",
+     *     path="/api/v1/tickets",
      *     summary="Create a new ticket",
      *     tags={"Tickets"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/TicketRequest")
@@ -136,9 +138,10 @@ class TicketController extends Controller
      * Retrieve a ticket by ID.
      *
      * @OA\Get(
-     *     path="/api/tickets/{id}",
+     *     path="/api/v1/tickets/{id}",
      *     summary="Get a ticket by ID",
      *     tags={"Tickets"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Ticket ID",
@@ -166,9 +169,10 @@ class TicketController extends Controller
      * Update an existing ticket.
      *
      * @OA\Put(
-     *     path="/api/tickets/{id}",
+     *     path="/api/v1/tickets/{id}",
      *     summary="Update a ticket",
      *     tags={"Tickets"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Ticket ID",
@@ -205,9 +209,10 @@ class TicketController extends Controller
      * Delete a ticket.
      *
      * @OA\Delete(
-     *     path="/api/tickets/{id}",
+     *     path="/api/v1/tickets/{id}",
      *     summary="Delete a ticket",
      *     tags={"Tickets"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Ticket ID",

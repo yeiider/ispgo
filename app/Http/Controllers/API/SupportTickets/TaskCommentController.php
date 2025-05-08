@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SupportTickets\TaskCommentRequest;
 use App\Http\Resources\SupportTickets\TaskCommentResource;
 use App\Services\SupportTickets\TaskCommentService;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -59,9 +60,10 @@ class TaskCommentController extends Controller
      * Retrieve all task comments.
      *
      * @OA\Get(
-     *     path="/api/task-comments",
+     *     path="/api/v1/task-comments",
      *     summary="List all task comments",
      *     tags={"Task Comments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of task comments retrieved successfully",
@@ -85,9 +87,10 @@ class TaskCommentController extends Controller
      * Create a new task comment.
      *
      * @OA\Post(
-     *     path="/api/task-comments",
+     *     path="/api/v1/task-comments",
      *     summary="Create a new task comment",
      *     tags={"Task Comments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/TaskCommentRequest")
@@ -121,9 +124,10 @@ class TaskCommentController extends Controller
      * Retrieve a specific task comment by ID.
      *
      * @OA\Get(
-     *     path="/api/task-comments/{id}",
+     *     path="/api/v1/task-comments/{id}",
      *     summary="Get a task comment by ID",
      *     tags={"Task Comments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Task comment ID",
@@ -151,9 +155,10 @@ class TaskCommentController extends Controller
      * Update an existing task comment.
      *
      * @OA\Put(
-     *     path="/api/task-comments/{id}",
+     *     path="/api/v1/task-comments/{id}",
      *     summary="Update a task comment",
      *     tags={"Task Comments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Task comment ID",
@@ -194,9 +199,10 @@ class TaskCommentController extends Controller
      * Delete a task comment.
      *
      * @OA\Delete(
-     *     path="/api/task-comments/{id}",
+     *     path="/api/v1/task-comments/{id}",
      *     summary="Delete a task comment",
      *     tags={"Task Comments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Task comment ID",

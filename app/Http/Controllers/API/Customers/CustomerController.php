@@ -84,9 +84,10 @@ class CustomerController extends Controller
      * Get all customers.
      *
      * @OA\Get(
-     *     path="/api/customers",
+     *     path="/api/v1/customers",
      *     summary="List all customers",
      *     tags={"Customers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of customers successfully retrieved",
@@ -110,9 +111,10 @@ class CustomerController extends Controller
      * Create a new customer.
      *
      * @OA\Post(
-     *     path="/api/customers",
+     *     path="/api/v1/customers",
      *     summary="Create a new customer",
      *     tags={"Customers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/CustomerRequest")
@@ -146,9 +148,10 @@ class CustomerController extends Controller
      * Get a customer by ID.
      *
      * @OA\Get(
-     *     path="/api/customers/{id}",
+     *     path="/api/v1/customers/{id}",
      *     summary="Retrieve a customer by ID",
      *     tags={"Customers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Customer ID",
@@ -176,9 +179,10 @@ class CustomerController extends Controller
      * Update a customer.
      *
      * @OA\Put(
-     *     path="/api/customers/{id}",
+     *     path="/api/v1/customers/{id}",
      *     summary="Update a customer",
      *     tags={"Customers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Customer ID",
@@ -215,9 +219,10 @@ class CustomerController extends Controller
      * Delete a customer.
      *
      * @OA\Delete(
-     *     path="/api/customers/{id}",
+     *     path="/api/v1/customers/{id}",
      *     summary="Delete a customer",
      *     tags={"Customers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Customer ID",

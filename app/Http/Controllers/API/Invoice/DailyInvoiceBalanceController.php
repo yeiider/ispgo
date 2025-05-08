@@ -70,9 +70,10 @@ class DailyInvoiceBalanceController extends Controller
      * Retrieve all daily invoice balances.
      *
      * @OA\Get(
-     *     path="/api/daily-invoice-balances",
+     *     path="/api/v1/daily-invoice-balances",
      *     summary="List all daily invoice balances",
      *     tags={"DailyInvoiceBalances"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of daily invoice balances retrieved successfully",
@@ -96,9 +97,10 @@ class DailyInvoiceBalanceController extends Controller
      * Create a new daily invoice balance entry.
      *
      * @OA\Post(
-     *     path="/api/daily-invoice-balances",
+     *     path="/api/v1/daily-invoice-balances",
      *     summary="Create a new daily invoice balance",
      *     tags={"DailyInvoiceBalances"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/DailyInvoiceBalanceRequest")
@@ -132,9 +134,10 @@ class DailyInvoiceBalanceController extends Controller
      * Retrieve a specific daily invoice balance entry by ID.
      *
      * @OA\Get(
-     *     path="/api/daily-invoice-balances/{id}",
+     *     path="/api/v1/daily-invoice-balances/{id}",
      *     summary="Get a daily invoice balance entry by ID",
      *     tags={"DailyInvoiceBalances"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Daily invoice balance entry ID",
@@ -165,6 +168,7 @@ class DailyInvoiceBalanceController extends Controller
      *     path="/api/daily-invoice-balances/{id}",
      *     summary="Update a daily invoice balance",
      *     tags={"DailyInvoiceBalances"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Daily invoice balance ID",
@@ -205,9 +209,10 @@ class DailyInvoiceBalanceController extends Controller
      * Delete a daily invoice balance entry.
      *
      * @OA\Delete(
-     *     path="/api/daily-invoice-balances/{id}",
+     *     path="/api/v1/daily-invoice-balances/{id}",
      *     summary="Delete a daily invoice balance entry",
      *     tags={"DailyInvoiceBalances"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Daily invoice balance entry ID",

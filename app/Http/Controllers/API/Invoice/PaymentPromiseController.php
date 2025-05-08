@@ -64,9 +64,10 @@ class PaymentPromiseController extends Controller
      * Retrieve all payment promises.
      *
      * @OA\Get(
-     *     path="/api/payment-promises",
+     *     path="/api/v1/payment-promises",
      *     summary="List all payment promises",
      *     tags={"PaymentPromises"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of payment promises retrieved successfully",
@@ -90,9 +91,10 @@ class PaymentPromiseController extends Controller
      * Create a new payment promise.
      *
      * @OA\Post(
-     *     path="/api/payment-promises",
+     *     path="/api/v1/payment-promises",
      *     summary="Create a new payment promise",
      *     tags={"PaymentPromises"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/PaymentPromiseRequest")
@@ -126,9 +128,10 @@ class PaymentPromiseController extends Controller
      * Retrieve a specific payment promise by ID.
      *
      * @OA\Get(
-     *     path="/api/payment-promises/{id}",
+     *     path="/api/v1/payment-promises/{id}",
      *     summary="Get a payment promise by ID",
      *     tags={"PaymentPromises"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Payment promise ID",
@@ -156,9 +159,10 @@ class PaymentPromiseController extends Controller
      * Update an existing payment promise.
      *
      * @OA\Put(
-     *     path="/api/payment-promises/{id}",
+     *     path="/api/v1/payment-promises/{id}",
      *     summary="Update a payment promise",
      *     tags={"PaymentPromises"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Payment promise ID",
@@ -199,9 +203,10 @@ class PaymentPromiseController extends Controller
      * Delete a payment promise.
      *
      * @OA\Delete(
-     *     path="/api/payment-promises/{id}",
+     *     path="/api/v1/payment-promises/{id}",
      *     summary="Delete a payment promise",
      *     tags={"PaymentPromises"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Payment promise ID",

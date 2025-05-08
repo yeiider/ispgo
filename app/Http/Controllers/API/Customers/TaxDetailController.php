@@ -74,9 +74,10 @@ class TaxDetailController extends Controller
      * Retrieve all tax details.
      *
      * @OA\Get(
-     *     path="/api/tax-details",
+     *     path="/api/v1/tax-details",
      *     summary="List all tax details",
      *     tags={"Tax Details"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of tax details retrieved successfully",
@@ -100,9 +101,10 @@ class TaxDetailController extends Controller
      * Create a new tax detail.
      *
      * @OA\Post(
-     *     path="/api/tax-details",
+     *     path="/api/v1/tax-details",
      *     summary="Create a new tax detail",
      *     tags={"Tax Details"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/TaxDetailRequest")
@@ -136,9 +138,10 @@ class TaxDetailController extends Controller
      * Retrieve a specific tax detail by ID.
      *
      * @OA\Get(
-     *     path="/api/tax-details/{id}",
+     *     path="/api/v1/tax-details/{id}",
      *     summary="Get a tax detail by ID",
      *     tags={"Tax Details"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Tax detail ID",
@@ -166,9 +169,10 @@ class TaxDetailController extends Controller
      * Update an existing tax detail.
      *
      * @OA\Put(
-     *     path="/api/tax-details/{id}",
+     *     path="/api/v1/tax-details/{id}",
      *     summary="Update a tax detail",
      *     tags={"Tax Details"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Tax detail ID",
@@ -209,9 +213,10 @@ class TaxDetailController extends Controller
      * Delete a tax detail.
      *
      * @OA\Delete(
-     *     path="/api/tax-details/{id}",
+     *     path="/api/v1/tax-details/{id}",
      *     summary="Delete a tax detail",
      *     tags={"Tax Details"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Tax detail ID",

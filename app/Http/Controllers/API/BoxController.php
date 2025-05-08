@@ -59,9 +59,10 @@ class BoxController extends Controller
      * Retrieve all boxes.
      *
      * @OA\Get(
-     *     path="/api/boxes",
+     *     path="/api/v1/boxes",
      *     summary="List all boxes",
      *     tags={"Boxes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of boxes retrieved successfully",
@@ -85,9 +86,10 @@ class BoxController extends Controller
      * Create a new box.
      *
      * @OA\Post(
-     *     path="/api/boxes",
+     *     path="/api/v1/boxes",
      *     summary="Create a new box",
      *     tags={"Boxes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/BoxRequest")
@@ -121,9 +123,10 @@ class BoxController extends Controller
      * Retrieve a specific box by ID.
      *
      * @OA\Get(
-     *     path="/api/boxes/{id}",
+     *     path="/api/v1/boxes/{id}",
      *     summary="Get a box by ID",
      *     tags={"Boxes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Box ID",
@@ -151,9 +154,10 @@ class BoxController extends Controller
      * Update an existing box.
      *
      * @OA\Put(
-     *     path="/api/boxes/{id}",
+     *     path="/api/v1/boxes/{id}",
      *     summary="Update a box",
      *     tags={"Boxes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Box ID",
@@ -194,9 +198,10 @@ class BoxController extends Controller
      * Delete a box.
      *
      * @OA\Delete(
-     *     path="/api/boxes/{id}",
+     *     path="/api/v1/boxes/{id}",
      *     summary="Delete a box",
      *     tags={"Boxes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Box ID",

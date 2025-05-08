@@ -66,9 +66,10 @@ class IncomeController extends Controller
      * Retrieve all incomes.
      *
      * @OA\Get(
-     *     path="/api/incomes",
+     *     path="/api/v1/incomes",
      *     summary="List all incomes",
      *     tags={"Incomes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of incomes retrieved successfully",
@@ -92,9 +93,10 @@ class IncomeController extends Controller
      * Create a new income.
      *
      * @OA\Post(
-     *     path="/api/incomes",
+     *     path="/api/v1/incomes",
      *     summary="Create a new income",
      *     tags={"Incomes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/IncomeRequest")
@@ -128,9 +130,10 @@ class IncomeController extends Controller
      * Retrieve a specific income by ID.
      *
      * @OA\Get(
-     *     path="/api/incomes/{id}",
+     *     path="/api/v1/incomes/{id}",
      *     summary="Get an income by ID",
      *     tags={"Incomes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Income ID",
@@ -158,9 +161,10 @@ class IncomeController extends Controller
      * Update an existing income.
      *
      * @OA\Put(
-     *     path="/api/incomes/{id}",
+     *     path="/api/v1/incomes/{id}",
      *     summary="Update an income",
      *     tags={"Incomes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Income ID",
@@ -201,9 +205,10 @@ class IncomeController extends Controller
      * Delete an income.
      *
      * @OA\Delete(
-     *     path="/api/incomes/{id}",
+     *     path="/api/v1/incomes/{id}",
      *     summary="Delete an income",
      *     tags={"Incomes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Income ID",

@@ -61,9 +61,10 @@ class BoardController extends Controller
      * Retrieve all boards.
      *
      * @OA\Get(
-     *     path="/api/boards",
+     *     path="/api/v1/boards",
      *     summary="List all boards",
      *     tags={"Boards"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of boards retrieved successfully",
@@ -87,9 +88,10 @@ class BoardController extends Controller
      * Create a new board.
      *
      * @OA\Post(
-     *     path="/api/boards",
+     *     path="/api/v1/boards",
      *     summary="Create a new board",
      *     tags={"Boards"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/BoardRequest")
@@ -123,9 +125,10 @@ class BoardController extends Controller
      * Retrieve a specific board by ID.
      *
      * @OA\Get(
-     *     path="/api/boards/{id}",
+     *     path="/api/v1/boards/{id}",
      *     summary="Get a board by ID",
      *     tags={"Boards"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Board ID",
@@ -153,9 +156,10 @@ class BoardController extends Controller
      * Update an existing board.
      *
      * @OA\Put(
-     *     path="/api/boards/{id}",
+     *     path="/api/v1/boards/{id}",
      *     summary="Update a board",
      *     tags={"Boards"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Board ID",
@@ -196,9 +200,10 @@ class BoardController extends Controller
      * Delete a board.
      *
      * @OA\Delete(
-     *     path="/api/boards/{id}",
+     *     path="/api/v1/boards/{id}",
      *     summary="Delete a board",
      *     tags={"Boards"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Board ID",

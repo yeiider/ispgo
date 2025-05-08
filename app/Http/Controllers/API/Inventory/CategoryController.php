@@ -58,9 +58,10 @@ class CategoryController extends Controller
      * Retrieve all categories.
      *
      * @OA\Get(
-     *     path="/api/categories",
+     *     path="/api/v1/categories",
      *     summary="List all categories",
      *     tags={"Categories"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of categories retrieved successfully",
@@ -84,9 +85,10 @@ class CategoryController extends Controller
      * Create a new category.
      *
      * @OA\Post(
-     *     path="/api/categories",
+     *     path="/api/v1/categories",
      *     summary="Create a new category",
      *     tags={"Categories"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/CategoryRequest")
@@ -120,9 +122,10 @@ class CategoryController extends Controller
      * Retrieve a specific category by ID.
      *
      * @OA\Get(
-     *     path="/api/categories/{id}",
+     *     path="/api/v1/categories/{id}",
      *     summary="Get a category by ID",
      *     tags={"Categories"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Category ID",
@@ -150,9 +153,10 @@ class CategoryController extends Controller
      * Update an existing category.
      *
      * @OA\Put(
-     *     path="/api/categories/{id}",
+     *     path="/api/v1/categories/{id}",
      *     summary="Update a category",
      *     tags={"Categories"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Category ID",
@@ -193,9 +197,10 @@ class CategoryController extends Controller
      * Delete a category.
      *
      * @OA\Delete(
-     *     path="/api/categories/{id}",
+     *     path="/api/v1/categories/{id}",
      *     summary="Delete a category",
      *     tags={"Categories"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Category ID",

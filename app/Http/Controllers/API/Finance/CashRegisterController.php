@@ -56,9 +56,10 @@ class CashRegisterController extends Controller
      * Retrieve all cash registers.
      *
      * @OA\Get(
-     *     path="/api/cash-registers",
+     *     path="/api/v1/cash-registers",
      *     summary="List all cash registers",
      *     tags={"Cash Registers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of cash registers retrieved successfully",
@@ -82,9 +83,10 @@ class CashRegisterController extends Controller
      * Create a new cash register.
      *
      * @OA\Post(
-     *     path="/api/cash-registers",
+     *     path="/api/v1/cash-registers",
      *     summary="Create a new cash register",
      *     tags={"Cash Registers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/CashRegisterRequest")
@@ -118,9 +120,10 @@ class CashRegisterController extends Controller
      * Retrieve a specific cash register by ID.
      *
      * @OA\Get(
-     *     path="/api/cash-registers/{id}",
+     *     path="/api/v1/cash-registers/{id}",
      *     summary="Get a cash register by ID",
      *     tags={"Cash Registers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Cash register ID",
@@ -148,9 +151,10 @@ class CashRegisterController extends Controller
      * Update an existing cash register.
      *
      * @OA\Put(
-     *     path="/api/cash-registers/{id}",
+     *     path="/api/v1/cash-registers/{id}",
      *     summary="Update a cash register",
      *     tags={"Cash Registers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Cash register ID",
@@ -191,9 +195,10 @@ class CashRegisterController extends Controller
      * Delete a cash register.
      *
      * @OA\Delete(
-     *     path="/api/cash-registers/{id}",
+     *     path="/api/v1/cash-registers/{id}",
      *     summary="Delete a cash register",
      *     tags={"Cash Registers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Cash register ID",

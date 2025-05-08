@@ -75,9 +75,10 @@ class EmailTemplateController extends Controller
      * Get a list of all email templates.
      *
      * @OA\Get(
-     *     path="/api/email-templates",
+     *     path="/api/v1/email-templates",
      *     summary="List all email templates",
      *     tags={"EmailTemplates"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="Email templates retrieved successfully",
@@ -101,9 +102,10 @@ class EmailTemplateController extends Controller
      * Create a new email template.
      *
      * @OA\Post(
-     *     path="/api/email-templates",
+     *     path="/api/v1/email-templates",
      *     summary="Create a new email template",
      *     tags={"EmailTemplates"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/EmailTemplateRequest")
@@ -133,9 +135,10 @@ class EmailTemplateController extends Controller
      * Retrieve an email template by its ID.
      *
      * @OA\Get(
-     *     path="/api/email-templates/{id}",
+     *     path="/api/v1/email-templates/{id}",
      *     summary="Retrieve an email template by ID",
      *     tags={"EmailTemplates"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Email Template ID",
@@ -163,9 +166,10 @@ class EmailTemplateController extends Controller
      * Update an email template by its ID.
      *
      * @OA\Put(
-     *     path="/api/email-templates/{id}",
+     *     path="/api/v1/email-templates/{id}",
      *     summary="Update an email template",
      *     tags={"EmailTemplates"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Email Template ID",
@@ -202,9 +206,10 @@ class EmailTemplateController extends Controller
      * Delete an email template by its ID.
      *
      * @OA\Delete(
-     *     path="/api/email-templates/{id}",
+     *     path="/api/v1/email-templates/{id}",
      *     summary="Delete an email template",
      *     tags={"EmailTemplates"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Email Template ID",

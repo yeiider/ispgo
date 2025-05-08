@@ -57,9 +57,10 @@ class DocumentTypeController extends Controller
      * Retrieve all document types.
      *
      * @OA\Get(
-     *     path="/api/document-types",
+     *     path="/api/v1/document-types",
      *     summary="List all document types",
      *     tags={"Document Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of document types retrieved successfully",
@@ -83,9 +84,10 @@ class DocumentTypeController extends Controller
      * Create a new document type.
      *
      * @OA\Post(
-     *     path="/api/document-types",
+     *     path="/api/v1/document-types",
      *     summary="Create a new document type",
      *     tags={"Document Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/DocumentTypeRequest")
@@ -119,9 +121,10 @@ class DocumentTypeController extends Controller
      * Retrieve a document type by ID.
      *
      * @OA\Get(
-     *     path="/api/document-types/{id}",
+     *     path="/api/v1/document-types/{id}",
      *     summary="Get a document type by ID",
      *     tags={"Document Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Document type ID",
@@ -149,9 +152,10 @@ class DocumentTypeController extends Controller
      * Update an existing document type.
      *
      * @OA\Put(
-     *     path="/api/document-types/{id}",
+     *     path="/api/v1/document-types/{id}",
      *     summary="Update a document type",
      *     tags={"Document Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Document type ID",
@@ -192,9 +196,10 @@ class DocumentTypeController extends Controller
      * Delete a document type.
      *
      * @OA\Delete(
-     *     path="/api/document-types/{id}",
+     *     path="/api/v1/document-types/{id}",
      *     summary="Delete a document type",
      *     tags={"Document Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Document type ID",

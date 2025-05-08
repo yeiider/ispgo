@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Invoice\InvoiceRequest;
 use App\Http\Resources\Invoice\InvoiceResource;
 use App\Services\Invoice\InvoiceService;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -77,9 +78,10 @@ class InvoiceController extends Controller
      * Retrieve all invoices.
      *
      * @OA\Get(
-     *     path="/api/invoices",
+     *     path="/api/v1/invoices",
      *     summary="List all invoices",
      *     tags={"Invoices"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of invoices retrieved successfully",
@@ -103,9 +105,10 @@ class InvoiceController extends Controller
      * Create a new invoice.
      *
      * @OA\Post(
-     *     path="/api/invoices",
+     *     path="/api/v1/invoices",
      *     summary="Create a new invoice",
      *     tags={"Invoices"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/InvoiceRequest")
@@ -139,9 +142,10 @@ class InvoiceController extends Controller
      * Retrieve a specific invoice by ID.
      *
      * @OA\Get(
-     *     path="/api/invoices/{id}",
+     *     path="/api/v1/invoices/{id}",
      *     summary="Get an invoice by ID",
      *     tags={"Invoices"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Invoice ID",
@@ -169,9 +173,10 @@ class InvoiceController extends Controller
      * Update an existing invoice.
      *
      * @OA\Put(
-     *     path="/api/invoices/{id}",
+     *     path="/api/v1/invoices/{id}",
      *     summary="Update an invoice",
      *     tags={"Invoices"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Invoice ID",
@@ -212,9 +217,10 @@ class InvoiceController extends Controller
      * Delete an invoice.
      *
      * @OA\Delete(
-     *     path="/api/invoices/{id}",
+     *     path="/api/v1/invoices/{id}",
      *     summary="Delete an invoice",
      *     tags={"Invoices"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Invoice ID",

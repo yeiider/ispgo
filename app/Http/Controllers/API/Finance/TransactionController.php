@@ -66,9 +66,10 @@ class TransactionController extends Controller
      * Retrieve all transactions.
      *
      * @OA\Get(
-     *     path="/api/transactions",
+     *     path="/api/v1/transactions",
      *     summary="List all transactions",
      *     tags={"Transactions"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of transactions retrieved successfully",
@@ -92,9 +93,10 @@ class TransactionController extends Controller
      * Create a new transaction.
      *
      * @OA\Post(
-     *     path="/api/transactions",
+     *     path="/api/v1/transactions",
      *     summary="Create a new transaction",
      *     tags={"Transactions"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/TransactionRequest")
@@ -128,9 +130,10 @@ class TransactionController extends Controller
      * Retrieve a specific transaction by ID.
      *
      * @OA\Get(
-     *     path="/api/transactions/{id}",
+     *     path="/api/v1/transactions/{id}",
      *     summary="Get a transaction by ID",
      *     tags={"Transactions"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Transaction ID",
@@ -158,9 +161,10 @@ class TransactionController extends Controller
      * Update an existing transaction.
      *
      * @OA\Put(
-     *     path="/api/transactions/{id}",
+     *     path="/api/v1/transactions/{id}",
      *     summary="Update a transaction",
      *     tags={"Transactions"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Transaction ID",
@@ -201,9 +205,10 @@ class TransactionController extends Controller
      * Delete a transaction.
      *
      * @OA\Delete(
-     *     path="/api/transactions/{id}",
+     *     path="/api/v1/transactions/{id}",
      *     summary="Delete a transaction",
      *     tags={"Transactions"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Transaction ID",

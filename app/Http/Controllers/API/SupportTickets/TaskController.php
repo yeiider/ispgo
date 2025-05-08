@@ -66,9 +66,10 @@ class TaskController extends Controller
      * Retrieve all tasks.
      *
      * @OA\Get(
-     *     path="/api/tasks",
+     *     path="/api/v1/tasks",
      *     summary="List all tasks",
      *     tags={"Tasks"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of tasks retrieved successfully",
@@ -92,9 +93,10 @@ class TaskController extends Controller
      * Create a new task.
      *
      * @OA\Post(
-     *     path="/api/tasks",
+     *     path="/api/v1/tasks",
      *     summary="Create a new task",
      *     tags={"Tasks"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/TaskRequest")
@@ -128,9 +130,10 @@ class TaskController extends Controller
      * Retrieve a specific task by ID.
      *
      * @OA\Get(
-     *     path="/api/tasks/{id}",
+     *     path="/api/v1/tasks/{id}",
      *     summary="Get a task by ID",
      *     tags={"Tasks"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Task ID",
@@ -158,9 +161,10 @@ class TaskController extends Controller
      * Update an existing task.
      *
      * @OA\Put(
-     *     path="/api/tasks/{id}",
+     *     path="/api/v1/tasks/{id}",
      *     summary="Update a task",
      *     tags={"Tasks"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Task ID",
@@ -201,9 +205,10 @@ class TaskController extends Controller
      * Delete a task.
      *
      * @OA\Delete(
-     *     path="/api/tasks/{id}",
+     *     path="/api/v1/tasks/{id}",
      *     summary="Delete a task",
      *     tags={"Tasks"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Task ID",

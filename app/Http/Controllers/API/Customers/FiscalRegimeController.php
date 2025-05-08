@@ -56,9 +56,10 @@ class FiscalRegimeController extends Controller
      * Retrieve all fiscal regimes.
      *
      * @OA\Get(
-     *     path="/api/fiscal-regimes",
+     *     path="/api/v1/fiscal-regimes",
      *     summary="List all fiscal regimes",
      *     tags={"Fiscal Regimes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of fiscal regimes retrieved successfully",
@@ -85,6 +86,7 @@ class FiscalRegimeController extends Controller
      *     path="/api/fiscal-regimes",
      *     summary="Create a new fiscal regime",
      *     tags={"Fiscal Regimes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/FiscalRegimeRequest")
@@ -121,6 +123,7 @@ class FiscalRegimeController extends Controller
      *     path="/api/fiscal-regimes/{id}",
      *     summary="Get a fiscal regime by ID",
      *     tags={"Fiscal Regimes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Fiscal regime ID",
@@ -151,6 +154,7 @@ class FiscalRegimeController extends Controller
      *     path="/api/fiscal-regimes/{id}",
      *     summary="Update a fiscal regime",
      *     tags={"Fiscal Regimes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Fiscal regime ID",
@@ -194,6 +198,7 @@ class FiscalRegimeController extends Controller
      *     path="/api/fiscal-regimes/{id}",
      *     summary="Delete a fiscal regime",
      *     tags={"Fiscal Regimes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Fiscal regime ID",

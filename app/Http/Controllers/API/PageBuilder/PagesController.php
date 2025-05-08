@@ -60,9 +60,10 @@ class PagesController extends Controller
      * Retrieve all pages.
      *
      * @OA\Get(
-     *     path="/api/pages",
+     *     path="/api/v1/pages",
      *     summary="List all pages",
      *     tags={"Pages"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of pages retrieved successfully",
@@ -86,9 +87,10 @@ class PagesController extends Controller
      * Create a new page.
      *
      * @OA\Post(
-     *     path="/api/pages",
+     *     path="/api/v1/pages",
      *     summary="Create a new page",
      *     tags={"Pages"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/PagesRequest")
@@ -122,9 +124,10 @@ class PagesController extends Controller
      * Retrieve a specific page by ID.
      *
      * @OA\Get(
-     *     path="/api/pages/{id}",
+     *     path="/api/v1/pages/{id}",
      *     summary="Get a page by ID",
      *     tags={"Pages"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Page ID",
@@ -152,9 +155,10 @@ class PagesController extends Controller
      * Update an existing page.
      *
      * @OA\Put(
-     *     path="/api/pages/{id}",
+     *     path="/api/v1/pages/{id}",
      *     summary="Update a page",
      *     tags={"Pages"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Page ID",
@@ -195,9 +199,10 @@ class PagesController extends Controller
      * Delete a page.
      *
      * @OA\Delete(
-     *     path="/api/pages/{id}",
+     *     path="/api/v1/pages/{id}",
      *     summary="Delete a page",
      *     tags={"Pages"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Page ID",

@@ -63,9 +63,10 @@ class PageTranslationController extends Controller
      * Retrieve all page translations.
      *
      * @OA\Get(
-     *     path="/api/page-translations",
+     *     path="/api/v1/page-translations",
      *     summary="List all page translations",
      *     tags={"PageTranslations"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of page translations retrieved successfully",
@@ -89,9 +90,10 @@ class PageTranslationController extends Controller
      * Create a new page translation.
      *
      * @OA\Post(
-     *     path="/api/page-translations",
+     *     path="/api/v1/page-translations",
      *     summary="Create a new page translation",
      *     tags={"PageTranslations"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/PageTranslationRequest")
@@ -125,9 +127,10 @@ class PageTranslationController extends Controller
      * Retrieve a specific page translation by ID.
      *
      * @OA\Get(
-     *     path="/api/page-translations/{id}",
+     *     path="/api/v1/page-translations/{id}",
      *     summary="Get a page translation by ID",
      *     tags={"PageTranslations"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Page translation ID",
@@ -155,9 +158,10 @@ class PageTranslationController extends Controller
      * Update an existing page translation.
      *
      * @OA\Put(
-     *     path="/api/page-translations/{id}",
+     *     path="/api/v1/page-translations/{id}",
      *     summary="Update a page translation",
      *     tags={"PageTranslations"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Page translation ID",
@@ -198,9 +202,10 @@ class PageTranslationController extends Controller
      * Delete a page translation.
      *
      * @OA\Delete(
-     *     path="/api/page-translations/{id}",
+     *     path="/api/v1/page-translations/{id}",
      *     summary="Delete a page translation",
      *     tags={"PageTranslations"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Page translation ID",
