@@ -10,7 +10,7 @@
     "require": {
         "php": "^8.2",
         "ext-fileinfo": "*",
-        "barryvdh/laravel-dompdf": "^2.2",
+        "barryvdh/laravel-dompdf": "*",
         "darkaonline/l5-swagger": "^9.0",
         "endroid/qr-code": "^5.0",
         "evilfreelancer/routeros-api-php": "^1.5",
@@ -19,9 +19,10 @@
         "ispgo/ckeditor": "@dev",
         "ispgo/mikrotik": "@dev",
         "ispgo/settings-manager": "@dev",
+        "ispgo/siigo": "@dev",
         "ispgo/smartolt": "@dev",
         "ispgo/wiivo": "@dev",
-        "laravel/framework": "^11.9",
+        "laravel/framework": "^12.0",
         "laravel/nova": "^5.0",
         "laravel/passport": "^12.0",
         "laravel/tinker": "^2.9",
@@ -114,6 +115,10 @@
         "5": {
             "type": "vcs",
             "url": "https://github.com/yeiider/nova-permissions"
+        },
+        "6": {
+            "type": "path",
+            "url": "./packages/ispgo/siigo"
         }
     }
 }

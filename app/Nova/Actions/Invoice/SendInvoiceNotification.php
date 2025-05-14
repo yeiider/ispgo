@@ -24,7 +24,7 @@ class SendInvoiceNotification extends Action
 
     public function name(): string
     {
-        return __('invoice.send_notification');
+        return __('invoice.actions.send_notification');
     }
 
     /**

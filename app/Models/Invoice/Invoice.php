@@ -3,13 +3,18 @@
 namespace App\Models\Invoice;
 
 use App\Events\InvoiceCreated;
+use App\Events\InvoiceCreatedBefore;
+use App\Events\InvoiceIssued;
 use App\Events\InvoicePaid;
 use App\Events\InvoiceUpdateStatus;
 use App\Helpers\QrCodeHelper;
 use App\Helpers\Utils;
 use App\Models\Customers\Customer;
+use App\Models\InvoiceAdjustment;
+use App\Models\InvoiceItem;
 use App\Models\Services\Service;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +27,7 @@ class Invoice extends Model
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
         'issue_date', 'due_date', 'full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
-        'payment_link', 'expiration_date', 'customer_name'
+        'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state','amount_before_discounts','tax_total','void_total'
     ];
 
     protected $casts = [
@@ -42,6 +47,67 @@ class Invoice extends Model
     {
         return $this->increment_id . ' - ' . ucfirst("{$this->customer->first_name} {$this->customer->last_name}");
     }
+
+    public function getBillingPeriodStartAttribute(): ?Carbon
+    {
+        return $this->issue_date?->copy()->startOfMonth();
+    }
+
+    public function adjustments()
+    {
+        return $this->hasMany(InvoiceAdjustment::class);
+    }
+   public function items()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function getTotalWithAdjustmentsAttribute(): float
+    {
+        $base = $this->total; // o subtotal + taxes
+        $delta = $this->adjustments()->sum('amount');
+        return $base + $delta;
+    }
+
+    public function recalcTotals(): void
+    {
+        $adjustments = $this->adjustments()->get();
+
+        $charges = $adjustments->where('kind', 'charge')->sum('amount');
+        $discounts = $adjustments->where('kind', 'discount')->sum('amount');
+        $taxes = $adjustments->where('kind', 'tax')->sum('amount');
+        $voids = $adjustments->where('kind', 'void')->sum('amount');
+
+        $subtotal = $charges + $discounts; // descuento ya viene negativo
+        $total = $subtotal + $taxes + $voids;
+
+        $this->subtotal = $subtotal;
+        $this->discount = abs($discounts);
+        $this->tax_total = $taxes;
+        $this->void_total = $voids;
+        $this->amount_before_discounts = $charges + $taxes;
+        $this->total = $total;
+        $this->outstanding_balance = max(0, $total);
+
+        $this->save();
+    }
+
+
+
+    public function products()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function finalize(): void
+    {
+        $this->state = 'issued';
+        $this->issued_at = now();
+        $this->save();
+
+        event(new InvoiceIssued($this));   // PDF + e-mail, etc.
+    }
+
 
     public function getEmailAddressAttribute()
     {
@@ -197,16 +263,16 @@ class Invoice extends Model
             if ($model->customer) {
                 $model->customer_name = $model->customer->first_name . ' ' . $model->customer->last_name;
             }
-
+           // event(new InvoiceCreatedBefore($model));
         });
         static::created(function ($model) {
             $model->load('customer');
-            event(new InvoiceCreated($model));
+           // event(new InvoiceCreated($model));
         });
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
             if ($model->isDirty('status')) {
-                event(new InvoiceUpdateStatus($model));
+              //  event(new InvoiceUpdateStatus($model));
             }
         });
     }

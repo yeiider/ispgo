@@ -32,6 +32,7 @@ return [
     'credit_notes' => 'Credit Notes',
     'payment_promises' => 'Payment Promises',
     'daily_invoice_balances' => 'Daily Invoice Balances',
+    'billing_novedad' => 'billing_novedad',
     'cash_registers' => 'Cash Registers',
     'incomes' => 'Incomes',
     'expenses' => 'Expenses',

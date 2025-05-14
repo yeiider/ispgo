@@ -83,6 +83,6 @@ class DownloadInvoicePdf extends Action
 
     public function name()
     {
-        return __('invoice.download_pdf');
+        return __('invoice.actions.download_pdf');
     }
 }

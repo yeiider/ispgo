@@ -1,6 +1,7 @@
 <?php
 
 use Ispgo\Mikrotik\Settings\SettingMikrotik;
+use Ispgo\Siigo\Settings\SettingSiigo;
 use Ispgo\Smartolt\Settings\SettingSmartolt;
 
 return [
@@ -556,5 +557,13 @@ return [
         "general" => SettingSmartolt::getGeneralSettings(),
 
     ],
+
+    "siigo" => [
+        "setting" => [
+            "label" => "Siigo",
+            "class" => "form-control",
+        ],
+        "general" => SettingSiigo::getGeneralSettings(),
+    ]
 
 ];

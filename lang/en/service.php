@@ -27,11 +27,11 @@ return [
     'service_details' => 'Service Details',
     'billing_and_contract_information' => 'Billing & Contract Information',
     'technical_information' => 'Technical Information',
-    'activate' => 'Activate',
     'actions' => [
         'install' => 'Install',
         'uninstall' => 'Uninstall',
         'generate_invoice' => 'Generate Invoice',
-        'suspend' => 'suspend',
+        'suspend' => 'Suspend',
+        'activate' => 'Activate'
     ]
 ];

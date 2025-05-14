@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Nova\BillingNovedad;
 use App\Nova\Box;
 use App\Nova\Contract;
 use App\Nova\Customers\Address;
@@ -97,6 +98,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(CreditNote::class)->name(__('panel.credit_notes')),
                     MenuItem::resource(PaymentPromise::class)->name(__('panel.payment_promises')),
                     MenuItem::resource(DailyInvoiceBalance::class)->name(__('panel.daily_invoice_balances')),
+                    MenuItem::resource(BillingNovedad::class)->name(__('panel.billing_novedad')),
                 ])->icon('archive')->collapsable(),
                 MenuSection::make(__('panel.finances'), [
                     MenuItem::resource(CashRegister::class)->name(__('panel.cash_registers'))->canSee(function ($request) {

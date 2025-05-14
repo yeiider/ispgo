@@ -25,6 +25,7 @@ use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\FormData;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
@@ -33,6 +34,7 @@ use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Resource;
+use Laravel\Nova\Tabs\Tab;
 
 class Service extends Resource
 {
@@ -61,6 +63,12 @@ class Service extends Resource
         if (ProviderSmartOlt::getEnabled()) {
             $panels[] = new Panel(__('Smart OLT'), $this->attributesSmartOlt());
         }
+
+        $rules = Tab::make(__('Relgas de promociones'), [
+            HasMany::make(__('rules'), 'rules', ServiceRule::class),
+        ]);
+
+        $panels[] = $rules;
 
         return $panels;
     }

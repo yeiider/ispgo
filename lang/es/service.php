@@ -31,7 +31,7 @@ return [
         'install' => 'Instalar',
         'uninstall' => 'Desinstalar',
         'generate_invoice' => 'Generar Factura',
-        'suspend' => 'Suspendido',
-        'activate' => 'Activar',
+        'suspend' => 'Suspender',
+        'activate' => 'Activar'
     ]
 ];

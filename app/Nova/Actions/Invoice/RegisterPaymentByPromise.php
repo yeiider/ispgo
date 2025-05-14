@@ -51,6 +51,6 @@ class RegisterPaymentByPromise extends Action
 
     public function name(): \Illuminate\Foundation\Application|\Stringable|array|string|\Illuminate\Contracts\Translation\Translator|null
     {
-        return __('invoice.register_payment_by_promise');
+        return __('invoice.actions.register_payment_by_promise');
     }
 }

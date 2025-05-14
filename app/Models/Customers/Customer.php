@@ -7,6 +7,8 @@ use App\Events\CustomerStatusUpdated;
 use App\Models\Contract;
 use App\Models\Invoice\Invoice;
 use App\Models\Services\Service;
+use App\Settings\GeneralProviderConfig;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +23,9 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
     protected $casts = [
         'date_of_birth' => 'date',
+        'email_verified_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
     protected $fillable = [
         'first_name',
@@ -46,6 +51,46 @@ class Customer extends Authenticatable implements MustVerifyEmail
         'password',
         'remember_token'
     ];
+
+
+    public function openDraftInvoice(string $period): Invoice
+    {
+        $dueDate = GeneralProviderConfig::getPaymentDueDate();
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+
+        // Si la fecha de vencimiento es menor que la fecha actual, se pasa al siguiente mes
+        if ($dueDate < now()->day) {
+            $dueMonth = ($currentMonth == 12) ? 1 : $currentMonth + 1;
+            $dueYear = ($currentMonth == 12) ? $currentYear + 1 : $currentYear;
+        } else {
+            $dueMonth = $currentMonth;
+            $dueYear = $currentYear;
+        }
+        $defaultUser = Auth::id() ?? GeneralProviderConfig::getDefaultUser();
+        $dueDate = Carbon::create($dueYear, $dueMonth, $dueDate);
+        return Invoice::create(
+            [
+                'billing_period' => $period,
+                'state' => 'draft',
+                'subtotal' => 0,
+                'customer_id' => $this->id,
+                'tax' => 0,
+                'amount' => 0,
+                'outstanding_balance' => 0,
+                'issue_date' => now(),
+                'due_date' => $dueDate,
+                'total' => 0,
+                'status' => 'unpaid',
+                'user_id' => $defaultUser,
+            ]
+        );
+    }
+
+    public function activeServices()
+    {
+        return $this->services()->where('service_status', '!=', 'free');
+    }
 
     public function addresses()
     {

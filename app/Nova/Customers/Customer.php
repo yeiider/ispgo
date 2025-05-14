@@ -15,6 +15,8 @@ use App\Nova\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
+use Ispgo\Siigo\Nova\onCreatedCustomerSiigo;
+use Ispgo\Siigo\Settings\ConfigProviderSiigo;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\Badge;
@@ -91,7 +93,6 @@ class Customer extends Resource
                 ]),
 
 
-
             ]),
         ];
     }
@@ -108,6 +109,9 @@ class Customer extends Resource
             Action::downloadUrl('Exportar Clientes', function () {
                 return route('customers.export');
             })->standalone(),
+            (new onCreatedCustomerSiigo())->canSee(function () {
+                return ConfigProviderSiigo::getEnabled();
+            })
         ];
     }
 

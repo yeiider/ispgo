@@ -10,6 +10,7 @@ use App\Models\Customers\Address;
 use App\Models\Customers\Customer;
 use App\Models\Invoice\Invoice;
 use App\Models\Router;
+use App\Models\ServiceRule;
 use App\Settings\GeneralProviderConfig;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,6 +51,8 @@ class Service extends Model
     {
         return $this->belongsTo(Router::class);
     }
+    public function rules() { return $this->hasMany(ServiceRule::class); }
+
 
     public function address()
     {
@@ -100,7 +103,7 @@ class Service extends Model
         });
     }
 
-    public function generateInvoice($notes = null)
+    public function generateInvoice($notes = null): ?Invoice
     {
         if ($this->service_status == 'free') {
             // No generar factura para servicios con estado 'free'

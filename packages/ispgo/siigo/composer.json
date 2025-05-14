@@ -1,0 +1,12 @@
+{
+  "name": "ispgo/siigo",
+  "description": "ISPGo integration package for Siigo API",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Ispgo\\Siigo\\": "src/"
+    }
+  },
+    "require": {}
+}

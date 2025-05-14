@@ -43,18 +43,51 @@ class Invoice extends Resource
     {
         return [
             ID::make(__('ID'), 'id')->sortable(),
+
             Text::make(__('invoice.increment_id'), 'increment_id')->readonly(),
             BelongsTo::make(__('customer.customer'), 'customer', Customers\Customer::class)->searchable()->readonly(),
             BelongsTo::make(__('service.service'), 'service', \App\Nova\Service::class)->searchable()->readonly(),
 
-            Currency::make(__('invoice.subtotal'), 'subtotal')->step(0.01),
-            Currency::make(__('invoice.tax'), 'tax')->step(0.01),
-            Currency::make(__('invoice.total'), 'total')->step(0.01),
-            Currency::make(__('invoice.amount'), 'amount')->step(0.01),
-            Currency::make(__('invoice.discount'), 'discount')->step(0.01),
-            Currency::make(__('invoice.total_pay'), 'total')->step(0.01),
+            // 💰 Totales detallados
+            Currency::make(__('invoice.amount_before_discounts'), 'amount_before_discounts')
+                ->step(0.01)
+                ->readonly()
+                ->hideFromIndex(),
+
+            Currency::make(__('invoice.discount'), 'discount')
+                ->step(0.01)
+                ->readonly(),
+
+            Currency::make(__('invoice.subtotal'), 'subtotal')
+                ->step(0.01)
+                ->readonly(),
+
+            Currency::make(__('invoice.tax_total'), 'tax_total')
+                ->step(0.01)
+                ->readonly()
+                ->hideFromIndex(),
+
+            Currency::make(__('invoice.void_total'), 'void_total')
+                ->step(0.01)
+                ->readonly()
+                ->hideFromIndex(),
+
+            Currency::make(__('invoice.total'), 'total')
+                ->step(0.01)
+                ->readonly(),
+
+            Currency::make(__('invoice.outstanding_balance'), 'outstanding_balance')
+                ->step(0.01)
+                ->readonly(),
+
+            Currency::make(__('invoice.amount'), 'amount')  // ¿Este es un campo manual de abono o pago?
+            ->step(0.01)
+                ->readonly(),
+
+            // 📆 Fechas y estado
             Date::make(__('invoice.issue_date'), 'issue_date'),
             Date::make(__('invoice.due_date'), 'due_date'),
+
             Select::make(__('attribute.status'), 'status')->options([
                 'paid' => __('attribute.paid'),
                 'unpaid' => __('attribute.unpaid'),
@@ -75,12 +108,12 @@ class Invoice extends Resource
                 'success' => 'check-circle',
                 'warning' => 'minus-circle',
                 'info' => 'speakerphone'
-            ])->label(function ($value) {
-                return __('attribute.'.$value);
-            }),
+            ])->label(fn($value) => __('attribute.'.$value)),
+
             Text::make(__('invoice.payment_method'), 'payment_method'),
             Textarea::make(__('invoice.notes'), 'notes')->hideFromIndex(),
         ];
+
     }
 
     public function actions(NovaRequest $request): array

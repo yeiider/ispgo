@@ -2,6 +2,7 @@
 
 namespace App\Nova\Actions\Service;
 
+use App\Services\Billing\CustomerBillingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
@@ -18,20 +19,22 @@ class GenerateInvoice extends Action
     /**
      * Perform the action on the given models.
      *
-     * @param \Laravel\Nova\Fields\ActionFields $fields
-     * @param \Illuminate\Support\Collection $models
+     * @param ActionFields $fields
+     * @param Collection $models
      * @return mixed
+     * @throws \Exception
      */
     public function handle(ActionFields $fields, Collection $models)
     {
         $invoice = false;
+        $serviceBuildInvoice = new CustomerBillingService();
         foreach ($models as $model) {
-            $invoice = $model->generateInvoice($fields->notes);
+            $invoice = $serviceBuildInvoice->generateForPeriod($model->customer, now());
         }
         if ($models->count() > 1) {
             return ActionResponse::visit('/resources/invoices');
         } else {
-            return ActionResponse::visit('/resources/invoices/'.$invoice->id);
+            return ActionResponse::visit('/resources/invoices/' . $invoice->id);
         }
     }
 

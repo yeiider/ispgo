@@ -46,6 +46,6 @@ class RegisterPayment extends Action
 
     public function name()
     {
-        return __('invoice.register_payment');
+        return __('invoice.actions.register_payment');
     }
 }

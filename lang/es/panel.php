@@ -32,6 +32,7 @@ return [
     'credit_notes' => 'Notas de Crédito',
     'payment_promises' => 'Promesas de Pago',
     'daily_invoice_balances' => 'Balances Diarios de Facturación',
+    'billing_novedad' => 'Novedad de facturas',
     'cash_registers' => 'Cajas Registradoras',
     'incomes' => 'Ingresos',
     'expenses' => 'Gastos',

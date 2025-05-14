@@ -33,7 +33,7 @@ class SendInvoiceByWhatsapp extends Action implements ShouldQueue
      */
     public function name(): string
     {
-        return __('invoice.send_by_whatsapp');
+        return __('invoice.actions.send_by_whatsapp');
     }
 
 
