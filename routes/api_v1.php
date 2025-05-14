@@ -14,7 +14,7 @@ Route::apiResource('/fiscal-regimes', \App\Http\Controllers\API\Customers\Fiscal
 
 Route::apiResource('/tax-identification-types', \App\Http\Controllers\API\Customers\TaxIdentificationTypeController::class);
 
-Route::apiResource('/taxpayer-_types', \App\Http\Controllers\API\Customers\TaxpayerTypeController::class);
+Route::apiResource('/taxpayer-types', \App\Http\Controllers\API\Customers\TaxpayerTypeController::class);
 
 Route::apiResource('/cash-registers', \App\Http\Controllers\API\Finance\CashRegisterController::class);
 
