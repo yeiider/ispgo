@@ -61,9 +61,10 @@ class TaskAttachmentController extends Controller
      * Retrieve all task attachments.
      *
      * @OA\Get(
-     *     path="/api/task-attachments",
+     *     path="/api/v1/task-attachments",
      *     summary="List all task attachments",
      *     tags={"Task Attachments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of task attachments retrieved successfully",
@@ -87,9 +88,10 @@ class TaskAttachmentController extends Controller
      * Create a new task attachment.
      *
      * @OA\Post(
-     *     path="/api/task-attachments",
+     *     path="/api/v1/task-attachments",
      *     summary="Create a new task attachment",
      *     tags={"Task Attachments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/TaskAttachmentRequest")
@@ -123,9 +125,10 @@ class TaskAttachmentController extends Controller
      * Retrieve a specific task attachment by ID.
      *
      * @OA\Get(
-     *     path="/api/task-attachments/{id}",
+     *     path="/api/v1/task-attachments/{id}",
      *     summary="Get a task attachment by ID",
      *     tags={"Task Attachments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Task attachment ID",
@@ -153,9 +156,10 @@ class TaskAttachmentController extends Controller
      * Update an existing task attachment.
      *
      * @OA\Put(
-     *     path="/api/task-attachments/{id}",
+     *     path="/api/v1/task-attachments/{id}",
      *     summary="Update a task attachment",
      *     tags={"Task Attachments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Task attachment ID",
@@ -196,9 +200,10 @@ class TaskAttachmentController extends Controller
      * Delete a task attachment.
      *
      * @OA\Delete(
-     *     path="/api/task-attachments/{id}",
+     *     path="/api/v1/task-attachments/{id}",
      *     summary="Delete a task attachment",
      *     tags={"Task Attachments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Task attachment ID",

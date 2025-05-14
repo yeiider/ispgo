@@ -18,7 +18,7 @@ use App\Http\Controllers\CustomerExportController;
 Route::get('checkout', [\App\Http\Controllers\Checkout::class, 'index'])->name('checkout.index');
 Route::middleware([\App\Http\Middleware\CheckUserBox::class])->prefix('admin')->group(function () {
     Route::get('pos', [\App\Http\Controllers\Pos::class, 'index'])->name('admin.pos');
-    Route::post('/daily-boxes/create', [BoxApi::class, 'createDailyBox']);
+    Route::post('/daily-boxes/create', [\App\Http\Controllers\Pos::class, 'store']);
 });
 
 Route::get('/payment/configurations', [PaymentController::class, 'getPaymentConfigurations']);

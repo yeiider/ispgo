@@ -64,9 +64,10 @@ class ExpenseController extends Controller
      * Retrieve all expenses.
      *
      * @OA\Get(
-     *     path="/api/expenses",
+     *     path="/api/v1/expenses",
      *     summary="List all expenses",
      *     tags={"Expenses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of expenses retrieved successfully",
@@ -90,9 +91,10 @@ class ExpenseController extends Controller
      * Create a new expense.
      *
      * @OA\Post(
-     *     path="/api/expenses",
+     *     path="/api/v1/expenses",
      *     summary="Create a new expense",
      *     tags={"Expenses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/ExpenseRequest")
@@ -126,9 +128,10 @@ class ExpenseController extends Controller
      * Retrieve a specific expense by ID.
      *
      * @OA\Get(
-     *     path="/api/expenses/{id}",
+     *     path="/api/v1/expenses/{id}",
      *     summary="Get an expense by ID",
      *     tags={"Expenses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Expense ID",
@@ -156,9 +159,10 @@ class ExpenseController extends Controller
      * Update an existing expense.
      *
      * @OA\Put(
-     *     path="/api/expenses/{id}",
+     *     path="/api/v1/expenses/{id}",
      *     summary="Update an expense",
      *     tags={"Expenses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Expense ID",
@@ -199,9 +203,10 @@ class ExpenseController extends Controller
      * Delete an expense.
      *
      * @OA\Delete(
-     *     path="/api/expenses/{id}",
+     *     path="/api/v1/expenses/{id}",
      *     summary="Delete an expense",
      *     tags={"Expenses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Expense ID",

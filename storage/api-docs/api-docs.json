@@ -9,95 +9,14 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/api/login": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Log in a user",
-                "description": "Log in a user.",
-                "operationId": "44212a9096e4b09358281e9ec8a0701d",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "username",
-                                    "password"
-                                ],
-                                "properties": {
-                                    "username": {
-                                        "description": "User's email or username",
-                                        "type": "string",
-                                        "example": "user@example.com"
-                                    },
-                                    "password": {
-                                        "description": "User's password",
-                                        "type": "string",
-                                        "example": "password123"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful login with access token",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "access_token": {
-                                            "description": "OAuth access token",
-                                            "type": "string"
-                                        },
-                                        "token_type": {
-                                            "description": "Type of token",
-                                            "type": "string",
-                                            "example": "Bearer"
-                                        },
-                                        "expires_in": {
-                                            "description": "Token expiration time in seconds",
-                                            "type": "integer",
-                                            "example": 3600
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Invalid credentials",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "description": "Error message",
-                                            "type": "string",
-                                            "example": "Invalid credentials"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/boxes": {
+        "/api/v1/boxes": {
             "get": {
                 "tags": [
                     "Boxes"
                 ],
                 "summary": "List all boxes",
                 "description": "Retrieve all boxes.",
-                "operationId": "0ea3013aa6b98aa32464d4e3edb6749b",
+                "operationId": "29488deb944bd36b196630ccd8563307",
                 "responses": {
                     "200": {
                         "description": "List of boxes retrieved successfully",
@@ -115,7 +34,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -123,7 +47,7 @@
                 ],
                 "summary": "Create a new box",
                 "description": "Create a new box.",
-                "operationId": "033a4c11c4212524a44cc48058c46815",
+                "operationId": "0b685ed647cf03c162f51eec2781ced8",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -151,17 +75,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/boxes/{id}": {
+        "/api/v1/boxes/{id}": {
             "get": {
                 "tags": [
                     "Boxes"
                 ],
                 "summary": "Get a box by ID",
                 "description": "Retrieve a specific box by ID.",
-                "operationId": "5e04d3b404af3651aee7bf6500973437",
+                "operationId": "4735fc62fae5f66e5917b78c0e0df304",
                 "parameters": [
                     {
                         "name": "id",
@@ -187,7 +116,12 @@
                     "404": {
                         "description": "Box not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -195,7 +129,7 @@
                 ],
                 "summary": "Update a box",
                 "description": "Update an existing box.",
-                "operationId": "861ee318ec07ef9d6b6e91482d9e2dd1",
+                "operationId": "0540f8cb03b769091b697cf83ece1936",
                 "parameters": [
                     {
                         "name": "id",
@@ -234,7 +168,12 @@
                     "404": {
                         "description": "Box not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -242,7 +181,7 @@
                 ],
                 "summary": "Delete a box",
                 "description": "Delete a box.",
-                "operationId": "565ee2b1af810cef9eec34af59955b2e",
+                "operationId": "0502886763e68222894307b553dc5c9b",
                 "parameters": [
                     {
                         "name": "id",
@@ -261,17 +200,22 @@
                     "404": {
                         "description": "Box not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/contracts": {
+        "/api/v1/contracts": {
             "get": {
                 "tags": [
                     "Contracts"
                 ],
                 "summary": "Get all Contracts",
                 "description": "List all contracts.",
-                "operationId": "a6a61306221aa5342fc310b63c1660ed",
+                "operationId": "bc77dc3cc8941fbe699959beacf85a8c",
                 "responses": {
                     "200": {
                         "description": "List of Contracts retrieved successfully",
@@ -289,7 +233,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -297,7 +246,7 @@
                 ],
                 "summary": "Create a new Contract",
                 "description": "Create a new contract.",
-                "operationId": "9a25642079c5690665a3bd85798ad224",
+                "operationId": "07b69eff7052acc6f0b72cbc5260058b",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -322,17 +271,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/contracts/{id}": {
+        "/api/v1/contracts/{id}": {
             "get": {
                 "tags": [
                     "Contracts"
                 ],
                 "summary": "Retrieve a Contract by ID",
                 "description": "Retrieve a contract by its ID.",
-                "operationId": "fab8961798ece4e150cd892e94c895c7",
+                "operationId": "d14318685c5e8cc25058e9246aa6cf20",
                 "parameters": [
                     {
                         "name": "id",
@@ -358,7 +312,12 @@
                     "404": {
                         "description": "Contract not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -366,7 +325,7 @@
                 ],
                 "summary": "Update an existing Contract",
                 "description": "Update an existing contract.",
-                "operationId": "f679100a9bbad41ce98ba57faa77a50e",
+                "operationId": "328fcde02059212c74fdb412a51dd7da",
                 "parameters": [
                     {
                         "name": "id",
@@ -402,7 +361,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -410,7 +374,7 @@
                 ],
                 "summary": "Delete a Contract",
                 "description": "Delete a contract.",
-                "operationId": "2bfe2f120e1b14cbfb023f0aa34bff7d",
+                "operationId": "6f4df5a45ee071119050c785dfaa03ec",
                 "parameters": [
                     {
                         "name": "id",
@@ -429,17 +393,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/addresses": {
+        "/api/v1/addresses": {
             "get": {
                 "tags": [
                     "Addresses"
                 ],
                 "summary": "Get all addresses",
                 "description": "Get all addresses.",
-                "operationId": "c2c9c55150f568a32c86f5ebeb271a77",
+                "operationId": "7feb96c2da91d9791159734a43d60abe",
                 "responses": {
                     "200": {
                         "description": "List of addresses retrieved successfully",
@@ -457,7 +426,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -465,7 +439,7 @@
                 ],
                 "summary": "Create a new address",
                 "description": "Create a new address.",
-                "operationId": "8c56e86cf90cbf8a0a25e3d7906e551b",
+                "operationId": "babfa83e9af76b20d6dd2e5a4a75405d",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -490,17 +464,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/addresses/{id}": {
+        "/api/v1/addresses/{id}": {
             "get": {
                 "tags": [
                     "Addresses"
                 ],
                 "summary": "Get an address by ID",
                 "description": "Get an address by ID.",
-                "operationId": "17d7aeb309cfcdfea3c38987e4244514",
+                "operationId": "ad1315a10d2364eece27af92a2563c73",
                 "parameters": [
                     {
                         "name": "id",
@@ -526,7 +505,12 @@
                     "404": {
                         "description": "Address not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -534,7 +518,7 @@
                 ],
                 "summary": "Update an address",
                 "description": "Update an address.",
-                "operationId": "8d6ebc3b921582ad59e98a8a318cc7d2",
+                "operationId": "155aa05d85ecc0ffbfc1bc3aa98daba1",
                 "parameters": [
                     {
                         "name": "id",
@@ -570,7 +554,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -578,7 +567,7 @@
                 ],
                 "summary": "Delete an address",
                 "description": "Delete an address.",
-                "operationId": "03ce73d65046faead36578045f024115",
+                "operationId": "9e1d111a502acaf6b1133c2daa0691e1",
                 "parameters": [
                     {
                         "name": "id",
@@ -597,17 +586,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/customers": {
+        "/api/v1/customers": {
             "get": {
                 "tags": [
                     "Customers"
                 ],
                 "summary": "List all customers",
                 "description": "Get all customers.",
-                "operationId": "f324f0c621bf707898979899be974942",
+                "operationId": "b2784c063762a8668d1ee92ac125c68f",
                 "responses": {
                     "200": {
                         "description": "List of customers successfully retrieved",
@@ -625,7 +619,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -633,7 +632,7 @@
                 ],
                 "summary": "Create a new customer",
                 "description": "Create a new customer.",
-                "operationId": "0f6a0a7c4d0fd4e1f924796ff6c011b2",
+                "operationId": "0383ae93402612b66ca440a7e8bbfb2f",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -661,17 +660,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/customers/{id}": {
+        "/api/v1/customers/{id}": {
             "get": {
                 "tags": [
                     "Customers"
                 ],
                 "summary": "Retrieve a customer by ID",
                 "description": "Get a customer by ID.",
-                "operationId": "e5948c45885f473a3fcd19d65023fbd2",
+                "operationId": "51d0dd7900a36faf9c7e733b7b64bd42",
                 "parameters": [
                     {
                         "name": "id",
@@ -697,7 +701,12 @@
                     "404": {
                         "description": "Customer not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -705,7 +714,7 @@
                 ],
                 "summary": "Update a customer",
                 "description": "Update a customer.",
-                "operationId": "fd729d22846992e8fe4bc8c2caee1d28",
+                "operationId": "5b6ddc6305d03c0a7d43fa44d6185e32",
                 "parameters": [
                     {
                         "name": "id",
@@ -741,7 +750,12 @@
                     "400": {
                         "description": "Validation Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -749,7 +763,7 @@
                 ],
                 "summary": "Delete a customer",
                 "description": "Delete a customer.",
-                "operationId": "195c0c3fdd1432125e8655d1912d96d9",
+                "operationId": "0aa64324fb7e38f1eb6fd4eb281fb8f4",
                 "parameters": [
                     {
                         "name": "id",
@@ -768,17 +782,22 @@
                     "404": {
                         "description": "Customer not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/document-types": {
+        "/api/v1/document-types": {
             "get": {
                 "tags": [
                     "Document Types"
                 ],
                 "summary": "List all document types",
                 "description": "Retrieve all document types.",
-                "operationId": "f8ea15f8fdd1c937db00d2dffc9eb778",
+                "operationId": "edf4739d3cadf95167df21b9d170b5cb",
                 "responses": {
                     "200": {
                         "description": "List of document types retrieved successfully",
@@ -796,7 +815,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -804,7 +828,7 @@
                 ],
                 "summary": "Create a new document type",
                 "description": "Create a new document type.",
-                "operationId": "22fe47cf5b83cee4cc08a5d6a7b6b32d",
+                "operationId": "47d84bf7b7856444ff87ecec7340b963",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -832,17 +856,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/document-types/{id}": {
+        "/api/v1/document-types/{id}": {
             "get": {
                 "tags": [
                     "Document Types"
                 ],
                 "summary": "Get a document type by ID",
                 "description": "Retrieve a document type by ID.",
-                "operationId": "67d6ba0c16867a1f95bc0e34098fb03c",
+                "operationId": "7fa54ffc59fe07532cdffa434c5bfc21",
                 "parameters": [
                     {
                         "name": "id",
@@ -868,7 +897,12 @@
                     "404": {
                         "description": "Document type not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -876,7 +910,7 @@
                 ],
                 "summary": "Update a document type",
                 "description": "Update an existing document type.",
-                "operationId": "6dcfce6402e6edb09ee75b7efee270dc",
+                "operationId": "58e9a25d2f34b9c56de95ae5cb22e9be",
                 "parameters": [
                     {
                         "name": "id",
@@ -915,7 +949,12 @@
                     "404": {
                         "description": "Document type not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -923,7 +962,7 @@
                 ],
                 "summary": "Delete a document type",
                 "description": "Delete a document type.",
-                "operationId": "d52735627f5b176206fcdc5c066a183c",
+                "operationId": "635de600ca3b57ed47453014bc23cebd",
                 "parameters": [
                     {
                         "name": "id",
@@ -942,17 +981,22 @@
                     "404": {
                         "description": "Document type not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/fiscal-regimes": {
+        "/api/v1/fiscal-regimes": {
             "get": {
                 "tags": [
                     "Fiscal Regimes"
                 ],
                 "summary": "List all fiscal regimes",
                 "description": "Retrieve all fiscal regimes.",
-                "operationId": "29fbe5c5cd939dba2da14141d1d34815",
+                "operationId": "5db34ff4420f921436114aba0d0af402",
                 "responses": {
                     "200": {
                         "description": "List of fiscal regimes retrieved successfully",
@@ -970,8 +1014,15 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
-            },
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/fiscal-regimes": {
             "post": {
                 "tags": [
                     "Fiscal Regimes"
@@ -1006,7 +1057,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/api/fiscal-regimes/{id}": {
@@ -1042,7 +1098,12 @@
                     "404": {
                         "description": "Fiscal regime not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -1089,7 +1150,12 @@
                     "404": {
                         "description": "Fiscal regime not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -1116,17 +1182,22 @@
                     "404": {
                         "description": "Fiscal regime not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/tax-details": {
+        "/api/v1/tax-details": {
             "get": {
                 "tags": [
                     "Tax Details"
                 ],
                 "summary": "List all tax details",
                 "description": "Retrieve all tax details.",
-                "operationId": "a92c547954161ce13bf867364e90c094",
+                "operationId": "1b782f69f2b2538a325c7f8ef5505aee",
                 "responses": {
                     "200": {
                         "description": "List of tax details retrieved successfully",
@@ -1144,7 +1215,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -1152,7 +1228,7 @@
                 ],
                 "summary": "Create a new tax detail",
                 "description": "Create a new tax detail.",
-                "operationId": "599df74bf8a3da7900027ddd3e19f81b",
+                "operationId": "3ca40df26845da5e12faaf89b08cb7a0",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1180,17 +1256,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/tax-details/{id}": {
+        "/api/v1/tax-details/{id}": {
             "get": {
                 "tags": [
                     "Tax Details"
                 ],
                 "summary": "Get a tax detail by ID",
                 "description": "Retrieve a specific tax detail by ID.",
-                "operationId": "e2e91b8232cc4e8bfcb74c3dffeda3a5",
+                "operationId": "36aa8d947dfa7351eb0d43b097793570",
                 "parameters": [
                     {
                         "name": "id",
@@ -1216,7 +1297,12 @@
                     "404": {
                         "description": "Tax detail not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -1224,7 +1310,7 @@
                 ],
                 "summary": "Update a tax detail",
                 "description": "Update an existing tax detail.",
-                "operationId": "e4423c03b36a4b5974be688b1e731eaa",
+                "operationId": "13843736ceb5620120c72def52a44cc9",
                 "parameters": [
                     {
                         "name": "id",
@@ -1263,7 +1349,12 @@
                     "404": {
                         "description": "Tax detail not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -1271,7 +1362,7 @@
                 ],
                 "summary": "Delete a tax detail",
                 "description": "Delete a tax detail.",
-                "operationId": "36acf90c0d196f08176587f328aa8f94",
+                "operationId": "7287047915a0d68a011adcb4a298666a",
                 "parameters": [
                     {
                         "name": "id",
@@ -1290,17 +1381,22 @@
                     "404": {
                         "description": "Tax detail not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/tax-identification-types": {
+        "/api/v1/tax-identification-types": {
             "get": {
                 "tags": [
                     "Tax Identification Types"
                 ],
                 "summary": "List all tax identification types",
                 "description": "Retrieve all tax identification types.",
-                "operationId": "e773c20ea3d223f6f24c83b81a3a43fa",
+                "operationId": "dbe7e33408b10e5ee6db550deb11278a",
                 "responses": {
                     "200": {
                         "description": "List of tax identification types retrieved successfully",
@@ -1318,7 +1414,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -1326,7 +1427,7 @@
                 ],
                 "summary": "Create a new tax identification type",
                 "description": "Create a new tax identification type.",
-                "operationId": "06550630ae1485a3e73b3bde68f8f2c9",
+                "operationId": "fa60c41f16e93b5b98224d00e7e5773e",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1354,17 +1455,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/tax-identification-types/{id}": {
+        "/api/v1/tax-identification-types/{id}": {
             "get": {
                 "tags": [
                     "Tax Identification Types"
                 ],
                 "summary": "Get a tax identification type by ID",
                 "description": "Retrieve a specific tax identification type by ID.",
-                "operationId": "3b431ad6e333362dd313d286b98c46bb",
+                "operationId": "cdf592ae90fe964cc83d9a0a6111999b",
                 "parameters": [
                     {
                         "name": "id",
@@ -1390,7 +1496,12 @@
                     "404": {
                         "description": "Tax identification type not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -1398,7 +1509,7 @@
                 ],
                 "summary": "Update a tax identification type",
                 "description": "Update an existing tax identification type.",
-                "operationId": "f701bb2cfb1b6396bd701d2be16dd7b8",
+                "operationId": "0ef4e8496b0ff5b008b736fcebf3743d",
                 "parameters": [
                     {
                         "name": "id",
@@ -1437,7 +1548,12 @@
                     "404": {
                         "description": "Tax identification type not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -1445,7 +1561,7 @@
                 ],
                 "summary": "Delete a tax identification type",
                 "description": "Delete a tax identification type.",
-                "operationId": "f91ff2a6a1d23b969142187c0e97cd31",
+                "operationId": "7b69fbfe9898d78038a1c57aa088e7b3",
                 "parameters": [
                     {
                         "name": "id",
@@ -1464,17 +1580,22 @@
                     "404": {
                         "description": "Tax identification type not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/taxpayer-types": {
+        "/api/v1/taxpayer-types": {
             "get": {
                 "tags": [
                     "Taxpayer Types"
                 ],
                 "summary": "List all taxpayer types",
                 "description": "Retrieve all taxpayer types.",
-                "operationId": "a9cef686db7f11094631d7875569fea5",
+                "operationId": "492ef73861fe186b673d28149fa2bd13",
                 "responses": {
                     "200": {
                         "description": "List of taxpayer types retrieved successfully",
@@ -1492,7 +1613,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -1500,7 +1626,7 @@
                 ],
                 "summary": "Create a new taxpayer type",
                 "description": "Create a new taxpayer type.",
-                "operationId": "03e0de967181d3ab9929d4c80cde6ff2",
+                "operationId": "1170f7ae0f4fbf949343093306f9a696",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1528,17 +1654,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/taxpayer-types/{id}": {
+        "/api/v1/taxpayer-types/{id}": {
             "get": {
                 "tags": [
                     "Taxpayer Types"
                 ],
                 "summary": "Get a taxpayer type by ID",
                 "description": "Retrieve a specific taxpayer type by ID.",
-                "operationId": "3dd34304822d414ba525bb286f32dee9",
+                "operationId": "0d4726a26b2af8720290aaf58e7c07a9",
                 "parameters": [
                     {
                         "name": "id",
@@ -1564,7 +1695,12 @@
                     "404": {
                         "description": "Taxpayer type not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -1572,7 +1708,7 @@
                 ],
                 "summary": "Update a taxpayer type",
                 "description": "Update an existing taxpayer type.",
-                "operationId": "2f9eabdb5ac9b20fb104596a972e8702",
+                "operationId": "178525a0d06ad9330ae9efff5edecf96",
                 "parameters": [
                     {
                         "name": "id",
@@ -1611,7 +1747,12 @@
                     "404": {
                         "description": "Taxpayer type not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -1619,7 +1760,7 @@
                 ],
                 "summary": "Delete a taxpayer type",
                 "description": "Delete a taxpayer type.",
-                "operationId": "b1df4b692b1c20d5b7aa8b2905f24903",
+                "operationId": "83ffdb92225726226ade8ce757588564",
                 "parameters": [
                     {
                         "name": "id",
@@ -1638,17 +1779,22 @@
                     "404": {
                         "description": "Taxpayer type not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/daily-boxes": {
+        "/api/v1/daily-boxes": {
             "get": {
                 "tags": [
                     "DailyBoxes"
                 ],
                 "summary": "Get all daily boxes",
                 "description": "List all daily boxes.",
-                "operationId": "bf9a94c444a7a8ea2d11d5507f33d56b",
+                "operationId": "fc1d2e9542b04708763dbe3ba81cdef7",
                 "responses": {
                     "200": {
                         "description": "List of all daily boxes retrieved successfully",
@@ -1666,7 +1812,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -1674,7 +1825,7 @@
                 ],
                 "summary": "Create a new daily box record",
                 "description": "Create a new daily box record.",
-                "operationId": "5d6abe002ad7c7ba24e9fc30b0515d66",
+                "operationId": "0b812499f02e117cc441bc8dcf5d1288",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1699,17 +1850,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/daily-boxes/{id}": {
+        "/api/v1/daily-boxes/{id}": {
             "get": {
                 "tags": [
                     "DailyBoxes"
                 ],
                 "summary": "Get a daily box by its ID",
                 "description": "Get a single daily box by ID.",
-                "operationId": "7ecaec291c9b911e8e7eded779442354",
+                "operationId": "b45a206e9c07b61d10e6afe2d0e96b2f",
                 "parameters": [
                     {
                         "name": "id",
@@ -1735,7 +1891,12 @@
                     "404": {
                         "description": "Daily box not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -1743,7 +1904,7 @@
                 ],
                 "summary": "Update an existing daily box record",
                 "description": "Update an existing daily box record.",
-                "operationId": "462fd1a2ab151853e35f466bea171f54",
+                "operationId": "4a322839e966ead493ec57e44dff3a87",
                 "parameters": [
                     {
                         "name": "id",
@@ -1779,7 +1940,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -1787,7 +1953,7 @@
                 ],
                 "summary": "Delete a daily box record by ID",
                 "description": "Delete a daily box record by its ID.",
-                "operationId": "1530279feef1ed76787887ebab8c11c3",
+                "operationId": "ba914b6996156f315ecff75afb403a79",
                 "parameters": [
                     {
                         "name": "id",
@@ -1806,17 +1972,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/email-templates": {
+        "/api/v1/email-templates": {
             "get": {
                 "tags": [
                     "EmailTemplates"
                 ],
                 "summary": "List all email templates",
                 "description": "Get a list of all email templates.",
-                "operationId": "48487f955a610bbfd07ff880b553ad3c",
+                "operationId": "a6d1d868e062772940f1bf9f07eb3bd0",
                 "responses": {
                     "200": {
                         "description": "Email templates retrieved successfully",
@@ -1834,7 +2005,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -1842,7 +2018,7 @@
                 ],
                 "summary": "Create a new email template",
                 "description": "Create a new email template.",
-                "operationId": "00537cd685e69c3d47074687da7eaf63",
+                "operationId": "268d64c74b3053a5f789e8df3255415c",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1867,17 +2043,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/email-templates/{id}": {
+        "/api/v1/email-templates/{id}": {
             "get": {
                 "tags": [
                     "EmailTemplates"
                 ],
                 "summary": "Retrieve an email template by ID",
                 "description": "Retrieve an email template by its ID.",
-                "operationId": "f1843175e5528cfd0884b7502be577db",
+                "operationId": "c088d140efb5afa2f344ad949e91cd03",
                 "parameters": [
                     {
                         "name": "id",
@@ -1903,7 +2084,12 @@
                     "404": {
                         "description": "Email template not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -1911,7 +2097,7 @@
                 ],
                 "summary": "Update an email template",
                 "description": "Update an email template by its ID.",
-                "operationId": "8c7998523f1cea4fddb9999059ba7651",
+                "operationId": "4de6de6e2993d407071c607338746efe",
                 "parameters": [
                     {
                         "name": "id",
@@ -1947,7 +2133,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -1955,7 +2146,7 @@
                 ],
                 "summary": "Delete an email template",
                 "description": "Delete an email template by its ID.",
-                "operationId": "8a92374afd407f5ea44a64b40a4bf5ec",
+                "operationId": "371fc35354393d19f5a6fede6e3c917f",
                 "parameters": [
                     {
                         "name": "id",
@@ -1974,17 +2165,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/cash-registers": {
+        "/api/v1/cash-registers": {
             "get": {
                 "tags": [
                     "Cash Registers"
                 ],
                 "summary": "List all cash registers",
                 "description": "Retrieve all cash registers.",
-                "operationId": "2dff3943d7bbefdb9eb0713c6cdba6bb",
+                "operationId": "6a9d467a0d385058eaa265a09994482c",
                 "responses": {
                     "200": {
                         "description": "List of cash registers retrieved successfully",
@@ -2002,7 +2198,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -2010,7 +2211,7 @@
                 ],
                 "summary": "Create a new cash register",
                 "description": "Create a new cash register.",
-                "operationId": "7b9894e1736499fd636dcf99c98a3aa9",
+                "operationId": "673ce2d2dd15e60cfc2b11fd1d91b150",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2038,17 +2239,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/cash-registers/{id}": {
+        "/api/v1/cash-registers/{id}": {
             "get": {
                 "tags": [
                     "Cash Registers"
                 ],
                 "summary": "Get a cash register by ID",
                 "description": "Retrieve a specific cash register by ID.",
-                "operationId": "89bfe6d6a5d698bd1e47ad80ad77eb37",
+                "operationId": "d1c298ccabdebfd9c6ebad1340748f40",
                 "parameters": [
                     {
                         "name": "id",
@@ -2074,7 +2280,12 @@
                     "404": {
                         "description": "Cash register not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -2082,7 +2293,7 @@
                 ],
                 "summary": "Update a cash register",
                 "description": "Update an existing cash register.",
-                "operationId": "71e57e42f92eeee3e1bd6d1b075a7afd",
+                "operationId": "f5285f5b0cc647bffaeac204615a66f2",
                 "parameters": [
                     {
                         "name": "id",
@@ -2121,7 +2332,12 @@
                     "404": {
                         "description": "Cash register not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -2129,7 +2345,7 @@
                 ],
                 "summary": "Delete a cash register",
                 "description": "Delete a cash register.",
-                "operationId": "0620b171d3e57949118baa23da4b45e7",
+                "operationId": "db67970fe66ac4d4071dfa41a600e87b",
                 "parameters": [
                     {
                         "name": "id",
@@ -2148,17 +2364,22 @@
                     "404": {
                         "description": "Cash register not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/expenses": {
+        "/api/v1/expenses": {
             "get": {
                 "tags": [
                     "Expenses"
                 ],
                 "summary": "List all expenses",
                 "description": "Retrieve all expenses.",
-                "operationId": "440f5ce4423d934de27ba892f03e71eb",
+                "operationId": "ba8021714f373aa817920992de727956",
                 "responses": {
                     "200": {
                         "description": "List of expenses retrieved successfully",
@@ -2176,7 +2397,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -2184,7 +2410,7 @@
                 ],
                 "summary": "Create a new expense",
                 "description": "Create a new expense.",
-                "operationId": "f2d5cba640e09f24f3758439fc05fe02",
+                "operationId": "28d3f81f5d16f5d370c396e745abca8d",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2212,17 +2438,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/expenses/{id}": {
+        "/api/v1/expenses/{id}": {
             "get": {
                 "tags": [
                     "Expenses"
                 ],
                 "summary": "Get an expense by ID",
                 "description": "Retrieve a specific expense by ID.",
-                "operationId": "2cddf720c9ab82155dc35f16e01da04a",
+                "operationId": "1e4a3cda2d048e2a06e20a41ee6f6e4f",
                 "parameters": [
                     {
                         "name": "id",
@@ -2248,7 +2479,12 @@
                     "404": {
                         "description": "Expense not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -2256,7 +2492,7 @@
                 ],
                 "summary": "Update an expense",
                 "description": "Update an existing expense.",
-                "operationId": "a31ff303e9b96c470ac5f348f40cf5ec",
+                "operationId": "62c5829fab4fd89a9ef3ed82bc5ea6d2",
                 "parameters": [
                     {
                         "name": "id",
@@ -2295,7 +2531,12 @@
                     "404": {
                         "description": "Expense not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -2303,7 +2544,7 @@
                 ],
                 "summary": "Delete an expense",
                 "description": "Delete an expense.",
-                "operationId": "d3445535372a0d54c9544c5e95e60d54",
+                "operationId": "65e9f0a7738667b665e174e506069840",
                 "parameters": [
                     {
                         "name": "id",
@@ -2322,17 +2563,22 @@
                     "404": {
                         "description": "Expense not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/incomes": {
+        "/api/v1/incomes": {
             "get": {
                 "tags": [
                     "Incomes"
                 ],
                 "summary": "List all incomes",
                 "description": "Retrieve all incomes.",
-                "operationId": "967913b9c96a4655cfaf8083bbc774f4",
+                "operationId": "a6327f8457b6fd4f35bf5fa79ebce7c9",
                 "responses": {
                     "200": {
                         "description": "List of incomes retrieved successfully",
@@ -2350,7 +2596,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -2358,7 +2609,7 @@
                 ],
                 "summary": "Create a new income",
                 "description": "Create a new income.",
-                "operationId": "d57a5ee3f0a6e8fa9a611de5ad3bcf0f",
+                "operationId": "af33d3e40dde833edd45b44f3af31ebf",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2386,17 +2637,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/incomes/{id}": {
+        "/api/v1/incomes/{id}": {
             "get": {
                 "tags": [
                     "Incomes"
                 ],
                 "summary": "Get an income by ID",
                 "description": "Retrieve a specific income by ID.",
-                "operationId": "4611a08738f9026f000e9e973489d877",
+                "operationId": "44d73fd3bace68c9dbc49bf1f712cd3e",
                 "parameters": [
                     {
                         "name": "id",
@@ -2422,7 +2678,12 @@
                     "404": {
                         "description": "Income not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -2430,7 +2691,7 @@
                 ],
                 "summary": "Update an income",
                 "description": "Update an existing income.",
-                "operationId": "b3c6457dfabff78e22aacc28def4250b",
+                "operationId": "c09e8e5829218ff8f0148ee2538026bb",
                 "parameters": [
                     {
                         "name": "id",
@@ -2469,7 +2730,12 @@
                     "404": {
                         "description": "Income not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -2477,7 +2743,7 @@
                 ],
                 "summary": "Delete an income",
                 "description": "Delete an income.",
-                "operationId": "197feafb3e3ffc488529615a06ca7b84",
+                "operationId": "2e1e93fbc8d59709f61ce91dec364e69",
                 "parameters": [
                     {
                         "name": "id",
@@ -2496,17 +2762,22 @@
                     "404": {
                         "description": "Income not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/transactions": {
+        "/api/v1/transactions": {
             "get": {
                 "tags": [
                     "Transactions"
                 ],
                 "summary": "List all transactions",
                 "description": "Retrieve all transactions.",
-                "operationId": "b35e4132a9552744dc162ac545c61ff6",
+                "operationId": "e969d8219bf5abaa50267872e82fcd45",
                 "responses": {
                     "200": {
                         "description": "List of transactions retrieved successfully",
@@ -2524,7 +2795,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -2532,7 +2808,7 @@
                 ],
                 "summary": "Create a new transaction",
                 "description": "Create a new transaction.",
-                "operationId": "469c4fcff33f9203d454e88dcbd409a0",
+                "operationId": "3282e6fb0c8b19d71378fd4d12ba7b8d",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2560,17 +2836,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/transactions/{id}": {
+        "/api/v1/transactions/{id}": {
             "get": {
                 "tags": [
                     "Transactions"
                 ],
                 "summary": "Get a transaction by ID",
                 "description": "Retrieve a specific transaction by ID.",
-                "operationId": "58c32752e1fc2ad8809d480af3562b6f",
+                "operationId": "afa8c958177363bb88ef756692091168",
                 "parameters": [
                     {
                         "name": "id",
@@ -2596,7 +2877,12 @@
                     "404": {
                         "description": "Transaction not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -2604,7 +2890,7 @@
                 ],
                 "summary": "Update a transaction",
                 "description": "Update an existing transaction.",
-                "operationId": "55bebc350988294a9c413d75bcdf6071",
+                "operationId": "474b39940ebfbd73d20e73a3a695fc14",
                 "parameters": [
                     {
                         "name": "id",
@@ -2643,7 +2929,12 @@
                     "404": {
                         "description": "Transaction not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -2651,7 +2942,7 @@
                 ],
                 "summary": "Delete a transaction",
                 "description": "Delete a transaction.",
-                "operationId": "9dd64860706519ec466f545ecf46c05e",
+                "operationId": "c5de3faf2383597d435a7ee70fcb7d07",
                 "parameters": [
                     {
                         "name": "id",
@@ -2670,17 +2961,22 @@
                     "404": {
                         "description": "Transaction not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/html-templates": {
+        "/api/v1/html-templates": {
             "get": {
                 "tags": [
                     "HtmlTemplates"
                 ],
                 "summary": "Get all HTML templates",
                 "description": "Retrieve all HTML Templates.",
-                "operationId": "8338fe1d30e4124da8312f7cd999e312",
+                "operationId": "8106ee00f37db5b350291ab421c68c38",
                 "responses": {
                     "200": {
                         "description": "List of HTML templates retrieved successfully",
@@ -2698,7 +2994,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -2706,7 +3007,7 @@
                 ],
                 "summary": "Create a new HTML template",
                 "description": "Create a new HTML Template.",
-                "operationId": "0cf138f11abcbb98531a47adfac7568e",
+                "operationId": "1cfde2ce801ffb88370beb11a2c3106f",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2731,17 +3032,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/html-templates/{id}": {
+        "/api/v1/html-templates/{id}": {
             "get": {
                 "tags": [
                     "HtmlTemplates"
                 ],
                 "summary": "Get an HTML template by ID",
                 "description": "Retrieve an HTML Template by ID.",
-                "operationId": "2c0d76f66f8ef9ee16d55fb0c799d49f",
+                "operationId": "103275af4fa8d38cfbc3a12aaa40462f",
                 "parameters": [
                     {
                         "name": "id",
@@ -2767,7 +3073,12 @@
                     "404": {
                         "description": "HTML template not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -2775,7 +3086,7 @@
                 ],
                 "summary": "Update an HTML template",
                 "description": "Update an HTML Template.",
-                "operationId": "6fbc56972f9df59ef6f861321456edb6",
+                "operationId": "8ff5bb8403554852890d7a6239df7d87",
                 "parameters": [
                     {
                         "name": "id",
@@ -2811,8 +3122,15 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
-            },
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/html-templates/{id}": {
             "delete": {
                 "tags": [
                     "HtmlTemplates"
@@ -2838,17 +3156,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/categories": {
+        "/api/v1/categories": {
             "get": {
                 "tags": [
                     "Categories"
                 ],
                 "summary": "List all categories",
                 "description": "Retrieve all categories.",
-                "operationId": "10b81fc05c975232b0b5ed895232f494",
+                "operationId": "0995bbfe7ebb0e25b07ded0380990a18",
                 "responses": {
                     "200": {
                         "description": "List of categories retrieved successfully",
@@ -2866,7 +3189,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -2874,7 +3202,7 @@
                 ],
                 "summary": "Create a new category",
                 "description": "Create a new category.",
-                "operationId": "cacf3c9f6f6115ad195f8127ad84959e",
+                "operationId": "a90e4fb4a02cbffefa7a9574c6b0c289",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2902,17 +3230,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/categories/{id}": {
+        "/api/v1/categories/{id}": {
             "get": {
                 "tags": [
                     "Categories"
                 ],
                 "summary": "Get a category by ID",
                 "description": "Retrieve a specific category by ID.",
-                "operationId": "3b91a72ed2acb85751a8c49b2a3aabb6",
+                "operationId": "49ebe6c66995ff97052cb84b1d39137d",
                 "parameters": [
                     {
                         "name": "id",
@@ -2938,7 +3271,12 @@
                     "404": {
                         "description": "Category not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -2946,7 +3284,7 @@
                 ],
                 "summary": "Update a category",
                 "description": "Update an existing category.",
-                "operationId": "b886dc7ea963794fc142bb276bb3e9a0",
+                "operationId": "a151b88856eedf1becb75b0ab460c25c",
                 "parameters": [
                     {
                         "name": "id",
@@ -2985,7 +3323,12 @@
                     "404": {
                         "description": "Category not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -2993,7 +3336,7 @@
                 ],
                 "summary": "Delete a category",
                 "description": "Delete a category.",
-                "operationId": "9f0cab867589a678773d9872ffabd810",
+                "operationId": "b818b5bb211f7c508d2daa1b07b269fb",
                 "parameters": [
                     {
                         "name": "id",
@@ -3012,17 +3355,22 @@
                     "404": {
                         "description": "Category not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/equipment-assignments": {
+        "/api/v1/equipment-assignments": {
             "get": {
                 "tags": [
                     "EquipmentAssignments"
                 ],
                 "summary": "List all equipment assignments",
                 "description": "Retrieve all equipment assignments.",
-                "operationId": "ebfc305817f29aa9bdd4d31ef6f4c827",
+                "operationId": "85bae9f48fadb866c6bb786c60d2e0fa",
                 "responses": {
                     "200": {
                         "description": "List of equipment assignments retrieved successfully",
@@ -3040,7 +3388,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -3048,7 +3401,7 @@
                 ],
                 "summary": "Create a new equipment assignment",
                 "description": "Create a new equipment assignment.",
-                "operationId": "d127c8d9ea64bbfca44278ed989e6fce",
+                "operationId": "c243723a1f496437f06eab1bf09b6bc2",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -3076,17 +3429,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/equipment-assignments/{id}": {
+        "/api/v1/equipment-assignments/{id}": {
             "get": {
                 "tags": [
                     "EquipmentAssignments"
                 ],
                 "summary": "Get an equipment assignment by ID",
                 "description": "Retrieve a specific equipment assignment by ID.",
-                "operationId": "6a9ed91581e68e88be047c58939124cc",
+                "operationId": "a3fcbed75c83201f489fc815de8792da",
                 "parameters": [
                     {
                         "name": "id",
@@ -3112,7 +3470,12 @@
                     "404": {
                         "description": "Equipment assignment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -3120,7 +3483,7 @@
                 ],
                 "summary": "Update an equipment assignment",
                 "description": "Update an existing equipment assignment.",
-                "operationId": "bd1763ad9194e0a46d1d83009953991c",
+                "operationId": "6ea6a83cee31cf51492bd76086f92a9d",
                 "parameters": [
                     {
                         "name": "id",
@@ -3159,7 +3522,12 @@
                     "404": {
                         "description": "Equipment assignment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -3167,7 +3535,7 @@
                 ],
                 "summary": "Delete an equipment assignment",
                 "description": "Delete an equipment assignment.",
-                "operationId": "88de695c828a124364d6cb9f87cfb7dc",
+                "operationId": "630aa1c2bd6d8faff07a50c60a304f68",
                 "parameters": [
                     {
                         "name": "id",
@@ -3186,17 +3554,22 @@
                     "404": {
                         "description": "Equipment assignment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/products": {
+        "/api/v1/products": {
             "get": {
                 "tags": [
                     "Products"
                 ],
                 "summary": "List all products",
                 "description": "Retrieve all products.",
-                "operationId": "d71776dc76e2676df32701a57152c208",
+                "operationId": "d05f256155685598074d670c3dbcfaaa",
                 "responses": {
                     "200": {
                         "description": "List of products retrieved successfully",
@@ -3214,7 +3587,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -3222,7 +3600,7 @@
                 ],
                 "summary": "Create a new product",
                 "description": "Create a new product.",
-                "operationId": "26687c1c4c1289f7671b9f1f5ad06f9b",
+                "operationId": "2f9e715f5869425eb88a73b1bf3578fd",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -3250,17 +3628,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/products/{id}": {
+        "/api/v1/products/{id}": {
             "get": {
                 "tags": [
                     "Products"
                 ],
                 "summary": "Get a product by ID",
                 "description": "Retrieve a specific product by ID.",
-                "operationId": "72c0303355e73031a8b73fcf351fdbfa",
+                "operationId": "10f6b8bded1fc6d5be55ac2b01b02586",
                 "parameters": [
                     {
                         "name": "id",
@@ -3286,7 +3669,12 @@
                     "404": {
                         "description": "Product not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -3294,7 +3682,7 @@
                 ],
                 "summary": "Update a product",
                 "description": "Update an existing product.",
-                "operationId": "fdd666db4b58fc7af5c34eeb22e2f8ef",
+                "operationId": "b4643b8ac2010bc80edb770602ca3eb8",
                 "parameters": [
                     {
                         "name": "id",
@@ -3333,7 +3721,12 @@
                     "404": {
                         "description": "Product not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -3341,7 +3734,7 @@
                 ],
                 "summary": "Delete a product",
                 "description": "Delete a product.",
-                "operationId": "56c9ae6c3770ff7c1725799b0332c6ca",
+                "operationId": "944569f6066a195ab54cfd5ee2943eb9",
                 "parameters": [
                     {
                         "name": "id",
@@ -3360,17 +3753,22 @@
                     "404": {
                         "description": "Product not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/suppliers": {
+        "/api/v1/suppliers": {
             "get": {
                 "tags": [
                     "Suppliers"
                 ],
                 "summary": "List all suppliers",
                 "description": "Retrieve all suppliers.",
-                "operationId": "575dd6dabd00ac26f344a1f3b4c17c7c",
+                "operationId": "e08b54408eae6175365a4e1d1ebc9f79",
                 "responses": {
                     "200": {
                         "description": "List of suppliers retrieved successfully",
@@ -3388,7 +3786,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -3396,7 +3799,7 @@
                 ],
                 "summary": "Create a new supplier",
                 "description": "Create a new supplier.",
-                "operationId": "0bbbf338e903370db02d3a09cbad6aef",
+                "operationId": "be97faa3e4f4494deb89a671666d35ed",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -3424,17 +3827,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/suppliers/{id}": {
+        "/api/v1/suppliers/{id}": {
             "get": {
                 "tags": [
                     "Suppliers"
                 ],
                 "summary": "Get a supplier by ID",
                 "description": "Retrieve a specific supplier by ID.",
-                "operationId": "bab3fee965d55742295b1155a9cda815",
+                "operationId": "bc48f872a038112e9e9ae756c68cd7e7",
                 "parameters": [
                     {
                         "name": "id",
@@ -3460,7 +3868,12 @@
                     "404": {
                         "description": "Supplier not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -3468,7 +3881,7 @@
                 ],
                 "summary": "Update a supplier",
                 "description": "Update an existing supplier.",
-                "operationId": "57fcdfa5aa14502130e49f6854e70e98",
+                "operationId": "293a12f16887aab865b3913599c48db1",
                 "parameters": [
                     {
                         "name": "id",
@@ -3507,7 +3920,12 @@
                     "404": {
                         "description": "Supplier not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -3515,7 +3933,7 @@
                 ],
                 "summary": "Delete a supplier",
                 "description": "Delete a supplier.",
-                "operationId": "959a321c04abf2b66c879da67cd33952",
+                "operationId": "fb0fb8a83949e3c9f9829c25fe1d850b",
                 "parameters": [
                     {
                         "name": "id",
@@ -3534,17 +3952,22 @@
                     "404": {
                         "description": "Supplier not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/warehouses": {
+        "/api/v1/warehouses": {
             "get": {
                 "tags": [
                     "Warehouses"
                 ],
                 "summary": "List all warehouses",
                 "description": "Retrieve all warehouses.",
-                "operationId": "6a160132d1ad0a3ad31b8ae0e3d3ce6c",
+                "operationId": "bf11a6ff25e2984209286b029884a1f6",
                 "responses": {
                     "200": {
                         "description": "List of warehouses retrieved successfully",
@@ -3562,7 +3985,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -3570,7 +3998,7 @@
                 ],
                 "summary": "Create a new warehouse",
                 "description": "Create a new warehouse.",
-                "operationId": "6aa61746a7d1dc88f91c5cabcfb4e7d7",
+                "operationId": "102ac1765e5c4c49f66933f937f192b7",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -3598,17 +4026,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/warehouses/{id}": {
+        "/api/v1/warehouses/{id}": {
             "get": {
                 "tags": [
                     "Warehouses"
                 ],
                 "summary": "Get a warehouse by ID",
                 "description": "Retrieve a specific warehouse by ID.",
-                "operationId": "e4c70546aff4e2bf4b078ef812f71add",
+                "operationId": "7c2be66a677134a83dce13cd2cb7278c",
                 "parameters": [
                     {
                         "name": "id",
@@ -3634,7 +4067,12 @@
                     "404": {
                         "description": "Warehouse not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -3642,7 +4080,7 @@
                 ],
                 "summary": "Update a warehouse",
                 "description": "Update an existing warehouse.",
-                "operationId": "5bb0a2045c588fe578061767a24c66ee",
+                "operationId": "76070a9033f254d87c6f82db09ad3bb6",
                 "parameters": [
                     {
                         "name": "id",
@@ -3681,7 +4119,12 @@
                     "404": {
                         "description": "Warehouse not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -3689,7 +4132,7 @@
                 ],
                 "summary": "Delete a warehouse",
                 "description": "Delete a warehouse.",
-                "operationId": "6cc90823c6e6f260143124727a9358bd",
+                "operationId": "2bf88006427bad05600e28d32caa92f1",
                 "parameters": [
                     {
                         "name": "id",
@@ -3708,17 +4151,22 @@
                     "404": {
                         "description": "Warehouse not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/credit-notes": {
+        "/api/v1/credit-notes": {
             "get": {
                 "tags": [
                     "CreditNotes"
                 ],
                 "summary": "List all credit notes",
                 "description": "Retrieve all credit notes.",
-                "operationId": "a2adef7498379b3981e2b31cc3369f35",
+                "operationId": "6580edb1872b67b272be17bf03c8f2c5",
                 "responses": {
                     "200": {
                         "description": "List of credit notes retrieved successfully",
@@ -3736,7 +4184,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -3744,7 +4197,7 @@
                 ],
                 "summary": "Create a new credit note",
                 "description": "Create a new credit note.",
-                "operationId": "0160d835c82cc864fdb9f93111df11fc",
+                "operationId": "1388c179f18299f89f710ed95e367a75",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -3772,17 +4225,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/credit-notes/{id}": {
+        "/api/v1/credit-notes/{id}": {
             "get": {
                 "tags": [
                     "CreditNotes"
                 ],
                 "summary": "Get a credit note by ID",
                 "description": "Retrieve a specific credit note by ID.",
-                "operationId": "00bcd49e9fea062bb9a2b34bc05d95f1",
+                "operationId": "e729b4189782b69904998476a0fafb71",
                 "parameters": [
                     {
                         "name": "id",
@@ -3808,7 +4266,12 @@
                     "404": {
                         "description": "Credit note not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -3816,7 +4279,7 @@
                 ],
                 "summary": "Update a credit note",
                 "description": "Update an existing credit note.",
-                "operationId": "2649fc4337e0c92e32b74093ff50e678",
+                "operationId": "b1d2129b996d6bfdfa0c6b433c79fd7e",
                 "parameters": [
                     {
                         "name": "id",
@@ -3855,7 +4318,12 @@
                     "404": {
                         "description": "Credit note not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -3863,7 +4331,7 @@
                 ],
                 "summary": "Delete a credit note",
                 "description": "Delete a credit note.",
-                "operationId": "a04d775d39a51ce9c0e2e79720a013ec",
+                "operationId": "ea13afe3077a0432d51ef0b59f76ede3",
                 "parameters": [
                     {
                         "name": "id",
@@ -3882,17 +4350,22 @@
                     "404": {
                         "description": "Credit note not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/daily-invoice-balances": {
+        "/api/v1/daily-invoice-balances": {
             "get": {
                 "tags": [
                     "DailyInvoiceBalances"
                 ],
                 "summary": "List all daily invoice balances",
                 "description": "Retrieve all daily invoice balances.",
-                "operationId": "f2ca8af306e059e60aaca9bae33cf709",
+                "operationId": "c5a6cf548246bd8164d290abc6c3cb36",
                 "responses": {
                     "200": {
                         "description": "List of daily invoice balances retrieved successfully",
@@ -3910,7 +4383,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -3918,7 +4396,7 @@
                 ],
                 "summary": "Create a new daily invoice balance",
                 "description": "Create a new daily invoice balance entry.",
-                "operationId": "652eb8a4950ab3ee285441571ef22ddc",
+                "operationId": "44b76f9c8a539c099f663c6a7fec1e9f",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -3946,17 +4424,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/daily-invoice-balances/{id}": {
+        "/api/v1/daily-invoice-balances/{id}": {
             "get": {
                 "tags": [
                     "DailyInvoiceBalances"
                 ],
                 "summary": "Get a daily invoice balance entry by ID",
                 "description": "Retrieve a specific daily invoice balance entry by ID.",
-                "operationId": "5456f7171a3f92f4c8a105bfe6030219",
+                "operationId": "8e91ffe2658c0e3789adbc74155aa725",
                 "parameters": [
                     {
                         "name": "id",
@@ -3982,8 +4465,47 @@
                     "404": {
                         "description": "Daily invoice balance not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
+            "delete": {
+                "tags": [
+                    "DailyInvoiceBalances"
+                ],
+                "summary": "Delete a daily invoice balance entry",
+                "description": "Delete a daily invoice balance entry.",
+                "operationId": "a16fd18eed45aebc168a95d440efa114",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Daily invoice balance entry ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daily invoice balance entry deleted successfully"
+                    },
+                    "404": {
+                        "description": "Daily invoice balance not found"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/daily-invoice-balances/{id}": {
             "put": {
                 "tags": [
                     "DailyInvoiceBalances"
@@ -4029,44 +4551,22 @@
                     "404": {
                         "description": "Daily invoice balance not found"
                     }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "DailyInvoiceBalances"
-                ],
-                "summary": "Delete a daily invoice balance entry",
-                "description": "Delete a daily invoice balance entry.",
-                "operationId": "58aa286ee871191194fd0266189e78af",
-                "parameters": [
+                },
+                "security": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Daily invoice balance entry ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
+                        "BearerAuth": []
                     }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Daily invoice balance entry deleted successfully"
-                    },
-                    "404": {
-                        "description": "Daily invoice balance not found"
-                    }
-                }
+                ]
             }
         },
-        "/api/invoices": {
+        "/api/v1/invoices": {
             "get": {
                 "tags": [
                     "Invoices"
                 ],
                 "summary": "List all invoices",
                 "description": "Retrieve all invoices.",
-                "operationId": "b43704efb2b50a11888215d32c821b39",
+                "operationId": "2f3a8d28e4cc9213dfe5e61a34f62817",
                 "responses": {
                     "200": {
                         "description": "List of invoices retrieved successfully",
@@ -4084,7 +4584,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -4092,7 +4597,7 @@
                 ],
                 "summary": "Create a new invoice",
                 "description": "Create a new invoice.",
-                "operationId": "952361f17b1489d089b24e597ca9b326",
+                "operationId": "edbffbbe3d44bdd43b1e38993c5258d2",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -4120,17 +4625,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/invoices/{id}": {
+        "/api/v1/invoices/{id}": {
             "get": {
                 "tags": [
                     "Invoices"
                 ],
                 "summary": "Get an invoice by ID",
                 "description": "Retrieve a specific invoice by ID.",
-                "operationId": "3e1ee24df782d713817a1b0e4d912fc4",
+                "operationId": "8013e676055338e6d8ed01fd0008bb29",
                 "parameters": [
                     {
                         "name": "id",
@@ -4156,7 +4666,12 @@
                     "404": {
                         "description": "Invoice not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -4164,7 +4679,7 @@
                 ],
                 "summary": "Update an invoice",
                 "description": "Update an existing invoice.",
-                "operationId": "9ae84c12bf18b68a5eebaea99c45605f",
+                "operationId": "f87338f9a9a87b549e4e14356941d38b",
                 "parameters": [
                     {
                         "name": "id",
@@ -4203,7 +4718,12 @@
                     "404": {
                         "description": "Invoice not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -4211,7 +4731,7 @@
                 ],
                 "summary": "Delete an invoice",
                 "description": "Delete an invoice.",
-                "operationId": "6b82cc7845c5e0eea19227c4fdfeef84",
+                "operationId": "5a5411c620d03c970cae1b69c120ac03",
                 "parameters": [
                     {
                         "name": "id",
@@ -4230,17 +4750,22 @@
                     "404": {
                         "description": "Invoice not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/payment-promises": {
+        "/api/v1/payment-promises": {
             "get": {
                 "tags": [
                     "PaymentPromises"
                 ],
                 "summary": "List all payment promises",
                 "description": "Retrieve all payment promises.",
-                "operationId": "55b70ec4375f0686918f2970e6200a6d",
+                "operationId": "d8545a8f49677b6817b3c7cda3bbc55e",
                 "responses": {
                     "200": {
                         "description": "List of payment promises retrieved successfully",
@@ -4258,7 +4783,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -4266,7 +4796,7 @@
                 ],
                 "summary": "Create a new payment promise",
                 "description": "Create a new payment promise.",
-                "operationId": "29b1a9b52ae6c7a5d0e86c72fc70f0bd",
+                "operationId": "a6f397c6a5db3e69a1dd21e4473319bf",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -4294,17 +4824,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/payment-promises/{id}": {
+        "/api/v1/payment-promises/{id}": {
             "get": {
                 "tags": [
                     "PaymentPromises"
                 ],
                 "summary": "Get a payment promise by ID",
                 "description": "Retrieve a specific payment promise by ID.",
-                "operationId": "dc9d2cd479c2de75c7ed12d305b42d4e",
+                "operationId": "ecc0929c39f22209acff9151c0e7e28d",
                 "parameters": [
                     {
                         "name": "id",
@@ -4330,7 +4865,12 @@
                     "404": {
                         "description": "Payment promise not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -4338,7 +4878,7 @@
                 ],
                 "summary": "Update a payment promise",
                 "description": "Update an existing payment promise.",
-                "operationId": "df6884e3aa2e4cf31a2f40af9ef6fb4b",
+                "operationId": "ab9aa110a998fbf9c8478639ec468021",
                 "parameters": [
                     {
                         "name": "id",
@@ -4377,7 +4917,12 @@
                     "404": {
                         "description": "Payment promise not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -4385,7 +4930,7 @@
                 ],
                 "summary": "Delete a payment promise",
                 "description": "Delete a payment promise.",
-                "operationId": "b1cde45b96ad8e23624ce4d240abaa09",
+                "operationId": "8e42ee0cbaf9c462e97a20c9d2056b9f",
                 "parameters": [
                     {
                         "name": "id",
@@ -4404,17 +4949,116 @@
                     "404": {
                         "description": "Payment promise not found"
                     }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/oauth/token": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Generate an access and refresh token",
+                "description": "This endpoint is used to generate an access token and refresh token for the application using client credentials.",
+                "operationId": "authenticateUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "client_id",
+                                    "client_secret",
+                                    "username",
+                                    "password",
+                                    "grant_type"
+                                ],
+                                "properties": {
+                                    "client_id": {
+                                        "description": "The client ID provided by the application",
+                                        "type": "string",
+                                        "example": "9ed315be-902f-49b2-b951-dc9fa3e9736c"
+                                    },
+                                    "client_secret": {
+                                        "description": "The client secret provided by the application",
+                                        "type": "string",
+                                        "example": "jl2nmTwPEO0JwIMZpc9YN9PylBnMuwd5SW1x7brQ"
+                                    },
+                                    "username": {
+                                        "description": "The username of the application user",
+                                        "type": "string",
+                                        "example": "user@mail.com"
+                                    },
+                                    "password": {
+                                        "description": "The password of the application user",
+                                        "type": "string",
+                                        "example": "123***"
+                                    },
+                                    "grant_type": {
+                                        "description": "Grant type for the OAuth token request, usually 'password'",
+                                        "type": "string",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token_type": {
+                                            "description": "The type of the token issued",
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "expires_in": {
+                                            "description": "Time in seconds before the token expires",
+                                            "type": "integer",
+                                            "example": 1296000
+                                        },
+                                        "access_token": {
+                                            "description": "The issued access token",
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5ZWQzMTViZS05MDJmLTQ5YjItYjk1MS1kYzlmYTNlOTczNmMiLC..."
+                                        },
+                                        "refresh_token": {
+                                            "description": "The issued refresh token to renew the access token",
+                                            "type": "string",
+                                            "example": "def502005e168a620160560c0b80f752470935adbe5bdb521c28a1582bc3daa971b27b9a..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid client details or credentials"
+                    },
+                    "401": {
+                        "description": "Unauthorized access"
+                    }
                 }
             }
         },
-        "/api/page-translations": {
+        "/api/v1/page-translations": {
             "get": {
                 "tags": [
                     "PageTranslations"
                 ],
                 "summary": "List all page translations",
                 "description": "Retrieve all page translations.",
-                "operationId": "0c66bcd0b879472a232a71535abfcf88",
+                "operationId": "31bb16c1eab8788d117bd7f512ac4504",
                 "responses": {
                     "200": {
                         "description": "List of page translations retrieved successfully",
@@ -4432,7 +5076,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -4440,7 +5089,7 @@
                 ],
                 "summary": "Create a new page translation",
                 "description": "Create a new page translation.",
-                "operationId": "8b77532093cf760544fc399592c09609",
+                "operationId": "7646bdfafb8d19eca6a93c07f2bc0f4e",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -4468,17 +5117,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/page-translations/{id}": {
+        "/api/v1/page-translations/{id}": {
             "get": {
                 "tags": [
                     "PageTranslations"
                 ],
                 "summary": "Get a page translation by ID",
                 "description": "Retrieve a specific page translation by ID.",
-                "operationId": "ab7bee7611733676621878c1fe4c5e72",
+                "operationId": "5e67621c53ed349376251dba64e41ac4",
                 "parameters": [
                     {
                         "name": "id",
@@ -4504,7 +5158,12 @@
                     "404": {
                         "description": "Page translation not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -4512,7 +5171,7 @@
                 ],
                 "summary": "Update a page translation",
                 "description": "Update an existing page translation.",
-                "operationId": "d299cffb4390710a321740b078a02cf1",
+                "operationId": "c125ae24b49e30857b3d8a8759c9944f",
                 "parameters": [
                     {
                         "name": "id",
@@ -4551,7 +5210,12 @@
                     "404": {
                         "description": "Page translation not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -4559,7 +5223,7 @@
                 ],
                 "summary": "Delete a page translation",
                 "description": "Delete a page translation.",
-                "operationId": "e10b2c66c8a1af14232c46cb8e65de10",
+                "operationId": "aaf3129a1c10415059c396d4cf1a3889",
                 "parameters": [
                     {
                         "name": "id",
@@ -4578,17 +5242,22 @@
                     "404": {
                         "description": "Page translation not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/pages": {
+        "/api/v1/pages": {
             "get": {
                 "tags": [
                     "Pages"
                 ],
                 "summary": "List all pages",
                 "description": "Retrieve all pages.",
-                "operationId": "e0c9affb539f093fcf95b02939bd2b62",
+                "operationId": "02d90991aaa73d5bcc3407549e723735",
                 "responses": {
                     "200": {
                         "description": "List of pages retrieved successfully",
@@ -4606,7 +5275,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -4614,7 +5288,7 @@
                 ],
                 "summary": "Create a new page",
                 "description": "Create a new page.",
-                "operationId": "55f3cd49e6543146b8a3c79ad754c2a8",
+                "operationId": "8088fe250e0be311c10f9245c9815382",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -4642,17 +5316,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/pages/{id}": {
+        "/api/v1/pages/{id}": {
             "get": {
                 "tags": [
                     "Pages"
                 ],
                 "summary": "Get a page by ID",
                 "description": "Retrieve a specific page by ID.",
-                "operationId": "8c3e2bbdae5591e2b01dab1a727075b7",
+                "operationId": "b3f20e13df04927d8214e0e3c72b2760",
                 "parameters": [
                     {
                         "name": "id",
@@ -4678,7 +5357,12 @@
                     "404": {
                         "description": "Page not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -4686,7 +5370,7 @@
                 ],
                 "summary": "Update a page",
                 "description": "Update an existing page.",
-                "operationId": "7ede679b59d65f5e566dd784a6b7e6fa",
+                "operationId": "dfb082e68b258e87edd8645257afb1f7",
                 "parameters": [
                     {
                         "name": "id",
@@ -4725,7 +5409,12 @@
                     "404": {
                         "description": "Page not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -4733,7 +5422,7 @@
                 ],
                 "summary": "Delete a page",
                 "description": "Delete a page.",
-                "operationId": "f9aff2746e5606f7770ae6e228955444",
+                "operationId": "b97ce697eef2b4e00401e815c5861d66",
                 "parameters": [
                     {
                         "name": "id",
@@ -4752,17 +5441,22 @@
                     "404": {
                         "description": "Page not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/password-resets": {
+        "/api/v1/password-resets": {
             "get": {
                 "tags": [
                     "PasswordResets"
                 ],
                 "summary": "Retrieve all password resets",
                 "description": "List all Password Resets.",
-                "operationId": "08f74f254887b209c00f440495d2a7cb",
+                "operationId": "2ffd9469159e1d5416f8a5e51f39b377",
                 "responses": {
                     "200": {
                         "description": "List of password resets retrieved successfully",
@@ -4780,7 +5474,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -4788,7 +5487,7 @@
                 ],
                 "summary": "Create a new password reset entry",
                 "description": "Create a new Password Reset entry.",
-                "operationId": "b464f43ed68314fb4f1ac989b9fdead6",
+                "operationId": "d61154d1960f7c10288e0bef736c5aec",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -4813,17 +5512,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/password-resets/{id}": {
+        "/api/v1/password-resets/{id}": {
             "get": {
                 "tags": [
                     "PasswordResets"
                 ],
                 "summary": "Get a password reset entry by ID",
                 "description": "Retrieve a Password Reset entry by ID.",
-                "operationId": "7cbf6afd382484cf3413c3c73a5c314d",
+                "operationId": "072ef7d0c86da90890b944454cd257ff",
                 "parameters": [
                     {
                         "name": "id",
@@ -4849,7 +5553,12 @@
                     "404": {
                         "description": "Password reset entry not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -4857,7 +5566,7 @@
                 ],
                 "summary": "Update an existing password reset entry",
                 "description": "Update an existing Password Reset entry.",
-                "operationId": "c898e47a1e195f6285e1898a84588295",
+                "operationId": "10ddae4674c1345d6a2fb7da4a1f0bbf",
                 "parameters": [
                     {
                         "name": "id",
@@ -4893,7 +5602,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -4901,7 +5615,7 @@
                 ],
                 "summary": "Delete a password reset entry",
                 "description": "Delete a Password Reset entry by ID.",
-                "operationId": "90039031aca0fd14146bb6b2823fdd11",
+                "operationId": "dea5d43c68f6788a1720531fc92ec775",
                 "parameters": [
                     {
                         "name": "id",
@@ -4920,17 +5634,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/plans": {
+        "/api/v1/plans": {
             "get": {
                 "tags": [
                     "Plans"
                 ],
                 "summary": "List all service plans",
                 "description": "Retrieve all service plans.",
-                "operationId": "4e3e92c13601df1524868f6665beb769",
+                "operationId": "8d4ed1c2a924e577eb3e00a46c0bb560",
                 "responses": {
                     "200": {
                         "description": "List of service plans retrieved successfully",
@@ -4948,7 +5667,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -4956,7 +5680,7 @@
                 ],
                 "summary": "Create a new service plan",
                 "description": "Create a new service plan.",
-                "operationId": "258534693abeb52bd16603f720563837",
+                "operationId": "d374936c6613961400af0c405cbdaa66",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -4984,17 +5708,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/plans/{id}": {
+        "/api/v1/plans/{id}": {
             "get": {
                 "tags": [
                     "Plans"
                 ],
                 "summary": "Get a service plan by ID",
                 "description": "Retrieve a specific service plan by ID.",
-                "operationId": "fc4c4a4f2976cc009b1027f99d6ef7db",
+                "operationId": "837ac988646c373ba2d1e15607c0a734",
                 "parameters": [
                     {
                         "name": "id",
@@ -5020,7 +5749,12 @@
                     "404": {
                         "description": "Service plan not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -5028,7 +5762,7 @@
                 ],
                 "summary": "Update a service plan",
                 "description": "Update an existing service plan.",
-                "operationId": "72b38bf261ae3c5ce18ea3ad86db78bc",
+                "operationId": "4f7648bfff9c7c9dd214a5c882a0edb4",
                 "parameters": [
                     {
                         "name": "id",
@@ -5067,8 +5801,15 @@
                     "404": {
                         "description": "Service plan not found"
                     }
-                }
-            },
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/plans/{id}": {
             "delete": {
                 "tags": [
                     "Plans"
@@ -5094,17 +5835,22 @@
                     "404": {
                         "description": "Service plan not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/service-actions": {
+        "/api/v1/service-actions": {
             "get": {
                 "tags": [
                     "ServiceActions"
                 ],
                 "summary": "List all service actions",
                 "description": "Retrieve all service actions.",
-                "operationId": "b57f57e15f1481658e621a797fc4106f",
+                "operationId": "0dc623c8e28d62a3b2555c91977e04fc",
                 "responses": {
                     "200": {
                         "description": "List of service actions retrieved successfully",
@@ -5122,7 +5868,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -5130,7 +5881,7 @@
                 ],
                 "summary": "Create a new service action",
                 "description": "Create a new service action.",
-                "operationId": "b5e8a341a5e1ff49b37610fc2b71b137",
+                "operationId": "7549cbe346bedd620f178c8a61ee2b70",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -5158,17 +5909,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/service-actions/{id}": {
+        "/api/v1/service-actions/{id}": {
             "get": {
                 "tags": [
                     "ServiceActions"
                 ],
                 "summary": "Get a service action by ID",
                 "description": "Retrieve a specific service action by ID.",
-                "operationId": "9672e93ef1f76ef772c8b719007bb63e",
+                "operationId": "bb233d9b0d96e29eb07aa9c4b126f46e",
                 "parameters": [
                     {
                         "name": "id",
@@ -5194,7 +5950,12 @@
                     "404": {
                         "description": "Service action not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -5202,7 +5963,7 @@
                 ],
                 "summary": "Update a service action",
                 "description": "Update an existing service action.",
-                "operationId": "54b37056a6b4ebc1b868e6878406352c",
+                "operationId": "5f2e6a9e80b3aaa7cdbd55860057b916",
                 "parameters": [
                     {
                         "name": "id",
@@ -5241,7 +6002,12 @@
                     "404": {
                         "description": "Service action not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -5249,7 +6015,7 @@
                 ],
                 "summary": "Delete a service action",
                 "description": "Delete a service action.",
-                "operationId": "b5aeb187c1855c3dc72e4cbde8758ac4",
+                "operationId": "ac665831f011308c691fdd9ca242904c",
                 "parameters": [
                     {
                         "name": "id",
@@ -5268,17 +6034,22 @@
                     "404": {
                         "description": "Service action not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/services": {
+        "/api/v1/services": {
             "get": {
                 "tags": [
                     "Services"
                 ],
                 "summary": "List all services",
                 "description": "Retrieve all services.",
-                "operationId": "8c9ebb1796fc9353394e3398db68889e",
+                "operationId": "5dfc02499bd8b9e54d7188b48e271799",
                 "responses": {
                     "200": {
                         "description": "List of services retrieved successfully",
@@ -5296,7 +6067,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -5304,7 +6080,7 @@
                 ],
                 "summary": "Create a new service",
                 "description": "Create a new service.",
-                "operationId": "2ed732944d57ef40baf054b4bd297f75",
+                "operationId": "f17cabc33e31c927fcda6844f1fdc713",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -5332,17 +6108,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/services/{id}": {
+        "/api/v1/services/{id}": {
             "get": {
                 "tags": [
                     "Services"
                 ],
                 "summary": "Get a service by ID",
                 "description": "Retrieve a specific service by ID.",
-                "operationId": "847ecba1ae7ca8d553ba469206ca666b",
+                "operationId": "79ef4c0b5672766af191649b14bd69da",
                 "parameters": [
                     {
                         "name": "id",
@@ -5368,7 +6149,12 @@
                     "404": {
                         "description": "Service not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -5376,7 +6162,7 @@
                 ],
                 "summary": "Update a service",
                 "description": "Update an existing service.",
-                "operationId": "3b6bdaf6e719e47932e6f6f6ef985027",
+                "operationId": "558482ce751fc57af1ca687ea0640b38",
                 "parameters": [
                     {
                         "name": "id",
@@ -5415,7 +6201,12 @@
                     "404": {
                         "description": "Service not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -5423,7 +6214,7 @@
                 ],
                 "summary": "Delete a service",
                 "description": "Delete a service.",
-                "operationId": "a2a32897e0922f881e902cd0950a7f5b",
+                "operationId": "c64bca63fab88819f25c85e0393a9742",
                 "parameters": [
                     {
                         "name": "id",
@@ -5442,17 +6233,22 @@
                     "404": {
                         "description": "Service not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/boards": {
+        "/api/v1/boards": {
             "get": {
                 "tags": [
                     "Boards"
                 ],
                 "summary": "List all boards",
                 "description": "Retrieve all boards.",
-                "operationId": "518a18dbde5e9432de15a88b1b77b4a1",
+                "operationId": "d039bda1bf21aa8bffa2e998e39a57a0",
                 "responses": {
                     "200": {
                         "description": "List of boards retrieved successfully",
@@ -5470,7 +6266,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -5478,7 +6279,7 @@
                 ],
                 "summary": "Create a new board",
                 "description": "Create a new board.",
-                "operationId": "e5c379452a0824c367e7144ec1309df5",
+                "operationId": "637b6f508b6b7b9536a739cbc0953c16",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -5506,17 +6307,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/boards/{id}": {
+        "/api/v1/boards/{id}": {
             "get": {
                 "tags": [
                     "Boards"
                 ],
                 "summary": "Get a board by ID",
                 "description": "Retrieve a specific board by ID.",
-                "operationId": "126bc0b3f91f8a40c4423973e167028d",
+                "operationId": "c2991b10d38074ef6bbf5b12a668c3aa",
                 "parameters": [
                     {
                         "name": "id",
@@ -5542,7 +6348,12 @@
                     "404": {
                         "description": "Board not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -5550,7 +6361,7 @@
                 ],
                 "summary": "Update a board",
                 "description": "Update an existing board.",
-                "operationId": "21c3b2cc35ad6f8cfc784df759d7d78d",
+                "operationId": "4f6c05abd5e6af2b800acf60aa1dede3",
                 "parameters": [
                     {
                         "name": "id",
@@ -5589,7 +6400,12 @@
                     "404": {
                         "description": "Board not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -5597,7 +6413,7 @@
                 ],
                 "summary": "Delete a board",
                 "description": "Delete a board.",
-                "operationId": "38a9b174306e6dcf7cdc95e91aeaaa48",
+                "operationId": "b24efdcf3a37354b56e79d7a45978148",
                 "parameters": [
                     {
                         "name": "id",
@@ -5616,17 +6432,22 @@
                     "404": {
                         "description": "Board not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/columns": {
+        "/api/v1/columns": {
             "get": {
                 "tags": [
                     "Columns"
                 ],
                 "summary": "List all columns",
                 "description": "Retrieve all columns.",
-                "operationId": "71bc568e1a8be4f477eb87b8f8fc2ccc",
+                "operationId": "f7a0fa72c0974f5ef2d24637e6b203a4",
                 "responses": {
                     "200": {
                         "description": "List of columns retrieved successfully",
@@ -5644,7 +6465,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -5652,7 +6478,7 @@
                 ],
                 "summary": "Create a new column",
                 "description": "Create a new column.",
-                "operationId": "433cca645264e56ea8c99fee4769bee8",
+                "operationId": "37f3bb2cdc503665e3e1c393bc995e32",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -5680,17 +6506,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/columns/{id}": {
+        "/api/v1/columns/{id}": {
             "get": {
                 "tags": [
                     "Columns"
                 ],
                 "summary": "Get a column by ID",
                 "description": "Retrieve a specific column by ID.",
-                "operationId": "fe81e74b935044ad7288df129b3654cf",
+                "operationId": "434c71e7cfbdf0683bc389f6925cb47a",
                 "parameters": [
                     {
                         "name": "id",
@@ -5716,7 +6547,12 @@
                     "404": {
                         "description": "Column not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -5724,7 +6560,7 @@
                 ],
                 "summary": "Update a column",
                 "description": "Update an existing column.",
-                "operationId": "747820613ecf531e9b8235adbeb6371d",
+                "operationId": "380152fcca7bfe3c16a27e589e400b9f",
                 "parameters": [
                     {
                         "name": "id",
@@ -5763,7 +6599,12 @@
                     "404": {
                         "description": "Column not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -5771,7 +6612,7 @@
                 ],
                 "summary": "Delete a column",
                 "description": "Delete a column.",
-                "operationId": "c65e16feb9194b7c593f28c7e733e2b7",
+                "operationId": "89689eec40fd487a705ea456b6464ef5",
                 "parameters": [
                     {
                         "name": "id",
@@ -5790,17 +6631,22 @@
                     "404": {
                         "description": "Column not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/labels": {
+        "/api/v1/labels": {
             "get": {
                 "tags": [
                     "Labels"
                 ],
                 "summary": "List all labels",
                 "description": "Retrieve all labels.",
-                "operationId": "197346f9af899c66720d664a02fd9e54",
+                "operationId": "e7366d91ef8d80436921e556077b6b0e",
                 "responses": {
                     "200": {
                         "description": "List of labels retrieved successfully",
@@ -5818,7 +6664,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -5826,7 +6677,7 @@
                 ],
                 "summary": "Create a new label",
                 "description": "Create a new label.",
-                "operationId": "2f5760667161df4ff9466eb6b103dd4d",
+                "operationId": "ba42b7c658825c4d7900b0364cc16e77",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -5854,17 +6705,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/labels/{id}": {
+        "/api/v1/labels/{id}": {
             "get": {
                 "tags": [
                     "Labels"
                 ],
                 "summary": "Get a label by ID",
                 "description": "Retrieve a specific label by ID.",
-                "operationId": "899a7611eb3dd1b64315be8de16bc886",
+                "operationId": "eaeb0adbf4debbc252cea66a9c73f1dd",
                 "parameters": [
                     {
                         "name": "id",
@@ -5890,7 +6746,12 @@
                     "404": {
                         "description": "Label not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -5898,7 +6759,7 @@
                 ],
                 "summary": "Update a label",
                 "description": "Update an existing label.",
-                "operationId": "2d55fceea14ba8b76e3c1bee50699706",
+                "operationId": "db244adecf29ff52d25d63366edadf25",
                 "parameters": [
                     {
                         "name": "id",
@@ -5937,7 +6798,12 @@
                     "404": {
                         "description": "Label not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -5945,7 +6811,7 @@
                 ],
                 "summary": "Delete a label",
                 "description": "Delete a label.",
-                "operationId": "cc749f6ea9cc15fbd93bbb9d1c02acac",
+                "operationId": "9787c535075a7e0f428f8b81cabaa5a6",
                 "parameters": [
                     {
                         "name": "id",
@@ -5964,17 +6830,22 @@
                     "404": {
                         "description": "Label not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/label-tasks": {
+        "/api/v1/label-tasks": {
             "get": {
                 "tags": [
                     "LabelTasks"
                 ],
                 "summary": "List all label-task relationships",
                 "description": "Retrieve all label-task relationships.",
-                "operationId": "0b5d700df19c819dace871fc76e2b361",
+                "operationId": "43335065f0642476a354200f406bf0ec",
                 "responses": {
                     "200": {
                         "description": "List of label-task relationships retrieved successfully",
@@ -5992,7 +6863,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -6000,7 +6876,7 @@
                 ],
                 "summary": "Create a new label-task relationship",
                 "description": "Create a new label-task relationship.",
-                "operationId": "1cda9c6c478ed01c48b52cc0efb6421c",
+                "operationId": "fbabd7998070297ee7ce8428f6ef9883",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -6028,17 +6904,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/label-tasks/{id}": {
+        "/api/v1/label-tasks/{id}": {
             "get": {
                 "tags": [
                     "LabelTasks"
                 ],
                 "summary": "Get a label-task relationship by ID",
                 "description": "Retrieve a specific label-task relationship by ID.",
-                "operationId": "b10840e9ffeb71d9483920c84c32c11c",
+                "operationId": "d89e0fc5e0bac57dd4b20fbb3b5b4162",
                 "parameters": [
                     {
                         "name": "id",
@@ -6064,7 +6945,12 @@
                     "404": {
                         "description": "Label-task relationship not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -6072,7 +6958,7 @@
                 ],
                 "summary": "Update a label-task relationship",
                 "description": "Update an existing label-task relationship.",
-                "operationId": "fa1aa084d033d929bb55dc8ca66e8db5",
+                "operationId": "415e915e2735e559fe4e2bc8b9cc4d0d",
                 "parameters": [
                     {
                         "name": "id",
@@ -6111,7 +6997,12 @@
                     "404": {
                         "description": "Label-task relationship not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -6119,7 +7010,7 @@
                 ],
                 "summary": "Delete a label-task relationship",
                 "description": "Delete a label-task relationship.",
-                "operationId": "3dd245570452340cf748f12c1c1a7d53",
+                "operationId": "4133a9f334a55423ad4501e574f6cc77",
                 "parameters": [
                     {
                         "name": "id",
@@ -6138,17 +7029,22 @@
                     "404": {
                         "description": "Label-task relationship not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/task-attachments": {
+        "/api/v1/task-attachments": {
             "get": {
                 "tags": [
                     "Task Attachments"
                 ],
                 "summary": "List all task attachments",
                 "description": "Retrieve all task attachments.",
-                "operationId": "039cf2674a082ee220cd9e58d56ca3e1",
+                "operationId": "9d3487f70ddeb274b71dbdf30cfc6475",
                 "responses": {
                     "200": {
                         "description": "List of task attachments retrieved successfully",
@@ -6166,7 +7062,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -6174,7 +7075,7 @@
                 ],
                 "summary": "Create a new task attachment",
                 "description": "Create a new task attachment.",
-                "operationId": "18b524eabd77e59e1cfdb5feaaedcb82",
+                "operationId": "3f06a31d0252d887c2e6d71145ab77b6",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -6202,17 +7103,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/task-attachments/{id}": {
+        "/api/v1/task-attachments/{id}": {
             "get": {
                 "tags": [
                     "Task Attachments"
                 ],
                 "summary": "Get a task attachment by ID",
                 "description": "Retrieve a specific task attachment by ID.",
-                "operationId": "9dd08812478fb82f45ec91ea19514dc1",
+                "operationId": "34243261725f1fe97add25b674fbb117",
                 "parameters": [
                     {
                         "name": "id",
@@ -6238,7 +7144,12 @@
                     "404": {
                         "description": "Task attachment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -6246,7 +7157,7 @@
                 ],
                 "summary": "Update a task attachment",
                 "description": "Update an existing task attachment.",
-                "operationId": "6c6cc0a28399b0db1f96629cf5d21b31",
+                "operationId": "4ba6f97a5237edd157dbc0aa458fe4c7",
                 "parameters": [
                     {
                         "name": "id",
@@ -6285,7 +7196,12 @@
                     "404": {
                         "description": "Task attachment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -6293,7 +7209,7 @@
                 ],
                 "summary": "Delete a task attachment",
                 "description": "Delete a task attachment.",
-                "operationId": "917fecb9778a31cead7bb1a2a534a4c7",
+                "operationId": "f1b77b49296bb6552d5a8c6edc4d47d9",
                 "parameters": [
                     {
                         "name": "id",
@@ -6312,17 +7228,22 @@
                     "404": {
                         "description": "Task attachment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/task-comments": {
+        "/api/v1/task-comments": {
             "get": {
                 "tags": [
                     "Task Comments"
                 ],
                 "summary": "List all task comments",
                 "description": "Retrieve all task comments.",
-                "operationId": "4b490d85dda1611ab7113d24e738b887",
+                "operationId": "5847236001e25d38bf172d39774bab74",
                 "responses": {
                     "200": {
                         "description": "List of task comments retrieved successfully",
@@ -6340,7 +7261,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -6348,7 +7274,7 @@
                 ],
                 "summary": "Create a new task comment",
                 "description": "Create a new task comment.",
-                "operationId": "8f9505cfed6d86ff0c51e73d403b39f0",
+                "operationId": "5c3af7a0422b4bc6be3473a4b26a746b",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -6376,17 +7302,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/task-comments/{id}": {
+        "/api/v1/task-comments/{id}": {
             "get": {
                 "tags": [
                     "Task Comments"
                 ],
                 "summary": "Get a task comment by ID",
                 "description": "Retrieve a specific task comment by ID.",
-                "operationId": "29c336d897ae4be355cdbfb3ad5e6dcc",
+                "operationId": "9abea8e475865d54b755c14040a9e86d",
                 "parameters": [
                     {
                         "name": "id",
@@ -6412,7 +7343,12 @@
                     "404": {
                         "description": "Task comment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -6420,7 +7356,7 @@
                 ],
                 "summary": "Update a task comment",
                 "description": "Update an existing task comment.",
-                "operationId": "52b490b611edfed631dc69ffe3e95f79",
+                "operationId": "ff2eb750b57d6059eb9125129b70e44e",
                 "parameters": [
                     {
                         "name": "id",
@@ -6459,7 +7395,12 @@
                     "404": {
                         "description": "Task comment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -6467,7 +7408,7 @@
                 ],
                 "summary": "Delete a task comment",
                 "description": "Delete a task comment.",
-                "operationId": "c716c57e601d57fb346589501c7b896e",
+                "operationId": "97a2bf08db861dbaf6b48c3d269a3cc7",
                 "parameters": [
                     {
                         "name": "id",
@@ -6486,17 +7427,22 @@
                     "404": {
                         "description": "Task comment not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/tasks": {
+        "/api/v1/tasks": {
             "get": {
                 "tags": [
                     "Tasks"
                 ],
                 "summary": "List all tasks",
                 "description": "Retrieve all tasks.",
-                "operationId": "158a628873e482116cfcf394fd34c059",
+                "operationId": "e1b3e59b342a017d56640a4d229438a4",
                 "responses": {
                     "200": {
                         "description": "List of tasks retrieved successfully",
@@ -6514,7 +7460,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -6522,7 +7473,7 @@
                 ],
                 "summary": "Create a new task",
                 "description": "Create a new task.",
-                "operationId": "59e69952a94b1cdc74e9b5d91456dcd3",
+                "operationId": "e2bc7d72cdbacd0576cefda1d4613532",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -6550,17 +7501,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/tasks/{id}": {
+        "/api/v1/tasks/{id}": {
             "get": {
                 "tags": [
                     "Tasks"
                 ],
                 "summary": "Get a task by ID",
                 "description": "Retrieve a specific task by ID.",
-                "operationId": "5ac29d1f979e6ec03ce0bc30174ac4a0",
+                "operationId": "b76f265484f2c2c615b2843fca57586e",
                 "parameters": [
                     {
                         "name": "id",
@@ -6586,7 +7542,12 @@
                     "404": {
                         "description": "Task not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -6594,7 +7555,7 @@
                 ],
                 "summary": "Update a task",
                 "description": "Update an existing task.",
-                "operationId": "e15c0dd7869aff76e299c55a77c32c57",
+                "operationId": "be46e1909297eeeac322d7f561eb61f9",
                 "parameters": [
                     {
                         "name": "id",
@@ -6633,7 +7594,12 @@
                     "404": {
                         "description": "Task not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -6641,7 +7607,7 @@
                 ],
                 "summary": "Delete a task",
                 "description": "Delete a task.",
-                "operationId": "87e3f55c10c3a3486383410d035207d7",
+                "operationId": "20f968bc1407ed599a6fc9006c2b8302",
                 "parameters": [
                     {
                         "name": "id",
@@ -6660,17 +7626,22 @@
                     "404": {
                         "description": "Task not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/tickets": {
+        "/api/v1/tickets": {
             "get": {
                 "tags": [
                     "Tickets"
                 ],
                 "summary": "List all tickets",
                 "description": "Retrieve all tickets.",
-                "operationId": "aa173082967dc1109d4a82b9975ba6b8",
+                "operationId": "bba32327fb57ca6f47d4ef170f57c442",
                 "responses": {
                     "200": {
                         "description": "List of tickets retrieved successfully",
@@ -6688,7 +7659,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -6696,7 +7672,7 @@
                 ],
                 "summary": "Create a new ticket",
                 "description": "Create a new ticket.",
-                "operationId": "ea682b4b2e24c649aeab9e4862602294",
+                "operationId": "7a3e478fdbb8c48ce07afb0d66a1617b",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -6721,17 +7697,22 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/tickets/{id}": {
+        "/api/v1/tickets/{id}": {
             "get": {
                 "tags": [
                     "Tickets"
                 ],
                 "summary": "Get a ticket by ID",
                 "description": "Retrieve a ticket by ID.",
-                "operationId": "7d9ae46a6f051e4bbab3955f0ee3aa1d",
+                "operationId": "fe13797267a1dc2e486498addda8e7a9",
                 "parameters": [
                     {
                         "name": "id",
@@ -6757,7 +7738,12 @@
                     "404": {
                         "description": "Ticket not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -6765,7 +7751,7 @@
                 ],
                 "summary": "Update a ticket",
                 "description": "Update an existing ticket.",
-                "operationId": "5a7fa169028b7276a7d8bc10ce45159d",
+                "operationId": "67e63ecc0a0bc2459e15bef7cccdd761",
                 "parameters": [
                     {
                         "name": "id",
@@ -6801,7 +7787,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -6809,7 +7800,7 @@
                 ],
                 "summary": "Delete a ticket",
                 "description": "Delete a ticket.",
-                "operationId": "92e8553ca90169f3008d45c84349feaf",
+                "operationId": "83a24b562eb94adf3e221c3370b622bb",
                 "parameters": [
                     {
                         "name": "id",
@@ -6828,7 +7819,12 @@
                     "500": {
                         "description": "Internal Server Error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         }
     },
@@ -10183,12 +11179,6 @@
             }
         },
         "securitySchemes": {
-            "bearerAuth": {
-                "type": "http",
-                "description": "Use an access token obtained from /api/login",
-                "bearerFormat": "JWT",
-                "scheme": "bearer"
-            },
             "passport": {
                 "type": "oauth2",
                 "description": "Laravel passport oauth2 security.",
@@ -10199,6 +11189,9 @@
                         "authorizationUrl": "http://localhost/oauth/authorize",
                         "tokenUrl": "http://localhost/oauth/token",
                         "refreshUrl": "http://localhost/token/refresh",
+                        "grantTypes": [
+                            "password"
+                        ],
                         "scopes": []
                     }
                 }
@@ -10206,10 +11199,6 @@
         }
     },
     "tags": [
-        {
-            "name": "Authentication",
-            "description": "API Endpoints for user authentication"
-        },
         {
             "name": "Boxes",
             "description": "API Endpoints for managing boxes"
@@ -10365,6 +11354,10 @@
         {
             "name": "Tickets",
             "description": "API Endpoints for managing tickets"
+        },
+        {
+            "name": "Authentication",
+            "description": "Authentication"
         }
     ]
 }

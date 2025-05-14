@@ -76,9 +76,10 @@ class AddressController extends Controller
      * Get all addresses.
      *
      * @OA\Get(
-     *     path="/api/addresses",
+     *     path="/api/v1/addresses",
      *     summary="Get all addresses",
      *     tags={"Addresses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of addresses retrieved successfully",
@@ -102,9 +103,10 @@ class AddressController extends Controller
      * Create a new address.
      *
      * @OA\Post(
-     *     path="/api/addresses",
+     *     path="/api/v1/addresses",
      *     summary="Create a new address",
      *     tags={"Addresses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/AddressRequest")
@@ -134,9 +136,10 @@ class AddressController extends Controller
      * Get an address by ID.
      *
      * @OA\Get(
-     *     path="/api/addresses/{id}",
+     *     path="/api/v1/addresses/{id}",
      *     summary="Get an address by ID",
      *     tags={"Addresses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Address ID",
@@ -164,9 +167,10 @@ class AddressController extends Controller
      * Update an address.
      *
      * @OA\Put(
-     *     path="/api/addresses/{id}",
+     *     path="/api/v1/addresses/{id}",
      *     summary="Update an address",
      *     tags={"Addresses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Address ID",
@@ -203,9 +207,10 @@ class AddressController extends Controller
      * Delete an address.
      *
      * @OA\Delete(
-     *     path="/api/addresses/{id}",
+     *     path="/api/v1/addresses/{id}",
      *     summary="Delete an address",
      *     tags={"Addresses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Address ID",

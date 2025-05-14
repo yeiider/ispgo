@@ -65,9 +65,10 @@ class ServiceActionController extends Controller
      * Retrieve all service actions.
      *
      * @OA\Get(
-     *     path="/api/service-actions",
+     *     path="/api/v1/service-actions",
      *     summary="List all service actions",
      *     tags={"ServiceActions"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of service actions retrieved successfully",
@@ -91,9 +92,10 @@ class ServiceActionController extends Controller
      * Create a new service action.
      *
      * @OA\Post(
-     *     path="/api/service-actions",
+     *     path="/api/v1/service-actions",
      *     summary="Create a new service action",
      *     tags={"ServiceActions"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/ServiceActionRequest")
@@ -127,9 +129,10 @@ class ServiceActionController extends Controller
      * Retrieve a specific service action by ID.
      *
      * @OA\Get(
-     *     path="/api/service-actions/{id}",
+     *     path="/api/v1/service-actions/{id}",
      *     summary="Get a service action by ID",
      *     tags={"ServiceActions"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Service action ID",
@@ -157,9 +160,10 @@ class ServiceActionController extends Controller
      * Update an existing service action.
      *
      * @OA\Put(
-     *     path="/api/service-actions/{id}",
+     *     path="/api/v1/service-actions/{id}",
      *     summary="Update a service action",
      *     tags={"ServiceActions"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Service action ID",
@@ -200,9 +204,10 @@ class ServiceActionController extends Controller
      * Delete a service action.
      *
      * @OA\Delete(
-     *     path="/api/service-actions/{id}",
+     *     path="/api/v1/service-actions/{id}",
      *     summary="Delete a service action",
      *     tags={"ServiceActions"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Service action ID",

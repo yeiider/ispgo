@@ -65,9 +65,10 @@ class ContractController extends Controller
      * List all contracts.
      *
      * @OA\Get(
-     *     path="/api/contracts",
+     *     path="/api/v1/contracts",
      *     summary="Get all Contracts",
      *     tags={"Contracts"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of Contracts retrieved successfully",
@@ -91,9 +92,10 @@ class ContractController extends Controller
      * Create a new contract.
      *
      * @OA\Post(
-     *     path="/api/contracts",
+     *     path="/api/v1/contracts",
      *     summary="Create a new Contract",
      *     tags={"Contracts"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/ContractRequest")
@@ -123,9 +125,10 @@ class ContractController extends Controller
      * Retrieve a contract by its ID.
      *
      * @OA\Get(
-     *     path="/api/contracts/{id}",
+     *     path="/api/v1/contracts/{id}",
      *     summary="Retrieve a Contract by ID",
      *     tags={"Contracts"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Contract ID",
@@ -153,9 +156,10 @@ class ContractController extends Controller
      * Update an existing contract.
      *
      * @OA\Put(
-     *     path="/api/contracts/{id}",
+     *     path="/api/v1/contracts/{id}",
      *     summary="Update an existing Contract",
      *     tags={"Contracts"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Contract ID",
@@ -193,9 +197,10 @@ class ContractController extends Controller
      * Delete a contract.
      *
      * @OA\Delete(
-     *     path="/api/contracts/{id}",
+     *     path="/api/v1/contracts/{id}",
      *     summary="Delete a Contract",
      *     tags={"Contracts"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Contract ID",

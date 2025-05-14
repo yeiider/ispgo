@@ -57,9 +57,10 @@ class PasswordResetController extends Controller
      * List all Password Resets.
      *
      * @OA\Get(
-     *     path="/api/password-resets",
+     *     path="/api/v1/password-resets",
      *     summary="Retrieve all password resets",
      *     tags={"PasswordResets"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of password resets retrieved successfully",
@@ -83,9 +84,10 @@ class PasswordResetController extends Controller
      * Create a new Password Reset entry.
      *
      * @OA\Post(
-     *     path="/api/password-resets",
+     *     path="/api/v1/password-resets",
      *     summary="Create a new password reset entry",
      *     tags={"PasswordResets"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/PasswordResetRequest")
@@ -115,9 +117,10 @@ class PasswordResetController extends Controller
      * Retrieve a Password Reset entry by ID.
      *
      * @OA\Get(
-     *     path="/api/password-resets/{id}",
+     *     path="/api/v1/password-resets/{id}",
      *     summary="Get a password reset entry by ID",
      *     tags={"PasswordResets"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Password Reset entry ID",
@@ -145,9 +148,10 @@ class PasswordResetController extends Controller
      * Update an existing Password Reset entry.
      *
      * @OA\Put(
-     *     path="/api/password-resets/{id}",
+     *     path="/api/v1/password-resets/{id}",
      *     summary="Update an existing password reset entry",
      *     tags={"PasswordResets"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Password Reset entry ID",
@@ -184,9 +188,10 @@ class PasswordResetController extends Controller
      * Delete a Password Reset entry by ID.
      *
      * @OA\Delete(
-     *     path="/api/password-resets/{id}",
+     *     path="/api/v1/password-resets/{id}",
      *     summary="Delete a password reset entry",
      *     tags={"PasswordResets"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Password Reset entry ID",

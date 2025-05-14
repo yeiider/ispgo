@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Invoice\CreditNoteRequest;
 use App\Http\Resources\Invoice\CreditNoteResource;
 use App\Services\Invoice\CreditNoteService;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -61,9 +62,10 @@ class CreditNoteController extends Controller
      * Retrieve all credit notes.
      *
      * @OA\Get(
-     *     path="/api/credit-notes",
+     *     path="/api/v1/credit-notes",
      *     summary="List all credit notes",
      *     tags={"CreditNotes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of credit notes retrieved successfully",
@@ -87,9 +89,10 @@ class CreditNoteController extends Controller
      * Create a new credit note.
      *
      * @OA\Post(
-     *     path="/api/credit-notes",
+     *     path="/api/v1/credit-notes",
      *     summary="Create a new credit note",
      *     tags={"CreditNotes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/CreditNoteRequest")
@@ -123,9 +126,10 @@ class CreditNoteController extends Controller
      * Retrieve a specific credit note by ID.
      *
      * @OA\Get(
-     *     path="/api/credit-notes/{id}",
+     *     path="/api/v1/credit-notes/{id}",
      *     summary="Get a credit note by ID",
      *     tags={"CreditNotes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Credit note ID",
@@ -153,9 +157,10 @@ class CreditNoteController extends Controller
      * Update an existing credit note.
      *
      * @OA\Put(
-     *     path="/api/credit-notes/{id}",
+     *     path="/api/v1/credit-notes/{id}",
      *     summary="Update a credit note",
      *     tags={"CreditNotes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Credit note ID",
@@ -196,9 +201,10 @@ class CreditNoteController extends Controller
      * Delete a credit note.
      *
      * @OA\Delete(
-     *     path="/api/credit-notes/{id}",
+     *     path="/api/v1/credit-notes/{id}",
      *     summary="Delete a credit note",
      *     tags={"CreditNotes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Credit note ID",

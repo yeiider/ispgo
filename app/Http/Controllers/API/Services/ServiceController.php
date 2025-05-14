@@ -71,9 +71,10 @@ class ServiceController extends Controller
      * Retrieve all services.
      *
      * @OA\Get(
-     *     path="/api/services",
+     *     path="/api/v1/services",
      *     summary="List all services",
      *     tags={"Services"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of services retrieved successfully",
@@ -97,9 +98,10 @@ class ServiceController extends Controller
      * Create a new service.
      *
      * @OA\Post(
-     *     path="/api/services",
+     *     path="/api/v1/services",
      *     summary="Create a new service",
      *     tags={"Services"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/ServiceRequest")
@@ -133,9 +135,10 @@ class ServiceController extends Controller
      * Retrieve a specific service by ID.
      *
      * @OA\Get(
-     *     path="/api/services/{id}",
+     *     path="/api/v1/services/{id}",
      *     summary="Get a service by ID",
      *     tags={"Services"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Service ID",
@@ -163,9 +166,10 @@ class ServiceController extends Controller
      * Update an existing service.
      *
      * @OA\Put(
-     *     path="/api/services/{id}",
+     *     path="/api/v1/services/{id}",
      *     summary="Update a service",
      *     tags={"Services"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Service ID",
@@ -206,9 +210,10 @@ class ServiceController extends Controller
      * Delete a service.
      *
      * @OA\Delete(
-     *     path="/api/services/{id}",
+     *     path="/api/v1/services/{id}",
      *     summary="Delete a service",
      *     tags={"Services"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Service ID",

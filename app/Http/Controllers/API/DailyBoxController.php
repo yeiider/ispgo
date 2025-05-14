@@ -61,9 +61,10 @@ class DailyBoxController extends Controller
      * List all daily boxes.
      *
      * @OA\Get(
-     *     path="/api/daily-boxes",
+     *     path="/api/v1/daily-boxes",
      *     summary="Get all daily boxes",
      *     tags={"DailyBoxes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of all daily boxes retrieved successfully",
@@ -88,9 +89,10 @@ class DailyBoxController extends Controller
      * Create a new daily box record.
      *
      * @OA\Post(
-     *     path="/api/daily-boxes",
+     *     path="/api/v1/daily-boxes",
      *     summary="Create a new daily box record",
      *     tags={"DailyBoxes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/DailyBoxRequest")
@@ -120,9 +122,10 @@ class DailyBoxController extends Controller
      * Get a single daily box by ID.
      *
      * @OA\Get(
-     *     path="/api/daily-boxes/{id}",
+     *     path="/api/v1/daily-boxes/{id}",
      *     summary="Get a daily box by its ID",
      *     tags={"DailyBoxes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Daily box ID",
@@ -150,9 +153,10 @@ class DailyBoxController extends Controller
      * Update an existing daily box record.
      *
      * @OA\Put(
-     *     path="/api/daily-boxes/{id}",
+     *     path="/api/v1/daily-boxes/{id}",
      *     summary="Update an existing daily box record",
      *     tags={"DailyBoxes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Daily box ID",
@@ -189,9 +193,10 @@ class DailyBoxController extends Controller
      * Delete a daily box record by its ID.
      *
      * @OA\Delete(
-     *     path="/api/daily-boxes/{id}",
+     *     path="/api/v1/daily-boxes/{id}",
      *     summary="Delete a daily box record by ID",
      *     tags={"DailyBoxes"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Daily box ID",

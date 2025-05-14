@@ -62,9 +62,10 @@ class HtmlTemplateController extends Controller
      * Retrieve all HTML Templates.
      *
      * @OA\Get(
-     *     path="/api/html-templates",
+     *     path="/api/v1/html-templates",
      *     summary="Get all HTML templates",
      *     tags={"HtmlTemplates"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of HTML templates retrieved successfully",
@@ -88,9 +89,10 @@ class HtmlTemplateController extends Controller
      * Create a new HTML Template.
      *
      * @OA\Post(
-     *     path="/api/html-templates",
+     *     path="/api/v1/html-templates",
      *     summary="Create a new HTML template",
      *     tags={"HtmlTemplates"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/HtmlTemplateRequest")
@@ -120,9 +122,10 @@ class HtmlTemplateController extends Controller
      * Retrieve an HTML Template by ID.
      *
      * @OA\Get(
-     *     path="/api/html-templates/{id}",
+     *     path="/api/v1/html-templates/{id}",
      *     summary="Get an HTML template by ID",
      *     tags={"HtmlTemplates"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="HTML Template ID",
@@ -150,9 +153,10 @@ class HtmlTemplateController extends Controller
      * Update an HTML Template.
      *
      * @OA\Put(
-     *     path="/api/html-templates/{id}",
+     *     path="/api/v1/html-templates/{id}",
      *     summary="Update an HTML template",
      *     tags={"HtmlTemplates"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="HTML Template ID",
@@ -192,6 +196,7 @@ class HtmlTemplateController extends Controller
      *     path="/api/html-templates/{id}",
      *     summary="Delete an HTML template",
      *     tags={"HtmlTemplates"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="HTML Template ID",

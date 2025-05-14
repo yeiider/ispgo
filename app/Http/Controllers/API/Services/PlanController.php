@@ -68,9 +68,10 @@ class PlanController extends Controller
      * Retrieve all service plans.
      *
      * @OA\Get(
-     *     path="/api/plans",
+     *     path="/api/v1/plans",
      *     summary="List all service plans",
      *     tags={"Plans"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of service plans retrieved successfully",
@@ -94,9 +95,10 @@ class PlanController extends Controller
      * Create a new service plan.
      *
      * @OA\Post(
-     *     path="/api/plans",
+     *     path="/api/v1/plans",
      *     summary="Create a new service plan",
      *     tags={"Plans"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/PlanRequest")
@@ -130,9 +132,10 @@ class PlanController extends Controller
      * Retrieve a specific service plan by ID.
      *
      * @OA\Get(
-     *     path="/api/plans/{id}",
+     *     path="/api/v1/plans/{id}",
      *     summary="Get a service plan by ID",
      *     tags={"Plans"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Plan ID",
@@ -160,9 +163,10 @@ class PlanController extends Controller
      * Update an existing service plan.
      *
      * @OA\Put(
-     *     path="/api/plans/{id}",
+     *     path="/api/v1/plans/{id}",
      *     summary="Update a service plan",
      *     tags={"Plans"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Plan ID",
@@ -206,6 +210,7 @@ class PlanController extends Controller
      *     path="/api/plans/{id}",
      *     summary="Delete a service plan",
      *     tags={"Plans"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Plan ID",

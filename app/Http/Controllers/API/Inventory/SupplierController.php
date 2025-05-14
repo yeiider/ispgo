@@ -70,9 +70,10 @@ class SupplierController extends Controller
      * Retrieve all suppliers.
      *
      * @OA\Get(
-     *     path="/api/suppliers",
+     *     path="/api/v1/suppliers",
      *     summary="List all suppliers",
      *     tags={"Suppliers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of suppliers retrieved successfully",
@@ -96,9 +97,10 @@ class SupplierController extends Controller
      * Create a new supplier.
      *
      * @OA\Post(
-     *     path="/api/suppliers",
+     *     path="/api/v1/suppliers",
      *     summary="Create a new supplier",
      *     tags={"Suppliers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/SupplierRequest")
@@ -132,9 +134,10 @@ class SupplierController extends Controller
      * Retrieve a specific supplier by ID.
      *
      * @OA\Get(
-     *     path="/api/suppliers/{id}",
+     *     path="/api/v1/suppliers/{id}",
      *     summary="Get a supplier by ID",
      *     tags={"Suppliers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Supplier ID",
@@ -162,9 +165,10 @@ class SupplierController extends Controller
      * Update an existing supplier.
      *
      * @OA\Put(
-     *     path="/api/suppliers/{id}",
+     *     path="/api/v1/suppliers/{id}",
      *     summary="Update a supplier",
      *     tags={"Suppliers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Supplier ID",
@@ -205,9 +209,10 @@ class SupplierController extends Controller
      * Delete a supplier.
      *
      * @OA\Delete(
-     *     path="/api/suppliers/{id}",
+     *     path="/api/v1/suppliers/{id}",
      *     summary="Delete a supplier",
      *     tags={"Suppliers"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Supplier ID",

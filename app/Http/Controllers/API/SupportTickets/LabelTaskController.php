@@ -59,9 +59,10 @@ class LabelTaskController extends Controller
      * Retrieve all label-task relationships.
      *
      * @OA\Get(
-     *     path="/api/label-tasks",
+     *     path="/api/v1/label-tasks",
      *     summary="List all label-task relationships",
      *     tags={"LabelTasks"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of label-task relationships retrieved successfully",
@@ -85,9 +86,10 @@ class LabelTaskController extends Controller
      * Create a new label-task relationship.
      *
      * @OA\Post(
-     *     path="/api/label-tasks",
+     *     path="/api/v1/label-tasks",
      *     summary="Create a new label-task relationship",
      *     tags={"LabelTasks"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/LabelTaskRequest")
@@ -121,9 +123,10 @@ class LabelTaskController extends Controller
      * Retrieve a specific label-task relationship by ID.
      *
      * @OA\Get(
-     *     path="/api/label-tasks/{id}",
+     *     path="/api/v1/label-tasks/{id}",
      *     summary="Get a label-task relationship by ID",
      *     tags={"LabelTasks"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Label-task relationship ID",
@@ -151,9 +154,10 @@ class LabelTaskController extends Controller
      * Update an existing label-task relationship.
      *
      * @OA\Put(
-     *     path="/api/label-tasks/{id}",
+     *     path="/api/v1/label-tasks/{id}",
      *     summary="Update a label-task relationship",
      *     tags={"LabelTasks"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Label-task relationship ID",
@@ -194,9 +198,10 @@ class LabelTaskController extends Controller
      * Delete a label-task relationship.
      *
      * @OA\Delete(
-     *     path="/api/label-tasks/{id}",
+     *     path="/api/v1/label-tasks/{id}",
      *     summary="Delete a label-task relationship",
      *     tags={"LabelTasks"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Label-task relationship ID",

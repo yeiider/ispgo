@@ -59,9 +59,10 @@ class LabelController extends Controller
      * Retrieve all labels.
      *
      * @OA\Get(
-     *     path="/api/labels",
+     *     path="/api/v1/labels",
      *     summary="List all labels",
      *     tags={"Labels"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of labels retrieved successfully",
@@ -85,9 +86,10 @@ class LabelController extends Controller
      * Create a new label.
      *
      * @OA\Post(
-     *     path="/api/labels",
+     *     path="/api/v1/labels",
      *     summary="Create a new label",
      *     tags={"Labels"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/LabelRequest")
@@ -121,9 +123,10 @@ class LabelController extends Controller
      * Retrieve a specific label by ID.
      *
      * @OA\Get(
-     *     path="/api/labels/{id}",
+     *     path="/api/v1/labels/{id}",
      *     summary="Get a label by ID",
      *     tags={"Labels"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Label ID",
@@ -151,9 +154,10 @@ class LabelController extends Controller
      * Update an existing label.
      *
      * @OA\Put(
-     *     path="/api/labels/{id}",
+     *     path="/api/v1/labels/{id}",
      *     summary="Update a label",
      *     tags={"Labels"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Label ID",
@@ -194,9 +198,10 @@ class LabelController extends Controller
      * Delete a label.
      *
      * @OA\Delete(
-     *     path="/api/labels/{id}",
+     *     path="/api/v1/labels/{id}",
      *     summary="Delete a label",
      *     tags={"Labels"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Label ID",

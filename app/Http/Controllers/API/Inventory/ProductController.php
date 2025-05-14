@@ -82,9 +82,10 @@ class ProductController extends Controller
      * Retrieve all products.
      *
      * @OA\Get(
-     *     path="/api/products",
+     *     path="/api/v1/products",
      *     summary="List all products",
      *     tags={"Products"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of products retrieved successfully",
@@ -108,9 +109,10 @@ class ProductController extends Controller
      * Create a new product.
      *
      * @OA\Post(
-     *     path="/api/products",
+     *     path="/api/v1/products",
      *     summary="Create a new product",
      *     tags={"Products"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/ProductRequest")
@@ -144,9 +146,10 @@ class ProductController extends Controller
      * Retrieve a specific product by ID.
      *
      * @OA\Get(
-     *     path="/api/products/{id}",
+     *     path="/api/v1/products/{id}",
      *     summary="Get a product by ID",
      *     tags={"Products"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Product ID",
@@ -174,9 +177,10 @@ class ProductController extends Controller
      * Update an existing product.
      *
      * @OA\Put(
-     *     path="/api/products/{id}",
+     *     path="/api/v1/products/{id}",
      *     summary="Update a product",
      *     tags={"Products"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Product ID",
@@ -217,9 +221,10 @@ class ProductController extends Controller
      * Delete a product.
      *
      * @OA\Delete(
-     *     path="/api/products/{id}",
+     *     path="/api/v1/products/{id}",
      *     summary="Delete a product",
      *     tags={"Products"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Product ID",

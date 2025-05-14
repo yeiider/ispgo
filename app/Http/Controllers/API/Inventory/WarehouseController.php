@@ -58,9 +58,10 @@ class WarehouseController extends Controller
      * Retrieve all warehouses.
      *
      * @OA\Get(
-     *     path="/api/warehouses",
+     *     path="/api/v1/warehouses",
      *     summary="List all warehouses",
      *     tags={"Warehouses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of warehouses retrieved successfully",
@@ -84,9 +85,10 @@ class WarehouseController extends Controller
      * Create a new warehouse.
      *
      * @OA\Post(
-     *     path="/api/warehouses",
+     *     path="/api/v1/warehouses",
      *     summary="Create a new warehouse",
      *     tags={"Warehouses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/WarehouseRequest")
@@ -120,9 +122,10 @@ class WarehouseController extends Controller
      * Retrieve a specific warehouse by ID.
      *
      * @OA\Get(
-     *     path="/api/warehouses/{id}",
+     *     path="/api/v1/warehouses/{id}",
      *     summary="Get a warehouse by ID",
      *     tags={"Warehouses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Warehouse ID",
@@ -150,9 +153,10 @@ class WarehouseController extends Controller
      * Update an existing warehouse.
      *
      * @OA\Put(
-     *     path="/api/warehouses/{id}",
+     *     path="/api/v1/warehouses/{id}",
      *     summary="Update a warehouse",
      *     tags={"Warehouses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Warehouse ID",
@@ -193,9 +197,10 @@ class WarehouseController extends Controller
      * Delete a warehouse.
      *
      * @OA\Delete(
-     *     path="/api/warehouses/{id}",
+     *     path="/api/v1/warehouses/{id}",
      *     summary="Delete a warehouse",
      *     tags={"Warehouses"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Warehouse ID",

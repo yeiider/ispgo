@@ -68,9 +68,10 @@ class EquipmentAssignmentController extends Controller
      * Retrieve all equipment assignments.
      *
      * @OA\Get(
-     *     path="/api/equipment-assignments",
+     *     path="/api/v1/equipment-assignments",
      *     summary="List all equipment assignments",
      *     tags={"EquipmentAssignments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of equipment assignments retrieved successfully",
@@ -94,9 +95,10 @@ class EquipmentAssignmentController extends Controller
      * Create a new equipment assignment.
      *
      * @OA\Post(
-     *     path="/api/equipment-assignments",
+     *     path="/api/v1/equipment-assignments",
      *     summary="Create a new equipment assignment",
      *     tags={"EquipmentAssignments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/EquipmentAssignmentRequest")
@@ -130,9 +132,10 @@ class EquipmentAssignmentController extends Controller
      * Retrieve a specific equipment assignment by ID.
      *
      * @OA\Get(
-     *     path="/api/equipment-assignments/{id}",
+     *     path="/api/v1/equipment-assignments/{id}",
      *     summary="Get an equipment assignment by ID",
      *     tags={"EquipmentAssignments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Equipment Assignment ID",
@@ -160,9 +163,10 @@ class EquipmentAssignmentController extends Controller
      * Update an existing equipment assignment.
      *
      * @OA\Put(
-     *     path="/api/equipment-assignments/{id}",
+     *     path="/api/v1/equipment-assignments/{id}",
      *     summary="Update an equipment assignment",
      *     tags={"EquipmentAssignments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Equipment Assignment ID",
@@ -203,9 +207,10 @@ class EquipmentAssignmentController extends Controller
      * Delete an equipment assignment.
      *
      * @OA\Delete(
-     *     path="/api/equipment-assignments/{id}",
+     *     path="/api/v1/equipment-assignments/{id}",
      *     summary="Delete an equipment assignment",
      *     tags={"EquipmentAssignments"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Equipment Assignment ID",

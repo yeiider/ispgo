@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\TaxIdentificationTypeRequest;
 use App\Http\Resources\Customers\TaxIdentificationTypeResource;
 use App\Services\Customers\TaxIdentificationTypeService;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -54,9 +55,10 @@ class TaxIdentificationTypeController extends Controller
      * Retrieve all tax identification types.
      *
      * @OA\Get(
-     *     path="/api/tax-identification-types",
+     *     path="/api/v1/tax-identification-types",
      *     summary="List all tax identification types",
      *     tags={"Tax Identification Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of tax identification types retrieved successfully",
@@ -80,9 +82,10 @@ class TaxIdentificationTypeController extends Controller
      * Create a new tax identification type.
      *
      * @OA\Post(
-     *     path="/api/tax-identification-types",
+     *     path="/api/v1/tax-identification-types",
      *     summary="Create a new tax identification type",
      *     tags={"Tax Identification Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/TaxIdentificationTypeRequest")
@@ -116,9 +119,10 @@ class TaxIdentificationTypeController extends Controller
      * Retrieve a specific tax identification type by ID.
      *
      * @OA\Get(
-     *     path="/api/tax-identification-types/{id}",
+     *     path="/api/v1/tax-identification-types/{id}",
      *     summary="Get a tax identification type by ID",
      *     tags={"Tax Identification Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Tax identification type ID",
@@ -146,9 +150,10 @@ class TaxIdentificationTypeController extends Controller
      * Update an existing tax identification type.
      *
      * @OA\Put(
-     *     path="/api/tax-identification-types/{id}",
+     *     path="/api/v1/tax-identification-types/{id}",
      *     summary="Update a tax identification type",
      *     tags={"Tax Identification Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Tax identification type ID",
@@ -189,9 +194,10 @@ class TaxIdentificationTypeController extends Controller
      * Delete a tax identification type.
      *
      * @OA\Delete(
-     *     path="/api/tax-identification-types/{id}",
+     *     path="/api/v1/tax-identification-types/{id}",
      *     summary="Delete a tax identification type",
      *     tags={"Tax Identification Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Tax identification type ID",

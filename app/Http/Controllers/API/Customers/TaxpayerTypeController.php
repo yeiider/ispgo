@@ -56,9 +56,10 @@ class TaxpayerTypeController extends Controller
      * Retrieve all taxpayer types.
      *
      * @OA\Get(
-     *     path="/api/taxpayer-types",
+     *     path="/api/v1/taxpayer-types",
      *     summary="List all taxpayer types",
      *     tags={"Taxpayer Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of taxpayer types retrieved successfully",
@@ -82,9 +83,10 @@ class TaxpayerTypeController extends Controller
      * Create a new taxpayer type.
      *
      * @OA\Post(
-     *     path="/api/taxpayer-types",
+     *     path="/api/v1/taxpayer-types",
      *     summary="Create a new taxpayer type",
      *     tags={"Taxpayer Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/TaxpayerTypeRequest")
@@ -118,9 +120,10 @@ class TaxpayerTypeController extends Controller
      * Retrieve a specific taxpayer type by ID.
      *
      * @OA\Get(
-     *     path="/api/taxpayer-types/{id}",
+     *     path="/api/v1/taxpayer-types/{id}",
      *     summary="Get a taxpayer type by ID",
      *     tags={"Taxpayer Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Taxpayer type ID",
@@ -148,9 +151,10 @@ class TaxpayerTypeController extends Controller
      * Update an existing taxpayer type.
      *
      * @OA\Put(
-     *     path="/api/taxpayer-types/{id}",
+     *     path="/api/v1/taxpayer-types/{id}",
      *     summary="Update a taxpayer type",
      *     tags={"Taxpayer Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Taxpayer type ID",
@@ -191,9 +195,10 @@ class TaxpayerTypeController extends Controller
      * Delete a taxpayer type.
      *
      * @OA\Delete(
-     *     path="/api/taxpayer-types/{id}",
+     *     path="/api/v1/taxpayer-types/{id}",
      *     summary="Delete a taxpayer type",
      *     tags={"Taxpayer Types"},
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         description="Taxpayer type ID",

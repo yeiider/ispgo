@@ -49,7 +49,6 @@ class BoxApi extends Controller
             'date' => $today,
             'start_amount' => $request->start_amount,
             'end_amount' => 0, // Inicializamos end_amount a 0
-            'transactions' => '', // Inicializamos transacciones vacías
         ]);
 
         return response()->json([
