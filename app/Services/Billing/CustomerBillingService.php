@@ -62,6 +62,7 @@ class CustomerBillingService
             return $invoice;
 
         } catch (Exception $e) {
+
             // Registrar el error en el log de Laravel
             Log::error('Error al generar la factura para el cliente.', [
                 'customer_id' => $customer->id,
