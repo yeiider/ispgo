@@ -29,11 +29,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Event::listen(
-            InvoiceCreated::class,
-            [SendInvoiceNotification::class, 'handle']
-        );
-
         Passport::enablePasswordGrant();
         Passport::tokensExpireIn(now()->addDays(15));
         Passport::refreshTokensExpireIn(now()->addDays(30));

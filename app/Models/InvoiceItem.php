@@ -14,6 +14,10 @@ class InvoiceItem extends Model
         'quantity', 'unit_price', 'subtotal', 'metadata'
     ];
 
+    protected $casts = [
+        "metadata" => "array"
+    ];
+
     public function invoice()
     {
         return $this->belongsTo(Invoice::class);
