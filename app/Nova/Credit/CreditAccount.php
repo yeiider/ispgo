@@ -20,7 +20,7 @@ class CreditAccount extends Resource
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Credit\CreditAccount>
+     * @var class-string<CreditAccountModel>
      */
     public static $model = CreditAccountModel::class;
 
@@ -74,7 +74,7 @@ class CreditAccount extends Resource
                 ->default(0)
                 ->help(__('credit.number_of_days_before_applying_penalties')),
 
-            Select::make(__('credit.status'))
+            Select::make(__('credit.status'),'status')
                 ->options([
                     'active' => __('credit.active'),
                     'in_grace' => __('credit.in_grace'),
