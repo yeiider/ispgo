@@ -16,6 +16,7 @@ use App\Nova\Metrics\Invoice\OutstandingBalance;
 use App\Nova\Metrics\Invoice\TotalRevenue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\DestructiveAction;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\Badge;
@@ -36,7 +37,7 @@ class Invoice extends Resource
     public static $title = 'invoice_full_name_descriptions';
 
     public static $search = [
-        'id', 'amount', 'issue_date', 'status','customer_name'
+        'id', 'amount', 'issue_date', 'status', 'customer_name'
     ];
 
     public function fields(NovaRequest $request): array
@@ -108,7 +109,7 @@ class Invoice extends Resource
                 'success' => 'check-circle',
                 'warning' => 'minus-circle',
                 'info' => 'speakerphone'
-            ])->label(fn($value) => __('attribute.'.$value)),
+            ])->label(fn($value) => __('attribute.' . $value)),
 
             Text::make(__('invoice.payment_method'), 'payment_method'),
             Textarea::make(__('invoice.notes'), 'notes')->hideFromIndex(),
@@ -122,10 +123,12 @@ class Invoice extends Resource
             (new RegisterPayment())->showInline(),
             (new RegisterPaymentPromise())->showInline(),
             (new ApplyDiscount())->showInline(),
-            (new DownloadInvoicePdf())->showInline(),
             DestructiveAction::using(__('invoice.cancel_invoice'), function (ActionFields $fields, Collection $models) {
                 $models->each->canceled();
             })->showInline(),
+            Action::openInNewTab('View Invoice', function ($invoice) {
+                return route('preview.invoice', $invoice->increment_id);
+            })->sole(),
             (new SendInvoiceByWhatsapp())->showInline(),
             (new SendInvoiceNotification())->showInline(),
         ];

@@ -41,9 +41,15 @@ class ApplyRuleInvoice
                     continue;
                 }
 
+                $label = match ($rule->type) {
+                    'percentage' => "Descuento por {$rule->value}%",
+                    'fixed'      => "Descuento por {$rule->value}",
+                    'free_month' => "Mes Gratis",
+                };
+
                 // Crear item de descuento negativo
                 $discountItem = $invoice->items()->create([
-                    'description' => "Descuento aplicado: {$rule->type}",
+                    'description' => $label,
                     'invoice_id'  => $invoice->id,
                     'unit_price'  => -$discountAmount,
                     'service_id'  => $service->id,

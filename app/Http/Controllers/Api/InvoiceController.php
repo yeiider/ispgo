@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class InvoiceController extends Controller
 {
@@ -141,7 +142,7 @@ class InvoiceController extends Controller
         ];
     }
 
-    public function previewInvoice($id): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function previewInvoice($id)
     {
         $invoice = $this->getInvoice($id);
 
@@ -151,34 +152,43 @@ class InvoiceController extends Controller
 
         $filePath = "public/invoices/pdf/invoice_{$id}_{$invoice->status}.pdf";
 
-        if (Storage::exists($filePath)) {
-            return Storage::download($filePath);
-        }
-
-        $companyName = GeneralProviderConfig::getCompanyName() ?? env('APP_NAME');
-        $companyEmail = GeneralProviderConfig::getCompanyEmail() ?? env('MAIL_FROM_ADDRESS');
-        $companyPhone = GeneralProviderConfig::getCompanyPhone() ?? null;
-
-        $imgPath = public_path('img/invoice.svg');
-
-        if (file_exists($imgPath)) {
-            $imgContent = file_get_contents($imgPath);
-            $img = base64_encode($imgContent);
-            $img = 'data:image/svg+xml;base64,' . $img;
-        } else {
-            $img = ''; // Manejo cuando el archivo no existe
-        }
+//        if (Storage::exists($filePath)) {
+//            return Storage::download($filePath);
+//        }
 
         $options = ['locale' => 'es', 'currency' => 'COP'];
-        $invoice->total = Utils::priceFormat($invoice->total, $options);
-        $invoice->subtotal = Utils::priceFormat($invoice->subtotal, $options);
-        $invoice->tax = Utils::priceFormat($invoice->tax, $options);
 
-        $pdfContent = Pdf::loadView('invoices.preview', compact('invoice', 'companyName', 'companyEmail', 'companyPhone', 'img'));
-        Storage::put($filePath, $pdfContent->output());
+        // Create a data array with all necessary variables
+        $data = [
+            'invoice' => $invoice,
+            'companyName' => GeneralProviderConfig::getCompanyName() ?? env('APP_NAME'),
+            'companyEmail' => GeneralProviderConfig::getCompanyEmail() ?? env('MAIL_FROM_ADDRESS'),
+            'companyPhone' => GeneralProviderConfig::getCompanyPhone() ?? "",
+            'companyAddress' => GeneralProviderConfig::getCompanyAddress() ?? "",
+            'items' => $invoice->items,
+            'tax_rate' => $invoice->tax_rate ?? 0,
+            'tax_amount' => $invoice->tax ?? 0,
+        ];
 
-        //return view('invoices.preview', compact('invoice', 'companyName', 'companyEmail', 'companyPhone', 'img'));
+        // Format numeric values
+        $data['invoice']->total = Utils::priceFormat($invoice->total, $options);
+        $data['invoice']->subtotal = Utils::priceFormat($invoice->subtotal, $options);
+        $data['invoice']->tax = Utils::priceFormat($invoice->tax, $options);
 
+        // Handle company logo
+        $imgPath = GeneralProviderConfig::getCompanyLogo() ?? public_path('img/invoice.svg');
+        $imgPath = Str::after($imgPath, 'storage/');
+        if (Storage::disk('public')->exists($imgPath)) {
+            $imgContent = Storage::disk('public')->get($imgPath);
+            $data['img'] = 'data:image/png;base64,' . base64_encode($imgContent);
+        } else {
+            $data['img'] = '';
+        }
+
+        //$pdfContent = Pdf::loadView('invoices.preview', compact('data'));
+        //Storage::put($filePath, $pdfContent->output());
+
+        return view('invoices.preview', compact('data'));
 
         return response()->streamDownload(function () use ($pdfContent) {
             if ($pdfContent) {
@@ -222,5 +232,6 @@ class InvoiceController extends Controller
             ->with('customer')
             ->first();
     }
+
 
 }

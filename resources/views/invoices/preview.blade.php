@@ -1,488 +1,299 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{__('Invoice')}}</title>
+          content="width=device-width, initial-scale=1.0">
+    <title>{{ __('Factura') }} #{{ $data['invoice']->number }}</title>
 
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        /* Estilos generales */
-        .container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            background-color: white;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border-radius: 1rem;
-            pointer-events: auto;
 
+        body {
+            font-family: "Segoe UI", "Arial", sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+            line-height: 1.5;
         }
 
-        .dark .container {
-            background-color: #262626; /* neutral-800 */
-        }
-
-        /* Estilos para la sección superior */
-        .top-section {
-            position: relative;
+        .invoice-wrapper {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 12px;
             overflow: hidden;
-            min-height: 8rem; /* min-h-32 */
-            background-color: #111827; /* gray-900 */
-            text-align: center;
-            border-top-left-radius: 1rem;
-            border-top-right-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
         }
 
-        .dark .top-section {
-            background-color: #0a0a0a; /* neutral-950 */
-        }
-
-        .top-section figure {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            margin-bottom: -1px; /* -mb-px */
-        }
-
-        .top-section svg {
-            fill: white;
-        }
-
-        .dark .top-section svg {
-            fill: #262626; /* neutral-800 */
-        }
-
-        /* Estilos para el círculo con ícono */
-        .icon-circle {
-            position: relative;
-            z-index: 10;
-            margin-top: -3rem; /* -mt-12 */
-            margin-left: auto;
-            margin-right: auto;
+        .header {
+            background: #1f2937;
+            color: #ffffff;
+            padding: 2rem;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            width: 62px; /* size-[62px] */
-            height: 62px; /* size-[62px] */
-            border-radius: 50%;
-            border: 1px solid #e5e7eb; /* gray-200 */
-            background-color: white;
-            color: #374151; /* gray-700 */
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            text-align: center;
-            align-content: center;
         }
 
-        .dark .icon-circle {
-            background-color: #262626; /* neutral-800 */
-            border-color: #404040; /* neutral-700 */
-            color: #a3a3a3; /* neutral-400 */
-        }
-
-        .icon-circle img {
-            flex-shrink: 0;
-            width: 1.5rem; /* size-6 */
-            height: 1.5rem; /* size-6 */
-            margin-top: 25%;
-            margin-bottom: auto;
-        }
-
-        /* Estilos para el contenido */
-        .content {
-            padding: 1rem; /* p-4 */
-        }
-
-        @media (min-width: 640px) {
-            .content {
-                padding: 1.75rem; /* sm:p-7 */
-            }
-        }
-
-        .content h3 {
-            font-size: 1.125rem; /* text-lg */
-            font-weight: 600; /* font-semibold */
-            color: #1f2937; /* gray-800 */
+        .company-info h1 {
+            font-size: 2rem;
             margin-bottom: 0.5rem;
         }
 
-        .dark .content h3 {
-            color: #e5e5e5; /* neutral-200 */
+        .company-info small {
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
 
-        .content p {
-            font-size: 0.875rem; /* text-sm */
-            color: #6b7280; /* gray-500 */
-        }
-
-        .dark .content p {
-            color: #a3a3a3; /* neutral-500 */
-        }
-
-        /* Estilos para la sección de detalles */
-        .details-grid {
+        .logo-container {
+            width: 100px;
+            height: 100px;
+            overflow: hidden;
+            border-radius: 50%;
+            border: 2px solid #ffffff33;
             display: flex;
-            justify-content: space-between;
-            gap: 1.25rem; /* gap-5 */
-            margin-top: 1.25rem; /* mt-5 */
-        }
-
-        @media (min-width: 640px) {
-            .details-grid {
-                grid-template-columns: repeat(3, 1fr); /* sm:grid-cols-3 */
-                margin-top: 2.5rem; /* sm:mt-10 */
-            }
-        }
-
-        .details-grid span {
-            display: block;
-            font-size: 0.75rem; /* text-xs */
-            text-transform: uppercase;
-        }
-
-        .details-grid .value {
-            font-size: 0.875rem; /* text-sm */
-            font-weight: 500; /* font-medium */
-            color: #1f2937; /* gray-800 */
-        }
-
-        .dark .details-grid .value {
-            color: #e5e5e5; /* neutral-200 */
-        }
-
-        /* Estilos para el estado de la factura */
-        .status {
-            display: inline-block;
             align-items: center;
-            padding: 0.5rem 1rem; /* px-4 py-2 */
-            border-radius: 9999px; /* rounded-full */
-            max-width: fit-content;
-            width: fit-content;
+            justify-content: center;
+            background-color: #ffffff10;
         }
 
-        .status.paid {
-            background-color: #f0fdf4; /* bg-green-50 */
-            color: #22c55e; /* text-green-500 */
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
 
-            span {
-                color: #22c55e;
+        .print-button-container {
+            text-align: right;
+            padding: 1rem 2rem 0;
+        }
+
+        .print-button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .pay-button {
+            background-color: #8e0e0e;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .print-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        @media print {
+            .print-button-container {
+                display: none;
             }
         }
 
-        .status.unpaid {
-            background-color: #fefce8; /* bg-yellow-50 */
-            color: #eab308; /* text-yellow-500 */
-
-            span {
-                color: #eab308;
-            }
-        }
-
-        .status.canceled {
-            background-color: #fef2f2; /* bg-red-50 */
-            color: #ef4444; /* text-red-500 */
-
-            span {
-                color: #ef4444;
-            }
-        }
-
-        /* Estilos para la lista de resumen */
-        .summary-list {
-            margin-top: 1.25rem; /* mt-5 */
-        }
-
-        @media (min-width: 640px) {
-            .summary-list {
-                margin-top: 2.5rem; /* sm:mt-10 */
-            }
-        }
-
-        .summary-list h4 {
-            font-size: 0.75rem; /* text-xs */
-            font-weight: 600; /* font-semibold */
-            text-transform: uppercase;
-            color: #1f2937; /* gray-800 */
-        }
-
-        .dark .summary-list h4 {
-            color: #e5e5e5; /* neutral-200 */
-        }
-
-        .summary-list ul {
+        .meta {
             display: flex;
-            flex-direction: column;
-            margin-top: 0.75rem; /* mt-3 */
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding: 2rem;
+            font-size: 0.9rem;
+            background-color: #f3f4f6;
         }
 
-        .summary-list li {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem; /* gap-x-2 */
-            padding: 0.75rem 1rem; /* py-3 px-4 */
-            font-size: 0.875rem; /* text-sm */
-            border: 1px solid #e5e7eb; /* border */
-            color: #1f2937; /* gray-800 */
-            margin-top: -1px; /* -mt-px */
+        .meta > div {
+            flex: 1 1 300px;
         }
 
-        .summary-list li:first-child {
-            border-top-left-radius: 0.5rem; /* first:rounded-t-lg */
-            border-top-right-radius: 0.5rem; /* first:rounded-t-lg */
-            margin-top: 0; /* first:mt-0 */
+        .meta h3 {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
         }
 
-        .summary-list li:last-child {
-            border-bottom-left-radius: 0.5rem; /* last:rounded-b-lg */
-            border-bottom-right-radius: 0.5rem; /* last:rounded-b-lg */
-        }
-
-        .dark .summary-list li {
-            border-color: #404040; /* dark:border-neutral-700 */
-            color: #e5e5e5; /* dark:text-neutral-200 */
-        }
-
-        .summary-list li.bg-gray-50 {
-            background-color: #f9fafb; /* bg-gray-50 */
-        }
-
-        .dark .summary-list li.bg-gray-50 {
-            background-color: #262626; /* dark:bg-neutral-800 */
-        }
-
-        .summary-list li .total {
-            font-size: 1.125rem; /* text-[18px] */
-            font-weight: 500; /* font-medium */
-            color: #1f2937; /* gray-900 */
-        }
-
-        .dark .summary-list li .total {
-            color: #e5e5e5; /* dark:text-neutral-200 */
+        .meta p {
+            margin: 0.25rem 0;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            border-spacing: 0;
+            font-size: 0.875rem;
         }
 
-        table.summary tbody tr:nth-child(even) {
-            background-color: #f9fafb;
+        thead {
+            background: #e5e7eb;
+            color: #374151;
+            text-transform: uppercase;
+            font-size: 0.75rem;
         }
 
-        table.summary tbody th {
-            text-align: left;
-            padding: 0.75rem 1rem;
+        th, td {
+            padding: 1rem;
             border: 1px solid #e5e7eb;
-            border-collapse: collapse;
-            border-right: none;
         }
 
-        table.summary tbody td {
+        td.number {
             text-align: right;
-            padding: 0.75rem 1rem;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .totals {
+            width: 40%;
+            margin: 2rem 2rem 0 auto;
             border: 1px solid #e5e7eb;
-            border-collapse: collapse;
+            border-top: none;
+        }
+
+        .totals td {
             border-left: none;
+            padding: 0.75rem 1rem;
         }
 
+        .totals tr:last-child td {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            font-size: 1rem;
+        }
 
-        /* Estilos para el pie de página */
         .footer {
-            margin-top: 1.25rem; /* mt-5 */
-        }
-
-        @media (min-width: 640px) {
-            .footer {
-                margin-top: 2.5rem; /* sm:mt-10 */
-            }
-        }
-
-        .footer p {
-            font-size: 0.875rem; /* text-sm */
-            color: #6b7280; /* gray-500 */
-        }
-
-        .dark .footer p {
-            color: #a3a3a3; /* neutral-500 */
+            padding: 1.5rem 2rem;
+            font-size: 0.8rem;
+            color: #6b7280;
+            background: #f9fafb;
+            text-align: center;
         }
 
         .footer a {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem; /* gap-x-1.5 */
-            color: #2563eb; /* blue-600 */
-            text-decoration: underline;
-            text-decoration-thickness: 2px; /* decoration-2 */
-            font-weight: 500; /* font-medium */
-        }
-
-        .dark .footer a {
-            color: #3b82f6; /* dark:text-blue-500 */
+            color: #2563eb;
+            text-decoration: none;
         }
 
         .footer a:hover {
             text-decoration: underline;
         }
-
-        .footer a:focus {
-            outline: none;
-            text-decoration: underline;
-        }
     </style>
-
 </head>
 <body>
-<div class="container">
-    <div class="top-section">
-        <figure>
-            <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                 viewBox="0 0 1920 100.1">
-                <path fill="currentColor" class="fill-white dark:fill-neutral-800"
-                      d="M0,0c0,0,934.4,93.4,1920,0v100.1H0L0,0z"></path>
-            </svg>
-        </figure>
-    </div>
 
-    <div class="icon-circle">
-        <img src="{{$img}}" alt="Logo">
-    </div>
+<div class="invoice-wrapper">
 
-    <div class="content">
-        <div class="text-center">
-            <h3 id="hs-ai-modal-label" class="text-lg font-semibold text-gray-800 dark:text-neutral-200">
-                {{__('Invoice')}}
-            </h3>
-            <p class="text-sm text-gray-500 dark:text-neutral-500">
-                {{__('Reference')}} #{{$invoice->increment_id}}
-            </p>
+    <!-- CABECERA -->
+    <header class="header">
+        <div class="company-info">
+            <h1>{{ $data['companyName'] }}</h1>
+            <small>{{ $data['companyEmail'] }} — {{ $data['companyPhone'] }}</small>
         </div>
+        <div class="logo-container">
+            <img src="{{ $data['img'] }}" alt="Logo empresa">
+        </div>
+    </header>
 
+    <!-- BOTÓN DE IMPRESIÓN -->
+    <div class="print-button-container">
+        <button class="print-button" onclick="window.print()">🖨 Imprimir factura</button>
+        <button class="pay-button" onclick="window.location.href='https://raicesc.net/pagos'">🪙 Paga Aquí</button>
+    </div>
+
+    <!-- INFORMACIÓN DEL CLIENTE Y FACTURA -->
+    <section class="meta">
+        <div>
+            <h3>Cliente</h3>
+            <p><strong>Nombre:</strong> {{ $data['invoice']->full_name }}</p>
+            <p><strong>Teléfono:</strong> {{ $data['invoice']->customer->phone_number }}</p>
+            <p><strong>Correo:</strong> {{ $data['invoice']->email_address }}</p>
+        </div>
+        <div>
+            <h3>Factura</h3>
+            <p><strong>Número:</strong> {{ $data['invoice']->increment_id }}</p>
+            <p><strong>Fecha de emisión:</strong> {{ $data['invoice']->issue_date }}</p>
+            <p><strong>Estado:</strong> {{ ucfirst(__($data['invoice']->status)) }}</p>
+        </div>
+    </section>
+
+    <!-- DETALLE DE ITEMS -->
+    <section style="padding: 0 2rem 2rem">
         <table>
+            <thead>
+            <tr>
+                <th style="width: 40px">#</th>
+                <th>Descripción</th>
+                <th style="width: 80px">Cant.</th>
+                <th style="width: 120px">Precio U.</th>
+                <th style="width: 120px">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach($data['items'] as $index => $item)
+                <tr>
+                    <td class="number">{{ $index + 1 }}</td>
+                    <td>{{ $item->description }}</td>
+                    <td class="number">{{ $item->quantity }}</td>
+                    <td class="number">{{ number_format($item->unit_price, 2) }}</td>
+                    <td class="number">{{ number_format($item->total, 2) }}</td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </section>
+
+    <!-- RESUMEN -->
+    <section>
+        <table class="totals">
             <tbody>
             <tr>
-                <td><span
-                        class="block text-xs uppercase text-gray-500 dark:text-neutral-500">{{__('Total')}}:</span>
-                </td>
-                <td><span class="block text-xs uppercase text-gray-500 dark:text-neutral-500">{{__('Status paid')}}:</span>
-                </td>
-                <td><span class="block text-xs uppercase text-gray-500 dark:text-neutral-500">{{__('Customer')}}:</span>
-                </td>
+                <td>Subtotal</td>
+                <td class="number">{{ number_format($data['invoice']->amount_before_discounts, 2) }}</td>
             </tr>
             <tr>
-                <td>
-                    <span class="value">{{$invoice->total}}</span>
-                </td>
-                <td>
-                    <div class="value" style="text-transform: uppercase; max-width: fit-content;">
-                        @if($invoice->status === 'paid')
-                            <div class="status paid">
-                                <span>{{__('Paid')}}</span>
-                            </div>
-                        @elseif($invoice->status === 'unpaid')
-                            <div class="status unpaid">
-                                <span>{{__('Unpaid')}}</span>
-                            </div>
-                        @elseif($invoice->status === 'canceled')
-                            <div class="status canceled">
-                                <span>{{__('Canceled')}}</span>
-                            </div>
-                        @endif
-                    </div>
-                </td>
-                <td>
-                    <div class="flex items-center gap-x-2">
-                        <span class="value">{{$invoice->full_name}}</span>
-                    </div>
-                </td>
+                <td>Impuestos ({{ $data['tax_rate'] }} %)</td>
+                <td class="number">{{ number_format($data['invoice']->tax_total, 2) }}</td>
+            </tr>
+            @if($data['invoice']->discount > 0)
+                <tr>
+                    <td>Descuento</td>
+                    <td class="number">-{{ number_format($data['invoice']->discount, 2) }}</td>
+                </tr>
+            @endif
+            <tr>
+                <td>Total</td>
+                <td class="number">{{ $data['invoice']->total }}</td>
             </tr>
             </tbody>
         </table>
+    </section>
+    <!-- NOTAS DE PAGO -->
+    <section class="notas-pago" style="padding: 1.5rem 2rem; background: #fefce8; border-top: 1px solid #fcd34d; margin-top: 2rem;">
+        <h3 style="color: #92400e; font-size: 1rem; margin-bottom: 0.5rem;">PAGOS EN NUESTRAS OFICINAS:</h3>
+        <p><strong>Guachené:</strong> Calle 8#6-52 B/r Las Palmas</p>
+        <p><strong>Padilla:</strong> Calle 9 #2-15 esquina B/r Carlos Lleras</p>
+        <p><strong>Ciudad del Sur:</strong> Calle 86a #22-03 esquina</p>
+        <p><strong>Horarios:</strong> Lunes a Viernes: 08:00 AM - 12:00 PM y 2:00 PM - 5:00 PM</p>
+        <p><strong>Sábado:</strong> 08:00 AM - 12:00 PM</p>
+    </section>
 
 
-        <div class="details-grid" style="display: none">
-            <div>
-                <span class="block text-xs uppercase text-gray-500 dark:text-neutral-500">Total</span>
-                <span class="value">{{$invoice->total}}</span>
-            </div>
+    <!-- PIE -->
+    <footer class="footer">
+        Gracias por su confianza. Para cualquier duda, puede contactarnos en
+        <a href="mailto:{{ $data['companyEmail'] }}">{{ $data['companyEmail'] }}</a>
+    </footer>
 
-            <div>
-                <span class="block text-xs uppercase text-gray-500 dark:text-neutral-500">{{__('Status paid')}}:</span>
-                <div class="value">
-                    @if($invoice->status === 'paid')
-                        <div class="status paid">
-                            <span>{{__('Paid')}}</span>
-                        </div>
-                    @elseif($invoice->status === 'unpaid')
-                        <div class="status unpaid">
-                            <span>{{__('Unpaid')}}</span>
-                        </div>
-                    @elseif($invoice->status === 'canceled')
-                        <div class="status canceled">
-                            <span>{{__('Canceled')}}</span>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <div>
-                <span class="block text-xs uppercase text-gray-500 dark:text-neutral-500">{{__('Customer')}}:</span>
-                <div class="flex items-center gap-x-2">
-                    <span class="value">{{$invoice->full_name}}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="summary-list">
-            <h4>{{__('Summary')}}</h4>
-            <table class="summary">
-                <tbody>
-                <tr>
-                    <th><span>{{__('Tax')}}</span></th>
-                    <td><span>{{$invoice->tax}}</span></td>
-                </tr>
-                <tr>
-                    <th><span>{{__('Amount')}}</span></th>
-                    <td><span>{{$invoice->amount}}</span></td>
-                </tr>
-                <tr>
-                    <th><span>{{__('Discount')}}</span></th>
-                    <td><span>{{$invoice->discount}}</span></td>
-                </tr>
-                <tr>
-                    <th><span>SubTotal</span></th>
-                    <td><span>{{$invoice->subtotal}}</span></td>
-                </tr>
-                <tr>
-                    <th><span class="total">Total</span></th>
-                    <td><span class="total">{{$invoice->total}}</span></td>
-                </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="footer">
-            <p>
-                @if($companyEmail)
-                    {{__('If you have any questions, please contact at ')}}
-                    <a href="mailto:{{$companyEmail}}">{{$companyEmail}}</a>
-                @endif
-
-                @if($companyPhone)
-                    {{__(' or call at ')}}
-                    <a href="tel:{{$companyPhone}}">{{$companyPhone}}</a>
-                @endif
-            </p>
-        </div>
-    </div>
 </div>
+
 </body>
 </html>

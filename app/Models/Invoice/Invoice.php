@@ -26,14 +26,16 @@ class Invoice extends Model
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
         'issue_date', 'due_date', 'full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
-        'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state','amount_before_discounts','tax_total','void_total'
+        'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total'
     ];
 
     protected $casts = [
         "due_date" => 'date',
         "issue_date" => 'date',
         "expiration_date" => 'date',
-        "additional_information" => 'array'
+        "additional_information" => 'array',
+        'quantity' => 'int',
+
     ];
     protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay'];
 
@@ -56,7 +58,8 @@ class Invoice extends Model
     {
         return $this->hasMany(InvoiceAdjustment::class);
     }
-   public function items()
+
+    public function items()
     {
         return $this->hasMany(InvoiceItem::class);
     }
@@ -90,7 +93,6 @@ class Invoice extends Model
 
         $this->save();
     }
-
 
 
     public function products()
@@ -260,16 +262,16 @@ class Invoice extends Model
             if ($model->customer) {
                 $model->customer_name = $model->customer->first_name . ' ' . $model->customer->last_name;
             }
-           // event(new InvoiceCreatedBefore($model));
+            // event(new InvoiceCreatedBefore($model));
         });
         static::created(function ($model) {
             $model->load('customer');
-           // event(new InvoiceCreated($model));
+            // event(new InvoiceCreated($model));
         });
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
             if ($model->isDirty('status')) {
-              //  event(new InvoiceUpdateStatus($model));
+                //  event(new InvoiceUpdateStatus($model));
             }
         });
     }
