@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Events\FinalizeInvoiceBySchedule;
 use App\Settings\GeneralProviderConfig;
 use Illuminate\Console\Command;
 use App\Models\Customers\Customer;
@@ -34,6 +35,7 @@ class GenerateCustomerInvoices extends Command
                 foreach ($customers as $customer) {
                     try {
                         $billing->generateForPeriod($customer, $period);
+                        event(new FinalizeInvoiceBySchedule());
                     } catch (\Exception $e) {
                         // Registrar el error en los logs
                         Log::error("Error al generar factura para el cliente {$customer->id}: {$e->getMessage()}");
