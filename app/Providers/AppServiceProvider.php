@@ -12,6 +12,7 @@ use App\Listeners\ApplyBillingNovedades;
 use App\Listeners\ApplyRuleInvoice;
 use App\Listeners\FinalizeBuildInvoiceToSchedule;
 use App\Listeners\SendInvoiceNotification;
+use App\Listeners\UpdateStateToIssued;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
@@ -51,6 +52,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             FinalizeInvoiceBySchedule::class,
             [FinalizeBuildInvoiceToSchedule::class, 'handle']
+        );
+        Event::listen(
+            FinalizeInvoice::class,
+            [UpdateStateToIssued::class, 'handle']
         );
         Event::listen(
             InvoiceIssued::class,
