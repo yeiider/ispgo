@@ -24,8 +24,7 @@ class GenerateCustomerInvoices extends Command
         $billingDate = GeneralProviderConfig::getBillingDate();
         $currentDate = Carbon::now();
 
-        //  if ($currentDate->day == $billingDate) {
-        if (true) {
+        if ($currentDate->day == $billingDate) {
             $period = $this->option('period')
                 ? Carbon::createFromFormat('Y-m', $this->option('period'))
                 : now();

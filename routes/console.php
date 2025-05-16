@@ -13,11 +13,9 @@ Artisan::command('inspire', function () {
 Schedule::command('calculate:daily_invoice_balances')->daily();
 
 // Programar el comando basado en la configuración de facturación
-Schedule::command('invoice:generate_everyday')->dailyAt('00:00');
+Schedule::command('billing:generate-invoices')->dailyAt('00:00');
 
 Schedule::command('app:syncronizar-datos-onu')->dailyAt('01:00');
-
-//Schedule::command('smartolt:process_batches')->everyMinute();
 
 Schedule::command('services:suspend_everyday')->dailyAt('00:00');
 
