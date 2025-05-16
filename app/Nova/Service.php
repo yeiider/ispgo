@@ -162,7 +162,6 @@ class Service extends Resource
         return [
             new ActivateService(),
             new SuspendService(),
-            new GenerateInvoice(),
             new CreateActionsServiceInstall(),
             new CreateActionsServiceUninstall(),
             (new MikrotikAction())->canSee(function () {

@@ -30,7 +30,7 @@ class GenerateInvoice extends Action
         $invoice = false;
         $serviceBuildInvoice = new CustomerBillingService();
         foreach ($models as $model) {
-            $invoice = $serviceBuildInvoice->generateForPeriod($model->customer, now());
+            $invoice = $serviceBuildInvoice->generateForPeriod($model, now());
             event(new FinalizeInvoice($invoice));
         }
         if ($models->count() > 1) {

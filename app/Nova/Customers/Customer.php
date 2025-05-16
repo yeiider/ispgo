@@ -5,6 +5,7 @@ namespace App\Nova\Customers;
 use App\Mail\DynamicEmail;
 use App\Models\Customers\DocumentType;
 use App\Models\EmailTemplate;
+use App\Nova\Actions\Service\GenerateInvoice;
 use App\Nova\Actions\UpdateCustomerStatus;
 use App\Nova\Contract;
 use App\Nova\Filters\CustomerStatus;
@@ -111,7 +112,9 @@ class Customer extends Resource
             })->standalone(),
             (new onCreatedCustomerSiigo())->canSee(function () {
                 return ConfigProviderSiigo::getEnabled();
-            })
+            }),
+
+            new GenerateInvoice
         ];
     }
 
