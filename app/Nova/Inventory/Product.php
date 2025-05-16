@@ -67,6 +67,8 @@ class Product extends Resource
                 ->sortable(),
             BelongsTo::make(__('Category'),'category', Category::class)
                 ->sortable(),
+
+            \Laravel\Nova\Fields\BelongsToMany::make('Credit Accounts', 'creditAccounts', \App\Nova\Credit\CreditAccount::class),
         ];
     }
 

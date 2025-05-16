@@ -26,4 +26,14 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * Get the credit accounts associated with the product.
+     */
+    public function creditAccounts()
+    {
+        return $this->belongsToMany(\App\Models\Credit\CreditAccount::class, 'credit_account_product')
+            ->using(\App\Models\Credit\CreditAccountProduct::class)
+            ->withPivot('quantity', 'unit_price', 'subtotal')
+            ->withTimestamps();
+    }
 }

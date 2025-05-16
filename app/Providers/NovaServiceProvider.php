@@ -10,6 +10,7 @@ use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
 use App\Nova\DailyBox;
+use App\Nova\Dashboards\CreditDashboard;
 use App\Nova\Dashboards\Main;
 use App\Nova\EmailTemplate;
 use App\Nova\Finance\CashRegister;
@@ -23,6 +24,7 @@ use App\Nova\Inventory\EquipmentAssignment;
 use App\Nova\Inventory\Product;
 use App\Nova\Inventory\Supplier;
 use App\Nova\Inventory\Warehouse;
+use App\Nova\Credit\CreditAccount;
 use App\Nova\Invoice\CreditNote;
 use App\Nova\Invoice\DailyInvoiceBalance;
 use App\Nova\Invoice\Invoice;
@@ -100,6 +102,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(DailyInvoiceBalance::class)->name(__('panel.daily_invoice_balances')),
                     MenuItem::resource(BillingNovedad::class)->name(__('panel.billing_novedad')),
                 ])->icon('archive')->collapsable(),
+                MenuSection::make(__('panel.credits'), [
+                    MenuItem::resource(CreditAccount::class)->name(__('panel.credit_accounts')),
+                ])->icon('credit-card')->collapsable(),
+
                 MenuSection::make(__('panel.finances'), [
                     MenuItem::resource(CashRegister::class)->name(__('panel.cash_registers'))->canSee(function ($request) {
                         return $request->user() && $request->user()->can('PostInvoice');
@@ -197,6 +203,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         return [
             new \App\Nova\Dashboards\Main,
+            new \App\Nova\Dashboards\CreditDashboard,
         ];
     }
 

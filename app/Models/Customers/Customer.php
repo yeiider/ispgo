@@ -89,7 +89,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
     public function activeServices()
     {
-        return $this->services()->where('service_status', '!=', 'free');
+        return $this->services()->whereNotIn('service_status', ['free', 'inactive']);
     }
 
     public function addresses()

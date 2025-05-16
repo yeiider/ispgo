@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\InvoiceCreated;
+use App\Events\InvoiceIssued;
 use App\Helpers\Utils;
 use App\Models\EmailTemplate;
 use App\Models\Invoice\Invoice;
@@ -47,10 +47,10 @@ class SendInvoiceNotification implements ShouldQueue
     /**
      * Handle the event.
      *
-     * @param InvoiceCreated $event
+     * @param InvoiceIssued $event
      * @return void
      */
-    public function handle(InvoiceCreated $event): void
+    public function handle(InvoiceIssued $event): void
     {
         /**
          * @var Invoice $invoice;

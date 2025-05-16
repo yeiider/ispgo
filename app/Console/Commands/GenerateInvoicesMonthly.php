@@ -18,7 +18,7 @@ class GenerateInvoicesMonthly extends Command
         parent::__construct();
     }
 
-    public function handle()
+    public function handle(): void
     {
         $billingDate = GeneralProviderConfig::getBillingDate(); // Día configurado para facturación
         $currentDate = Carbon::now();

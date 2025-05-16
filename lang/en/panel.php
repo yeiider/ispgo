@@ -51,4 +51,6 @@ return [
     'tickets_tasks' => 'Tickets Tasks',
     'tickets_labels' => 'Tickets Labels',
     'tickets_board' => 'Tickets Board',
+    'credits' => 'Credits',
+    'credit_accounts' => 'Credit Accounts',
 ];

@@ -143,4 +143,4 @@ Usa `Carbon::setTestNow()` para controlar fechas y `assertDatabaseHas`.
 
 ---
 
-> **¡Éxitos codificando!** Este documento es tu hoja de ruta para un módulo de créditos robusto y mantenible.
+> **¡SI nesecitas hacer alguna configuracion general para encender o a pagar o configuraciones para que los administradores del sistema considera usar el archivo config/settings acompañado de un App\Setting\GeneralProviderConfig de esta forma puedes hacer configuraciones mas generales.

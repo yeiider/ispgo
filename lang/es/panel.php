@@ -51,4 +51,6 @@ return [
     'tickets_tasks' => 'Tareas de Tickets',
     'tickets_labels' => 'Etiquetas de Tickets',
     'tickets_board' => 'Tablero de Tickets',
+    'credits' => 'Créditos',
+    'credit_accounts' => 'Cuentas de Crédito',
 ];

@@ -20,7 +20,6 @@ class SendInvoiceNotification extends Action
 {
     use InteractsWithQueue;
     use Queueable;
-    public $withoutActionEvents = true;
 
     public function name(): string
     {

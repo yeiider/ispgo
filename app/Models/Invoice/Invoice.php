@@ -2,8 +2,7 @@
 
 namespace App\Models\Invoice;
 
-use App\Events\InvoiceCreated;
-use App\Events\InvoiceCreatedBefore;
+
 use App\Events\InvoiceIssued;
 use App\Events\InvoicePaid;
 use App\Events\InvoiceUpdateStatus;

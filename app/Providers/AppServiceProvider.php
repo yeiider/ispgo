@@ -2,12 +2,8 @@
 
 namespace App\Providers;
 
-use App\Events\InvoiceCreated;
-use App\Events\InvoicePaid;
-use App\Listeners\AfterPayingInvoice;
-use App\Listeners\SendInvoiceNotification;
+
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Laravel\Passport\Passport;
 

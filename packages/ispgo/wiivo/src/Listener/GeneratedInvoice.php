@@ -2,7 +2,7 @@
 
 namespace Ispgo\Wiivo\Listener;
 
-use App\Events\InvoiceCreated;
+use App\Events\InvoiceIssued;
 use App\Models\Invoice\Invoice;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Http\Client\ConnectionException;
@@ -22,7 +22,7 @@ class GeneratedInvoice implements ShouldQueue
     public $timeout = 120;
     public $delay = 10;
 
-    public function handle(InvoiceCreated $event): void
+    public function handle(InvoiceIssued $event): void
     {
         try {
             if (WiivoConfigProvider::getNotifyInvoice()) {
