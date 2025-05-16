@@ -2,6 +2,7 @@
 
 namespace App\Nova\Actions\Service;
 
+use App\Events\FinalizeInvoice;
 use App\Services\Billing\CustomerBillingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -30,6 +31,7 @@ class GenerateInvoice extends Action
         $serviceBuildInvoice = new CustomerBillingService();
         foreach ($models as $model) {
             $invoice = $serviceBuildInvoice->generateForPeriod($model->customer, now());
+            event(new FinalizeInvoice($invoice));
         }
         if ($models->count() > 1) {
             return ActionResponse::visit('/resources/invoices');

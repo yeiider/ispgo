@@ -56,6 +56,8 @@ class FinalizeBuildInvoiceToSchedule implements ShouldQueue
         ->where('state', 'building')
         ->get();
 
+
+
         foreach ($invoices as $invoice) {
             try {
                 $invoice->finalize();

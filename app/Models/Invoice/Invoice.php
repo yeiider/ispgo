@@ -101,10 +101,8 @@ class Invoice extends Model
     public function finalize(): void
     {
         $this->state = 'issued';
-        $this->issued_at = now();
         $this->save();
-
-        event(new InvoiceIssued($this));   // PDF + e-mail, etc.
+        event(new InvoiceIssued($this));
     }
 
 

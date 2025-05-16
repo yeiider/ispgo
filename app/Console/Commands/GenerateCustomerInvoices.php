@@ -24,7 +24,8 @@ class GenerateCustomerInvoices extends Command
         $billingDate = GeneralProviderConfig::getBillingDate();
         $currentDate = Carbon::now();
 
-        if ($currentDate->day == $billingDate) {
+        //  if ($currentDate->day == $billingDate) {
+        if (true) {
             $period = $this->option('period')
                 ? Carbon::createFromFormat('Y-m', $this->option('period'))
                 : now();
@@ -35,7 +36,7 @@ class GenerateCustomerInvoices extends Command
                 foreach ($customers as $customer) {
                     try {
                         $billing->generateForPeriod($customer, $period);
-                        event(new FinalizeInvoiceBySchedule());
+
                     } catch (\Exception $e) {
                         // Registrar el error en los logs
                         Log::error("Error al generar factura para el cliente {$customer->id}: {$e->getMessage()}");
@@ -47,6 +48,7 @@ class GenerateCustomerInvoices extends Command
                         continue;
                     }
                 }
+                event(new FinalizeInvoiceBySchedule());
             });
 
             $this->info('Proceso de generación completado ✔');

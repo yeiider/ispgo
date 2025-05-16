@@ -2,7 +2,7 @@
 
 namespace Ispgo\Wiivo;
 
-use App\Events\InvoiceCreated;
+use App\Events\InvoiceIssued;
 use App\Events\InvoicePaid;
 use Illuminate\Support\ServiceProvider;
 use Ispgo\Wiivo\Http\Middleware\Authorize;
@@ -35,7 +35,7 @@ class WiivoServiceProvider extends ServiceProvider
             [PaymentInvoice::class, 'handle']
         );
         Event::listen(
-            InvoiceCreated::class,
+            InvoiceIssued::class,
             [GeneratedInvoice::class, 'handle']
         );
 

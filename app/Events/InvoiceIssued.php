@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Invoice\Invoice;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -17,10 +18,10 @@ class InvoiceIssued
     /**
      * Create a new event instance.
      */
-    public function __construct(public $invoice)
+    public function __construct(public Invoice $invoice)
     {
 
     }
 
-    
+
 }
