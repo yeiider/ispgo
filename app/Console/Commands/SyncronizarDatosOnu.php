@@ -71,6 +71,8 @@ class SyncronizarDatosOnu extends Command
 
                         if ($service) {
                             $service->sn = $onuSerial;
+                            $service->unu_latitude = floatval($onu["latitude"]??0);
+                            $service->unu_longitude = floatval($onu["longitude"]??0);
                             $service->save();
 
                             $this->info("Servicio actualizado para el cliente con documento: {$onuName}");
