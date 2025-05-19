@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('services', function (Blueprint $table) {
-            $table->decimal('unu_latitude', 10, 8)->nullable()->after('some_column'); // Cambia "some_column" por la columna existente después de la cual deseas agregar latitud
-            $table->decimal('unu_longitude', 11, 8)->nullable()->after('unu_latitude'); // Agrega longitud justo después de latitud
+            $table->decimal('unu_latitude', 10, 8)->nullable(); // Cambia "some_column" por la columna existente después de la cual deseas agregar latitud
+            $table->decimal('unu_longitude', 11, 8)->nullable(); // Agrega longitud justo después de latitud
         });
     }
 

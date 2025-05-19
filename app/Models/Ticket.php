@@ -8,6 +8,8 @@ use App\Models\Services\Service;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ticket extends Model
 {
@@ -112,6 +114,30 @@ class Ticket extends Model
         $this->save();
 
         event(new UserAssignedToTicket($this));
+    }
 
+    /**
+     * Get the comments for the ticket.
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(TicketComment::class);
+    }
+
+    /**
+     * Get the attachments for the ticket.
+     */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TicketAttachment::class);
+    }
+
+    /**
+     * Get the labels for the ticket.
+     */
+    public function labels(): BelongsToMany
+    {
+        return $this->belongsToMany(TicketLabel::class, 'ticket_label', 'ticket_id', 'ticket_label_id')
+            ->withTimestamps();
     }
 }
