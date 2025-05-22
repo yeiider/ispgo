@@ -78,5 +78,36 @@ return [
     'contact_method' => 'Método de Contacto',
     'url_key' => 'Clave URL',
     'categories' => 'Categorías',
-    'installation' => 'Instalacion'
+    'installation' => 'Instalacion',
+
+    // Atributos de Comentarios de Tickets
+    'comment' => 'Comentario',
+    'comments' => 'Comentarios',
+    'content' => 'Contenido',
+    'recipient' => 'Destinatario',
+    'recipient_id' => 'ID del Destinatario',
+    'ticket' => 'Ticket',
+
+    // Atributos de Adjuntos de Tickets
+    'attachment' => 'Adjunto',
+    'filename' => 'Nombre del Archivo',
+    'original_filename' => 'Nombre Original del Archivo',
+    'file_path' => 'Ruta del Archivo',
+    'file' => 'Archivo',
+    'mime_type' => 'Tipo MIME',
+    'file_size' => 'Tamaño del Archivo',
+    'human_file_size' => 'Tamaño Legible del Archivo',
+    'uploaded_by' => 'Subido Por',
+    'uploader' => 'Cargador',
+
+    // Atributos de Etiquetas de Tickets
+    'label' => 'Etiqueta',
+    'labels' => 'Etiquetas',
+    'color' => 'Color',
+    'is_active' => 'Está Activo',
+
+    'support' => 'Soporte',
+    'technical' => 'Técnico',
+    'other' => 'Otro',
+
 ];

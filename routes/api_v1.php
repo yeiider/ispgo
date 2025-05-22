@@ -90,10 +90,10 @@ Route::apiResource('/attachments', App\Http\Controllers\API\TicketAttachmentCont
 Route::post('/tickets/{ticket_id}/attachments', [App\Http\Controllers\API\TicketAttachmentController::class, 'store']);
 Route::post('/comments/{comment_id}/attachments', [App\Http\Controllers\API\TicketAttachmentController::class, 'storeForComment']);
 
-// Ticket Labels
-Route::apiResource('/ticket-labels', App\Http\Controllers\API\TicketLabelController::class);
-Route::get('/tickets/{ticket_id}/labels', [App\Http\Controllers\API\TicketLabelController::class, 'getTicketLabels']);
-Route::post('/tickets/{ticket_id}/labels/{label_id}', [App\Http\Controllers\API\TicketLabelController::class, 'attachLabel']);
-Route::delete('/tickets/{ticket_id}/labels/{label_id}', [App\Http\Controllers\API\TicketLabelController::class, 'detachLabel']);
+// Ticket Labels - Removed in favor of direct labels field on tickets
+// Route::apiResource('/ticket-labels', App\Http\Controllers\API\TicketLabelController::class);
+// Route::get('/tickets/{ticket_id}/labels', [App\Http\Controllers\API\TicketLabelController::class, 'getTicketLabels']);
+// Route::post('/tickets/{ticket_id}/labels/{label_id}', [App\Http\Controllers\API\TicketLabelController::class, 'attachLabel']);
+// Route::delete('/tickets/{ticket_id}/labels/{label_id}', [App\Http\Controllers\API\TicketLabelController::class, 'detachLabel']);
 
 Route::apiResource('/users', App\Http\Controllers\API\UserController::class);

@@ -9,7 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
-use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\MultiSelect;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class AssignmentTickets extends Action
@@ -27,20 +27,20 @@ class AssignmentTickets extends Action
     {
         foreach ($models as $model) {
             try {
-                // Verifica si se seleccionó un técnico
-                if (!$fields->technician) {
-                    return Action::danger('No technician selected.');
+                // Verifica si se seleccionaron técnicos
+                if (empty($fields->technicians)) {
+                    return Action::danger('No technicians selected.');
                 }
 
-                // Asigna el técnico al ticket
-                $model->assignUser($fields->technician);
+                // Asigna los técnicos al ticket
+                $model->assignUsers($fields->technicians);
             } catch (\Exception $e) {
                 // Manejo de excepciones y mensaje de error
-                return Action::danger("Failed to assign technician to ticket ID {$model->id}: " . $e->getMessage());
+                return Action::danger("Failed to assign technicians to ticket ID {$model->id}: " . $e->getMessage());
             }
         }
 
-        return Action::message('Technician assigned successfully to all selected tickets.');
+        return Action::message('Technicians assigned successfully to all selected tickets.');
     }
 
     /**
@@ -55,11 +55,11 @@ class AssignmentTickets extends Action
         $technicians = User::technicians()->pluck('name', 'id');
 
         return [
-            Select::make('Technician')
+            MultiSelect::make('Technicians')
                 ->options($technicians)
                 ->displayUsingLabels()
                 ->rules('required')
-                ->help('Select a technician to assign to the selected tickets.'),
+                ->help('Select technicians to assign to the selected tickets.'),
         ];
     }
 }

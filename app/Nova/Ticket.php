@@ -8,13 +8,17 @@ use App\Nova\Customers\Customer;
 use App\Nova\Filters\PriorityTickets;
 use App\Nova\Filters\StatusTickets;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\File;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Markdown;
 use Laravel\Nova\Fields\Select;
+
+use Laravel\Nova\Fields\Tag;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Ticket extends Resource
@@ -50,7 +54,6 @@ class Ticket extends Resource
      */
     public function fields(Request $request): array
     {
-        $technicians = User::technicians()->pluck('name', 'id');
         return [
             ID::make()->sortable(),
 
@@ -99,7 +102,7 @@ class Ticket extends Resource
                 ->sortable()
                 ->rules('required', 'max:255'),
 
-            Textarea::make(__('attribute.description'), 'description')
+            Markdown::make(__('attribute.description'), 'description')
                 ->alwaysShow()
                 ->rules('required'),
 
@@ -116,11 +119,11 @@ class Ticket extends Resource
                 ->onlyOnDetail()
                 ->sortable(),
 
-            Select::make(__('attribute.technician'), 'user_id')
-                ->options($technicians)
-                ->displayUsingLabels(),
+            Tag::make(__('attribute.technicians'), 'users', \App\Nova\User::class)
+                ->searchable()
+                ->showCreateRelationButton(),
 
-            Textarea::make(__('attribute.resolution_notes'), 'resolution_notes')
+            Markdown::make(__('attribute.resolution_notes'), 'resolution_notes')
                 ->alwaysShow()
                 ->nullable(),
 
@@ -130,6 +133,27 @@ class Ticket extends Resource
             Text::make(__('attribute.contact_method'), 'contact_method')
                 ->nullable()
                 ->sortable(),
+
+            HasMany::make(__('attribute.comments'), 'comments', TicketComment::class),
+
+            HasMany::make(__('attribute.attachments'), 'attachments', TicketAttachment::class),
+
+            Select::make(__('attribute.labels'), 'labels')
+                ->options([
+                    'support' => __('attribute.support'),
+                    'billing' => __('attribute.billing'),
+                    'technical' => __('attribute.technical'),
+                    'installation' => __('attribute.installation'),
+                    'other' => __('attribute.other'),
+                ]),
+
+            Badge::make(__('attribute.labels'), 'labels')->types([
+                'support' => ['font-bold', 'text-green-600'],
+                'billing' => ['font-medium', 'text-blue-600'],
+                'technical' => ['font-medium', 'text-yellow-600'],
+                'installation' => ['font-bold', 'text-red-600'],
+                'other' => ['font-medium', 'text-gray-600']
+            ]),
         ];
     }
 

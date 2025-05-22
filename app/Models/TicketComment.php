@@ -20,7 +20,6 @@ class TicketComment extends Model
         'ticket_id',
         'user_id',
         'content',
-        'recipient_id',
     ];
 
     /**
@@ -39,19 +38,5 @@ class TicketComment extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the recipient user of the comment.
-     */
-    public function recipient(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'recipient_id');
-    }
 
-    /**
-     * Get the attachments for the comment.
-     */
-    public function attachments(): HasMany
-    {
-        return $this->hasMany(TicketAttachment::class, 'comment_id');
-    }
 }

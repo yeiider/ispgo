@@ -23,21 +23,25 @@ class Ticket extends Model
         'status',
         'title',
         'description',
-        'user_id',
         'resolution_notes',
         'attachments',
         'contact_method',
-        'closed_at'
+        'closed_at',
+        'labels'
     ];
 
     protected $casts = [
-        'closed_at' => 'date'
+        'closed_at' => 'date',
+        'labels' => 'array'
     ];
 
 
-    public function user()
+    /**
+     * Get the users assigned to the ticket.
+     */
+    public function users(): BelongsToMany
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class)->withTimestamps();
     }
 
     /**
@@ -105,15 +109,37 @@ class Ticket extends Model
      */
     public function assignUser(User|int $user): void
     {
-        if ($user instanceof User) {
-            $this->user_id = $user->id;
-        } else {
-            $this->user_id = $user;
+        $userId = $user instanceof User ? $user->id : $user;
+
+        // Check if the user is already assigned to the ticket
+        if (!$this->users()->where('user_id', $userId)->exists()) {
+            $this->users()->attach($userId);
+            event(new UserAssignedToTicket($this));
         }
+    }
 
-        $this->save();
-
+    /**
+     * Assign multiple users to the ticket.
+     *
+     * @param array $userIds
+     * @return void
+     */
+    public function assignUsers(array $userIds): void
+    {
+        $this->users()->syncWithoutDetaching($userIds);
         event(new UserAssignedToTicket($this));
+    }
+
+    /**
+     * Remove a user from the ticket.
+     *
+     * @param int|User $user
+     * @return void
+     */
+    public function removeUser(User|int $user): void
+    {
+        $userId = $user instanceof User ? $user->id : $user;
+        $this->users()->detach($userId);
     }
 
     /**
@@ -133,11 +159,70 @@ class Ticket extends Model
     }
 
     /**
-     * Get the labels for the ticket.
+     * Add a label to the ticket.
+     *
+     * @param string $name
+     * @param string $color
+     * @return void
      */
-    public function labels(): BelongsToMany
+    public function addLabel(string $name, string $color = '#3498db'): void
     {
-        return $this->belongsToMany(TicketLabel::class, 'ticket_label', 'ticket_id', 'ticket_label_id')
-            ->withTimestamps();
+        $labels = $this->labels ?? [];
+
+        // Check if label already exists
+        foreach ($labels as $label) {
+            if ($label['name'] === $name) {
+                return;
+            }
+        }
+
+        $labels[] = [
+            'name' => $name,
+            'color' => $color
+        ];
+
+        $this->labels = $labels;
+        $this->save();
+    }
+
+    /**
+     * Remove a label from the ticket.
+     *
+     * @param string $name
+     * @return void
+     */
+    public function removeLabel(string $name): void
+    {
+        if (!$this->labels) {
+            return;
+        }
+
+        $labels = array_filter($this->labels, function ($label) use ($name) {
+            return $label['name'] !== $name;
+        });
+
+        $this->labels = array_values($labels);
+        $this->save();
+    }
+
+    /**
+     * Check if the ticket has a specific label.
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function hasLabel(string $name): bool
+    {
+        if (!$this->labels) {
+            return false;
+        }
+
+        foreach ($this->labels as $label) {
+            if ($label['name'] === $name) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

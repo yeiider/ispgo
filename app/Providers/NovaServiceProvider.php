@@ -43,6 +43,10 @@ use App\Nova\SupportTickets\ColumnResourceNova;
 use App\Nova\SupportTickets\LabelResourceNova;
 use App\Nova\SupportTickets\TaskResourceNova;
 use App\Nova\Ticket;
+use App\Nova\TicketComment;
+use App\Nova\TicketAttachment;
+// TicketLabel removed in favor of direct labels field on tickets
+use App\Nova\TicketLabel;
 use App\NovaPermissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;

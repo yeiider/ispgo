@@ -34,6 +34,10 @@ use Symfony\Component\HttpFoundation\Response;
  *     @OA\Property(property="resolution_notes", type="string", description="Resolution notes added by the team", example="Issue fixed by updating the software version."),
  *     @OA\Property(property="attachments", type="string", description="Attachment file paths, if any", example="['attachment1.png', 'attachment2.pdf']"),
  *     @OA\Property(property="contact_method", type="string", description="Preferred contact method for this ticket", example="Email"),
+ *     @OA\Property(property="labels", type="array", @OA\Items(type="object",
+ *         @OA\Property(property="name", type="string", example="Technical Support"),
+ *         @OA\Property(property="color", type="string", example="#e74c3c")
+ *     ), description="Labels associated with the ticket"),
  * )
  *
  * @OA\Schema(
@@ -54,6 +58,10 @@ use Symfony\Component\HttpFoundation\Response;
  *     @OA\Property(property="resolution_notes", type="string", description="Resolution notes", example="Issue fixed by updating the software version."),
  *     @OA\Property(property="attachments", type="array", @OA\Items(type="string"), description="Array of file paths for attachments", example="['attachment1.png', 'attachment2.pdf']"),
  *     @OA\Property(property="contact_method", type="string", description="Preferred contact method", example="Email"),
+ *     @OA\Property(property="labels", type="array", @OA\Items(type="object",
+ *         @OA\Property(property="name", type="string", example="Technical Support"),
+ *         @OA\Property(property="color", type="string", example="#e74c3c")
+ *     ), description="Labels associated with the ticket"),
  * )
  */
 class TicketController extends Controller

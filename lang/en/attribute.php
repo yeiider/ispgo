@@ -78,4 +78,34 @@ return [
     'url_key' => 'URL Key',
     'categories' => 'Categories',
     'installation' => 'Installation',
+
+    // Ticket Comment attributes
+    'comment' => 'Comment',
+    'comments' => 'Comments',
+    'content' => 'Content',
+    'recipient' => 'Recipient',
+    'recipient_id' => 'Recipient ID',
+    'ticket' => 'Ticket',
+
+    // Ticket Attachment attributes
+    'attachment' => 'Attachment',
+    'filename' => 'Filename',
+    'original_filename' => 'Original Filename',
+    'file_path' => 'File Path',
+    'file' => 'File',
+    'mime_type' => 'MIME Type',
+    'file_size' => 'File Size',
+    'human_file_size' => 'Human File Size',
+    'uploaded_by' => 'Uploaded By',
+    'uploader' => 'Uploader',
+
+    // Ticket Label attributes
+    'label' => 'Label',
+    'labels' => 'Labels',
+    'color' => 'Color',
+    'is_active' => 'Is Active',
+
+    'support' => 'Support',
+    'technical' => 'Technical',
+    'other' => 'Other',
 ];
