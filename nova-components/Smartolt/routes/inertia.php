@@ -14,6 +14,8 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 |
 */
 
-Route::get('/', function (NovaRequest $request) {
-    return inertia('Smartolt');
-});
+Route::get('/{resourceId}', function (NovaRequest $request, $resourceId) {
+    return inertia('Smartolt', [
+        'resourceId' => $resourceId,
+    ]);
+})->name('smartolt.onu');

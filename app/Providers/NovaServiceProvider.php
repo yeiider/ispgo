@@ -125,12 +125,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Ticket::class)->name(__('panel.tickets')),
                 ])->icon('support')->collapsable(),
 
-                MenuSection::make(__('panel.tickets_board'), [
-                    MenuItem::resource(BoardResourceNova::class)->name(__('panel.tickets_boards')),
-                    MenuItem::resource(ColumnResourceNova::class)->name(__('panel.tickets_columns')),
-                    MenuItem::resource(TaskResourceNova::class)->name(__('panel.tickets_tasks')),
-                    MenuItem::resource(LabelResourceNova::class)->name(__('panel.tickets_labels')),
-                ])->icon('support')->collapsable(),
 
                 MenuSection::make(__('panel.content'), [
                     MenuItem::resource(Pages::class)->name(__('panel.pages')),
@@ -157,6 +151,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     ->icon('cog')->canSee(function ($request) {
                         return $request->user() && $request->user()->can('Setting');
                     }),
+
 
                 MenuSection::make(__('panel.mikrotik_manager'), [
                     MenuItem::link(__('panel.plans_PPPoe'), 'mikrotik/planes-ppp'),

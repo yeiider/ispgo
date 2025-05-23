@@ -109,5 +109,6 @@ return [
     'support' => 'Soporte',
     'technical' => 'Técnico',
     'other' => 'Otro',
+    'technicians' => 'Te'
 
 ];

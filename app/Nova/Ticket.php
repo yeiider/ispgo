@@ -62,10 +62,21 @@ class Ticket extends Resource
                 ->searchable()
                 ->rules('required'),
 
-            BelongsTo::make(__('service.service'), 'service', Service::class)
+            Select::make(__('service.service'), 'service_id')
                 ->sortable()
-                ->searchable()
-                ->nullable(),
+                ->nullable()
+                ->dependsOn(['customer'], function ($field, NovaRequest $request, $formData) {
+                    if (isset($formData['customer'])) {
+                        $customers = \App\Models\Customers\Customer::find($formData['customer']);
+                        $customerservices = $customers->services;
+                        $field->readonly(false);
+                        $field->options($customerservices->pluck('full_service_name', 'id'));
+                    } else {
+                        $field->options([]);
+                        $field->readonly(true);
+                    }
+                })->displayUsingLabels(),
+
 
             Select::make(__('attribute.issue_type'), 'issue_type')
                 ->options([
@@ -147,13 +158,9 @@ class Ticket extends Resource
                     'other' => __('attribute.other'),
                 ]),
 
-            Badge::make(__('attribute.labels'), 'labels')->types([
-                'support' => ['font-bold', 'text-green-600'],
-                'billing' => ['font-medium', 'text-blue-600'],
-                'technical' => ['font-medium', 'text-yellow-600'],
-                'installation' => ['font-bold', 'text-red-600'],
-                'other' => ['font-medium', 'text-gray-600']
-            ]),
+
+            DateTime::make('Created At')->filterable()->onlyOnIndex(),
+
         ];
     }
 

@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Ispgo\Mikrotik\Nova\Actions\MikrotikAction;
 use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
 use Ispgo\Smartolt\Nova\Actions\LoadPlanSmartOlt;
+use Ispgo\Smartolt\Nova\OnuManager;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\Badge;
@@ -135,6 +136,7 @@ class Service extends Resource
     {
         return [
             Text::make(__('Onu SN'), 'sn'),
+            OnuManager::make(),
         ];
     }
 
@@ -170,9 +172,14 @@ class Service extends Resource
             (new LoadPlanSmartOlt())->canSee(function () {
                 return ProviderSmartOlt::getEnabled();
             }),
+            Action::openInNewTab('Ver estado de la Onu', function ($service) {
+                return route('smartolt.onu', $service->id);
+            })->sole(),
             Action::downloadUrl('Exportar Servicioss', function () {
                 return route('service.export');
             })->standalone(),
+
+
             new SendWhatsAppMessage(),
         ];
     }
