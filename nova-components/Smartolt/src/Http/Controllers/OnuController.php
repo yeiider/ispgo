@@ -4,6 +4,7 @@ namespace Ispgo\Smartolt\Http\Controllers;
 
 use App\Models\Services\Service;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Http\JsonResponse;
@@ -133,7 +134,7 @@ class OnuController extends Controller
      *
      * @param Request $request
      * @param string|int $serviceId
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|object|Response
      */
     public function getSignalGraph(Request $request, $serviceId)
     {
@@ -160,7 +161,7 @@ class OnuController extends Controller
      * @param Request $request
      * @param string|int $serviceId
      * @param string $graphType
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|object|Response
      */
     public function getTrafficGraph(Request $request, $serviceId, string $graphType = 'hourly')
     {
