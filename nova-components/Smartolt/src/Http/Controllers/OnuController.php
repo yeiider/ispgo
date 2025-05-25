@@ -142,7 +142,10 @@ class OnuController extends Controller
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
-            $response = $this->apiManager->getOnuSignalGraphByExternalId($externalId);
+            $cacheKey = "onu_signal_graph_{$externalId}";
+            $response = cache()->remember($cacheKey, now()->addDay(), function () use ($externalId) {
+                return $this->apiManager->getOnuSignalGraphByExternalId($externalId);
+            });
 
             // Set the content type to image/png as specified in the requirements
             return response($response->body(), 200, ['Content-Type' => 'image/png']);
