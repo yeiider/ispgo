@@ -5,6 +5,7 @@ namespace Ispgo\Smartolt\Http\Controllers;
 use App\Models\Services\Service;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Cache;
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Http\JsonResponse;
 
@@ -26,8 +27,11 @@ class OltController extends Controller
     public function getOlts(Request $request): JsonResponse
     {
         try {
-            $response = $this->apiManager->getOlts();
-            return response()->json($response->json());
+            $response = Cache::remember('smartolt_olts', now()->addHours(8), function () {
+                $apiResponse = $this->apiManager->getOlts();
+                return $apiResponse->json();
+            });
+            return response()->json($response);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -43,8 +47,11 @@ class OltController extends Controller
     public function getOltCardsDetails(Request $request, int $oltId): JsonResponse
     {
         try {
-            $response = $this->apiManager->getOltCardsDetails($oltId);
-            return response()->json($response->json());
+            $response = Cache::remember('smartolt_cards_' . $oltId, now()->addHours(8), function () use ($oltId) {
+                $apiResponse = $this->apiManager->getOltCardsDetails($oltId);
+                return $apiResponse->json();
+            });
+            return response()->json($response);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -123,8 +130,11 @@ class OltController extends Controller
     public function getZones(Request $request): JsonResponse
     {
         try {
-            $response = $this->apiManager->getZones();
-            return response()->json($response->json());
+            $response = Cache::remember('smartolt_zones', now()->addHours(8), function () {
+                $apiResponse = $this->apiManager->getZones();
+                return $apiResponse->json();
+            });
+            return response()->json($response);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -140,8 +150,11 @@ class OltController extends Controller
     public function getVlansByOltId(Request $request, int $oltId): JsonResponse
     {
         try {
-            $response = $this->apiManager->getVlansByOltId($oltId);
-            return response()->json($response->json());
+            $response = Cache::remember('smartolt_vlans_' . $oltId, now()->addMinutes(60), function () use ($oltId) {
+                $apiResponse = $this->apiManager->getVlansByOltId($oltId);
+                return $apiResponse->json();
+            });
+            return response()->json($response);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
