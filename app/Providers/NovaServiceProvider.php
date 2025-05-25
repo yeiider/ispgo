@@ -45,6 +45,7 @@ use App\Nova\SupportTickets\TaskResourceNova;
 use App\Nova\Ticket;
 use App\Nova\TicketComment;
 use App\Nova\TicketAttachment;
+
 // TicketLabel removed in favor of direct labels field on tickets
 use App\Nova\TicketLabel;
 use App\NovaPermissions;
@@ -52,6 +53,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Ispgo\Mikrotik\Mikrotik;
 use Ispgo\SettingsManager\SettingsManager;
+use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 use Ispgo\Smartolt\Smartolt;
 use Laravel\Nova\Exceptions\NovaException;
 use Laravel\Nova\Menu\MenuGroup;
@@ -152,7 +154,11 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                         return $request->user() && $request->user()->can('Setting');
                     }),
 
-
+                MenuSection::make(__('panel.smart_olt'))
+                    ->path('/smartolt/olts')
+                    ->icon('cog')->canSee(function ($request) {
+                        return ProviderSmartOlt::getEnabled();
+                    }),
                 MenuSection::make(__('panel.mikrotik_manager'), [
                     MenuItem::link(__('panel.plans_PPPoe'), 'mikrotik/planes-ppp'),
                     MenuItem::link(__('panel.ip_pools'), 'mikrotik/ip-pool'),

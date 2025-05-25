@@ -2,6 +2,7 @@
 
 namespace Ispgo\Smartolt\Services;
 
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
@@ -109,7 +110,8 @@ class ApiManager
         // Agrega otras validaciones según los requisitos de la API
     }
 
-    public function getAllOnus(): \GuzzleHttp\Promise\PromiseInterface|Response
+
+    public function getAllOnus(): PromiseInterface|Response
     {
 
         $endpoint = 'api/onu/get_all_onus_details';
@@ -124,6 +126,24 @@ class ApiManager
             throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
         }
     }
+
+
+    /**
+     * Obtiene la lista de zonas del sistema SmartOLT.
+     *
+     * @return Response Retorna la promesa o respuesta HTTP con las zonas
+     * @throws \Exception Si hay error de conexión con el servidor SmartOLT
+     */
+    public function getZones(): Response
+    {
+        $endpoint = 'api/system/get_zones';
+        try {
+            return $this->request($endpoint, [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
 
     /**
      * Validar el número de serie de la ONU.
@@ -293,4 +313,95 @@ class ApiManager
             'wan_mode' => $wanMode
         ]);
     }
+
+    /**
+     * Obtener lista de OLTs.
+     *
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOlts(): Response
+    {
+        try {
+            return $this->request('api/system/get_olts', [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Obtener detalles de las tarjetas de una OLT por ID.
+     *
+     * @param int $oltId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOltCardsDetails(int $oltId): Response
+    {
+        try {
+            return $this->request('api/system/get_olt_cards_details/' . $oltId, [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al obtener detalles de las tarjetas de la OLT: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Obtener ONUs no configuradas para una OLT por ID.
+     *
+     * @param int $oltId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getUnconfiguredOnusForOlt(int $oltId): Response
+    {
+        try {
+            return $this->request('api/onu/unconfigured_onus_for_olt/' . $oltId, [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al obtener ONUs no configuradas: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Obtener Vlans por ID de OLT.
+     *
+     * @param int $oltId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getVlansByOltId(int $oltId): Response
+    {
+        try {
+            return $this->request('api/olt/get_vlans/' . $oltId, [], false, 'get');
+        }catch (ConnectionException $e) {
+            throw new \Exception("Error al obtener VLANs: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Configurar IP de gestión DHCP para ONU por external_id.
+     *
+     * @param string $externalId
+     * @param int $vlan
+     * @return Response
+     * @throws \Exception
+     */
+    public function setOnuManagementIpDhcpByExternalId(string $externalId, int $vlan): Response
+    {
+        $this->validateExternalId($externalId);
+        return $this->request('api/onu/set_onu_mgmt_ip_dhcp/' . $externalId, ['vlan' => $vlan], true);
+    }
+
+    /**
+     * Autorizar una ONU nueva.
+     *
+     * @param array $payload Datos de la ONU a autorizar
+     * @return Response
+     * @throws \Exception
+     */
+    public function authorizeOnu(array $payload): Response
+    {
+        return $this->request('api/onu/authorize_onu', $payload, true);
+    }
+
+
 }

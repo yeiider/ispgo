@@ -14,8 +14,22 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 |
 */
 
+// Route for OLT list
+Route::get('/olts', function (NovaRequest $request) {
+    return inertia('OltLists');
+})->name('smartolt.olts');
+
+// Route for OLT details
+Route::get('/olts/{oltId}', function (NovaRequest $request, $oltId) {
+    return inertia('OltDetail', [
+        'oltId' => $oltId,
+    ]);
+})->name('smartolt.olt.detail');
+
+// Route for ONU details
 Route::get('/{resourceId}', function (NovaRequest $request, $resourceId) {
     return inertia('Smartolt', [
         'resourceId' => $resourceId,
+        'view' => 'onu',
     ]);
 })->name('smartolt.onu');

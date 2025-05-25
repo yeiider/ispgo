@@ -7,7 +7,6 @@
 </template>
 
 <script>
-
 import Board from '../components/OnuManager'
 
 export default {
@@ -16,16 +15,20 @@ export default {
       type: String,
       required: false
     },
+    view: {
+      type: String,
+      default: 'onu'
+    }
   },
   components: {
-    Board
+    Board,
   },
 
   mounted() {
     console.log('Component mounted.')
-    console.log(this.resourceId)
+    console.log('View:', this.view)
+    console.log('Resource ID:', this.resourceId)
   },
-
 }
 </script>
 

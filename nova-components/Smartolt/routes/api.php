@@ -15,6 +15,17 @@ use Ispgo\Smartolt\Http\Controllers\OnuController;
 |
 */
 
+// OLT Management Routes
+Route::prefix('olt')->group(function () {
+    // GET routes for retrieving information
+    Route::get('list', [\Ispgo\Smartolt\Http\Controllers\OltController::class, 'getOlts']);
+    Route::get('{oltId}/cards', [\Ispgo\Smartolt\Http\Controllers\OltController::class, 'getOltCardsDetails']);
+    Route::get('{oltId}/unconfigured-onus', [\Ispgo\Smartolt\Http\Controllers\OltController::class, 'getUnconfiguredOnusForOlt']);
+    Route::get('services', [\Ispgo\Smartolt\Http\Controllers\OltController::class, 'getServices']);
+    Route::get('zones', [\Ispgo\Smartolt\Http\Controllers\OltController::class, 'getZones']);
+    Route::get('vlans/{oltId}', [\Ispgo\Smartolt\Http\Controllers\OltController::class, 'getVlansByOltId']);
+});
+
 // ONU Management Routes
 Route::prefix('onu')->group(function () {
     // GET routes for retrieving information
@@ -25,6 +36,7 @@ Route::prefix('onu')->group(function () {
     Route::get('{serviceId}/traffic-graph/{graphType?}', [OnuController::class, 'getTrafficGraph']);
 
     // POST routes for actions
+    Route::post('authorize', [OnuController::class, 'authorize']);
     Route::post('{serviceId}/reboot', [OnuController::class, 'reboot']);
     Route::post('{serviceId}/factory-reset', [OnuController::class, 'factoryReset']);
     Route::post('{serviceId}/enable', [OnuController::class, 'enable']);

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class OnuController extends Controller
 {
@@ -21,12 +22,13 @@ class OnuController extends Controller
      * Get ONU details for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @return JsonResponse
      */
-    public function getDetails(Request $request, int $serviceId): JsonResponse
+    public function getDetails(Request $request, $serviceId): JsonResponse
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
 
             // Assuming the service has a field for the ONU serial number
@@ -50,6 +52,7 @@ class OnuController extends Controller
     public function getStatus(Request $request, int $serviceId): JsonResponse
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
@@ -107,12 +110,13 @@ class OnuController extends Controller
      * Get ONU configuration for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @return JsonResponse
      */
-    public function getConfig(Request $request, int $serviceId): JsonResponse
+    public function getConfig(Request $request, $serviceId): JsonResponse
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
@@ -128,12 +132,13 @@ class OnuController extends Controller
      * Get ONU signal graph for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @return \Illuminate\Http\Response
      */
-    public function getSignalGraph(Request $request, int $serviceId)
+    public function getSignalGraph(Request $request, $serviceId)
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
@@ -150,13 +155,14 @@ class OnuController extends Controller
      * Get ONU traffic graph for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @param string $graphType
      * @return \Illuminate\Http\Response
      */
-    public function getTrafficGraph(Request $request, int $serviceId, string $graphType = 'hourly')
+    public function getTrafficGraph(Request $request, $serviceId, string $graphType = 'hourly')
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
@@ -173,12 +179,13 @@ class OnuController extends Controller
      * Reboot ONU for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @return JsonResponse
      */
-    public function reboot(Request $request, int $serviceId): JsonResponse
+    public function reboot(Request $request, $serviceId): JsonResponse
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
@@ -194,12 +201,13 @@ class OnuController extends Controller
      * Factory reset ONU for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @return JsonResponse
      */
-    public function factoryReset(Request $request, int $serviceId): JsonResponse
+    public function factoryReset(Request $request, $serviceId): JsonResponse
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
@@ -215,16 +223,17 @@ class OnuController extends Controller
      * Enable ONU for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @return JsonResponse
      */
-    public function enable(Request $request, int $serviceId): JsonResponse
+    public function enable(Request $request, $serviceId): JsonResponse
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
 
             // Assuming the service has a field for the ONU serial number
-            $sn = $service->onu_sn;
+            $sn = $service->sn;
 
             if (empty($sn)) {
                 return response()->json(['message' => 'ONU serial number not found for this service'], 404);
@@ -242,16 +251,17 @@ class OnuController extends Controller
      * Disable ONU for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @return JsonResponse
      */
-    public function disable(Request $request, int $serviceId): JsonResponse
+    public function disable(Request $request, $serviceId): JsonResponse
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
 
             // Assuming the service has a field for the ONU serial number
-            $sn = $service->onu_sn;
+            $sn = $service->sn;
 
             if (empty($sn)) {
                 return response()->json(['message' => 'ONU serial number not found for this service'], 404);
@@ -265,16 +275,18 @@ class OnuController extends Controller
         }
     }
 
+
     /**
      * Update ONU speed profile for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @return JsonResponse
      */
-    public function updateSpeedProfile(Request $request, int $serviceId): JsonResponse
+    public function updateSpeedProfile(Request $request, $serviceId): JsonResponse
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
@@ -294,12 +306,13 @@ class OnuController extends Controller
      * Update ONU VLAN for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @return JsonResponse
      */
-    public function updateVlan(Request $request, int $serviceId): JsonResponse
+    public function updateVlan(Request $request, $serviceId): JsonResponse
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
@@ -319,12 +332,13 @@ class OnuController extends Controller
      * Update ONU WAN mode for a service.
      *
      * @param Request $request
-     * @param int $serviceId
+     * @param string|int $serviceId
      * @return JsonResponse
      */
-    public function updateWanMode(Request $request, int $serviceId): JsonResponse
+    public function updateWanMode(Request $request, $serviceId): JsonResponse
     {
         try {
+            $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
@@ -335,6 +349,61 @@ class OnuController extends Controller
             $response = $this->apiManager->setOnuWanModeByExternalId($externalId, $request->wan_mode);
 
             return response()->json(['message' => 'ONU WAN mode updated successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Authorize ONU for a service.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function authorize(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'onu' => 'required|array',
+                'onu.id' => 'required|integer',
+                'onu.pon_type' => 'required|string',
+                'onu.board' => 'required|integer',
+                'onu.port' => 'required|integer',
+                'onu.sn' => 'required|string',
+                'onu.olt_id' => 'required|string',
+                'service_id' => 'required|integer',
+                'onu_mode' => 'required|string',
+                'zone' => 'required|string',
+                'vlan' => 'required|integer',
+            ]);
+
+            $service = Service::find($request->input('service_id'));
+            $customer = $service->customer;
+            $payload = [
+                'olt_id' => $request->input('onu.olt_id'),
+                'pon_type' => $request->input('onu.pon_type'),
+                'board' => $request->input('onu.board'),
+                'port' => $request->input('onu.port'),
+                'sn' => $request->input('onu.sn'),
+                'vlan' => $request->input('vlan'),
+                'onu_type' => $request->input('onu.onu_type_name', 'ZTE-F660V6.0'),
+                'zone' => $request->input('zone'),
+                'name' => $customer->identity_document,
+                'address_or_comment' => $customer->addresses()->first()->address ?? 'Unknown',
+                'onu_mode' => $request->input('onu_mode'),
+                'onu_external_id' => $customer->identity_document,
+                'upload_speed_profile_name' => $service->plan->upload_speed . 'M',
+                'download_speed_profile_name' => $service->plan->download_speed . 'M',
+            ];
+
+            //using dhcp
+            //$this->apiManager->authorizeOnu($payload);
+            //$this->apiManager->setOnuManagementIpDhcpByExternalId($request->input('onu.sn'), $request->input('vlan'));;
+            return response()->json([
+                'status' => true,
+                'payload' => $payload
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

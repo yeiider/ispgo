@@ -209,6 +209,20 @@ class Service extends Model
         return self::where('service_status', '!=', 'free')->get();
     }
 
+    /**
+     * Find services by customer's name (first name or last name).
+     *
+     * @param string $str Customer's name to search for
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function findByCustomerName(string $str): \Illuminate\Database\Eloquent\Collection
+    {
+        return self::whereHas('customer', function ($query) use ($str) {
+            $query->where('first_name', 'like', "%{$str}%")
+                ->orWhere('last_name', 'like', "%{$str}%");
+        })->get();
+    }
+
 
     /**
      * Retrieve services associated with a specific customer ID.

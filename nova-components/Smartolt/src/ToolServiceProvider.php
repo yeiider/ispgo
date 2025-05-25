@@ -47,7 +47,7 @@ class ToolServiceProvider extends ServiceProvider
         });
 
         Nova::serving(function (ServingNova $event) {
-            //
+            Nova::mix('smart-olt', __DIR__.'/../dist/mix-manifest.json');
         });
     }
 
