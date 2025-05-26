@@ -113,10 +113,6 @@ class Invoice extends Model
         return $this->customer->email_address;
     }
 
-    public function getProductAttribute()
-    {
-        return $this->service->plan->name;
-    }
 
     public function creditNotes()
     {
