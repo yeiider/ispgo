@@ -3,6 +3,8 @@
 namespace Ispgo\Smartolt\Http\Controllers;
 
 use App\Models\Services\Service;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
@@ -134,7 +136,7 @@ class OnuController extends Controller
      *
      * @param Request $request
      * @param string|int $serviceId
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|object|Response
+     * @return ResponseFactory|Application|object|Response
      */
     public function getSignalGraph(Request $request, $serviceId)
     {
@@ -142,11 +144,7 @@ class OnuController extends Controller
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
-
-            $cacheKey = "onu_signal_graph_{$externalId}";
-            $response = cache()->remember($cacheKey, now()->addDay(), function () use ($externalId) {
-                return $this->apiManager->getOnuSignalGraphByExternalId($externalId);
-            });
+            $response = $this->apiManager->getOnuSignalGraphByExternalId($externalId);
 
             // Set the content type to image/png as specified in the requirements
             return response($response->body(), 200, ['Content-Type' => 'image/png']);
@@ -161,7 +159,7 @@ class OnuController extends Controller
      * @param Request $request
      * @param string|int $serviceId
      * @param string $graphType
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|object|Response
+     * @return ResponseFactory|Application|object|Response
      */
     public function getTrafficGraph(Request $request, $serviceId, string $graphType = 'hourly')
     {
@@ -170,10 +168,7 @@ class OnuController extends Controller
             $service = Service::findOrFail($serviceId);
             $externalId = $service->sn ?? $service->id;
 
-            $cacheKey = "onu_traffic_graph_{$externalId}_{$graphType}";
-            $response = cache()->remember($cacheKey, now()->addHour(), function () use ($externalId, $graphType) {
-                return $this->apiManager->getOnuTrafficGraphByExternalId($externalId, $graphType);
-            });
+            $response = $this->apiManager->getOnuTrafficGraphByExternalId($externalId, $graphType);
 
             // Set the content type to image/png as specified in the requirements
             return response($response->body(), 200, ['Content-Type' => 'image/png']);
