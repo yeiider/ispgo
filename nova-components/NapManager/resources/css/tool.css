@@ -1,0 +1,9 @@
+/* Nova Tool CSS */
+.nap-manager-wrapper {
+  /* Scoped Tailwind CSS */
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+}
+
+/* Custom styles below this line */

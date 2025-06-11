@@ -51,6 +51,7 @@ use App\NovaPermissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Ispgo\Mikrotik\Mikrotik;
+use Ispgo\NapManager\NapManager;
 use Ispgo\SettingsManager\SettingsManager;
 use Ispgo\Smartolt\Smartolt;
 use Laravel\Nova\Exceptions\NovaException;
@@ -144,6 +145,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Router::class)->name(__('panel.routers')),
                     MenuItem::resource(Plan::class)->name(__('panel.plans')),
                     MenuItem::lens(Plan::class, TelevisionPlanLens::class)->name(__('panel.television_plans')),
+                    MenuItem::make('Nap Manager')
+                        ->path('/nap-manager')
+
                 ])->icon('server')->collapsable(),
 
                 MenuSection::make(__('panel.settings_manager'))
@@ -217,7 +221,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             new SettingsManager,
             new NovaPermissions,
             new Mikrotik,
-            new Smartolt
+            new Smartolt,
+            new NapManager
         ];
     }
 
