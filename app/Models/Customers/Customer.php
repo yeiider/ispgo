@@ -6,6 +6,7 @@ use App\Events\CustomerCreated;
 use App\Events\CustomerStatusUpdated;
 use App\Models\Contract;
 use App\Models\Invoice\Invoice;
+use App\Models\Router;
 use App\Models\Services\Service;
 use App\Settings\GeneralProviderConfig;
 use Carbon\Carbon;
@@ -178,5 +179,8 @@ class Customer extends Authenticatable implements MustVerifyEmail
         return $this->invoices()->orderBy('created_at', 'desc')->first();
     }
 
-
+    public function router()
+    {
+        return $this->belongsTo(Router::class);
+    }
 }

@@ -10,6 +10,7 @@ use App\Nova\Actions\Invoice\SendInvoiceByWhatsapp;
 use App\Nova\Actions\Invoice\SendInvoiceNotification;
 use App\Nova\Customers;
 use App\Nova\Filters\Invoice\InvoiceStatusFilter;
+use App\Nova\Filters\RouterFilter;
 use App\Nova\Metrics\Invoice\InvoicesStatus;
 use App\Nova\Metrics\Invoice\MonthlyRevenue;
 use App\Nova\Metrics\Invoice\OutstandingBalance;
@@ -48,6 +49,7 @@ class Invoice extends Resource
             Text::make(__('invoice.increment_id'), 'increment_id')->readonly(),
             BelongsTo::make(__('customer.customer'), 'customer', Customers\Customer::class)->searchable()->readonly(),
             BelongsTo::make(__('service.service'), 'service', \App\Nova\Service::class)->searchable()->readonly(),
+            BelongsTo::make(__('Router (Zone)'), 'router', \App\Nova\Router::class)->searchable(),
 
             // 💰 Totales detallados
             Currency::make(__('invoice.amount_before_discounts'), 'amount_before_discounts')
@@ -143,6 +145,7 @@ class Invoice extends Resource
     {
         return [
             new InvoiceStatusFilter(),
+            new RouterFilter(),
         ];
     }
 

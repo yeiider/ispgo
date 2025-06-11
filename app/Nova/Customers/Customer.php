@@ -9,6 +9,7 @@ use App\Nova\Actions\Service\GenerateInvoice;
 use App\Nova\Actions\UpdateCustomerStatus;
 use App\Nova\Contract;
 use App\Nova\Filters\CustomerStatus;
+use App\Nova\Filters\RouterFilter;
 use App\Nova\Invoice\Invoice;
 use App\Nova\Metrics\NewCustomers;
 use App\Nova\Resource;
@@ -21,6 +22,7 @@ use Ispgo\Siigo\Settings\ConfigProviderSiigo;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\Badge;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\HasOne;
@@ -78,6 +80,7 @@ class Customer extends Resource
                         ->sortable()->rules('required'),
 
                     Textarea::make(__('customer.additional_notes'), 'additional_notes')->nullable(),
+                    BelongsTo::make(__('Router (Zone)'), 'router', \App\Nova\Router::class)->searchable(),
                     HasOne::make(__('customer.taxDetails'), 'taxDetails', TaxDetail::class),
                     HasMany::make(__('customer.addresses'), 'addresses', Address::class),
                 ]),
@@ -152,6 +155,7 @@ class Customer extends Resource
     {
         return [
             new CustomerStatus,
+            new RouterFilter,
         ];
     }
 

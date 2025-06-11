@@ -11,6 +11,7 @@ use App\Helpers\Utils;
 use App\Models\Customers\Customer;
 use App\Models\InvoiceAdjustment;
 use App\Models\InvoiceItem;
+use App\Models\Router;
 use App\Models\Services\Service;
 use App\Models\User;
 use Carbon\Carbon;
@@ -26,7 +27,7 @@ class Invoice extends Model
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
         'issue_date', 'due_date', 'full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
-        'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total'
+        'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total','router_id'
     ];
 
     protected $casts = [
@@ -113,10 +114,6 @@ class Invoice extends Model
         return $this->customer->email_address;
     }
 
-    public function getProductAttribute()
-    {
-        return $this->service->plan->name;
-    }
 
     public function creditNotes()
     {
@@ -141,6 +138,11 @@ class Invoice extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function router()
+    {
+        return $this->belongsTo(Router::class);
     }
 
     public static function findByDniOrInvoiceId($input)

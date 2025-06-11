@@ -41,12 +41,12 @@ class InvoiceApi extends Controller
             "amount" => $invoice->amount,
             "discount" => $invoice->discount,
             "customer_name" => $invoice->customer->full_name,
-            "product" => $invoice->product,
+            "products" => $invoice->products,
             "status" => $invoice->status,
             "issue_date" => $invoice->issue_date,
             "due_date" => $invoice->due_date,
             "customer" => $invoice->customer,
-            "address" => $invoice->service->address
+            "address" => $invoice->customer->addresses()->first()->address,
         ];
 
     }
