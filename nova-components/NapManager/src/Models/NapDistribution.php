@@ -29,7 +29,7 @@ class NapDistribution extends Model
     {
         return [
             'id' => $this->nap_box_id,
-            'type' => 'napNode',
+            'type' => 'default', // Use default node type instead of custom napNode
             'position' => [
                 'x' => (float)$this->flow_position_x,
                 'y' => (float)$this->flow_position_y

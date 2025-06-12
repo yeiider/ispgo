@@ -17,20 +17,20 @@ import { useToast } from 'vue-toastification'
 const NapNode = {
   props: ['id', 'data', 'selected'],
   template: `
-    <div class="nap-node" :class="['nap-node-' + data.status]">
-      <div class="nap-node-header">
-        <div class="nap-node-title">{{ data.label }}</div>
-        <div class="nap-node-code">{{ data.code }}</div>
+    <div class="nap-node" :class="['nap-node-' + data.status]" style="padding: 10px; border-radius: 5px; width: 200px; background-color: white; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+      <div class="nap-node-header" style="border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px;">
+        <div class="nap-node-title" style="font-weight: bold; font-size: 14px;">{{ data.label }}</div>
+        <div class="nap-node-code" style="font-size: 12px; color: #666;">{{ data.code }}</div>
       </div>
-      <div class="nap-node-content">
-        <div class="nap-node-status">Status: {{ data.status }}</div>
-        <div class="nap-node-occupancy">
+      <div class="nap-node-content" style="font-size: 12px;">
+        <div class="nap-node-status" style="margin-bottom: 5px;">Status: {{ data.status }}</div>
+        <div class="nap-node-occupancy" style="margin-bottom: 5px;">
           Occupancy: {{ data.occupancy }}%
-          <div class="occupancy-bar">
-            <div class="occupancy-fill" :style="{ width: data.occupancy + '%' }"></div>
+          <div class="occupancy-bar" style="height: 5px; background-color: #eee; border-radius: 2px; margin-top: 2px;">
+            <div class="occupancy-fill" style="height: 100%; background-color: #2196F3; border-radius: 2px;" :style="{ width: data.occupancy + '%' }"></div>
           </div>
         </div>
-        <div class="nap-node-level">Level: {{ data.level }}</div>
+        <div class="nap-node-level" style="color: #666;">Level: {{ data.level }}</div>
       </div>
     </div>
   `
@@ -88,7 +88,8 @@ export default defineComponent({
 
     // Define node types
     const nodeTypes = ref({
-      napNode: NapNode
+      // Use default node type instead of custom NapNode
+      // napNode: NapNode
     })
 
     // Define default edge options
@@ -112,12 +113,23 @@ export default defineComponent({
     const fetchFlowData = async () => {
       try {
         loading.value = true
+        console.log('Fetching flow data...')
         const response = await axios.get('/nova-vendor/nap-manager/flow-data')
-        nodes.value = response.data.nodes
-        edges.value = response.data.edges
+        console.log('Flow data response:', response.data)
+
+        if (response.data.nodes && response.data.nodes.length > 0) {
+          nodes.value = response.data.nodes
+          edges.value = response.data.edges || []
+          console.log('Nodes set:', nodes.value)
+          console.log('Edges set:', edges.value)
+        } else {
+          console.warn('No nodes returned from flow-data endpoint')
+          error.value = 'No NAP boxes found. Please create a NAP box first.'
+        }
+
         loading.value = false
       } catch (err) {
-        error.value = 'Error fetching flow data: ' + err.message
+        error.value = 'Error fetching flow data: ' + (err.response?.data?.message || err.message)
         console.error('Error fetching flow data:', err)
         loading.value = false
       }
@@ -158,17 +170,25 @@ export default defineComponent({
       console.log('Node clicked:', event.node)
       // Get the NAP box details for the clicked node
       const napBoxId = event.node.id
-      fetchNapBoxDetails(napBoxId)
+      console.log('Node ID:', napBoxId, 'Type:', typeof napBoxId)
+
+      // Ensure napBoxId is a number if it's a string
+      const parsedId = typeof napBoxId === 'string' ? parseInt(napBoxId, 10) : napBoxId
+      console.log('Parsed ID:', parsedId, 'Type:', typeof parsedId)
+
+      fetchNapBoxDetails(parsedId)
     }
 
     // Fetch NAP box details
     const fetchNapBoxDetails = async (napBoxId) => {
       try {
+        console.log('Fetching NAP box details for ID:', napBoxId)
         const response = await axios.get(`/nova-vendor/nap-manager/nap-box/${napBoxId}`)
+        console.log('NAP box details response:', response.data)
         selectedNapBox.value = response.data
       } catch (err) {
         console.error('Error fetching NAP box details:', err)
-        toast.error('Error fetching NAP box details')
+        toast.error('Error fetching NAP box details: ' + (err.response?.data?.message || err.message))
       }
     }
 
@@ -600,46 +620,46 @@ export default defineComponent({
     </div>
 
     <!-- Port Form Modal -->
-    <div v-if="showPortForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-lg max-h-screen overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold">{{ isEditMode ? 'Edit Port' : 'Create Port' }}</h3>
-          <button @click="closePortForm" class="text-gray-500 hover:text-gray-700">
-            <span class="text-2xl">&times;</span>
+    <div v-if="showPortForm" class="nap-fixed nap-inset-0 nap-bg-black nap-bg-opacity-50 nap-flex nap-items-center nap-justify-center nap-z-50">
+      <div class="nap-bg-white nap-rounded-lg nap-p-6 nap-w-full nap-max-w-lg nap-max-h-screen nap-overflow-y-auto">
+        <div class="nap-flex nap-justify-between nap-items-center nap-mb-4">
+          <h3 class="nap-text-xl nap-font-bold">{{ isEditMode ? 'Edit Port' : 'Create Port' }}</h3>
+          <button @click="closePortForm" class="nap-text-gray-500 hover:nap-text-gray-700">
+            <span class="nap-text-2xl">&times;</span>
           </button>
         </div>
 
-        <form @submit.prevent="submitPortForm" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form @submit.prevent="submitPortForm" class="nap-space-y-4">
+          <div class="nap-grid nap-grid-cols-1 md:nap-grid-cols-2 nap-gap-4">
             <!-- Port Number -->
             <div>
-              <label class="block text-sm font-medium text-gray-700">Port Number</label>
+              <label class="nap-block nap-text-sm nap-font-medium nap-text-gray-700">Port Number</label>
               <input
                 type="number"
                 v-model="portForm.port_number"
                 min="1"
                 required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                class="nap-mt-1 nap-block nap-w-full nap-rounded-md nap-border-gray-300 nap-shadow-sm focus:nap-border-indigo-500 focus:nap-ring-indigo-500"
               />
             </div>
 
             <!-- Port Name -->
             <div>
-              <label class="block text-sm font-medium text-gray-700">Port Name (Optional)</label>
+              <label class="nap-block nap-text-sm nap-font-medium nap-text-gray-700">Port Name (Optional)</label>
               <input
                 type="text"
                 v-model="portForm.port_name"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                class="nap-mt-1 nap-block nap-w-full nap-rounded-md nap-border-gray-300 nap-shadow-sm focus:nap-border-indigo-500 focus:nap-ring-indigo-500"
               />
             </div>
 
             <!-- Status -->
             <div>
-              <label class="block text-sm font-medium text-gray-700">Status</label>
+              <label class="nap-block nap-text-sm nap-font-medium nap-text-gray-700">Status</label>
               <select
                 v-model="portForm.status"
                 required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                class="nap-mt-1 nap-block nap-w-full nap-rounded-md nap-border-gray-300 nap-shadow-sm focus:nap-border-indigo-500 focus:nap-ring-indigo-500"
               >
                 <option value="available">Available</option>
                 <option value="occupied">Occupied</option>
@@ -652,11 +672,11 @@ export default defineComponent({
 
             <!-- Connection Type -->
             <div>
-              <label class="block text-sm font-medium text-gray-700">Connection Type</label>
+              <label class="nap-block nap-text-sm nap-font-medium nap-text-gray-700">Connection Type</label>
               <select
                 v-model="portForm.connection_type"
                 required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                class="nap-mt-1 nap-block nap-w-full nap-rounded-md nap-border-gray-300 nap-shadow-sm focus:nap-border-indigo-500 focus:nap-ring-indigo-500"
               >
                 <option value="fiber">Fiber</option>
                 <option value="coaxial">Coaxial</option>
@@ -666,27 +686,27 @@ export default defineComponent({
             </div>
 
             <!-- Technician Notes -->
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700">Technician Notes</label>
+            <div class="md:nap-col-span-2">
+              <label class="nap-block nap-text-sm nap-font-medium nap-text-gray-700">Technician Notes</label>
               <textarea
                 v-model="portForm.technician_notes"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                class="nap-mt-1 nap-block nap-w-full nap-rounded-md nap-border-gray-300 nap-shadow-sm focus:nap-border-indigo-500 focus:nap-ring-indigo-500"
                 rows="3"
               ></textarea>
             </div>
           </div>
 
-          <div class="flex justify-end space-x-2 pt-4">
+          <div class="nap-flex nap-justify-end nap-space-x-2 nap-pt-4">
             <button
               type="button"
               @click="closePortForm"
-              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+              class="nap-px-4 nap-py-2 nap-bg-gray-200 nap-text-gray-800 nap-rounded-md hover:nap-bg-gray-300"
             >
               Cancel
             </button>
             <button
               type="submit"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              class="nap-px-4 nap-py-2 nap-bg-blue-600 nap-text-white nap-rounded-md hover:nap-bg-blue-700"
               :disabled="loading"
             >
               {{ loading ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
@@ -700,9 +720,9 @@ export default defineComponent({
       {{ error }}
     </div>
 
-    <div class="flex flex-col md:flex-row gap-4">
+    <div class="flex flex-col md:flex-row gap-4" style="width: 100%; height: 100%; min-height: 500px;">
       <!-- Flow diagram -->
-      <div class="flex-grow">
+      <div class="flex-grow" style="width: 100%; height: 500px;">
         <div v-if="loading && !error" class="flex justify-center items-center" style="height: 400px;">
           <div class="spinner"></div>
           <span class="ml-2">Loading flow data...</span>
@@ -720,6 +740,7 @@ export default defineComponent({
             @nodeclick="onNodeClick"
             @nodedragstop="onNodeDragEnd"
             @connect="onEdgeConnect"
+            style="width: 100%; height: 100%;"
           >
             <Background pattern="dots" :size="1.5" :gap="20" />
             <MiniMap :node-color="getNodeColor" />
@@ -852,13 +873,17 @@ export default defineComponent({
 
 <style scoped>
 .nap-flow-container {
+  width: 100%;
   height: 100%;
+  min-height: 600px;
   display: flex;
   flex-direction: column;
 }
 
 .flow-container {
   flex-grow: 1;
+  width: 100%;
+  height: 500px;
   min-height: 500px;
   border-radius: 8px;
   overflow: hidden;
@@ -979,5 +1004,35 @@ export default defineComponent({
 
 :deep(.btn-refresh:hover) {
   background-color: #0b7dda;
+}
+
+/* Vue Flow Styles */
+:deep(.vue-flow) {
+  width: 100%;
+  height: 100%;
+}
+
+/* Edge Styles */
+:deep(.vue-flow__edge) {
+  stroke-width: 2;
+}
+
+:deep(.vue-flow__edge.selected) {
+  stroke-width: 3;
+}
+
+:deep(.vue-flow__edge-path) {
+  stroke: #2196F3;
+}
+
+:deep(.vue-flow__edge.animated .vue-flow__edge-path) {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
+@keyframes dashdraw {
+  from {
+    stroke-dashoffset: 10;
+  }
 }
 </style>

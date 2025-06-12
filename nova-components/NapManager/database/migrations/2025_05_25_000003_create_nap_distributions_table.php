@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->float('flow_position_x');
             $table->float('flow_position_y');
             $table->float('flow_level');
-            $table->json('connection_data');
+            $table->json('connection_data')->nullable();
             $table->timestamps();
         });
     }

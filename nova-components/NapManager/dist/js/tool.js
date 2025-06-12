@@ -15140,12 +15140,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _vue_flow_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @vue-flow/core */ "./node_modules/@vue-flow/core/dist/vue-flow-core.mjs");
 /* harmony import */ var _vue_flow_core_dist_style_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @vue-flow/core/dist/style.css */ "./node_modules/@vue-flow/core/dist/style.css");
 /* harmony import */ var vue_toastification__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue-toastification */ "./node_modules/vue-toastification/dist/index.mjs");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return r; }; var t, r = {}, e = Object.prototype, n = e.hasOwnProperty, o = "function" == typeof Symbol ? Symbol : {}, i = o.iterator || "@@iterator", a = o.asyncIterator || "@@asyncIterator", u = o.toStringTag || "@@toStringTag"; function c(t, r, e, n) { return Object.defineProperty(t, r, { value: e, enumerable: !n, configurable: !n, writable: !n }); } try { c({}, ""); } catch (t) { c = function c(t, r, e) { return t[r] = e; }; } function h(r, e, n, o) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype); return c(a, "_invoke", function (r, e, n) { var o = 1; return function (i, a) { if (3 === o) throw Error("Generator is already running"); if (4 === o) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var u = n.delegate; if (u) { var c = d(u, n); if (c) { if (c === f) continue; return c; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (1 === o) throw o = 4, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = 3; var h = s(r, e, n); if ("normal" === h.type) { if (o = n.done ? 4 : 2, h.arg === f) continue; return { value: h.arg, done: n.done }; } "throw" === h.type && (o = 4, n.method = "throw", n.arg = h.arg); } }; }(r, n, new Context(o || [])), !0), a; } function s(t, r, e) { try { return { type: "normal", arg: t.call(r, e) }; } catch (t) { return { type: "throw", arg: t }; } } r.wrap = h; var f = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var l = {}; c(l, i, function () { return this; }); var p = Object.getPrototypeOf, y = p && p(p(x([]))); y && y !== e && n.call(y, i) && (l = y); var v = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(l); function g(t) { ["next", "throw", "return"].forEach(function (r) { c(t, r, function (t) { return this._invoke(r, t); }); }); } function AsyncIterator(t, r) { function e(o, i, a, u) { var c = s(t[o], t, i); if ("throw" !== c.type) { var h = c.arg, f = h.value; return f && "object" == _typeof(f) && n.call(f, "__await") ? r.resolve(f.__await).then(function (t) { e("next", t, a, u); }, function (t) { e("throw", t, a, u); }) : r.resolve(f).then(function (t) { h.value = t, a(h); }, function (t) { return e("throw", t, a, u); }); } u(c.arg); } var o; c(this, "_invoke", function (t, n) { function i() { return new r(function (r, o) { e(t, n, r, o); }); } return o = o ? o.then(i, i) : i(); }, !0); } function d(r, e) { var n = e.method, o = r.i[n]; if (o === t) return e.delegate = null, "throw" === n && r.i["return"] && (e.method = "return", e.arg = t, d(r, e), "throw" === e.method) || "return" !== n && (e.method = "throw", e.arg = new TypeError("The iterator does not provide a '" + n + "' method")), f; var i = s(o, r.i, e.arg); if ("throw" === i.type) return e.method = "throw", e.arg = i.arg, e.delegate = null, f; var a = i.arg; return a ? a.done ? (e[r.r] = a.value, e.next = r.n, "return" !== e.method && (e.method = "next", e.arg = t), e.delegate = null, f) : a : (e.method = "throw", e.arg = new TypeError("iterator result is not an object"), e.delegate = null, f); } function w(t) { this.tryEntries.push(t); } function m(r) { var e = r[4] || {}; e.type = "normal", e.arg = t, r[4] = e; } function Context(t) { this.tryEntries = [[-1]], t.forEach(w, this), this.reset(!0); } function x(r) { if (null != r) { var e = r[i]; if (e) return e.call(r); if ("function" == typeof r.next) return r; if (!isNaN(r.length)) { var o = -1, a = function e() { for (; ++o < r.length;) if (n.call(r, o)) return e.value = r[o], e.done = !1, e; return e.value = t, e.done = !0, e; }; return a.next = a; } } throw new TypeError(_typeof(r) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, c(v, "constructor", GeneratorFunctionPrototype), c(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = c(GeneratorFunctionPrototype, u, "GeneratorFunction"), r.isGeneratorFunction = function (t) { var r = "function" == typeof t && t.constructor; return !!r && (r === GeneratorFunction || "GeneratorFunction" === (r.displayName || r.name)); }, r.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, c(t, u, "GeneratorFunction")), t.prototype = Object.create(v), t; }, r.awrap = function (t) { return { __await: t }; }, g(AsyncIterator.prototype), c(AsyncIterator.prototype, a, function () { return this; }), r.AsyncIterator = AsyncIterator, r.async = function (t, e, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(h(t, e, n, o), i); return r.isGeneratorFunction(e) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, g(v), c(v, u, "Generator"), c(v, i, function () { return this; }), c(v, "toString", function () { return "[object Generator]"; }), r.keys = function (t) { var r = Object(t), e = []; for (var n in r) e.unshift(n); return function t() { for (; e.length;) if ((n = e.pop()) in r) return t.value = n, t.done = !1, t; return t.done = !0, t; }; }, r.values = x, Context.prototype = { constructor: Context, reset: function reset(r) { if (this.prev = this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(m), !r) for (var e in this) "t" === e.charAt(0) && n.call(this, e) && !isNaN(+e.slice(1)) && (this[e] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0][4]; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(r) { if (this.done) throw r; var e = this; function n(t) { a.type = "throw", a.arg = r, e.next = t; } for (var o = e.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i[4], u = this.prev, c = i[1], h = i[2]; if (-1 === i[0]) return n("end"), !1; if (!c && !h) throw Error("try statement without catch or finally"); if (null != i[0] && i[0] <= u) { if (u < c) return this.method = "next", this.arg = t, n(c), !0; if (u < h) return n(h), !1; } } }, abrupt: function abrupt(t, r) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var n = this.tryEntries[e]; if (n[0] > -1 && n[0] <= this.prev && this.prev < n[2]) { var o = n; break; } } o && ("break" === t || "continue" === t) && o[0] <= r && r <= o[2] && (o = null); var i = o ? o[4] : {}; return i.type = t, i.arg = r, o ? (this.method = "next", this.next = o[2], f) : this.complete(i); }, complete: function complete(t, r) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && r && (this.next = r), f; }, finish: function finish(t) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var e = this.tryEntries[r]; if (e[2] === t) return this.complete(e[4], e[3]), m(e), f; } }, "catch": function _catch(t) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var e = this.tryEntries[r]; if (e[0] === t) { var n = e[4]; if ("throw" === n.type) { var o = n.arg; m(e); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(r, e, n) { return this.delegate = { i: x(r), r: e, n: n }, "next" === this.method && (this.arg = t), f; } }, r; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
@@ -15158,7 +15158,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 // Define custom NAP node component
 var NapNode = {
   props: ['id', 'data', 'selected'],
-  template: "\n    <div class=\"nap-node\" :class=\"['nap-node-' + data.status]\">\n      <div class=\"nap-node-header\">\n        <div class=\"nap-node-title\">{{ data.label }}</div>\n        <div class=\"nap-node-code\">{{ data.code }}</div>\n      </div>\n      <div class=\"nap-node-content\">\n        <div class=\"nap-node-status\">Status: {{ data.status }}</div>\n        <div class=\"nap-node-occupancy\">\n          Occupancy: {{ data.occupancy }}%\n          <div class=\"occupancy-bar\">\n            <div class=\"occupancy-fill\" :style=\"{ width: data.occupancy + '%' }\"></div>\n          </div>\n        </div>\n        <div class=\"nap-node-level\">Level: {{ data.level }}</div>\n      </div>\n    </div>\n  "
+  template: "\n    <div class=\"nap-node\" :class=\"['nap-node-' + data.status]\" style=\"padding: 10px; border-radius: 5px; width: 200px; background-color: white; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);\">\n      <div class=\"nap-node-header\" style=\"border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px;\">\n        <div class=\"nap-node-title\" style=\"font-weight: bold; font-size: 14px;\">{{ data.label }}</div>\n        <div class=\"nap-node-code\" style=\"font-size: 12px; color: #666;\">{{ data.code }}</div>\n      </div>\n      <div class=\"nap-node-content\" style=\"font-size: 12px;\">\n        <div class=\"nap-node-status\" style=\"margin-bottom: 5px;\">Status: {{ data.status }}</div>\n        <div class=\"nap-node-occupancy\" style=\"margin-bottom: 5px;\">\n          Occupancy: {{ data.occupancy }}%\n          <div class=\"occupancy-bar\" style=\"height: 5px; background-color: #eee; border-radius: 2px; margin-top: 2px;\">\n            <div class=\"occupancy-fill\" style=\"height: 100%; background-color: #2196F3; border-radius: 2px;\" :style=\"{ width: data.occupancy + '%' }\"></div>\n          </div>\n        </div>\n        <div class=\"nap-node-level\" style=\"color: #666;\">Level: {{ data.level }}</div>\n      </div>\n    </div>\n  "
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
   name: "NapFlowComponent",
@@ -15211,7 +15211,8 @@ var NapNode = {
 
     // Define node types
     var nodeTypes = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)({
-      napNode: NapNode
+      // Use default node type instead of custom NapNode
+      // napNode: NapNode
     });
 
     // Define default edge options
@@ -15239,32 +15240,41 @@ var NapNode = {
     // Fetch flow data from API
     var fetchFlowData = /*#__PURE__*/function () {
       var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-        var response;
+        var response, _err$response;
         return _regeneratorRuntime().wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
               _context.prev = 0;
               loading.value = true;
-              _context.next = 4;
+              console.log('Fetching flow data...');
+              _context.next = 5;
               return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get('/nova-vendor/nap-manager/flow-data');
-            case 4:
+            case 5:
               response = _context.sent;
-              nodes.value = response.data.nodes;
-              edges.value = response.data.edges;
+              console.log('Flow data response:', response.data);
+              if (response.data.nodes && response.data.nodes.length > 0) {
+                nodes.value = response.data.nodes;
+                edges.value = response.data.edges || [];
+                console.log('Nodes set:', nodes.value);
+                console.log('Edges set:', edges.value);
+              } else {
+                console.warn('No nodes returned from flow-data endpoint');
+                error.value = 'No NAP boxes found. Please create a NAP box first.';
+              }
               loading.value = false;
-              _context.next = 15;
+              _context.next = 16;
               break;
-            case 10:
-              _context.prev = 10;
+            case 11:
+              _context.prev = 11;
               _context.t0 = _context["catch"](0);
-              error.value = 'Error fetching flow data: ' + _context.t0.message;
+              error.value = 'Error fetching flow data: ' + (((_err$response = _context.t0.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || _context.t0.message);
               console.error('Error fetching flow data:', _context.t0);
               loading.value = false;
-            case 15:
+            case 16:
             case "end":
               return _context.stop();
           }
-        }, _callee, null, [[0, 10]]);
+        }, _callee, null, [[0, 11]]);
       }));
       return function fetchFlowData() {
         return _ref.apply(this, arguments);
@@ -15341,34 +15351,41 @@ var NapNode = {
       console.log('Node clicked:', event.node);
       // Get the NAP box details for the clicked node
       var napBoxId = event.node.id;
-      fetchNapBoxDetails(napBoxId);
+      console.log('Node ID:', napBoxId, 'Type:', _typeof(napBoxId));
+
+      // Ensure napBoxId is a number if it's a string
+      var parsedId = typeof napBoxId === 'string' ? parseInt(napBoxId, 10) : napBoxId;
+      console.log('Parsed ID:', parsedId, 'Type:', _typeof(parsedId));
+      fetchNapBoxDetails(parsedId);
     };
 
     // Fetch NAP box details
     var fetchNapBoxDetails = /*#__PURE__*/function () {
       var _ref4 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(napBoxId) {
-        var response;
+        var response, _err$response2;
         return _regeneratorRuntime().wrap(function _callee4$(_context4) {
           while (1) switch (_context4.prev = _context4.next) {
             case 0:
               _context4.prev = 0;
-              _context4.next = 3;
+              console.log('Fetching NAP box details for ID:', napBoxId);
+              _context4.next = 4;
               return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/nova-vendor/nap-manager/nap-box/".concat(napBoxId));
-            case 3:
+            case 4:
               response = _context4.sent;
+              console.log('NAP box details response:', response.data);
               selectedNapBox.value = response.data;
-              _context4.next = 11;
+              _context4.next = 13;
               break;
-            case 7:
-              _context4.prev = 7;
+            case 9:
+              _context4.prev = 9;
               _context4.t0 = _context4["catch"](0);
               console.error('Error fetching NAP box details:', _context4.t0);
-              toast.error('Error fetching NAP box details');
-            case 11:
+              toast.error('Error fetching NAP box details: ' + (((_err$response2 = _context4.t0.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || _context4.t0.message));
+            case 13:
             case "end":
               return _context4.stop();
           }
-        }, _callee4, null, [[0, 7]]);
+        }, _callee4, null, [[0, 9]]);
       }));
       return function fetchNapBoxDetails(_x3) {
         return _ref4.apply(this, arguments);
@@ -15462,7 +15479,7 @@ var NapNode = {
     // Submit NAP box form
     var submitNapForm = /*#__PURE__*/function () {
       var _ref6 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6() {
-        var _err$response;
+        var _err$response3;
         return _regeneratorRuntime().wrap(function _callee6$(_context6) {
           while (1) switch (_context6.prev = _context6.next) {
             case 0:
@@ -15494,7 +15511,7 @@ var NapNode = {
               _context6.prev = 16;
               _context6.t0 = _context6["catch"](0);
               console.error('Error submitting NAP box form:', _context6.t0);
-              toast.error('Error saving NAP box: ' + (((_err$response = _context6.t0.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || _context6.t0.message));
+              toast.error('Error saving NAP box: ' + (((_err$response3 = _context6.t0.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || _context6.t0.message));
             case 20:
               _context6.prev = 20;
               loading.value = false;
@@ -15513,7 +15530,7 @@ var NapNode = {
     // Delete NAP box
     var deleteNapBox = /*#__PURE__*/function () {
       var _ref7 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee7(napBoxId) {
-        var _err$response2;
+        var _err$response4;
         return _regeneratorRuntime().wrap(function _callee7$(_context7) {
           while (1) switch (_context7.prev = _context7.next) {
             case 0:
@@ -15539,7 +15556,7 @@ var NapNode = {
               _context7.prev = 12;
               _context7.t0 = _context7["catch"](2);
               console.error('Error deleting NAP box:', _context7.t0);
-              toast.error('Error deleting NAP box: ' + (((_err$response2 = _context7.t0.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || _context7.t0.message));
+              toast.error('Error deleting NAP box: ' + (((_err$response4 = _context7.t0.response) === null || _err$response4 === void 0 || (_err$response4 = _err$response4.data) === null || _err$response4 === void 0 ? void 0 : _err$response4.message) || _context7.t0.message));
             case 16:
               _context7.prev = 16;
               loading.value = false;
@@ -15611,7 +15628,7 @@ var NapNode = {
     // Submit port form
     var submitPortForm = /*#__PURE__*/function () {
       var _ref9 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee9() {
-        var _err$response3;
+        var _err$response5;
         return _regeneratorRuntime().wrap(function _callee9$(_context9) {
           while (1) switch (_context9.prev = _context9.next) {
             case 0:
@@ -15647,7 +15664,7 @@ var NapNode = {
               _context9.prev = 17;
               _context9.t0 = _context9["catch"](0);
               console.error('Error submitting port form:', _context9.t0);
-              toast.error('Error saving port: ' + (((_err$response3 = _context9.t0.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || _context9.t0.message));
+              toast.error('Error saving port: ' + (((_err$response5 = _context9.t0.response) === null || _err$response5 === void 0 || (_err$response5 = _err$response5.data) === null || _err$response5 === void 0 ? void 0 : _err$response5.message) || _context9.t0.message));
             case 21:
               _context9.prev = 21;
               loading.value = false;
@@ -15666,7 +15683,7 @@ var NapNode = {
     // Delete port
     var deletePort = /*#__PURE__*/function () {
       var _ref0 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee0(portId) {
-        var _err$response4;
+        var _err$response6;
         return _regeneratorRuntime().wrap(function _callee0$(_context0) {
           while (1) switch (_context0.prev = _context0.next) {
             case 0:
@@ -15697,7 +15714,7 @@ var NapNode = {
               _context0.prev = 12;
               _context0.t0 = _context0["catch"](2);
               console.error('Error deleting port:', _context0.t0);
-              toast.error('Error deleting port: ' + (((_err$response4 = _context0.t0.response) === null || _err$response4 === void 0 || (_err$response4 = _err$response4.data) === null || _err$response4 === void 0 ? void 0 : _err$response4.message) || _context0.t0.message));
+              toast.error('Error deleting port: ' + (((_err$response6 = _context0.t0.response) === null || _err$response6 === void 0 || (_err$response6 = _err$response6.data) === null || _err$response6 === void 0 ? void 0 : _err$response6.message) || _context0.t0.message));
             case 16:
               _context0.prev = 16;
               loading.value = false;
@@ -16095,25 +16112,25 @@ var _hoisted_15 = {
 var _hoisted_16 = ["disabled"];
 var _hoisted_17 = {
   key: 1,
-  "class": "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  "class": "nap-fixed nap-inset-0 nap-bg-black nap-bg-opacity-50 nap-flex nap-items-center nap-justify-center nap-z-50"
 };
 var _hoisted_18 = {
-  "class": "bg-white rounded-lg p-6 w-full max-w-lg max-h-screen overflow-y-auto"
+  "class": "nap-bg-white nap-rounded-lg nap-p-6 nap-w-full nap-max-w-lg nap-max-h-screen nap-overflow-y-auto"
 };
 var _hoisted_19 = {
-  "class": "flex justify-between items-center mb-4"
+  "class": "nap-flex nap-justify-between nap-items-center nap-mb-4"
 };
 var _hoisted_20 = {
-  "class": "text-xl font-bold"
+  "class": "nap-text-xl nap-font-bold"
 };
 var _hoisted_21 = {
-  "class": "grid grid-cols-1 md:grid-cols-2 gap-4"
+  "class": "nap-grid nap-grid-cols-1 md:nap-grid-cols-2 nap-gap-4"
 };
 var _hoisted_22 = {
-  "class": "md:col-span-2"
+  "class": "md:nap-col-span-2"
 };
 var _hoisted_23 = {
-  "class": "flex justify-end space-x-2 pt-4"
+  "class": "nap-flex nap-justify-end nap-space-x-2 nap-pt-4"
 };
 var _hoisted_24 = ["disabled"];
 var _hoisted_25 = {
@@ -16121,10 +16138,19 @@ var _hoisted_25 = {
   "class": "bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
 };
 var _hoisted_26 = {
-  "class": "flex flex-col md:flex-row gap-4"
+  "class": "flex flex-col md:flex-row gap-4",
+  style: {
+    "width": "100%",
+    "height": "100%",
+    "min-height": "500px"
+  }
 };
 var _hoisted_27 = {
-  "class": "flex-grow"
+  "class": "flex-grow",
+  style: {
+    "width": "100%",
+    "height": "500px"
+  }
 };
 var _hoisted_28 = {
   key: 0,
@@ -16360,16 +16386,16 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClick: _cache[16] || (_cache[16] = function () {
       return _ctx.closePortForm && _ctx.closePortForm.apply(_ctx, arguments);
     }),
-    "class": "text-gray-500 hover:text-gray-700"
+    "class": "nap-text-gray-500 hover:nap-text-gray-700"
   }, _cache[46] || (_cache[46] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-    "class": "text-2xl"
+    "class": "nap-text-2xl"
   }, "×", -1 /* HOISTED */)]))]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", {
     onSubmit: _cache[23] || (_cache[23] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return _ctx.submitPortForm && _ctx.submitPortForm.apply(_ctx, arguments);
     }, ["prevent"])),
-    "class": "space-y-4"
+    "class": "nap-space-y-4"
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Port Number "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_cache[47] || (_cache[47] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
-    "class": "block text-sm font-medium text-gray-700"
+    "class": "nap-block nap-text-sm nap-font-medium nap-text-gray-700"
   }, "Port Number", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "number",
     "onUpdate:modelValue": _cache[17] || (_cache[17] = function ($event) {
@@ -16377,31 +16403,31 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     }),
     min: "1",
     required: "",
-    "class": "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+    "class": "nap-mt-1 nap-block nap-w-full nap-rounded-md nap-border-gray-300 nap-shadow-sm focus:nap-border-indigo-500 focus:nap-ring-indigo-500"
   }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, _ctx.portForm.port_number]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Port Name "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_cache[48] || (_cache[48] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
-    "class": "block text-sm font-medium text-gray-700"
+    "class": "nap-block nap-text-sm nap-font-medium nap-text-gray-700"
   }, "Port Name (Optional)", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
     type: "text",
     "onUpdate:modelValue": _cache[18] || (_cache[18] = function ($event) {
       return _ctx.portForm.port_name = $event;
     }),
-    "class": "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+    "class": "nap-mt-1 nap-block nap-w-full nap-rounded-md nap-border-gray-300 nap-shadow-sm focus:nap-border-indigo-500 focus:nap-ring-indigo-500"
   }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, _ctx.portForm.port_name]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Status "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_cache[50] || (_cache[50] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
-    "class": "block text-sm font-medium text-gray-700"
+    "class": "nap-block nap-text-sm nap-font-medium nap-text-gray-700"
   }, "Status", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
     "onUpdate:modelValue": _cache[19] || (_cache[19] = function ($event) {
       return _ctx.portForm.status = $event;
     }),
     required: "",
-    "class": "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+    "class": "nap-mt-1 nap-block nap-w-full nap-rounded-md nap-border-gray-300 nap-shadow-sm focus:nap-border-indigo-500 focus:nap-ring-indigo-500"
   }, _cache[49] || (_cache[49] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<option value=\"available\" data-v-778e46bd>Available</option><option value=\"occupied\" data-v-778e46bd>Occupied</option><option value=\"damaged\" data-v-778e46bd>Damaged</option><option value=\"maintenance\" data-v-778e46bd>Maintenance</option><option value=\"reserved\" data-v-778e46bd>Reserved</option><option value=\"testing\" data-v-778e46bd>Testing</option>", 6)]), 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, _ctx.portForm.status]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Connection Type "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [_cache[52] || (_cache[52] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
-    "class": "block text-sm font-medium text-gray-700"
+    "class": "nap-block nap-text-sm nap-font-medium nap-text-gray-700"
   }, "Connection Type", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
     "onUpdate:modelValue": _cache[20] || (_cache[20] = function ($event) {
       return _ctx.portForm.connection_type = $event;
     }),
     required: "",
-    "class": "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+    "class": "nap-mt-1 nap-block nap-w-full nap-rounded-md nap-border-gray-300 nap-shadow-sm focus:nap-border-indigo-500 focus:nap-ring-indigo-500"
   }, _cache[51] || (_cache[51] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
     value: "fiber"
   }, "Fiber", -1 /* HOISTED */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
@@ -16411,22 +16437,22 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, "Ethernet", -1 /* HOISTED */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
     value: "mixed"
   }, "Mixed", -1 /* HOISTED */)]), 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, _ctx.portForm.connection_type]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Technician Notes "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_22, [_cache[53] || (_cache[53] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
-    "class": "block text-sm font-medium text-gray-700"
+    "class": "nap-block nap-text-sm nap-font-medium nap-text-gray-700"
   }, "Technician Notes", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("textarea", {
     "onUpdate:modelValue": _cache[21] || (_cache[21] = function ($event) {
       return _ctx.portForm.technician_notes = $event;
     }),
-    "class": "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500",
+    "class": "nap-mt-1 nap-block nap-w-full nap-rounded-md nap-border-gray-300 nap-shadow-sm focus:nap-border-indigo-500 focus:nap-ring-indigo-500",
     rows: "3"
   }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, _ctx.portForm.technician_notes]])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     type: "button",
     onClick: _cache[22] || (_cache[22] = function () {
       return _ctx.closePortForm && _ctx.closePortForm.apply(_ctx, arguments);
     }),
-    "class": "px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+    "class": "nap-px-4 nap-py-2 nap-bg-gray-200 nap-text-gray-800 nap-rounded-md hover:nap-bg-gray-300"
   }, " Cancel "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     type: "submit",
-    "class": "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700",
+    "class": "nap-px-4 nap-py-2 nap-bg-blue-600 nap-text-white nap-rounded-md hover:nap-bg-blue-700",
     disabled: _ctx.loading
   }, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.loading ? 'Saving...' : _ctx.isEditMode ? 'Update' : 'Create'), 9 /* TEXT, PROPS */, _hoisted_24)])], 32 /* NEED_HYDRATION */)])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _ctx.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.error), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Flow diagram "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [_ctx.loading && !_ctx.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_28, _cache[54] || (_cache[54] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "spinner"
@@ -16448,7 +16474,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "max-zoom": 4,
     onNodeclick: _ctx.onNodeClick,
     onNodedragstop: _ctx.onNodeDragEnd,
-    onConnect: _ctx.onEdgeConnect
+    onConnect: _ctx.onEdgeConnect,
+    style: {
+      "width": "100%",
+      "height": "100%"
+    }
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
       return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Background, {
@@ -18739,7 +18769,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.nap-flow-container[data-v-778e46bd] {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n.flow-container[data-v-778e46bd] {\n  flex-grow: 1;\n  min-height: 500px;\n  border-radius: 8px;\n  overflow: hidden;\n  background-color: #f5f5f5;\n}\n.legend-dot[data-v-778e46bd] {\n  width: 12px;\n  height: 12px;\n  border-radius: 50%;\n  display: inline-block;\n  margin-right: 8px;\n}\n.spinner[data-v-778e46bd] {\n  border: 4px solid rgba(0, 0, 0, 0.1);\n  width: 36px;\n  height: 36px;\n  border-radius: 50%;\n  border-left-color: #09f;\n  animation: spin-778e46bd 1s linear infinite;\n}\n@keyframes spin-778e46bd {\n0% { transform: rotate(0deg);\n}\n100% { transform: rotate(360deg);\n}\n}\n\n/* NAP Node Styles */\n[data-v-778e46bd] .nap-node {\n  padding: 10px;\n  border-radius: 5px;\n  width: 200px;\n  background-color: white;\n  border: 1px solid #ddd;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);\n}\n[data-v-778e46bd] .nap-node-active {\n  border-left: 5px solid #4CAF50;\n}\n[data-v-778e46bd] .nap-node-inactive {\n  border-left: 5px solid #9E9E9E;\n}\n[data-v-778e46bd] .nap-node-maintenance {\n  border-left: 5px solid #FFC107;\n}\n[data-v-778e46bd] .nap-node-damaged {\n  border-left: 5px solid #F44336;\n}\n[data-v-778e46bd] .nap-node-header {\n  border-bottom: 1px solid #eee;\n  padding-bottom: 8px;\n  margin-bottom: 8px;\n}\n[data-v-778e46bd] .nap-node-title {\n  font-weight: bold;\n  font-size: 14px;\n}\n[data-v-778e46bd] .nap-node-code {\n  font-size: 12px;\n  color: #666;\n}\n[data-v-778e46bd] .nap-node-content {\n  font-size: 12px;\n}\n[data-v-778e46bd] .nap-node-status {\n  margin-bottom: 5px;\n}\n[data-v-778e46bd] .nap-node-occupancy {\n  margin-bottom: 5px;\n}\n[data-v-778e46bd] .nap-node-level {\n  color: #666;\n}\n[data-v-778e46bd] .occupancy-bar {\n  height: 5px;\n  background-color: #eee;\n  border-radius: 2px;\n  margin-top: 2px;\n}\n[data-v-778e46bd] .occupancy-fill {\n  height: 100%;\n  background-color: #2196F3;\n  border-radius: 2px;\n}\n\n/* Custom Controls Styles */\n[data-v-778e46bd] .custom-controls {\n  background-color: white;\n  padding: 5px;\n  border-radius: 4px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);\n}\n[data-v-778e46bd] .btn-refresh {\n  background-color: #2196F3;\n  color: white;\n  border: none;\n  border-radius: 4px;\n  padding: 5px 10px;\n  font-size: 12px;\n  cursor: pointer;\n  transition: background-color 0.3s;\n}\n[data-v-778e46bd] .btn-refresh:hover {\n  background-color: #0b7dda;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.nap-flow-container[data-v-778e46bd] {\n  width: 100%;\n  height: 100%;\n  min-height: 600px;\n  display: flex;\n  flex-direction: column;\n}\n.flow-container[data-v-778e46bd] {\n  flex-grow: 1;\n  width: 100%;\n  height: 500px;\n  min-height: 500px;\n  border-radius: 8px;\n  overflow: hidden;\n  background-color: #f5f5f5;\n}\n.legend-dot[data-v-778e46bd] {\n  width: 12px;\n  height: 12px;\n  border-radius: 50%;\n  display: inline-block;\n  margin-right: 8px;\n}\n.spinner[data-v-778e46bd] {\n  border: 4px solid rgba(0, 0, 0, 0.1);\n  width: 36px;\n  height: 36px;\n  border-radius: 50%;\n  border-left-color: #09f;\n  animation: spin-778e46bd 1s linear infinite;\n}\n@keyframes spin-778e46bd {\n0% { transform: rotate(0deg);\n}\n100% { transform: rotate(360deg);\n}\n}\n\n/* NAP Node Styles */\n[data-v-778e46bd] .nap-node {\n  padding: 10px;\n  border-radius: 5px;\n  width: 200px;\n  background-color: white;\n  border: 1px solid #ddd;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);\n}\n[data-v-778e46bd] .nap-node-active {\n  border-left: 5px solid #4CAF50;\n}\n[data-v-778e46bd] .nap-node-inactive {\n  border-left: 5px solid #9E9E9E;\n}\n[data-v-778e46bd] .nap-node-maintenance {\n  border-left: 5px solid #FFC107;\n}\n[data-v-778e46bd] .nap-node-damaged {\n  border-left: 5px solid #F44336;\n}\n[data-v-778e46bd] .nap-node-header {\n  border-bottom: 1px solid #eee;\n  padding-bottom: 8px;\n  margin-bottom: 8px;\n}\n[data-v-778e46bd] .nap-node-title {\n  font-weight: bold;\n  font-size: 14px;\n}\n[data-v-778e46bd] .nap-node-code {\n  font-size: 12px;\n  color: #666;\n}\n[data-v-778e46bd] .nap-node-content {\n  font-size: 12px;\n}\n[data-v-778e46bd] .nap-node-status {\n  margin-bottom: 5px;\n}\n[data-v-778e46bd] .nap-node-occupancy {\n  margin-bottom: 5px;\n}\n[data-v-778e46bd] .nap-node-level {\n  color: #666;\n}\n[data-v-778e46bd] .occupancy-bar {\n  height: 5px;\n  background-color: #eee;\n  border-radius: 2px;\n  margin-top: 2px;\n}\n[data-v-778e46bd] .occupancy-fill {\n  height: 100%;\n  background-color: #2196F3;\n  border-radius: 2px;\n}\n\n/* Custom Controls Styles */\n[data-v-778e46bd] .custom-controls {\n  background-color: white;\n  padding: 5px;\n  border-radius: 4px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);\n}\n[data-v-778e46bd] .btn-refresh {\n  background-color: #2196F3;\n  color: white;\n  border: none;\n  border-radius: 4px;\n  padding: 5px 10px;\n  font-size: 12px;\n  cursor: pointer;\n  transition: background-color 0.3s;\n}\n[data-v-778e46bd] .btn-refresh:hover {\n  background-color: #0b7dda;\n}\n\n/* Vue Flow Styles */\n[data-v-778e46bd] .vue-flow {\n  width: 100%;\n  height: 100%;\n}\n\n/* Edge Styles */\n[data-v-778e46bd] .vue-flow__edge {\n  stroke-width: 2;\n}\n[data-v-778e46bd] .vue-flow__edge.selected {\n  stroke-width: 3;\n}\n[data-v-778e46bd] .vue-flow__edge-path {\n  stroke: #2196F3;\n}\n[data-v-778e46bd] .vue-flow__edge.animated .vue-flow__edge-path {\n  stroke-dasharray: 5;\n  animation: dashdraw-778e46bd 0.5s linear infinite;\n}\n@keyframes dashdraw-778e46bd {\nfrom {\n    stroke-dashoffset: 10;\n}\n}\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
