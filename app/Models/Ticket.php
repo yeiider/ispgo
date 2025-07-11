@@ -24,7 +24,6 @@ class Ticket extends Model
         'title',
         'description',
         'resolution_notes',
-        'attachments',
         'contact_method',
         'closed_at',
         'labels'

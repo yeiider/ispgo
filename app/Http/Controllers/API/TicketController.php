@@ -248,4 +248,64 @@ class TicketController extends Controller
             return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * Update the status of a ticket.
+     *
+     * @OA\Patch(
+     *     path="/api/v1/tickets/{id}/status",
+     *     summary="Update the status of a ticket",
+     *     tags={"Tickets"},
+     *     security={{"BearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         description="Ticket ID",
+     *         required=true,
+     *         in="path",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", enum={"open", "in_progress", "resolved", "closed"}, description="New status for the ticket", example="in_progress")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Ticket status updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/TicketResource")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Ticket not found"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error"
+     *     )
+     * )
+     */
+    public function updateStatus(Request $request, int $id): TicketResource|\Illuminate\Http\JsonResponse
+    {
+        try {
+            $request->validate([
+                'status' => 'required|string|in:open,in_progress,resolved,closed',
+            ]);
+
+            $ticket = $this->ticketService->getById($id);
+            if (!$ticket) {
+                return response()->json(['error' => 'Ticket not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            $data = ['status' => $request->status];
+            return new TicketResource($this->ticketService->update($data, $id));
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

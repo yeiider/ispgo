@@ -24,6 +24,10 @@ class TicketResource extends JsonResource
             'attachments' => $this->attachments,
             'contact_method' => $this->contact_method,
             'labels' => $this->labels,
+            'customer' => $this->customer,
+            'service' => $this->service,
+            'comments' => $this->comments,
+            'users' => $this->users
         ];
     }
 }

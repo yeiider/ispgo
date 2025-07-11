@@ -1,0 +1,52 @@
+{
+  "request": {
+    "endpoint": "/api/v1/tickets/{ticket_id}/comments",
+    "method": "POST",
+    "headers": {
+      "Authorization": "Bearer {your_access_token}",
+      "Content-Type": "application/json"
+    },
+    "parameters": {
+      "ticket_id": "Replace with the actual ticket ID (integer)"
+    },
+    "body": {
+      "content": "This is a comment on the ticket. You can include detailed information about the issue or resolution.",
+      "recipient_id": 2
+    },
+    "curl_example": "curl -X POST \\\n  'https://your-domain.com/api/v1/tickets/123/comments' \\\n  -H 'Authorization: Bearer your_access_token' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"content\": \"This is a comment on the ticket. You can include detailed information about the issue or resolution.\",\n    \"recipient_id\": 2\n  }'"
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "id": 1,
+      "ticket_id": 123,
+      "user_id": 1,
+      "user": {
+        "id": 1,
+        "name": "John Doe"
+      },
+      "content": "This is a comment on the ticket. You can include detailed information about the issue or resolution.",
+      "recipient_id": 2,
+      "recipient": {
+        "id": 2,
+        "name": "Jane Smith"
+      },
+      "attachments": [],
+      "created_at": "2023-10-15T14:53:00Z",
+      "updated_at": "2023-10-15T14:53:00Z"
+    }
+  },
+  "notes": [
+    "This endpoint allows you to create a new comment on a specific ticket.",
+    "The 'content' field is required and contains the text of your comment.",
+    "The 'recipient_id' field is optional and can be used to direct the comment to a specific user.",
+    "To add attachments to a comment, you can use the /api/v1/comments/{comment_id}/attachments endpoint after creating the comment."
+  ],
+  "multipart_form_data_example": {
+    "description": "If you want to upload attachments along with your comment, you can use multipart/form-data instead:",
+    "curl_example": "curl -X POST \\\n  'https://your-domain.com/api/v1/tickets/123/comments' \\\n  -H 'Authorization: Bearer your_access_token' \\\n  -H 'Content-Type: multipart/form-data' \\\n  -F 'content=This is a comment with an attachment.' \\\n  -F 'recipient_id=2' \\\n  -F 'attachments[]=@/path/to/your/file1.pdf' \\\n  -F 'attachments[]=@/path/to/your/file2.jpg'"
+  }
+}

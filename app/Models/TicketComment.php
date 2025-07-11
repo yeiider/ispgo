@@ -23,6 +23,23 @@ class TicketComment extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['user_name'];
+
+    /**
+     * Get the user's name associated with the comment.
+     *
+     * @return string
+     */
+    public function getUserNameAttribute(): string
+    {
+        return $this->user->name;
+    }
+
+    /**
      * Get the ticket that owns the comment.
      */
     public function ticket(): BelongsTo
@@ -37,6 +54,8 @@ class TicketComment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+
 
 
 }
