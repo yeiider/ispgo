@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        return $request->user()->load(['roles', 'permissions'])->withoutRelations();
     });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/v1/invoice/search', [InvoiceApi::class, 'searchInvoices']);

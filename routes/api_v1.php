@@ -79,6 +79,7 @@ Route::apiResource('/html-templates', App\Http\Controllers\API\HtmlTemplateContr
 Route::apiResource('/password-resets', App\Http\Controllers\API\PasswordResetController::class);
 
 Route::apiResource('/tickets', App\Http\Controllers\API\TicketController::class);
+Route::patch('/tickets/{id}/status', [App\Http\Controllers\API\TicketController::class, 'updateStatus']);
 
 // Ticket Comments
 Route::apiResource('/comments', App\Http\Controllers\API\TicketCommentController::class)->except(['index', 'store']);
@@ -89,11 +90,8 @@ Route::post('/tickets/{ticket_id}/comments', [App\Http\Controllers\API\TicketCom
 Route::apiResource('/attachments', App\Http\Controllers\API\TicketAttachmentController::class)->except(['store']);
 Route::post('/tickets/{ticket_id}/attachments', [App\Http\Controllers\API\TicketAttachmentController::class, 'store']);
 Route::post('/comments/{comment_id}/attachments', [App\Http\Controllers\API\TicketAttachmentController::class, 'storeForComment']);
+Route::post('/customers', [App\Http\Controllers\Api\CustomerController::class, 'store'])->name('customers.store');
 
-// Ticket Labels - Removed in favor of direct labels field on tickets
-// Route::apiResource('/ticket-labels', App\Http\Controllers\API\TicketLabelController::class);
-// Route::get('/tickets/{ticket_id}/labels', [App\Http\Controllers\API\TicketLabelController::class, 'getTicketLabels']);
-// Route::post('/tickets/{ticket_id}/labels/{label_id}', [App\Http\Controllers\API\TicketLabelController::class, 'attachLabel']);
-// Route::delete('/tickets/{ticket_id}/labels/{label_id}', [App\Http\Controllers\API\TicketLabelController::class, 'detachLabel']);
+
 
 Route::apiResource('/users', App\Http\Controllers\API\UserController::class);
