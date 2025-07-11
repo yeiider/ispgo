@@ -27,7 +27,8 @@
         "laravel/passport": "^12.0",
         "laravel/tinker": "^2.9",
         "predis/predis": "^2.3",
-        "sereny/nova-permissions": "@dev"
+        "sereny/nova-permissions": "@dev",
+        "ispgo/nap-manager": "@dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -67,7 +68,6 @@
             "@php artisan migrate --graceful --ansi"
         ]
     },
-
     "extra": {
         "laravel": {
             "dont-discover": [
@@ -86,7 +86,6 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-
     "repositories": {
         "nova": {
             "type": "composer",
@@ -119,6 +118,10 @@
         "6": {
             "type": "path",
             "url": "./packages/ispgo/siigo"
+        },
+        "7": {
+            "type": "path",
+            "url": "./nova-components/NapManager"
         }
     }
 }

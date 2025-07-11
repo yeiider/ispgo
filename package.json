@@ -17,7 +17,10 @@
         "build-mikrotik": "cd nova-components/Mikrotik && npm run dev",
         "build-mikrotik-prod": "cd nova-components/Mikrotik && npm run prod",
         "build-smartolt": "cd nova-components/Smartolt && npm run dev",
-        "build-smartolt-prod": "cd nova-components/Smartolt && npm run prod"
+        "build-smartolt-prod": "cd nova-components/Smartolt && npm run prod",
+        "build-nap-manager": "cd nova-components/NapManager && npm run dev",
+        "watch-nap-manager": "cd nova-components/NapManager && npm run watch",
+        "build-nap-manager-prod": "cd nova-components/NapManager && npm run prod"
     },
     "devDependencies": {
         "@types/node": "^22.9.0",
