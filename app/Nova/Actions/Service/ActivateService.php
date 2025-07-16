@@ -11,6 +11,7 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class ActivateService extends Action
 {
+
     use InteractsWithQueue, Queueable;
 
     /**

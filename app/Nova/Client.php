@@ -12,6 +12,7 @@ use Laravel\Passport\Client as PassportClient;
 
 class Client extends Resource
 {
+
     /**
      * El modelo Eloquent al que hace referencia este Resource.
      *
