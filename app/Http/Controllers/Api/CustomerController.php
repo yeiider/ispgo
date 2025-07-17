@@ -94,8 +94,8 @@ class CustomerController extends Controller
             'addresses.*.postal_code' => 'required|max:20',
             'addresses.*.country' => 'required|max:100',
             'addresses.*.address_type' => 'required|in:billing,shipping',
-            'addresses.*.latitude' => 'nullable|numeric',
-            'addresses.*.longitude' => 'nullable|numeric',
+            'addresses.*.latitude' => 'nullable',
+            'addresses.*.longitude' => 'nullable',
         ];
     }
 
