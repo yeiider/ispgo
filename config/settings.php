@@ -353,7 +353,7 @@ return [
                 "label" => "URL Response",
                 "placeholder" => "URL Response",
             ],
-            "env" => [
+            ".env" => [
                 "field" => "select-field",
                 "label" => "Environment",
                 "placeholder" => "Environment",
@@ -371,7 +371,7 @@ return [
                 'label' => 'Enabled',
                 'placeholder' => 'Enabled',
             ],
-            "env" => [
+            ".env" => [
                 "field" => "select-field",
                 "label" => "Environment",
                 "placeholder" => "Environment",

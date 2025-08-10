@@ -12,6 +12,8 @@ return [
     'deactivation_date' => 'Fecha de Desactivación',
     'support_contact' => 'Contacto de Soporte',
     'address' => 'Ubicación del Servicio',
+    'unu_latitude' => 'Latitud de UNU',
+    'unu_longitude' => 'Longitud de UNU',
     'billing_cycle' => 'Ciclo de Facturación',
     'service_contract' => 'Contrato de Servicio',
     'sn' => 'SN de la Onu',

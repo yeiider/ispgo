@@ -16,6 +16,7 @@ class EquipmentAssignment extends Model
         'assigned_at',
         'returned_at',
         'status',
+        'quantity',
         'condition_on_assignment',
         'condition_on_return',
         'notes',

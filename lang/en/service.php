@@ -12,6 +12,8 @@ return [
     'deactivation_date' => 'Deactivation Date',
     'support_contact' => 'Support Contact',
     'address' => 'Service Location',
+    'unu_latitude' => 'UNU Latitude',
+    'unu_longitude' => 'UNU Longitude',
     'billing_cycle' => 'Billing Cycle',
     'service_contract' => 'Service Contract',
     'sn' => 'Onu SN',

@@ -120,10 +120,6 @@ class TicketCommentController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/TicketCommentRequest"),
-     *         @OA\MediaType(
-     *             mediaType="multipart/form-data",
-     *             @OA\Schema(ref="#/components/schemas/TicketCommentRequest")
-     *         )
      *     ),
      *     @OA\Response(
      *         response=201,
@@ -140,20 +136,15 @@ class TicketCommentController extends Controller
      *     )
      * )
      */
-    public function store(TicketCommentRequest $request, int $ticketId): TicketCommentResource|\Illuminate\Http\JsonResponse
+    public function  store(TicketCommentRequest $request, int $ticketId): TicketCommentResource|\Illuminate\Http\JsonResponse
     {
         try {
             $data = $request->validated();
+
             $data['ticket_id'] = $ticketId;
             $data['user_id'] = auth()->id();
 
             $comment = $this->ticketCommentService->save($data);
-
-            // Handle file uploads if present
-            if ($request->hasFile('attachments')) {
-                // This would be handled by a separate service
-                // For now, we'll just return the comment
-            }
 
             return new TicketCommentResource($comment);
         } catch (\Exception $exception) {

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "87e18a2fe215ccabf18af091a35afdf8",
+    "content-hash": "da6376d48419760aca350c4ee5e3f9ad",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2103,7 +2103,7 @@
         },
         {
             "name": "ispgo/ckeditor",
-            "version": "dev-staging",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/Ckeditor",
@@ -2139,7 +2139,7 @@
         },
         {
             "name": "ispgo/mikrotik",
-            "version": "dev-staging",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/Mikrotik",
@@ -2175,7 +2175,7 @@
         },
         {
             "name": "ispgo/nap-manager",
-            "version": "dev-staging",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/NapManager",
@@ -2216,7 +2216,7 @@
         },
         {
             "name": "ispgo/settings-manager",
-            "version": "dev-staging",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/SettingsManager",
@@ -2252,7 +2252,7 @@
         },
         {
             "name": "ispgo/siigo",
-            "version": "dev-staging",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./packages/ispgo/siigo",
@@ -2274,7 +2274,7 @@
         },
         {
             "name": "ispgo/smartolt",
-            "version": "dev-staging",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./nova-components/Smartolt",
@@ -2310,7 +2310,7 @@
         },
         {
             "name": "ispgo/wiivo",
-            "version": "dev-staging",
+            "version": "dev-master",
             "dist": {
                 "type": "path",
                 "url": "./packages/ispgo/wiivo",
@@ -10436,16 +10436,16 @@
         },
         {
             "name": "laravel/sail",
-            "version": "v1.43.0",
+            "version": "v1.44.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/sail.git",
-                "reference": "71a509b14b2621ce58574274a74290f933c687f7"
+                "reference": "a09097bd2a8a38e23ac472fa6a6cf5b0d1c1d3fe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/sail/zipball/71a509b14b2621ce58574274a74290f933c687f7",
-                "reference": "71a509b14b2621ce58574274a74290f933c687f7",
+                "url": "https://api.github.com/repos/laravel/sail/zipball/a09097bd2a8a38e23ac472fa6a6cf5b0d1c1d3fe",
+                "reference": "a09097bd2a8a38e23ac472fa6a6cf5b0d1c1d3fe",
                 "shasum": ""
             },
             "require": {
@@ -10495,7 +10495,7 @@
                 "issues": "https://github.com/laravel/sail/issues",
                 "source": "https://github.com/laravel/sail"
             },
-            "time": "2025-05-13T13:34:34+00:00"
+            "time": "2025-07-04T16:17:06+00:00"
         },
         {
             "name": "mockery/mockery",

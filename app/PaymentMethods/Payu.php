@@ -24,7 +24,7 @@ class Payu extends AbstractPaymentMethod
     public function getConfiguration(): array
     {
         return [
-            'action_url' => ConfigHelper::getConfigValue(self::PATH . 'env') === 'sandbox' ? self::SANDBOX_ACTION : self::PRODUCTION_ACTION,
+            'action_url' => ConfigHelper::getConfigValue(self::PATH . '.env') === 'sandbox' ? self::SANDBOX_ACTION : self::PRODUCTION_ACTION,
             'url_confirmation' => ConfigHelper::getConfigValue(self::PATH . 'url_confirmation') ?? '',
             'url_response' => ConfigHelper::getConfigValue(self::PATH . 'url_response') ?? '',
             'merchant_id' => ConfigHelper::getConfigValue(self::PATH . 'merchant_id') ?? '',

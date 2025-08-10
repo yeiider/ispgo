@@ -142,7 +142,7 @@ class Ticket extends Resource
                 ->nullable(),
 
             Text::make(__('attribute.contact_method'), 'contact_method')
-                ->nullable()
+                ->rules('required')
                 ->sortable(),
 
             HasMany::make(__('attribute.comments'), 'comments', TicketComment::class),

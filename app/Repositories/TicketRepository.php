@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\Ticket;
+use Illuminate\Database\Eloquent\Collection;
 
 class TicketRepository
 {
@@ -29,6 +30,8 @@ class TicketRepository
     {
         return $this->ticket->get();
     }
+
+
 
      /**
      * Get ticket by id
@@ -76,5 +79,15 @@ class TicketRepository
         $ticket = $this->ticket->find($id);
         $ticket->delete();
         return $ticket;
+    }
+
+    /**
+     * Get tickets for authenticated user
+     *
+     * @return Collection
+     */
+    public function forAuthenticatedUser()
+    {
+        return $this->ticket->forAuthenticatedUser();
     }
 }

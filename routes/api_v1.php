@@ -79,7 +79,7 @@ Route::apiResource('/html-templates', App\Http\Controllers\API\HtmlTemplateContr
 Route::apiResource('/password-resets', App\Http\Controllers\API\PasswordResetController::class);
 
 Route::apiResource('/tickets', App\Http\Controllers\API\TicketController::class);
-Route::patch('/tickets/{id}/status', [App\Http\Controllers\API\TicketController::class, 'updateStatus']);
+Route::put('/tickets/{id}/status', [App\Http\Controllers\API\TicketController::class, 'updateStatus']);
 
 // Ticket Comments
 Route::apiResource('/comments', App\Http\Controllers\API\TicketCommentController::class)->except(['index', 'store']);
@@ -92,6 +92,12 @@ Route::post('/tickets/{ticket_id}/attachments', [App\Http\Controllers\API\Ticket
 Route::post('/comments/{comment_id}/attachments', [App\Http\Controllers\API\TicketAttachmentController::class, 'storeForComment']);
 Route::post('/customers', [App\Http\Controllers\Api\CustomerController::class, 'store'])->name('customers.store');
 
+// Mobile App Routes
+Route::get('/app-movil/tickets-data', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'getTicketsData']);
+Route::get('/app-movil/services', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'getServices']);
+Route::get('/app-movil/customers', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'getCustomers']);
+Route::get('/app-movil/equipment-assignments', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'getEquipmentAssignments']);
 
+Route::patch('/app-movil/{service_id}/update-service', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'updateServiceFields']);
 
 Route::apiResource('/users', App\Http\Controllers\API\UserController::class);

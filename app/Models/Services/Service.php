@@ -31,7 +31,7 @@ class Service extends Model
         'password_router', 'service_status', 'activation_date', 'deactivation_date',
         'bandwidth', 'mac_address', 'installation_date', 'service_notes', 'contract_id',
         'support_contact', 'service_location', 'service_type', 'static_ip', 'data_limit',
-        'last_maintenance', 'billing_cycle', 'service_priority', 'sn','unu_latitude','onu_longitude',
+        'last_maintenance', 'billing_cycle', 'service_priority', 'sn','unu_longitude','unu_latitude',
         'assigned_technician', 'service_contract', 'created_by', 'updated_by',
     ];
 
