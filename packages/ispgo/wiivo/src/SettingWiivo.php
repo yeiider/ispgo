@@ -78,7 +78,7 @@ class SettingWiivo
                     "label" => "Notificar Invoice Template",
                     "placeholder" => "Notificar Invoice Template",
                 ],
-                "env" => [
+                ".env" => [
                     "field" => "select-field",
                     "label" => "Environment",
                     "placeholder" => "Environment",

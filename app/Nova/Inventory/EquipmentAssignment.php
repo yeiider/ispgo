@@ -6,6 +6,7 @@ use App\Nova\Filters\Inventory\EquipmentAssignmentStatus;
 use App\Nova\Resource;
 use App\Nova\User;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Select;
@@ -51,6 +52,7 @@ class EquipmentAssignment extends Resource
             ID::make(__('ID'), 'id')->sortable(),
             BelongsTo::make(__('User'), 'user', User::class)->sortable()->searchable(),
             BelongsTo::make(__('Product'), 'product', Product::class)->sortable()->searchable(),
+            Number::make(__('Quantity'), 'quantity')->sortable()->rules('required', 'numeric', 'min:1'),
             DateTime::make(__('Assigned At'), 'assigned_at')->sortable(),
             DateTime::make(__('Returned At'), 'returned_at')->nullable()->sortable(),
             Select::make('Status', 'status')->options([

@@ -35,6 +35,16 @@ class TicketService
     }
 
     /**
+     * Get tickets for authenticated user.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function forAuthenticatedUser()
+    {
+        return $this->ticketRepository->forAuthenticatedUser();
+    }
+
+    /**
      * Get ticketRepository by id.
      *
      * @param $id

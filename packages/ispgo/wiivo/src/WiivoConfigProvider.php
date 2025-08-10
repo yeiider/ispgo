@@ -74,7 +74,7 @@ class WiivoConfigProvider
 
     public static function getEnv(): ?string
     {
-        return self::getValue('env');
+        return self::getValue('.env');
     }
 
     public static function getTelephoneTest(): ?array

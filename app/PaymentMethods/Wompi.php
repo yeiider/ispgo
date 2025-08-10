@@ -39,7 +39,7 @@ class Wompi extends AbstractPaymentMethod
 
     public static function getEnvironment(): string|null
     {
-        return ConfigHelper::getConfigValue(self::PATH . 'env');
+        return ConfigHelper::getConfigValue(self::PATH . '.env');
     }
 
     public static function getPublicKey(): string|null

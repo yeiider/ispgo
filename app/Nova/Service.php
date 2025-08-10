@@ -147,6 +147,8 @@ class Service extends Resource
 
             Text::make(__('service.mac_address'), 'mac_address')->hideFromIndex(),
             Date::make(__('service.installation_date'), 'installation_date'),
+            Text::make(__('service.unu_longitude'), 'unu_longitude'),
+            Text::make(__('service.unu_latitude'), 'unu_latitude'),
             Textarea::make(__('service.service_notes'), 'service_notes'),
             Boolean::make(__('service.static_ip'), 'static_ip')->hideFromIndex(),
             Number::make(__('service.data_limit'), 'data_limit')->hideFromIndex(),

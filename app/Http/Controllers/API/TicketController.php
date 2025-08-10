@@ -106,7 +106,7 @@ class TicketController extends Controller
      */
     public function index(): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
-        return TicketResource::collection($this->ticketService->getAll());
+        return TicketResource::collection($this->ticketService->forAuthenticatedUser());
     }
 
     /**
@@ -304,7 +304,7 @@ class TicketController extends Controller
             $data = ['status' => $request->status];
             return new TicketResource($this->ticketService->update($data, $id));
         } catch (\Exception $exception) {
-            report($exception);
+
             return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

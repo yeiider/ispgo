@@ -224,4 +224,34 @@ class Ticket extends Model
 
         return false;
     }
+
+    /**
+     * Scope: tickets asignados a un usuario concreto.
+     *
+     * Uso:
+     *   Ticket::assignedTo($userId)->get();
+     */
+    public function scopeAssignedTo(Builder $query, int $userId): Builder
+    {
+        return $query->whereHas(
+            'users',
+            fn (Builder $q) => $q->where('users.id', $userId)
+        );
+    }
+
+    /**
+     * Devuelve los tickets asignados al usuario autenticado
+     * (si no hay usuario autenticado, devuelve una colección vacía).
+     *
+     * Uso:
+     *   $tickets = Ticket::forAuthenticatedUser();
+     */
+    public static function forAuthenticatedUser()
+    {
+        $userId = auth()->id();
+
+        return $userId
+            ? static::assignedTo($userId)->get()
+            : collect();
+    }
 }

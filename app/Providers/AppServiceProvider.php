@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
         Passport::refreshTokensExpireIn(now()->addDays(30));
         Passport::personalAccessTokensExpireIn(now()->addMonths(6));
 
-        if (config('app.env') === 'production') {
+        if (config('app..env') === 'production') {
             URL::forceScheme('https');
         }
     }

@@ -31,7 +31,7 @@ This document provides essential information for developers working on the ISP G
    - Copy `.env.example` to `.env`
    - Configure your database and other services in the `.env` file
    ```bash
-   cp .env.example .env
+   cp ..env.example ..env
    php artisan key:generate
    ```
 
