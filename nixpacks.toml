@@ -1,9 +1,9 @@
 # nixpacks.toml
 
 [phases.setup]
-# Declara TODOS los paquetes necesarios aquí
-nixPkgs = ["php83", "composer", "pnpm_8", "nginx"]
+# La clave correcta es 'pkgs', no 'nixPkgs'.
+pkgs = ["php83", "composer", "pnpm_8", "nginx"]
 
 [start]
-# Comando para iniciar tu aplicación Laravel con Nginx y PHP-FPM
+# Este comando de inicio sigue siendo correcto.
 command = "nginx && php-fpm"
