@@ -1,2 +1,9 @@
+# nixpacks.toml
+
 [phases.setup]
-nixpkgs = ["php", "php-fpm", "nginx"]
+# Declara TODOS los paquetes necesarios aquí
+nixPkgs = ["php83", "composer", "pnpm_8", "nginx"]
+
+[start]
+# Comando para iniciar tu aplicación Laravel con Nginx y PHP-FPM
+command = "nginx && php-fpm"
