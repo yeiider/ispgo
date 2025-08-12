@@ -1,9 +1,10 @@
 # nixpacks.toml
 
 [phases.setup]
-# La clave correcta es 'pkgs', no 'nixPkgs'.
-pkgs = ["php83", "composer", "pnpm_8", "nginx"]
+# Usamos Nix para casi todo
+pkgs = ["php83", "pnpm_8", "nginx"]
+# ¡PERO usamos Apt para instalar composer y evitar la colisión!
+aptPkgs = ["composer"]
 
 [start]
-# Este comando de inicio sigue siendo correcto.
 command = "nginx && php-fpm"
