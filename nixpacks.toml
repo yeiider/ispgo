@@ -2,7 +2,7 @@
 
 [phases.setup]
 # Usamos Nix para casi todo
-pkgs = ["php83", "pnpm_8", "nginx"]
+pkgs = ["php83", "pnpm", "nginx"]
 # ¡PERO usamos Apt para instalar composer y evitar la colisión!
 aptPkgs = ["composer"]
 
