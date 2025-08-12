@@ -23,7 +23,7 @@
         "ispgo/smartolt": "@dev",
         "ispgo/wiivo": "@dev",
         "laravel/framework": "^12.0",
-        "laravel/nova": "^5.0",
+        "laravel/nova": "5.7.4",
         "laravel/passport": "^12.0",
         "laravel/tinker": "^2.9",
         "predis/predis": "^2.3",
