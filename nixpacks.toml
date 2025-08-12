@@ -2,7 +2,7 @@
 
 [phases.setup]
 # Declara TODOS los paquetes necesarios aquí
-nixPkgs = ["php83", "composer", "pnpm_8", "nginx"]
+nixPkgs = ["php83", "pnpm_8", "nginx"]
 
 [start]
 # Comando para iniciar tu aplicación Laravel con Nginx y PHP-FPM
