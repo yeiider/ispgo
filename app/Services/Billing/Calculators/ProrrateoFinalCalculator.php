@@ -41,8 +41,7 @@ class ProrrateoFinalCalculator implements NovedadCalculator
         $dailyPrice = $service->plan->monthly_price / $totalDaysInMonth;
 
         /* 6️⃣  Calcular el valor proporcional -------------------------- */
-        $proratedValue = $dailyPrice * $daysOfService;
-
+        $proratedValue = $service->plan->monthly_price-($dailyPrice * $daysOfService);
         /* 7️⃣  Devolver el resultado como carga positiva --------------- */
         return -abs(round($proratedValue)); // Redondear a 2 decimales
     }
