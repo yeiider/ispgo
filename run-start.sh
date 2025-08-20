@@ -15,5 +15,7 @@ php artisan migrate --force
 echo "Verificando la licencia de Laravel Nova..."
 php artisan nova:check-license
 
+php artisan route:clear
+
 
 echo "¡Script completado con éxito!"
