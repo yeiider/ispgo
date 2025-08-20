@@ -8,6 +8,7 @@ use App\Nova\Actions\Invoice\RegisterPayment;
 use App\Nova\Actions\Invoice\RegisterPaymentPromise;
 use App\Nova\Actions\Invoice\SendInvoiceByWhatsapp;
 use App\Nova\Actions\Invoice\SendInvoiceNotification;
+use App\Nova\Actions\Invoice\NotifyAllInvoices;
 use App\Nova\Customers;
 use App\Nova\Filters\Invoice\InvoiceStatusFilter;
 use App\Nova\Filters\RouterFilter;
@@ -133,6 +134,7 @@ class Invoice extends Resource
             })->sole(),
             (new SendInvoiceByWhatsapp())->showInline(),
             (new SendInvoiceNotification())->showInline(),
+            (new NotifyAllInvoices())->standalone(),
         ];
     }
 
