@@ -123,9 +123,28 @@ class Utils
 
     public static function sendInvoiceEmail(Invoice $invoice, $emailTemplate, $img_header): void
     {
+        // Validate template
+        if (!$emailTemplate) {
+            throw new \InvalidArgumentException('Email template is not configured or not found.');
+        }
+
+        // Resolve and validate recipient email
+        $to = trim((string) $invoice->email_address);
+        if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('Invalid or empty recipient email for invoice ID ' . $invoice->id . '.');
+        }
+
+        // Build the mailable
         $dynamicEmail = new DynamicEmail(['invoice' => $invoice], $emailTemplate, $img_header);
         $imagePath = Utils::generateQrCodeInvoice($invoice);
-        $bccEmails = explode(",",InvoiceProviderConfig::bccInvoiceTo());
+
+        // Parse and validate BCC recipients from configuration
+        $bccRaw = (string) (InvoiceProviderConfig::bccInvoiceTo() ?? '');
+        $bccEmails = array_values(array_filter(array_map(function ($e) {
+            $e = trim($e);
+            return $e !== '' && filter_var($e, FILTER_VALIDATE_EMAIL) ? $e : null;
+        }, explode(',', $bccRaw))));
+
         $dynamicEmail->attach($imagePath, [
             'as' => 'invoice-qr.png',
             'mime' => 'image/png'
@@ -133,9 +152,13 @@ class Utils
             'imagePath' => $imagePath,
         ]);
 
-        Mail::to($invoice->email_address)->bcc($bccEmails)->send(
-            $dynamicEmail
-        );
+        // Send email with optional BCCs
+        $mailer = Mail::to($to);
+        if (!empty($bccEmails)) {
+            $mailer->bcc($bccEmails);
+        }
+        $mailer->send($dynamicEmail);
+
         Utils::unlinkQrCode($invoice);
     }
 

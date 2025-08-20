@@ -58,7 +58,14 @@ class SendInvoiceNotification implements ShouldQueue
         $invoice = $event->invoice;
 
         $templateId = InvoiceProviderConfig::emailTemplateCreatedInvoice();
-        $emailTemplate = EmailTemplate::where('id', $templateId)->first();
+        $emailTemplate = $templateId ? EmailTemplate::where('id', $templateId)->first() : null;
+        if (!$emailTemplate) {
+            \Log::warning('SendInvoiceNotification: email template not configured or not found. Skipping.', [
+                'invoice_id' => $invoice->id,
+                'template_id' => $templateId,
+            ]);
+            return;
+        }
         $img_header = asset('/img/invoice/email-header.jpeg');
         Utils::sendInvoiceEmail($invoice, $emailTemplate, $img_header);
     }
