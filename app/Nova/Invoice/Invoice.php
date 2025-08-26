@@ -13,11 +13,11 @@ use App\Nova\Customers;
 use App\Nova\Filters\Invoice\InvoiceStatusFilter;
 use App\Nova\Filters\RouterFilter;
 use App\Nova\Metrics\Invoice\InvoicesStatus;
-use App\Nova\Metrics\Invoice\MonthlyRevenue;
 use App\Nova\Metrics\Invoice\OutstandingBalance;
 use App\Nova\Metrics\Invoice\TotalRevenue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Actions\DestructiveAction;
 use Laravel\Nova\Fields\ActionFields;
@@ -26,9 +26,11 @@ use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\KeyValue;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\URL;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Resource;
 
@@ -116,6 +118,15 @@ class Invoice extends Resource
 
             Text::make(__('invoice.payment_method'), 'payment_method'),
             Textarea::make(__('invoice.notes'), 'notes')->hideFromIndex(),
+
+            // Evidence and additional info
+            URL::make(__('Payment Evidence'), function () {
+                return $this->payment_support ? Storage::disk('public')->url($this->payment_support) : null;
+            })->onlyOnDetail(),
+
+            KeyValue::make(__('invoice.additional_information'), 'additional_information')
+                ->hideFromIndex()
+                ->readonly(),
         ];
 
     }
