@@ -32,4 +32,7 @@ return [
     'tax_total' => 'Total de impuestos',
     'total_amount' => 'Monto total',
     'void_total' => 'Total anulado',
+    'view_invoice' => 'Ver Factura',
+    'view_receipt' => 'Ver Recibo',
+
 ];

@@ -177,6 +177,7 @@
 </style>
 <div class="container">
     <div class="hero" style="background-image: url({{$img_header}})"></div>
+    <div style="padding:10px 20px; font-weight: bold; font-size:16px; color:#00448c; text-align:center;">{{$companyName}}</div>
     <!-- Renderizar contenido aquí -->
     <div class="content-info">
         <div class="info">

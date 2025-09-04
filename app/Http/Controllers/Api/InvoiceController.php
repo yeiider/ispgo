@@ -150,12 +150,6 @@ class InvoiceController extends Controller
             abort(404, __('Invoice not found'));
         }
 
-        $filePath = "public/invoices/pdf/invoice_{$id}_{$invoice->status}.pdf";
-
-//        if (Storage::exists($filePath)) {
-//            return Storage::download($filePath);
-//        }
-
         $options = ['locale' => 'es', 'currency' => 'COP'];
 
         // Create a data array with all necessary variables
@@ -190,11 +184,6 @@ class InvoiceController extends Controller
 
         return view('invoices.preview', compact('data'));
 
-        return response()->streamDownload(function () use ($pdfContent) {
-            if ($pdfContent) {
-                readfile($pdfContent->output());
-            }
-        }, "invoice_{$id}_{$invoice->status}.pdf");
 
     }
 
@@ -217,14 +206,30 @@ class InvoiceController extends Controller
         $img_header = asset('img/invoice/email-header.jpeg');
 
 
+        $companyName = GeneralProviderConfig::getCompanyName() ?? env('APP_NAME');
+
         return view('emails.invoice',
             compact(
                 'invoice',
                 'img_header',
+                'companyName'
             )
         );
     }
 
+    public function previewReceipt($id)
+    {
+        $invoice = $this->getInvoice($id);
+        if (!$invoice) {
+            abort(404, __('Invoice not found'));
+        }
+        if ($invoice->status !== 'paid') {
+            abort(403, __('Only paid invoices have a printable receipt.'));
+        }
+        $qrCode = QrCodeHelper::generateQrCode($invoice->increment_id);
+        $config = $this->getConfig();
+        return view('invoices.receipt', compact('invoice', 'config', 'qrCode'));
+    }
 
     private function getInvoice(int|string $id)
     {

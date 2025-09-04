@@ -32,4 +32,6 @@ return [
     'tax_total' => 'Tax total',
     'total_amount' => 'Total amount',
     'void_total' => 'Void total',
+    'view_invoice' => 'View Invoice',
+    'view_receipt' => 'View Receipt',
 ];

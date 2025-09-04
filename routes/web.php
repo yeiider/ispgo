@@ -107,5 +107,5 @@ Route::get('/401', function () {
 
 
 Route::get('/preview-invoice/{id}', [InvoiceController::class, 'previewInvoice'])->name('preview.invoice');
-
+Route::get('/preview-receipt/{id}', [InvoiceController::class, 'previewReceipt'])->name('preview.receipt');
 Route::get('/preview-invoice-email/{id}', [InvoiceController::class, 'previewInvoiceEmail']);
