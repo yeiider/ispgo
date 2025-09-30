@@ -564,6 +564,44 @@ return [
             "class" => "form-control",
         ],
         "general" => SettingSiigo::getGeneralSettings(),
+    ],
+
+    // OnePay integration settings
+    "onepay" => [
+        "setting" => [
+            "label" => "OnePay",
+            "class" => "form-control",
+        ],
+        "general" => [
+            "setting" => [
+                "label" => "OnePay Settings",
+                "code" => "general"
+            ],
+            "onepay_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Enable OnePay",
+            ],
+            "onepay_base_url" => [
+                "field" => "text-field",
+                "label" => "OnePay Base URL",
+                "placeholder" => "https://api.onepay.la/v1"
+            ],
+            "onepay_api_token" => [
+                "field" => "password-field",
+                "label" => "OnePay API Token",
+                "placeholder" => "Secret Token"
+            ],
+            "onepay_auto_create_day" => [
+                "field" => "select-field",
+                "label" => "Day of Month to Auto-Create Charges",
+                "options" => \App\Settings\Config\Sources\DaysOfMonth::class
+            ],
+            "onepay_auto_remind_day" => [
+                "field" => "select-field",
+                "label" => "Day of Month to Auto-Remind Charges",
+                "options" => \App\Settings\Config\Sources\DaysOfMonth::class
+            ],
+        ],
     ]
 
 ];

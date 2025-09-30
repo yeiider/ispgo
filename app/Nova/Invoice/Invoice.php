@@ -8,6 +8,8 @@ use App\Nova\Actions\Invoice\RegisterPayment;
 use App\Nova\Actions\Invoice\RegisterPaymentPromise;
 use App\Nova\Actions\Invoice\SendInvoiceByWhatsapp;
 use App\Nova\Actions\Invoice\SendInvoiceNotification;
+use App\Nova\Actions\Invoice\ProcessOnePayCharge;
+use App\Nova\Actions\Invoice\DeleteOnePayCharge;
 use App\Nova\Actions\Invoice\NotifyAllInvoices;
 use App\Nova\Customers;
 use App\Nova\Filters\Invoice\InvoiceStatusFilter;
@@ -127,6 +129,12 @@ class Invoice extends Resource
             KeyValue::make(__('invoice.additional_information'), 'additional_information')
                 ->hideFromIndex()
                 ->readonly(),
+
+            // OnePay info
+            URL::make('onepay_payment_link', function () {
+                return $this->onepay_payment_link;
+            })->onlyOnDetail(),
+            Text::make('onepay_status', 'onepay_status')->onlyOnDetail(),
         ];
 
     }
@@ -151,6 +159,18 @@ class Invoice extends Resource
             (new SendInvoiceByWhatsapp())->showInline(),
             (new SendInvoiceNotification())->showInline(),
             (new NotifyAllInvoices())->standalone(),
+            // OnePay actions
+            (new ProcessOnePayCharge())
+                ->canSee(function ($request) {
+                    // Visible always; label adapts depending on state handled internally
+                    return true;
+                })
+                ->showInline(),
+            (new DeleteOnePayCharge())
+                ->canSee(function ($request) {
+                    return (bool) optional($this->resource)->onepay_charge_id;
+                })
+                ->showInline(),
         ];
     }
 

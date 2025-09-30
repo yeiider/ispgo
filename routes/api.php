@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskControllerApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Webhooks\OnePayWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,5 +37,8 @@ Route::post('/login', [\App\Http\Controllers\API\AuthController::class, 'login']
 Route::prefix('v1')
     ->middleware('auth:api')
     ->group(base_path('routes/api_v1.php'));
+
+// OnePay webhook endpoint
+Route::post('/webhooks/onepay', [OnePayWebhookController::class, 'handle']);
 
 

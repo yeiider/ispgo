@@ -27,7 +27,9 @@ class Invoice extends Model
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
         'issue_date', 'due_date', 'full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
-        'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total','router_id'
+        'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total','router_id',
+        // OnePay integration fields
+        'onepay_charge_id', 'onepay_payment_link', 'onepay_status', 'onepay_metadata'
     ];
 
     protected $casts = [
@@ -36,6 +38,7 @@ class Invoice extends Model
         "expiration_date" => 'date',
         "additional_information" => 'array',
         'quantity' => 'int',
+        'onepay_metadata' => 'array',
 
     ];
     protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay'];

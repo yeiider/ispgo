@@ -40,7 +40,8 @@ class Customer extends Authenticatable implements MustVerifyEmail
         'additional_notes',
         'created_by',
         'updated_by',
-        'password'
+        'password',
+        'onepay_customer_id'
     ];
 
     /**

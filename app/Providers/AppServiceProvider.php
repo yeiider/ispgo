@@ -7,6 +7,10 @@ use App\Events\FinalizeInvoice;
 use App\Events\FinalizeInvoiceBySchedule;
 use App\Events\InvoiceCreated;
 use App\Events\InvoiceIssued;
+use App\Events\InvoicePaid;
+use App\Listeners\CancelOnePayChargeOnExternalPayment;
+use App\Listeners\RegisterIncome;
+use App\Listeners\AfterPayingInvoice;
 use App\Events\InvoiceItemsCreated;
 use App\Listeners\ApplyBillingNovedades;
 use App\Listeners\ApplyRuleInvoice;
@@ -60,6 +64,21 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             InvoiceIssued::class,
             [SendInvoiceNotification::class, 'handle']
+        );
+
+        // When an invoice is paid
+        Event::listen(
+            InvoicePaid::class,
+            [RegisterIncome::class, 'handle']
+        );
+        Event::listen(
+            InvoicePaid::class,
+            [AfterPayingInvoice::class, 'handle']
+        );
+        // Cancel outstanding OnePay charge if paid by another method
+        Event::listen(
+            InvoicePaid::class,
+            [CancelOnePayChargeOnExternalPayment::class, 'handle']
         );
     }
 }

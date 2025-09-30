@@ -19,7 +19,10 @@ Schedule::command('app:syncronizar-datos-onu')->dailyAt('01:00');
 
 Schedule::command('services:suspend_everyday')->dailyAt('00:00');
 
-Schedule::call(function () {
-    $cutoffTime = Carbon::now()->subMinutes(\Ispgo\Wiivo\WiivoConfigProvider::getSessionLife());
-    SessionChatBot::where('updated_at', '<', $cutoffTime)->delete();
-})->everyMinute();
+// OnePay: run daily; the command itself checks the configured day in OnePaySettings
+Schedule::command('onepay:auto-create-charges')->daily();
+
+//Schedule::call(function () {
+//    $cutoffTime = Carbon::now()->subMinutes(\Ispgo\Wiivo\WiivoConfigProvider::getSessionLife());
+//    SessionChatBot::where('updated_at', '<', $cutoffTime)->delete();
+//})->everyMinute();
