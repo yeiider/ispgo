@@ -117,7 +117,8 @@ class Customer extends Resource
                 return ConfigProviderSiigo::getEnabled();
             }),
 
-            new GenerateInvoice
+            new GenerateInvoice,
+            new \App\Nova\Actions\Customers\ImportCustomers
         ];
     }
 
