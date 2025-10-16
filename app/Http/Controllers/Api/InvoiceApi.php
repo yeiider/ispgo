@@ -18,11 +18,11 @@ class InvoiceApi extends Controller
 
         try {
             $query = $request->input('q');
-            $invoice = Invoice::findByDniOrInvoiceId($query);
+            $invoices = Invoice::searchInvoice($query);
 
-            if ($invoice) {
-                $invoiceParser =  $this->parseData($invoice);
-                return response()->json(['invoice' => $invoiceParser]);
+            if ($invoices->isNotEmpty()) {
+                $parsed = $invoices->map(fn (Invoice $invoice) => $this->parseData($invoice))->values();
+                return response()->json(['invoices' => $parsed]);
             } else {
                 return response()->json(['message' => __('Invoices not found')], 404);
             }

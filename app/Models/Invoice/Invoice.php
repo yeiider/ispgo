@@ -159,14 +159,15 @@ class Invoice extends Model
 
     public static function searchInvoice($input)
     {
-        return self::where('status', 'unpaid') // Filtrar primero por estado
-        ->where(function ($query) use ($input) {
-            $query->whereHas('customer', function ($query) use ($input) {
-                $query->where('identity_document', 'LIKE', "%{$input}%")
-                    ->orWhere('first_name', 'LIKE', "%{$input}%");
+        return self::where('status', 'unpaid')
+            ->where(function ($query) use ($input) {
+                $query->whereHas('customer', function ($query) use ($input) {
+                    $query->where('identity_document', 'LIKE', "%{$input}%")
+                        ->orWhere('first_name', 'LIKE', "%{$input}%");
+                })
+                ->orWhere('increment_id', 'LIKE', "%{$input}%");
             })
-                ->orWhere('increment_id', 'LIKE', "%{$input}%")->orddBy('id', 'desc');
-        })
+            ->orderBy('id', 'desc')
             ->get();
     }
 
