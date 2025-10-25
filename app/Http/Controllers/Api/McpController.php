@@ -114,8 +114,7 @@ class McpController extends Controller
                     return response()->json([
                         'method' => 'onepay',
                         'action' => 'resend',
-                        'onepay_charge_id' => $invoice->onepay_charge_id,
-                        'payment_link' => $invoice->onepay_payment_link,
+                        'message' => __('Se ha enviado el enlace de pago, este llegará a tu WhatsApp desde nuestra línea de pagos'),
                         'status' => $invoice->onepay_status,
                     ]);
                 }
