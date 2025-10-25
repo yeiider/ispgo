@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\Api\McpController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -101,3 +103,9 @@ Route::get('/app-movil/equipment-assignments', [App\Http\Controllers\API\AppMovi
 Route::patch('/app-movil/{service_id}/update-service', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'updateServiceFields']);
 
 Route::apiResource('/users', App\Http\Controllers\API\UserController::class);
+// MCP minimal endpoints (public for MCP; protect at gateway if needed)
+Route::prefix('mcp')->group(function () {
+    Route::get('/customer/{identifier}', [McpController::class, 'getCustomer']);
+    Route::get('/invoices/{identifier}/unpaid', [McpController::class, 'getUnpaidInvoices']);
+    Route::post('/payments', [McpController::class, 'postPayment']);
+});

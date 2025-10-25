@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\InvoiceApi;
+use App\Http\Controllers\Api\McpController;
 use App\Http\Controllers\Api\TaskAttachmentController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskControllerApi;
@@ -37,6 +38,8 @@ Route::post('/login', [\App\Http\Controllers\API\AuthController::class, 'login']
 Route::prefix('v1')
     ->middleware('auth:api')
     ->group(base_path('routes/api_v1.php'));
+
+
 
 // OnePay webhook endpoint
 Route::post('/webhooks/onepay', [OnePayWebhookController::class, 'handle']);
