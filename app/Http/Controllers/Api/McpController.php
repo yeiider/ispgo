@@ -28,7 +28,7 @@ class McpController extends Controller
             return [
                 'ip' => $svc->service_ip,
                 'status' => $svc->service_status,
-                'sn' => $svc->sn,
+                'onu_external_id' => $svc->sn,
                 'mac' => $svc->mac_address,
                 'plan_name' => optional($svc->plan)->name,
                 'plan_price' => optional($svc->plan)->monthly_price,
