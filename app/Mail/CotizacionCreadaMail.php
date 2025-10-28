@@ -8,9 +8,16 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class CotizacionCreadaMail extends Mailable
+class CotizacionCreadaMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
+
+    /**
+     * Nombre de la cola donde se encolará este mailable.
+     *
+     * @var string
+     */
+    public $queue = 'redis';
 
     public Cotizacion $cotizacion;
 
