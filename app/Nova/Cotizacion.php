@@ -15,7 +15,7 @@ class Cotizacion extends Resource
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Cotizacion>
+     * @var class-string<CotizacionModel>
      */
     public static string $model = CotizacionModel::class;
 
