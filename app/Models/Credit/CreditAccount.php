@@ -144,4 +144,30 @@ class CreditAccount extends Model
     {
         return $query->where('status', 'in_grace');
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Global Scope: Filter by user's router through customer
+        static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
+            /** @var \App\Models\User|null $user */
+            $user = \Illuminate\Support\Facades\Auth::user();
+            
+            // If not authenticated, no filtering
+            if (!$user) {
+                return;
+            }
+
+            // If super admin always sees all, or if no router assigned, show all
+            if ($user->isSuperAdmin() || !$user->router_id) {
+                return;
+            }
+
+            // Filter by router_id through customer relationship (applies to admin with router_id and regular users with router_id)
+            $builder->whereHas('customer', function ($query) use ($user) {
+                $query->where('router_id', $user->router_id);
+            });
+        });
+    }
 }

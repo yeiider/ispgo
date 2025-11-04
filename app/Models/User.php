@@ -27,6 +27,7 @@ class User extends Authenticatable
         'telephone',
         'created_by',
         'updated_by',
+        'router_id',
     ];
 
     /**
@@ -52,9 +53,54 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Get the router assigned to this user.
+     */
+    public function router()
+    {
+        return $this->belongsTo(Router::class);
+    }
+
+    /**
+     * Check if user can see all data (super admin, admin without router, or no router assigned).
+     */
+    public function canSeeAllData(): bool
+    {
+        // Super-admin siempre ve todo
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        // Si no tiene router_id, ve todo
+        if (!$this->router_id) {
+            return true;
+        }
+
+        // Si es admin con router_id, solo ve su router
+        // Si es usuario normal con router_id, solo ve su router
+        return false;
+    }
+
+    /**
+     * Check if user should filter by router.
+     * Returns true if user has router_id and is not super-admin.
+     */
+    public function shouldFilterByRouter(): bool
+    {
+        return !$this->isSuperAdmin() && !is_null($this->router_id);
+    }
+
     public function isSuperAdmin()
     {
         return $this->hasRole('super-admin');
+    }
+
+    /**
+     * Check if user has admin role (not super-admin).
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin') && !$this->isSuperAdmin();
     }
 
     /**

@@ -62,6 +62,11 @@ class User extends Resource
                 ->sortable()
                 ->rules('required', 'max:10'),
 
+            \Laravel\Nova\Fields\BelongsTo::make('Router', 'router', Router::class)
+                ->nullable()
+                ->searchable()
+                ->help('Router asignado al usuario. Super-admin siempre ve todo. Admin y usuarios normales sin router ven todo, con router solo ven su zona.'),
+
             Password::make('Password')
                 ->onlyOnForms()
                 ->creationRules('required', Rules\Password::defaults())

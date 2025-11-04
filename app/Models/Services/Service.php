@@ -85,6 +85,29 @@ class Service extends Model
     {
         parent::boot();
 
+        // Global Scope: Filter by user's router through customer
+        static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
+            /** @var \App\Models\User|null $user */
+            $user = \Illuminate\Support\Facades\Auth::user();
+            
+            // If not authenticated, no filtering
+            if (!$user) {
+                return;
+            }
+
+            // If super admin always sees all, or if no router assigned, show all
+            if ($user->isSuperAdmin() || !$user->router_id) {
+                return;
+            }
+
+            // Filter by router_id through customer relationship (applies to admin with router_id and regular users with router_id)
+            $builder->where(function ($query) use ($user) {
+                $query->whereHas('customer', function ($q) use ($user) {
+                    $q->where('router_id', $user->router_id);
+                })->orWhere('router_id', $user->router_id);
+            });
+        });
+
         static::creating(function ($model) {
             $model->created_by = Auth::id();
             $model->updated_by = Auth::id();
