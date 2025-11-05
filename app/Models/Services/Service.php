@@ -47,6 +47,11 @@ class Service extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function getFullNameAttribute()
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
     public function router()
     {
         return $this->belongsTo(Router::class);
@@ -61,7 +66,8 @@ class Service extends Model
 
     public function getFullServiceNameAttribute()
     {
-        return "{$this->service_ip} - {$this->customer->full_name}";
+        $full_name = $this->customer->full_name ? $this->customer->full_name : $this->getFullNameAttribute();
+        return "{$this->service_ip} - {$full_name}";
     }
 
     public function getServiceNameAttribute()
