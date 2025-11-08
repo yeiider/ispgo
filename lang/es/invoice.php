@@ -14,6 +14,8 @@ return [
     'discount' => 'Descuento',
     'total_pay' => 'Pago Total',
     'issue_date' => 'Fecha de Emisión',
+    'issue_date_from' => 'Fecha de Emisión Desde',
+    'issue_date_to' => 'Fecha de Emisión Hasta',
     'due_date' => 'Fecha de Vencimiento',
     'cancel_invoice' => 'Cancelar Factura',
     'payment_method' => 'Método de Pago',

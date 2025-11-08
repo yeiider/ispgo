@@ -14,6 +14,8 @@ return [
     'discount' => 'Discount',
     'total_pay' => 'Total Pay',
     'issue_date' => 'Issue Date',
+    'issue_date_from' => 'Issue Date From',
+    'issue_date_to' => 'Issue Date To',
     'due_date' => 'Due Date',
     'cancel_invoice' => 'Cancel invoice',
     'payment_method' => 'Payment Method',
