@@ -20,33 +20,31 @@ class SuspendServicesMonthly extends Command
 
     public function handle()
     {
-        $cutOffDate = GeneralProviderConfig::getCutOffDate(); // Día configurado
-        $currentDate = Carbon::now();
+        $today = Carbon::now()->toDateString();
 
-        // Lógica diaria: Solo actuar si el día coincide
-        if ($currentDate->day == $cutOffDate) {
-            $this->info("[EVERYDAY] Iniciando suspensión de servicios con facturas impagas...");
+        $this->info("[EVERYDAY] Iniciando suspensión de servicios con facturas vencidas e impagas...");
+        $this->info("[EVERYDAY] Fecha actual: {$today}");
 
-            Service::where('service_status', '!=', 'free')
-                ->whereHas('invoices', function ($query) {
-                    $query->where('status', 'unpaid');
-                })
-                ->chunk(50, function ($services) {
-                    foreach ($services as $service) {
-                        try {
-                            $service->suspend();
-                            Log::info("[EVERYDAY] Servicio ID: {$service->id} suspendido.");
-                            $this->info("[EVERYDAY] Servicio ID: {$service->id} suspendido.");
-                        } catch (\Exception $e) {
-                            Log::error("[EVERYDAY] Error al suspender servicio ID: {$service->id} - {$e->getMessage()}");
-                            $this->error("[EVERYDAY] Error al suspender servicio ID: {$service->id}");
-                        }
+        // Buscar servicios activos cuyos clientes tengan facturas vencidas y sin pagar
+        // La relación es: Service -> Customer -> Invoices
+        Service::where('service_status', 'active')
+            ->whereHas('customer.invoices', function ($query) use ($today) {
+                $query->where('status', 'unpaid')
+                    ->where('due_date', '<', $today); // Facturas que ya vencieron
+            })
+            ->chunk(50, function ($services) {
+                foreach ($services as $service) {
+                    try {
+                        $service->suspend();
+                        Log::info("[EVERYDAY] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido por facturas vencidas del cliente ID: {$service->customer_id}");
+                        $this->info("[EVERYDAY] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido.");
+                    } catch (\Exception $e) {
+                        Log::error("[EVERYDAY] Error al suspender servicio ID: {$service->id} - {$e->getMessage()}");
+                        $this->error("[EVERYDAY] Error al suspender servicio ID: {$service->id}");
                     }
-                });
+                }
+            });
 
-            $this->info("[EVERYDAY] Proceso de suspensión completado.");
-        } else {
-            $this->info("[EVERYDAY] Hoy no es el día de corte configurado ({$cutOffDate}). No se realizó ninguna acción.");
-        }
+        $this->info("[EVERYDAY] Proceso de suspensión completado.");
     }
 }
