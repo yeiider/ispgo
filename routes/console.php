@@ -19,6 +19,8 @@ Schedule::command('app:syncronizar-datos-onu')->dailyAt('01:00');
 
 Schedule::command('services:suspend_everyday')->dailyAt('00:00');
 
+Schedule::command('payment-promises:handle-expired')->dailyAt('00:30');
+
 // OnePay: run daily; the command itself checks the configured day in OnePaySettings
 Schedule::command('onepay:auto-create-charges')->daily();
 

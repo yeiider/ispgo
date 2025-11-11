@@ -30,8 +30,25 @@ class GenerateInvoice extends Action
         $invoice = false;
         $serviceBuildInvoice = new CustomerBillingService();
         foreach ($models as $model) {
-            $invoice = $serviceBuildInvoice->generateForPeriod($model, now());
-            event(new FinalizeInvoice($invoice));
+            $customer = $model->customer;
+
+            if (!$customer) {
+                continue;
+            }
+
+            $invoice = $serviceBuildInvoice->generateForPeriod($customer, now());
+
+            if ($invoice) {
+                if (empty($invoice->service_id)) {
+                    $invoice->service()->associate($model);
+                    if ($model->router_id && empty($invoice->router_id)) {
+                        $invoice->router_id = $model->router_id;
+                    }
+                    $invoice->save();
+                }
+
+                event(new FinalizeInvoice($invoice));
+            }
         }
         if ($models->count() > 1) {
             return ActionResponse::visit('/resources/invoices');
