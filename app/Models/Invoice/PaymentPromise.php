@@ -4,9 +4,11 @@ namespace App\Models\Invoice;
 
 use App\Models\Customers\Customer;
 use App\Models\User;
+use App\Settings\InvoiceProviderConfig;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentPromise extends Model
 {
@@ -36,8 +38,22 @@ class PaymentPromise extends Model
     protected static function booted()
     {
         static::creating(function ($model) {
-            if (empty($model->user_id) && auth()->check()) {
-                $model->user_id = auth()->id();
+            if (empty($model->user_id) && Auth::check()) {
+                $model->user_id = Auth::id();
+            }
+        });
+
+        static::created(function ($model) {
+            if (!InvoiceProviderConfig::enableServiceByPaymentPromise()) {
+                return;
+            }
+
+            $model->loadMissing('invoice.service');
+
+            $service = optional($model->invoice)->service;
+
+            if ($service && $service->service_status !== 'active') {
+                $service->activate();
             }
         });
     
