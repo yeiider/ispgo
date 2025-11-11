@@ -35,6 +35,12 @@ class PaymentPromise extends Model
 
     protected static function booted()
     {
+        static::creating(function ($model) {
+            if (empty($model->user_id) && auth()->check()) {
+                $model->user_id = auth()->id();
+            }
+        });
+    
         static::addGlobalScope('orderByStatus', function (Builder $builder) {
             $builder->orderByRaw("FIELD(status, 'pending', 'fulfilled', 'cancelled')");
         });
