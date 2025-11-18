@@ -44,4 +44,6 @@ Route::prefix('onu')->group(function () {
     Route::post('{serviceId}/update-speed-profile', [OnuController::class, 'updateSpeedProfile']);
     Route::post('{serviceId}/update-vlan', [OnuController::class, 'updateVlan']);
     Route::post('{serviceId}/update-wan-mode', [OnuController::class, 'updateWanMode']);
+    Route::post('{serviceId}/enable-catv', [OnuController::class, 'enableCatv']);
+    Route::post('{serviceId}/disable-catv', [OnuController::class, 'disableCatv']);
 });

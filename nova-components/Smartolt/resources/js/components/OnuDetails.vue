@@ -21,6 +21,10 @@
         <p v-if="onuFullStatus?.details?.['ONU Distance']"><span class="font-bold">Distance:</span> {{ onuFullStatus.details['ONU Distance'] }}</p>
         <p v-if="onuFullStatus?.details?.['Online Duration']"><span class="font-bold">Online Duration:</span> {{ onuFullStatus.details['Online Duration'] }}</p>
         <p v-if="onuFullStatus?.details?.['Description']"><span class="font-bold">Description:</span> {{ onuFullStatus.details['Description'] }}</p>
+        <p v-if="catvStatusText"><span class="font-bold">CATV:</span>
+          <span :class="catvStatusClass">{{ catvStatusText }}</span>
+        </p>
+        <p v-if="onuDetails.catvError" class="text-sm text-red-500">CATV error: {{ onuDetails.catvError }}</p>
       </div>
     </div>
   </div>
@@ -36,6 +40,27 @@ export default {
     onuFullStatus: {
       type: Object,
       required: true
+    }
+  },
+  computed: {
+    catvStatusText() {
+      if (this.onuDetails?.catvError) {
+        return 'Error'
+      }
+      return this.onuDetails?.catv || null
+    },
+    catvStatusClass() {
+      if (this.onuDetails?.catvError) {
+        return 'text-red-500'
+      }
+      const value = (this.onuDetails?.catv || '').toLowerCase()
+      if (value.includes('enable')) {
+        return 'text-green-500'
+      }
+      if (value.includes('disable')) {
+        return 'text-red-500'
+      }
+      return 'text-gray-500'
     }
   }
 }
