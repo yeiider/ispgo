@@ -493,9 +493,9 @@ class OnuController extends Controller
      */
     private function resolveExternalId(Service $service): string
     {
-        if ($service->customer && !empty($service->customer->identity_document)) {
-            return (string)$service->customer->identity_document;
-        }
+        // if ($service->customer && !empty($service->customer->identity_document)) {
+        //     return (string)$service->customer->identity_document;
+        // }
 
         if (!empty($service->sn)) {
             return (string)$service->sn;

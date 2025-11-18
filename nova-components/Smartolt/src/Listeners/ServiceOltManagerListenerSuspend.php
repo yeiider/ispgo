@@ -69,9 +69,9 @@ class ServiceOltManagerListenerSuspend
 
     private function resolveExternalId(\App\Models\Services\Service $service): string
     {
-        if ($service->customer && !empty($service->customer->identity_document)) {
-            return (string)$service->customer->identity_document;
-        }
+        // if ($service->customer && !empty($service->customer->identity_document)) {
+        //     return (string)$service->customer->identity_document;
+        // }
 
         if (!empty($service->sn)) {
             return (string)$service->sn;
