@@ -43,10 +43,13 @@ class ProcessSmartOltBatch implements ShouldQueue
         Log::info("procesando lote ". implode(',', $this->snList));
 
         try {
+            $catvResponse = null;
             if ($this->action === 'enable') {
                 $response = $apiManager->enableBulk($payload);
+                $catvResponse = $apiManager->enableCatvBulk($payload);
             } else {
                 $response = $apiManager->disableBulk($payload);
+                $catvResponse = $apiManager->disableCatvBulk($payload);
             }
 
             if ($response->successful()) {
@@ -59,6 +62,20 @@ class ProcessSmartOltBatch implements ShouldQueue
                     'sn_list' => $this->snList,
                     'response' => $response->body(),
                 ]);
+            }
+
+            if (isset($catvResponse)) {
+                if ($catvResponse->successful()) {
+                    Log::info("CATV lote '{$this->action}' procesado exitosamente.", [
+                        'sn_list' => $this->snList,
+                        'response' => $catvResponse->body(),
+                    ]);
+                } else {
+                    Log::warning("Error al procesar CATV lote '{$this->action}'.", [
+                        'sn_list' => $this->snList,
+                        'response' => $catvResponse->body(),
+                    ]);
+                }
             }
         } catch (\Exception $e) {
             Log::error("Excepción al procesar el lote '{$this->action}': {$e->getMessage()}");

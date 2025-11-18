@@ -52,6 +52,17 @@ class ApiManager
     }
 
     /**
+     * Habilitar CATV de ONUs en lote.
+     *
+     * @throws ConnectionException
+     */
+    public function enableCatvBulk(array $payload): Response
+    {
+        $this->validatePayload($payload);
+        return $this->request('api/onu/bulk_enable_catv', $payload, true);
+    }
+
+    /**
      * Deshabilitar ONUs en lote.
      *
      * @throws ConnectionException
@@ -60,6 +71,17 @@ class ApiManager
     {
         $this->validatePayload($payload);
         return $this->request('api/onu/bulk_disable', $payload, true);
+    }
+
+    /**
+     * Deshabilitar CATV de ONUs en lote.
+     *
+     * @throws ConnectionException
+     */
+    public function disableCatvBulk(array $payload): Response
+    {
+        $this->validatePayload($payload);
+        return $this->request('api/onu/bulk_disable_catv', $payload, true);
     }
 
     /**
@@ -74,6 +96,17 @@ class ApiManager
     }
 
     /**
+     * Habilitar CATV por external_id.
+     *
+     * @throws \Exception
+     */
+    public function enableOnuCatvByExternalId(string $externalId): Response
+    {
+        $this->validateExternalId($externalId);
+        return $this->request('api/onu/enable_catv/' . $externalId);
+    }
+
+    /**
      * Deshabilitar una ONU por su número de serie.
      *
      * @throws \Exception
@@ -82,6 +115,17 @@ class ApiManager
     {
         $this->validateSerialNumber($sn);
         return $this->request('api/onu/disable/' . $sn);
+    }
+
+    /**
+     * Deshabilitar CATV por external_id.
+     *
+     * @throws \Exception
+     */
+    public function disableOnuCatvByExternalId(string $externalId): Response
+    {
+        $this->validateExternalId($externalId);
+        return $this->request('api/onu/disable_catv/' . $externalId);
     }
 
     /**
@@ -235,6 +279,19 @@ class ApiManager
     {
         $this->validateExternalId($externalId);
         return $this->request('api/onu/get_onu_traffic_graph/' . $externalId . '/' . $graphType, [], false, 'get');
+    }
+
+    /**
+     * Obtener el estado de CATV por external_id.
+     *
+     * @param string $externalId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOnuCatvStatusByExternalId(string $externalId): Response
+    {
+        $this->validateExternalId($externalId);
+        return $this->request('api/onu/get_onu_catv_status/' . $externalId, [], false, 'get');
     }
 
     /**

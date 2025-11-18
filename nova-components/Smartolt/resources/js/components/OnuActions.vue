@@ -32,6 +32,28 @@
       >
         Enable
       </button>
+      
+      <!-- CATV Actions -->
+      <div class="border-l border-gray-300 pl-4 ml-4">
+        <div class="flex gap-2">
+          <button
+            v-if="isCatvEnabled"
+            @click="disableCatv"
+            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-sm"
+            :disabled="actionInProgress"
+          >
+            Disable CATV
+          </button>
+          <button
+            v-else
+            @click="enableCatv"
+            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm"
+            :disabled="actionInProgress"
+          >
+            Enable CATV
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -48,6 +70,12 @@ export default {
       default: false
     }
   },
+  computed: {
+    isCatvEnabled() {
+      const catvStatus = (this.onuDetails?.catv || '').toLowerCase();
+      return catvStatus.includes('enable') || catvStatus === 'enabled';
+    }
+  },
   methods: {
     rebootOnu() {
       this.$emit('reboot')
@@ -60,6 +88,12 @@ export default {
     },
     disableOnu() {
       this.$emit('disable')
+    },
+    enableCatv() {
+      this.$emit('enable-catv')
+    },
+    disableCatv() {
+      this.$emit('disable-catv')
     }
   }
 }
