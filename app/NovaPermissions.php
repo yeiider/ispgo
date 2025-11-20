@@ -13,6 +13,11 @@ use Laravel\Nova\Resource;
 class NovaPermissions extends \Sereny\NovaPermissions\NovaPermissions
 {
     /**
+     * @var class-string
+     */
+    public $roleResource = \App\Nova\Role::class;
+
+    /**
      * Build the menu that renders the navigation links for the tool.
      *
      * @param \Illuminate\Http\Request $request

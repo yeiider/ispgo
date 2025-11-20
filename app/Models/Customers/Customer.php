@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -41,7 +42,8 @@ class Customer extends Authenticatable implements MustVerifyEmail
         'created_by',
         'updated_by',
         'password',
-        'onepay_customer_id'
+        'onepay_customer_id',
+        'router_id',
     ];
 
     /**
@@ -134,15 +136,35 @@ class Customer extends Authenticatable implements MustVerifyEmail
         $this->attributes['last_name'] = strtolower($value);
     }
 
-    protected static function booted()
+    protected static function boot()
     {
+        parent::boot();
+
+        // Global Scope: Filter by user's router
+        static::addGlobalScope('router_filter', function (Builder $builder) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+            
+            // If not authenticated, no filtering
+            if (!$user) {
+                return;
+            }
+
+            // If super admin always sees all, or if no router assigned, show all
+            if ($user->isSuperAdmin() || !$user->router_id) {
+                return;
+            }
+
+            // Filter by router_id (applies to admin with router_id and regular users with router_id)
+            $builder->where('router_id', $user->router_id);
+        });
 
         static::created(function ($customer) {
-
             $customer->created_by = Auth::id();
             $customer->updated_by = Auth::id();
             event(new CustomerCreated($customer));
         });
+        
         static::updating(function ($customer) {
             if ($customer->isDirty('customer_status')) {
                 $customer->updated_by = Auth::id();

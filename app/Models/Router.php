@@ -43,4 +43,9 @@ class Router extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }
