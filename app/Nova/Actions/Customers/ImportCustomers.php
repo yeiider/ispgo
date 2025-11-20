@@ -160,44 +160,52 @@ class ImportCustomers extends Action
 
                 // Service handling: if any service fields provided, create or update
                 if (!empty($serviceData)) {
-                    $serviceId = $serviceData['id'] ?? null;
-                    $serviceModel = null;
-                    if ($serviceId) {
-                        $serviceModel = Service::where('customer_id', $customer->id)->where('id', $serviceId)->first();
-                    }
-
-                    // If creating and service_location not provided, try to use first address
-                    if (!isset($serviceData['service_location'])) {
-                        $firstAddress = $customer->addresses()->first();
-                        if ($firstAddress) {
-                            $serviceData['service_location'] = $firstAddress->id;
+                    // Verificar si el cliente ya tiene algún servicio
+                    $existingService = Service::where('customer_id', $customer->id)->first();
+                    
+                    if (!$existingService) {
+                        // El cliente no tiene servicios, proceder a crear uno
+                        $serviceId = $serviceData['id'] ?? null;
+                        $serviceModel = null;
+                        if ($serviceId) {
+                            $serviceModel = Service::where('customer_id', $customer->id)->where('id', $serviceId)->first();
                         }
-                    }
 
-                    if ($serviceModel) {
-                        $serviceModel->fill($serviceData);
-                        $serviceModel->customer_id = $customer->id;
-                        $serviceModel->save();
-                    } else {
-                        $svcValidator = Validator::make($serviceData, [
-                            'router_id' => 'required|exists:routers,id',
-                            'service_ip' => 'required|ip',
-                            'username_router' => 'required|string|max:255',
-                            'password_router' => 'required|string|max:255',
-                            'service_status' => 'required|in:active,inactive,suspended,pending,free',
-                            'activation_date' => 'required|date',
-                            'plan_id' => 'required|exists:plans,id',
-                        ]);
-                        if ($svcValidator->fails()) {
-                            if ($mode === 'update_only') {
-                                // ignore service errors in update-only mode
-                            } else {
-                                throw new \RuntimeException('Errores de validación (service): ' . $svcValidator->errors()->toJson());
+                        // If creating and service_location not provided, try to use first address
+                        if (!isset($serviceData['service_location'])) {
+                            $firstAddress = $customer->addresses()->first();
+                            if ($firstAddress) {
+                                $serviceData['service_location'] = $firstAddress->id;
                             }
-                        } else {
-                            $serviceModel = new Service($serviceData);
+                        }
+
+                        if ($serviceModel) {
+                            // Si se encontró por ID, actualizar
+                            $serviceModel->fill($serviceData);
                             $serviceModel->customer_id = $customer->id;
                             $serviceModel->save();
+                        } else {
+                            // Crear nuevo servicio solo si el cliente no tiene ninguno
+                            $svcValidator = Validator::make($serviceData, [
+                                'router_id' => 'required|exists:routers,id',
+                                'service_ip' => 'required|ip',
+                                'username_router' => 'required|string|max:255',
+                                'password_router' => 'required|string|max:255',
+                                'service_status' => 'required|in:active,inactive,suspended,pending,free',
+                                'activation_date' => 'required|date',
+                                'plan_id' => 'required|exists:plans,id',
+                            ]);
+                            if ($svcValidator->fails()) {
+                                if ($mode === 'update_only') {
+                                    // ignore service errors in update-only mode
+                                } else {
+                                    throw new \RuntimeException('Errores de validación (service): ' . $svcValidator->errors()->toJson());
+                                }
+                            } else {
+                                $serviceModel = new Service($serviceData);
+                                $serviceModel->customer_id = $customer->id;
+                                $serviceModel->save();
+                            }
                         }
                     }
                 }
