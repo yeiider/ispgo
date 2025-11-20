@@ -159,7 +159,7 @@ class Invoice extends Model
 
     public static function searchInvoice($input)
     {
-        return self::where('status', 'unpaid')->where('issue_date')
+        return self::where('status', 'unpaid')
             ->where(function ($query) use ($input) {
                 $query->whereHas('customer', function ($query) use ($input) {
                     $query->where('identity_document', 'LIKE', "%{$input}%")

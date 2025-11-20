@@ -23,30 +23,38 @@ class SuspendServicesMonthly extends Command
         $cutOffDate = GeneralProviderConfig::getCutOffDate(); // Día configurado
         $currentDate = Carbon::now();
 
-        // Lógica diaria: Solo actuar si el día coincide
-        if ($currentDate->day == $cutOffDate) {
-            $this->info("[EVERYDAY] Iniciando suspensión de servicios con facturas impagas...");
-
-            Service::where('service_status', '!=', 'free')
-                ->whereHas('invoices', function ($query) {
-                    $query->where('status', 'unpaid');
-                })
-                ->chunk(50, function ($services) {
-                    foreach ($services as $service) {
-                        try {
-                            $service->suspend();
-                            Log::info("[EVERYDAY] Servicio ID: {$service->id} suspendido.");
-                            $this->info("[EVERYDAY] Servicio ID: {$service->id} suspendido.");
-                        } catch (\Exception $e) {
-                            Log::error("[EVERYDAY] Error al suspender servicio ID: {$service->id} - {$e->getMessage()}");
-                            $this->error("[EVERYDAY] Error al suspender servicio ID: {$service->id}");
-                        }
-                    }
-                });
-
-            $this->info("[EVERYDAY] Proceso de suspensión completado.");
-        } else {
-            $this->info("[EVERYDAY] Hoy no es el día de corte configurado ({$cutOffDate}). No se realizó ninguna acción.");
+        if ($currentDate->day != $cutOffDate) {
+            return;
         }
+
+        $today = Carbon::now()->startOfDay();
+
+        $this->info("[EVERYDAY] Iniciando suspensión de servicios con facturas vencidas e impagas sin promesa vigente...");
+        $this->info("[EVERYDAY] Fecha actual: {$today->toDateString()}");
+
+        Service::where('service_status', 'active')
+            ->whereHas('invoices', function ($query) use ($today) {
+                $query->where('status', 'unpaid')
+                    ->where('outstanding_balance', '>', 0)
+                    ->whereDate('due_date', '<', $today)
+                    ->whereDoesntHave('paymentPromises', function ($promiseQuery) use ($today) {
+                        $promiseQuery->where('status', 'pending')
+                            ->whereDate('promise_date', '>=', $today);
+                    });
+            })
+            ->chunk(50, function ($services) {
+                foreach ($services as $service) {
+                    try {
+                        $service->suspend();
+                        Log::info("[EVERYDAY] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido por facturas vencidas sin promesa vigente del cliente ID: {$service->customer_id}");
+                        $this->info("[EVERYDAY] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido.");
+                    } catch (\Exception $e) {
+                        Log::error("[EVERYDAY] Error al suspender servicio ID: {$service->id} - {$e->getMessage()}");
+                        $this->error("[EVERYDAY] Error al suspender servicio ID: {$service->id}");
+                    }
+                }
+            });
+
+        $this->info("[EVERYDAY] Proceso de suspensión completado.");
     }
 }

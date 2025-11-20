@@ -13,6 +13,8 @@ use App\Nova\Actions\Invoice\DeleteOnePayCharge;
 use App\Nova\Actions\Invoice\NotifyAllInvoices;
 use App\Nova\Customers;
 use App\Nova\Filters\Invoice\InvoiceStatusFilter;
+use App\Nova\Filters\Invoice\InvoiceDateRangeFilter;
+use App\Nova\Filters\Invoice\InvoiceDateToFilter;
 use App\Nova\Filters\RouterFilter;
 use App\Nova\Metrics\Invoice\InvoicesStatus;
 use App\Nova\Metrics\Invoice\OutstandingBalance;
@@ -183,6 +185,8 @@ class Invoice extends Resource
     {
         return [
             new InvoiceStatusFilter(),
+            new InvoiceDateRangeFilter(),
+            new InvoiceDateToFilter(),
             new RouterFilter(),
         ];
     }

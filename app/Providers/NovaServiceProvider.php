@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Nova\BillingNovedad;
 use App\Nova\Box;
 use App\Nova\Contract;
+use App\Nova\Cotizacion;
 use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
@@ -89,6 +90,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                         MenuItem::resource(Customer::class)->name(__('panel.customers')),
                         MenuItem::resource(Address::class)->name(__('panel.addresses')),
                         MenuItem::resource(TaxDetail::class)->name(__('panel.tax_details')),
+                        MenuItem::resource(Cotizacion::class)->name(__('Cotizaciones')),
                     ]),
                     MenuGroup::make(__('panel.all_services'), [
                         MenuItem::resource(Service::class),

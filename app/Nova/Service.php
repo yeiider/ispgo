@@ -164,6 +164,7 @@ class Service extends Resource
     public function actions(NovaRequest $request): array
     {
         return [
+            new GenerateInvoice(),
             new ActivateService(),
             new SuspendService(),
             new CreateActionsServiceInstall(),

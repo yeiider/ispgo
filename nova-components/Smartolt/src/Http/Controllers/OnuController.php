@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class OnuController extends Controller
@@ -33,9 +34,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-
-            // Assuming the service has a field for the ONU serial number
-            $externalId = $service->sn ?? $service->id;
+            $externalId = $this->resolveExternalId($service);
 
             $response = $this->apiManager->getOnuDetailsByExternalId($externalId);
 
@@ -57,7 +56,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-            $externalId = $service->sn ?? $service->id;
+            $externalId = $this->resolveExternalId($service);
 
             $response = $this->apiManager->getOnuFullStatusByExternalId($externalId);
             $responseData = $response->json();
@@ -70,7 +69,12 @@ class OnuController extends Controller
                 'optical' => [],
                 'config' => [],
                 'history' => [],
-                'interfaces' => []
+                'interfaces' => [],
+                'catv' => [
+                    'status' => null,
+                    'value' => null,
+                    'error' => null,
+                ],
             ];
 
             if (isset($responseData['full_status_json'])) {
@@ -103,6 +107,22 @@ class OnuController extends Controller
                 }
             }
 
+            try {
+                $catvResponse = $this->apiManager->getOnuCatvStatusByExternalId($externalId);
+                $catvData = $catvResponse->json();
+                $data['catv'] = [
+                    'status' => $catvData['status'] ?? $catvResponse->successful(),
+                    'value' => $catvData['onu_catv_status'] ?? ($catvData['response'] ?? null),
+                    'error' => null,
+                    'raw' => $catvData,
+                ];
+            } catch (\Exception $catvException) {
+                Log::warning("No fue posible obtener el estado CATV para el servicio {$service->id}: {$catvException->getMessage()}");
+                $data['catv']['status'] = false;
+                $data['catv']['value'] = null;
+                $data['catv']['error'] = $catvException->getMessage();
+            }
+
             return response()->json($data);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
@@ -121,7 +141,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-            $externalId = $service->sn ?? $service->id;
+            $externalId = $this->resolveExternalId($service);
 
             $response = $this->apiManager->getOnuRunningConfigByExternalId($externalId);
 
@@ -143,7 +163,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-            $externalId = $service->sn ?? $service->id;
+            $externalId = $this->resolveExternalId($service);
             $response = $this->apiManager->getOnuSignalGraphByExternalId($externalId);
 
             // Set the content type to image/png as specified in the requirements
@@ -166,7 +186,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-            $externalId = $service->sn ?? $service->id;
+            $externalId = $this->resolveExternalId($service);
 
             $response = $this->apiManager->getOnuTrafficGraphByExternalId($externalId, $graphType);
 
@@ -189,7 +209,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-            $externalId = $service->sn ?? $service->id;
+            $externalId = $this->resolveExternalId($service);
 
             $response = $this->apiManager->rebootOnuByExternalId($externalId);
 
@@ -211,7 +231,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-            $externalId = $service->sn ?? $service->id;
+            $externalId = $this->resolveExternalId($service);
 
             $response = $this->apiManager->restoreOnuFactoryDefaultsByExternalId($externalId);
 
@@ -233,8 +253,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-
-            // Assuming the service has a field for the ONU serial number
+            $externalId = $this->resolveExternalId($service);
             $sn = $service->sn;
 
             if (empty($sn)) {
@@ -243,7 +262,12 @@ class OnuController extends Controller
 
             $response = $this->apiManager->enableOnu($sn);
 
-            return response()->json(['message' => 'ONU enabled successfully']);
+            $catvResult = $this->triggerCatvAction($externalId, 'enable');
+
+            return response()->json([
+                'message' => 'ONU enabled successfully',
+                'catv' => $catvResult,
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -261,8 +285,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-
-            // Assuming the service has a field for the ONU serial number
+            $externalId = $this->resolveExternalId($service);
             $sn = $service->sn;
 
             if (empty($sn)) {
@@ -271,12 +294,66 @@ class OnuController extends Controller
 
             $response = $this->apiManager->disableOnu($sn);
 
-            return response()->json(['message' => 'ONU disabled successfully']);
+            $catvResult = $this->triggerCatvAction($externalId, 'disable');
+
+            return response()->json([
+                'message' => 'ONU disabled successfully',
+                'catv' => $catvResult,
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
+    /**
+     * Enable CATV for a service.
+     *
+     * @param Request $request
+     * @param string|int $serviceId
+     * @return JsonResponse
+     */
+    public function enableCatv(Request $request, $serviceId): JsonResponse
+    {
+        try {
+            $serviceId = (int)$serviceId;
+            $service = Service::findOrFail($serviceId);
+            $externalId = $this->resolveExternalId($service);
+
+            $catvResult = $this->triggerCatvAction($externalId, 'enable');
+
+            return response()->json([
+                'message' => 'CATV enabled successfully',
+                'catv' => $catvResult,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Disable CATV for a service.
+     *
+     * @param Request $request
+     * @param string|int $serviceId
+     * @return JsonResponse
+     */
+    public function disableCatv(Request $request, $serviceId): JsonResponse
+    {
+        try {
+            $serviceId = (int)$serviceId;
+            $service = Service::findOrFail($serviceId);
+            $externalId = $this->resolveExternalId($service);
+
+            $catvResult = $this->triggerCatvAction($externalId, 'disable');
+
+            return response()->json([
+                'message' => 'CATV disabled successfully',
+                'catv' => $catvResult,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
 
     /**
      * Update ONU speed profile for a service.
@@ -290,7 +367,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-            $externalId = $service->sn ?? $service->id;
+            $externalId = $this->resolveExternalId($service);
 
             $request->validate([
                 'speed_profile_id' => 'required|integer',
@@ -316,7 +393,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-            $externalId = $service->sn ?? $service->id;
+            $externalId = $this->resolveExternalId($service);
 
             $request->validate([
                 'vlan_id' => 'required|integer',
@@ -342,7 +419,7 @@ class OnuController extends Controller
         try {
             $serviceId = (int)$serviceId;
             $service = Service::findOrFail($serviceId);
-            $externalId = $service->sn ?? $service->id;
+            $externalId = $this->resolveExternalId($service);
 
             $request->validate([
                 'wan_mode' => 'required|string',
@@ -408,6 +485,55 @@ class OnuController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Determina el external_id a utilizar para las peticiones a SmartOLT.
+     */
+    private function resolveExternalId(Service $service): string
+    {
+        // if ($service->customer && !empty($service->customer->identity_document)) {
+        //     return (string)$service->customer->identity_document;
+        // }
+
+        if (!empty($service->sn)) {
+            return (string)$service->sn;
+        }
+
+        return (string)$service->id;
+    }
+
+    /**
+     * Ejecuta la acción correspondiente de CATV y retorna el resultado formateado.
+     *
+     * @param string $externalId
+     * @param string $action
+     * @return array
+     */
+    private function triggerCatvAction(string $externalId, string $action): array
+    {
+        try {
+            $response = $action === 'enable'
+                ? $this->apiManager->enableOnuCatvByExternalId($externalId)
+                : $this->apiManager->disableOnuCatvByExternalId($externalId);
+
+            $payload = $response->json();
+
+            return [
+                'status' => $response->successful() && ($payload['status'] ?? true),
+                'value' => $payload['onu_catv_status'] ?? ($payload['response'] ?? null),
+                'message' => $payload['response'] ?? ($payload['onu_catv_status'] ?? null),
+                'raw' => $payload,
+            ];
+        } catch (\Exception $exception) {
+            Log::warning("No fue posible {$action} la CATV para external_id {$externalId}: {$exception->getMessage()}");
+            return [
+                'status' => false,
+                'value' => null,
+                'message' => null,
+                'error' => $exception->getMessage(),
+            ];
         }
     }
 }

@@ -41,7 +41,43 @@ class ServiceOltManagerListenerActive
         $apiManager = new ApiManager();
         if ($service->service_status === 'active'){
             $apiManager->enableOnu($service->sn);
+            $externalId = $this->resolveExternalId($service);
+            $this->triggerCatv($apiManager, $externalId, 'enable');
         }
+    }
+
+    private function triggerCatv(ApiManager $apiManager, string $externalId, string $action): void
+    {
+        try {
+            $response = $action === 'enable'
+                ? $apiManager->enableOnuCatvByExternalId($externalId)
+                : $apiManager->disableOnuCatvByExternalId($externalId);
+
+            if ($response->successful()) {
+                Log::info("CATV '{$action}' ejecutado correctamente para external_id {$externalId}", [
+                    'response' => $response->body(),
+                ]);
+            } else {
+                Log::warning("Error al ejecutar CATV '{$action}' para external_id {$externalId}", [
+                    'response' => $response->body(),
+                ]);
+            }
+        } catch (\Exception $exception) {
+            Log::warning("Excepción al ejecutar CATV '{$action}' para external_id {$externalId}: {$exception->getMessage()}");
+        }
+    }
+
+    private function resolveExternalId(\App\Models\Services\Service $service): string
+    {
+        // if ($service->customer && !empty($service->customer->identity_document)) {
+        //     return (string)$service->customer->identity_document;
+        // }
+
+        if (!empty($service->sn)) {
+            return (string)$service->sn;
+        }
+
+        return (string)$service->id;
     }
 
 

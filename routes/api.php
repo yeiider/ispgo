@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\InvoiceApi;
+use App\Http\Controllers\Api\CotizacionController;
 use App\Http\Controllers\Api\McpController;
 use App\Http\Controllers\Api\TaskAttachmentController;
 use App\Http\Controllers\Api\TaskCommentController;
@@ -23,6 +24,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/v1/invoice/search', [InvoiceApi::class, 'searchInvoices']);
     Route::post('/v1/invoice/pay', [InvoiceApi::class, 'registerPayment']);
+    Route::post('/v1/cotizaciones', [CotizacionController::class, 'store']);
     Route::apiResource('tasks', TaskControllerApi::class);
     Route::apiResource('comments', TaskCommentController::class);
     Route::apiResource('attachments', TaskAttachmentController::class);

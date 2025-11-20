@@ -52,7 +52,7 @@ class AssignmentTickets extends Action
     public function fields(NovaRequest $request)
     {
         // Obtiene una lista de técnicos con sus nombres e IDs
-        $technicians = User::technicians()->pluck('name', 'id');
+        $technicians = User::all()->pluck('name', 'id');
 
         return [
             MultiSelect::make('Technicians')
