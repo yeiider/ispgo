@@ -197,6 +197,9 @@
         <div class="company-info">
             <h1>{{ $data['companyName'] }}</h1>
             <small>{{ $data['companyEmail'] }} — {{ $data['companyPhone'] }}</small>
+            @if($data['companyUrl'])
+                <small style="display: block; margin-top: 0.25rem;">{{ $data['companyUrl'] }}</small>
+            @endif
         </div>
         <div class="logo-container">
             <img src="{{ $data['img'] }}" alt="Logo empresa">
@@ -214,14 +217,36 @@
         <div>
             <h3>Cliente</h3>
             <p><strong>Nombre:</strong> {{ $data['invoice']->full_name }}</p>
+            <p><strong>Documento de identificación:</strong> {{ $data['invoice']->customer->identity_document ?? 'N/A' }}</p>
             <p><strong>Teléfono:</strong> {{ $data['invoice']->customer->phone_number }}</p>
             <p><strong>Correo:</strong> {{ $data['invoice']->email_address }}</p>
+            @php
+                $address = null;
+                if ($data['invoice']->service && $data['invoice']->service->address) {
+                    $address = $data['invoice']->service->address;
+                } elseif ($data['invoice']->customer) {
+                    $address = $data['invoice']->customer->addresses()->where('address_type', 'billing')->first();
+                    if (!$address) {
+                        $address = $data['invoice']->customer->addresses()->first();
+                    }
+                }
+            @endphp
+            @if($address)
+                <p><strong>Dirección:</strong> {{ $address->address }}, {{ $address->city }}, {{ $address->state_province }}</p>
+            @endif
         </div>
         <div>
             <h3>Factura</h3>
             <p><strong>Número:</strong> {{ $data['invoice']->increment_id }}</p>
-            <p><strong>Fecha de emisión:</strong> {{ $data['invoice']->issue_date }}</p>
+            <p><strong>Fecha de emisión:</strong> {{ \Carbon\Carbon::parse($data['invoice']->issue_date)->format('d/m/Y') }}</p>
             <p><strong>Estado:</strong> {{ ucfirst(__($data['invoice']->status)) }}</p>
+            @if($data['billing_period'])
+                <p><strong>Periodo facturado:</strong> {{ \Carbon\Carbon::createFromFormat('Y-m', $data['billing_period'])->format('m/Y') }}</p>
+            @endif
+            <p><strong>Fecha oportuna de pago:</strong> {{ \Carbon\Carbon::parse($data['invoice']->due_date)->format('d/m/Y') }}</p>
+            @if($data['cut_off_date'])
+                <p><strong>Fecha de corte:</strong> {{ \Carbon\Carbon::parse($data['cut_off_date'])->format('d/m/Y') }}</p>
+            @endif
         </div>
     </section>
 

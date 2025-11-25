@@ -152,6 +152,19 @@ class InvoiceController extends Controller
 
         $options = ['locale' => 'es', 'currency' => 'COP'];
 
+        // Calculate cut off date based on issue_date and configured cut off day
+        $cutOffDay = GeneralProviderConfig::getCutOffDate() ?? 1;
+        $cutOffDate = null;
+        if ($invoice->issue_date) {
+            $cutOffDate = Carbon::parse($invoice->issue_date)
+                ->copy()
+                ->day($cutOffDay);
+            // If cut off day is before issue date, move to next month
+            if ($cutOffDate->lessThan($invoice->issue_date)) {
+                $cutOffDate->addMonth();
+            }
+        }
+
         // Create a data array with all necessary variables
         $data = [
             'invoice' => $invoice,
@@ -159,9 +172,12 @@ class InvoiceController extends Controller
             'companyEmail' => GeneralProviderConfig::getCompanyEmail() ?? env('MAIL_FROM_ADDRESS'),
             'companyPhone' => GeneralProviderConfig::getCompanyPhone() ?? "",
             'companyAddress' => GeneralProviderConfig::getCompanyAddress() ?? "",
+            'companyUrl' => GeneralProviderConfig::getCompanyUrl() ?? "",
             'items' => $invoice->items,
             'tax_rate' => $invoice->tax_rate ?? 0,
             'tax_amount' => $invoice->tax ?? 0,
+            'billing_period' => $invoice->billing_period ?? '',
+            'cut_off_date' => $cutOffDate,
         ];
 
         // Format numeric values
@@ -234,7 +250,7 @@ class InvoiceController extends Controller
     private function getInvoice(int|string $id)
     {
         return Invoice::where('increment_id', $id)
-            ->with('customer')
+            ->with(['customer.addresses', 'service.address'])
             ->first();
     }
 
