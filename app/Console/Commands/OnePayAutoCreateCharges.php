@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Invoice\Invoice;
 use App\Services\Payments\OnePay\OnePayHandler;
+use App\Settings\GeneralProviderConfig;
 use App\Settings\OnePaySettings;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -56,13 +57,27 @@ class OnePayAutoCreateCharges extends Command
 
         $this->info('Iniciando procesamiento de facturas no pagadas...');
 
+        // Obtener el día configurado para facturación
+        $billingDate = GeneralProviderConfig::getBillingDate();
+        
         // Selecciona todas salvo las pagadas/canceladas
+        // Filtra por issue_date: solo facturas donde el día del mes >= día configurado
+        // Y solo la última factura por cliente
+        $latestInvoiceIds = Invoice::query()
+            ->selectRaw('MAX(id) as id')
+            ->whereNotIn('status', ['paid', 'canceled'])
+            ->whereRaw('DAY(issue_date) >= ?', [$billingDate])
+            ->groupBy('customer_id')
+            ->pluck('id');
+        
         $query = Invoice::query()
             ->whereNotIn('status', ['paid', 'canceled'])
+            ->whereRaw('DAY(issue_date) >= ?', [$billingDate])
+            ->whereIn('id', $latestInvoiceIds)
             ->with('customer');
 
         $total = (clone $query)->count();
-        $this->info("Facturas candidatas: {$total}");
+        $this->info("Facturas candidatas: {$total} (filtradas por issue_date >= día {$billingDate} y última factura por cliente)");
 
         $query->orderBy('id')->chunk(200, function ($invoices) use (&$processed, &$created, &$resent, &$errors, $handler, $dryRun) {
             foreach ($invoices as $invoice) {
