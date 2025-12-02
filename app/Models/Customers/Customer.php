@@ -179,6 +179,20 @@ class Customer extends Authenticatable implements MustVerifyEmail
         //how use $activeCustomers = Customer::active()->get();
     }
 
+    public function scopeSearch($query, $search)
+    {
+        if (!$search) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($search) {
+            $q->where('first_name', 'LIKE', "%{$search}%")
+              ->orWhere('last_name', 'LIKE', "%{$search}%")
+              ->orWhere('identity_document', 'LIKE', "%{$search}%")
+              ->orWhere('email_address', 'LIKE', "%{$search}%");
+        });
+    }
+
     public static function findByIdentityDocument($identityDocument)
     {
         return self::where('identity_document', $identityDocument)->first();

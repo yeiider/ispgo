@@ -11,6 +11,7 @@ type Query {
         identity_document: String @where(operator: "like")
         email_address: String @where(operator: "like")
         customer_status: String @eq
+        search: String @scope(name: "search")
     ): [Customer!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Customer")
     customer(id: ID! @eq): Customer @find(model: "App\\Models\\Customers\\Customer")
 
