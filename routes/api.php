@@ -21,6 +21,30 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user()->load(['roles', 'permissions'])->withoutRelations();
     });
+
+    // Returns the currently authenticated user including role information
+    Route::get('/me', function (Request $request) {
+        $user = $request->user();
+
+        // Eager load roles for efficiency
+        $user->load('roles');
+
+        // Using Spatie\Permission helpers provided by HasRoles trait
+        $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : collect();
+        $permissions = method_exists($user, 'getPermissionNames') ? $user->getPermissionNames() : collect();
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name ?? null,
+            'email' => $user->email ?? null,
+            'roles' => $roles,
+            // convenience single role (first role if multiple)
+            'role' => $roles->first() ?: null,
+            'permissions' => $permissions,
+            // raw user (without relations) for clients that need extra attributes
+            'user' => $user->withoutRelations(),
+        ]);
+    });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/v1/invoice/search', [InvoiceApi::class, 'searchInvoices']);
     Route::post('/v1/invoice/pay', [InvoiceApi::class, 'registerPayment']);
