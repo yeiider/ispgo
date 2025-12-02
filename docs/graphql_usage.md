@@ -25,10 +25,20 @@ query {
       last_name
       email_address
       phone_number
+      identity_document
+      document_type
+      customer_status
+      router_id
+      router {
+        id
+        name
+        ip_address
+      }
     }
     paginatorInfo {
       currentPage
       lastPage
+      total
     }
   }
 }
@@ -36,7 +46,7 @@ query {
 
 ### Fetch Customer with Relationships
 
-To fetch a specific customer by ID, including their addresses, services, and invoices:
+To fetch a specific customer by ID, including their addresses, services, invoices, and router:
 
 ```graphql
 query {
@@ -44,6 +54,13 @@ query {
     id
     first_name
     last_name
+    document_type
+    identity_document
+    router {
+      id
+      name
+      ip_address
+    }
     addresses {
       id
       address
@@ -53,6 +70,10 @@ query {
       id
       service_ip
       service_status
+      router {
+        name
+        ip_address
+      }
       plan {
         name
         monthly_price
@@ -79,10 +100,23 @@ query {
       id
       service_ip
       service_status
+      router_id
+      router {
+        name
+        ip_address
+      }
       customer {
         first_name
         last_name
       }
+      plan {
+        name
+        monthly_price
+      }
+    }
+    paginatorInfo {
+      total
+      currentPage
     }
   }
 }
@@ -90,7 +124,7 @@ query {
 
 ### Fetch Invoices with Details
 
-To fetch a list of invoices with their items, adjustments, and credit notes:
+To fetch a list of invoices with their items, adjustments, credit notes, and router:
 
 ```graphql
 query {
@@ -100,6 +134,20 @@ query {
       increment_id
       total
       status
+      issue_date
+      due_date
+      router_id
+      router {
+        name
+        ip_address
+      }
+      customer {
+        first_name
+        last_name
+      }
+      service {
+        service_ip
+      }
       items {
         description
         quantity
@@ -114,6 +162,10 @@ query {
         amount
         reason
       }
+    }
+    paginatorInfo {
+      total
+      currentPage
     }
   }
 }
@@ -131,9 +183,72 @@ query {
       type
       amount
       description
+      applied
+      effective_period
       service {
         service_ip
       }
+      customer {
+        first_name
+        last_name
+      }
+    }
+    paginatorInfo {
+      total
+      currentPage
+    }
+  }
+}
+```
+
+### Fetch Routers
+
+To fetch a list of routers:
+
+```graphql
+query {
+  routers(first: 10) {
+    data {
+      id
+      name
+      ip_address
+      description
+      created_at
+    }
+    paginatorInfo {
+      total
+      currentPage
+    }
+  }
+}
+```
+
+### Fetch Router with Relationships
+
+To fetch a specific router with its associated customers, services, and invoices:
+
+```graphql
+query {
+  router(id: 1) {
+    id
+    name
+    ip_address
+    description
+    customers {
+      id
+      first_name
+      last_name
+    }
+    services {
+      id
+      service_ip
+      service_status
+    }
+    invoices {
+      id
+      increment_id
+      total
+      status
     }
   }
 }
@@ -143,10 +258,11 @@ query {
 
 The schema defines the following types:
 
-- **Customer**: Represents a customer.
+- **Customer**: Represents a customer. Includes `document_type` (required) and `router_id` (optional) for segmentation.
 - **Address**: Represents a customer's address.
-- **Service**: Represents a service subscribed by a customer.
-- **Invoice**: Represents an invoice for a customer.
+- **Service**: Represents a service subscribed by a customer. Includes `router_id` for segmentation.
+- **Invoice**: Represents an invoice for a customer. Includes `router_id` for segmentation.
+- **Router**: Represents a network router used for segmenting customers, services, and invoices.
 - **Plan**: Represents a service plan.
 - **InvoiceItem**: Represents an item in an invoice.
 - **BillingNovedad**: Represents a billing novelty.
@@ -154,12 +270,16 @@ The schema defines the following types:
 - **CreditNote**: Represents a credit note.
 - **PaymentPromise**: Represents a payment promise.
 
+### Router Segmentation
+
+The `router_id` field is used to segment customers, services, and invoices by network router. This allows you to organize and filter data based on different routers in your network infrastructure.
+
 For the full schema definition, please refer to `graphql/schema.graphql`.
 ## Mutations
 
 ### Create Customer
 
-To create a new customer:
+To create a new customer (note: `document_type` is required):
 
 ```graphql
 mutation {
@@ -169,14 +289,27 @@ mutation {
     email_address: "john.doe@example.com"
     phone_number: "1234567890"
     identity_document: "123456789"
+    document_type: "CC"
+    router_id: 1
   ) {
     id
     first_name
     last_name
+    document_type
+    router {
+      name
+    }
     created_at
   }
 }
 ```
+
+Common `document_type` values:
+- `CC`: Cédula de Ciudadanía
+- `CE`: Cédula de Extranjería
+- `NIT`: Número de Identificación Tributaria
+- `TI`: Tarjeta de Identidad
+- `PAS`: Pasaporte
 
 ### Update Customer
 
@@ -187,10 +320,16 @@ mutation {
   updateCustomer(
     id: 1
     first_name: "Jane"
+    document_type: "CE"
+    router_id: 2
   ) {
     id
     first_name
     last_name
+    document_type
+    router {
+      name
+    }
   }
 }
 ```
@@ -219,13 +358,76 @@ mutation {
     plan_id: 2
     service_ip: "192.168.1.100"
     service_status: "active"
+    router_id: 1
   ) {
     id
     service_ip
     service_status
+    router {
+      name
+      ip_address
+    }
     customer {
       first_name
     }
+  }
+}
+```
+
+### Update Service
+
+To update an existing service:
+
+```graphql
+mutation {
+  updateService(
+    id: 1
+    service_status: "suspended"
+    router_id: 2
+  ) {
+    id
+    service_status
+    router {
+      name
+    }
+  }
+}
+```
+
+### Create Router
+
+To create a new router:
+
+```graphql
+mutation {
+  createRouter(
+    name: "Router-Principal"
+    ip_address: "192.168.1.1"
+    description: "Router principal para zona norte"
+  ) {
+    id
+    name
+    ip_address
+    description
+    created_at
+  }
+}
+```
+
+### Update Router
+
+To update an existing router:
+
+```graphql
+mutation {
+  updateRouter(
+    id: 1
+    name: "Router-Principal-Actualizado"
+    ip_address: "192.168.1.2"
+  ) {
+    id
+    name
+    ip_address
   }
 }
 ```

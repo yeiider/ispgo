@@ -7,7 +7,7 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 type Query {
     customers: [Customer!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Customer")
     customer(id: ID! @eq): Customer @find(model: "App\\Models\\Customers\\Customer")
-    
+
     services: [Service!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Service")
     service(id: ID! @eq): Service @find(model: "App\\Models\\Services\\Service")
 
@@ -17,6 +17,9 @@ type Query {
     billingNovedades: [BillingNovedad!]! @paginate(defaultCount: 10, model: "App\\Models\\BillingNovedad")
     creditNotes: [CreditNote!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\CreditNote")
     paymentPromises: [PaymentPromise!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\PaymentPromise")
+
+    routers: [Router!]! @paginate(defaultCount: 10, model: "App\\Models\\Router")
+    router(id: ID! @eq): Router @find(model: "App\\Models\\Router")
 }
 
 type Mutation {
@@ -26,6 +29,8 @@ type Mutation {
         email_address: String @rules(apply: ["email", "max:255"])
         phone_number: String
         identity_document: String @rules(apply: ["required", "unique:customers,identity_document"])
+        document_type: String! @rules(apply: ["required", "max:50"])
+        router_id: Int @rules(apply: ["exists:routers,id"])
     ): Customer @create(model: "App\\Models\\Customers\\Customer")
 
     updateCustomer(
@@ -34,6 +39,8 @@ type Mutation {
         last_name: String
         email_address: String @rules(apply: ["email"])
         phone_number: String
+        document_type: String
+        router_id: Int @rules(apply: ["exists:routers,id"])
     ): Customer @update(model: "App\\Models\\Customers\\Customer")
 
     deleteCustomer(
@@ -45,6 +52,7 @@ type Mutation {
         plan_id: Int @rules(apply: ["exists:plans,id"])
         service_ip: String
         service_status: String
+        router_id: Int @rules(apply: ["exists:routers,id"])
     ): Service @create(model: "App\\Models\\Services\\Service")
 
     updateService(
@@ -52,7 +60,21 @@ type Mutation {
         service_ip: String
         service_status: String
         plan_id: Int
+        router_id: Int @rules(apply: ["exists:routers,id"])
     ): Service @update(model: "App\\Models\\Services\\Service")
+
+    createRouter(
+        name: String! @rules(apply: ["required", "max:255"])
+        ip_address: String! @rules(apply: ["required", "ip"])
+        description: String
+    ): Router @create(model: "App\\Models\\Router")
+
+    updateRouter(
+        id: ID! @rules(apply: ["required", "exists:routers,id"])
+        name: String
+        ip_address: String @rules(apply: ["ip"])
+        description: String
+    ): Router @update(model: "App\\Models\\Router")
 }
 
 type Customer {
@@ -62,13 +84,16 @@ type Customer {
     email_address: String
     phone_number: String
     identity_document: String
+    document_type: String!
     customer_status: String
+    router_id: Int
     created_at: DateTime!
     updated_at: DateTime!
-    
+
     addresses: [Address!]! @hasMany
     services: [Service!]! @hasMany
     invoices: [Invoice!]! @hasMany
+    router: Router @belongsTo
 }
 
 type Address {
@@ -92,12 +117,14 @@ type Service {
     service_status: String
     activation_date: Date
     service_location: Int
+    router_id: Int
     created_at: DateTime!
     updated_at: DateTime!
-    
+
     customer: Customer! @belongsTo
     invoices: [Invoice!]! @hasMany
     plan: Plan @belongsTo
+    router: Router @belongsTo
 }
 
 type Invoice {
@@ -107,15 +134,17 @@ type Invoice {
     status: String!
     issue_date: Date
     due_date: Date
+    router_id: Int
     created_at: DateTime!
     updated_at: DateTime!
-    
+
     customer: Customer! @belongsTo
     service: Service @belongsTo
     items: [InvoiceItem!]! @hasMany
     adjustments: [InvoiceAdjustment!]! @hasMany
     creditNotes: [CreditNote!]! @hasMany
     paymentPromises: [PaymentPromise!]! @hasMany
+    router: Router @belongsTo
 }
 
 type Plan {
@@ -182,7 +211,20 @@ type PaymentPromise {
     status: String
     created_at: DateTime!
     updated_at: DateTime!
-    
+
     invoice: Invoice! @belongsTo
     customer: Customer! @belongsTo
+}
+
+type Router {
+    id: ID!
+    name: String!
+    ip_address: String!
+    description: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    customers: [Customer!]! @hasMany
+    services: [Service!]! @hasMany
+    invoices: [Invoice!]! @hasMany
 }
