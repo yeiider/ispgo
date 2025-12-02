@@ -1,0 +1,188 @@
+"A datetime string with format 'Y-m-d H:i:s', e.g. '2018-05-23 13:43:32'."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+"A date string with format 'Y-m-d', e.g. '2011-05-23'."
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
+
+type Query {
+    customers: [Customer!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Customer")
+    customer(id: ID! @eq): Customer @find(model: "App\\Models\\Customers\\Customer")
+    
+    services: [Service!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Service")
+    service(id: ID! @eq): Service @find(model: "App\\Models\\Services\\Service")
+
+    invoices: [Invoice!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
+    invoice(id: ID! @eq): Invoice @find(model: "App\\Models\\Invoice\\Invoice")
+
+    billingNovedades: [BillingNovedad!]! @paginate(defaultCount: 10, model: "App\\Models\\BillingNovedad")
+    creditNotes: [CreditNote!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\CreditNote")
+    paymentPromises: [PaymentPromise!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\PaymentPromise")
+}
+
+type Mutation {
+    createCustomer(
+        first_name: String! @rules(apply: ["required", "max:255"])
+        last_name: String! @rules(apply: ["required", "max:255"])
+        email_address: String @rules(apply: ["email", "max:255"])
+        phone_number: String
+        identity_document: String @rules(apply: ["required", "unique:customers,identity_document"])
+    ): Customer @create(model: "App\\Models\\Customers\\Customer")
+
+    updateCustomer(
+        id: ID! @rules(apply: ["required", "exists:customers,id"])
+        first_name: String
+        last_name: String
+        email_address: String @rules(apply: ["email"])
+        phone_number: String
+    ): Customer @update(model: "App\\Models\\Customers\\Customer")
+
+    deleteCustomer(
+        id: ID! @rules(apply: ["required", "exists:customers,id"])
+    ): Customer @delete(model: "App\\Models\\Customers\\Customer")
+
+    createService(
+        customer_id: Int! @rules(apply: ["required", "exists:customers,id"])
+        plan_id: Int @rules(apply: ["exists:plans,id"])
+        service_ip: String
+        service_status: String
+    ): Service @create(model: "App\\Models\\Services\\Service")
+
+    updateService(
+        id: ID! @rules(apply: ["required", "exists:services,id"])
+        service_ip: String
+        service_status: String
+        plan_id: Int
+    ): Service @update(model: "App\\Models\\Services\\Service")
+}
+
+type Customer {
+    id: ID!
+    first_name: String!
+    last_name: String!
+    email_address: String
+    phone_number: String
+    identity_document: String
+    customer_status: String
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    addresses: [Address!]! @hasMany
+    services: [Service!]! @hasMany
+    invoices: [Invoice!]! @hasMany
+}
+
+type Address {
+    id: ID!
+    address: String!
+    city: String
+    state_province: String
+    postal_code: String
+    country: String
+    address_type: String
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    customer: Customer! @belongsTo
+}
+
+type Service {
+    id: ID!
+    service_ip: String
+    plan_id: Int
+    service_status: String
+    activation_date: Date
+    service_location: Int
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    customer: Customer! @belongsTo
+    invoices: [Invoice!]! @hasMany
+    plan: Plan @belongsTo
+}
+
+type Invoice {
+    id: ID!
+    increment_id: String
+    total: Float!
+    status: String!
+    issue_date: Date
+    due_date: Date
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    customer: Customer! @belongsTo
+    service: Service @belongsTo
+    items: [InvoiceItem!]! @hasMany
+    adjustments: [InvoiceAdjustment!]! @hasMany
+    creditNotes: [CreditNote!]! @hasMany
+    paymentPromises: [PaymentPromise!]! @hasMany
+}
+
+type Plan {
+    id: ID!
+    name: String
+    monthly_price: Float
+}
+
+type InvoiceItem {
+    id: ID!
+    description: String
+    quantity: Int
+    unit_price: Float
+    subtotal: Float
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    invoice: Invoice! @belongsTo
+    service: Service @belongsTo
+}
+
+type BillingNovedad {
+    id: ID!
+    type: String!
+    amount: Float!
+    description: String
+    applied: Boolean!
+    effective_period: Date
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    service: Service @belongsTo
+    customer: Customer @belongsTo
+    invoice: Invoice @belongsTo
+}
+
+type InvoiceAdjustment {
+    id: ID!
+    kind: String!
+    amount: Float!
+    label: String
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    invoice: Invoice! @belongsTo
+}
+
+type CreditNote {
+    id: ID!
+    amount: Float!
+    issue_date: Date
+    reason: String
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    invoice: Invoice! @belongsTo
+}
+
+type PaymentPromise {
+    id: ID!
+    amount: Float!
+    promise_date: Date
+    notes: String
+    status: String
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    invoice: Invoice! @belongsTo
+    customer: Customer! @belongsTo
+}
