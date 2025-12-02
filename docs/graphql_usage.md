@@ -497,10 +497,14 @@ mutation {
     name: "Plan Básico 50MB"
     monthly_price: 50000
     status: "active"
+    download_speed: 50
+    upload_speed: 25
   ) {
     id
     name
     monthly_price
+    download_speed
+    upload_speed
     status
     created_at
   }
