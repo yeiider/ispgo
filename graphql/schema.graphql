@@ -20,6 +20,9 @@ type Query {
 
     routers: [Router!]! @paginate(defaultCount: 10, model: "App\\Models\\Router")
     router(id: ID! @eq): Router @find(model: "App\\Models\\Router")
+
+    plans: [Plan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Plan")
+    plan(id: ID! @eq): Plan @find(model: "App\\Models\\Services\\Plan")
 }
 
 type Mutation {
@@ -75,6 +78,69 @@ type Mutation {
         ip_address: String @rules(apply: ["ip"])
         description: String
     ): Router @update(model: "App\\Models\\Router")
+
+    createPlan(
+        name: String! @rules(apply: ["required", "max:255"])
+        monthly_price: Float! @rules(apply: ["required", "numeric", "min:0"])
+        status: String! @rules(apply: ["required", "in:active,inactive"])
+        description: String
+        download_speed: Int
+        upload_speed: Int
+        overage_fee: Float
+        data_limit: Int
+        unlimited_data: Boolean
+        contract_period: String
+        promotions: String
+        extras_included: String
+        geographic_availability: String
+        promotion_start_date: DateTime
+        promotion_end_date: DateTime
+        plan_image: String
+        customer_rating: Float
+        customer_reviews: String
+        service_compatibility: String
+        network_priority: String
+        profile_smart_olt: String
+        technical_support: String
+        additional_benefits: String
+        connection_type: String
+        plan_type: String @rules(apply: ["in:internet,television,telephonic"])
+        modality_type: String @rules(apply: ["in:prepaid,postpaid"])
+    ): Plan @create(model: "App\\Models\\Services\\Plan")
+
+    updatePlan(
+        id: ID! @rules(apply: ["required", "exists:plans,id"])
+        name: String
+        monthly_price: Float @rules(apply: ["numeric", "min:0"])
+        status: String @rules(apply: ["in:active,inactive"])
+        description: String
+        download_speed: Int
+        upload_speed: Int
+        overage_fee: Float
+        data_limit: Int
+        unlimited_data: Boolean
+        contract_period: String
+        promotions: String
+        extras_included: String
+        geographic_availability: String
+        promotion_start_date: DateTime
+        promotion_end_date: DateTime
+        plan_image: String
+        customer_rating: Float
+        customer_reviews: String
+        service_compatibility: String
+        network_priority: String
+        profile_smart_olt: String
+        technical_support: String
+        additional_benefits: String
+        connection_type: String
+        plan_type: String @rules(apply: ["in:internet,television,telephonic"])
+        modality_type: String @rules(apply: ["in:prepaid,postpaid"])
+    ): Plan @update(model: "App\\Models\\Services\\Plan")
+
+    deletePlan(
+        id: ID! @rules(apply: ["required", "exists:plans,id"])
+    ): Plan @delete(model: "App\\Models\\Services\\Plan")
 }
 
 type Customer {
@@ -149,8 +215,39 @@ type Invoice {
 
 type Plan {
     id: ID!
-    name: String
-    monthly_price: Float
+    name: String!
+    description: String
+    is_synchronized: Boolean
+    download_speed: Int
+    upload_speed: Int
+    monthly_price: Float!
+    overage_fee: Float
+    data_limit: Int
+    unlimited_data: Boolean
+    contract_period: String
+    promotions: String
+    extras_included: String
+    geographic_availability: String
+    promotion_start_date: DateTime
+    promotion_end_date: DateTime
+    plan_image: String
+    customer_rating: Float
+    customer_reviews: String
+    service_compatibility: String
+    network_priority: String
+    profile_smart_olt: String
+    technical_support: String
+    additional_benefits: String
+    connection_type: String
+    status: String!
+    plan_type: String
+    modality_type: String
+    created_by: Int
+    updated_by: Int
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    services: [Service!]! @hasMany
 }
 
 type InvoiceItem {

@@ -254,6 +254,61 @@ query {
 }
 ```
 
+### Fetch Plans
+
+To fetch a list of plans:
+
+```graphql
+query {
+  plans(first: 10) {
+    data {
+      id
+      name
+      description
+      monthly_price
+      download_speed
+      upload_speed
+      status
+      plan_type
+      modality_type
+      unlimited_data
+    }
+    paginatorInfo {
+      total
+      currentPage
+    }
+  }
+}
+```
+
+### Fetch Plan with Relationships
+
+To fetch a specific plan with its associated services:
+
+```graphql
+query {
+  plan(id: 1) {
+    id
+    name
+    description
+    monthly_price
+    download_speed
+    upload_speed
+    status
+    plan_type
+    modality_type
+    services {
+      id
+      service_ip
+      customer {
+        first_name
+        last_name
+      }
+    }
+  }
+}
+```
+
 ## Schema
 
 The schema defines the following types:
@@ -263,7 +318,7 @@ The schema defines the following types:
 - **Service**: Represents a service subscribed by a customer. Includes `router_id` for segmentation.
 - **Invoice**: Represents an invoice for a customer. Includes `router_id` for segmentation.
 - **Router**: Represents a network router used for segmenting customers, services, and invoices.
-- **Plan**: Represents a service plan.
+- **Plan**: Represents a service plan with pricing and features.
 - **InvoiceItem**: Represents an item in an invoice.
 - **BillingNovedad**: Represents a billing novelty.
 - **InvoiceAdjustment**: Represents an adjustment to an invoice.
@@ -428,6 +483,101 @@ mutation {
     id
     name
     ip_address
+  }
+}
+```
+
+### Create Plan
+
+To create a new plan (only required fields):
+
+```graphql
+mutation {
+  createPlan(
+    name: "Plan Básico 50MB"
+    monthly_price: 50000
+    status: "active"
+  ) {
+    id
+    name
+    monthly_price
+    status
+    created_at
+  }
+}
+```
+
+To create a plan with all details:
+
+```graphql
+mutation {
+  createPlan(
+    name: "Plan Premium 100MB"
+    monthly_price: 80000
+    status: "active"
+    description: "Plan de alta velocidad con soporte 24/7"
+    download_speed: 100
+    upload_speed: 50
+    unlimited_data: true
+    plan_type: "internet"
+    modality_type: "postpaid"
+    connection_type: "Fiber Optic"
+    contract_period: "12 months"
+  ) {
+    id
+    name
+    description
+    monthly_price
+    download_speed
+    upload_speed
+    status
+    plan_type
+  }
+}
+```
+
+**Plan Types:**
+- `internet`: Internet service
+- `television`: TV service
+- `telephonic`: Phone service
+
+**Modality Types:**
+- `prepaid`: Prepaid service
+- `postpaid`: Postpaid service
+
+**Status:**
+- `active`: Active plan
+- `inactive`: Inactive plan
+
+### Update Plan
+
+To update an existing plan:
+
+```graphql
+mutation {
+  updatePlan(
+    id: 1
+    monthly_price: 85000
+    download_speed: 120
+  ) {
+    id
+    name
+    monthly_price
+    download_speed
+    status
+  }
+}
+```
+
+### Delete Plan
+
+To delete a plan:
+
+```graphql
+mutation {
+  deletePlan(id: 1) {
+    id
+    name
   }
 }
 ```
