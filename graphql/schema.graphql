@@ -5,13 +5,29 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
 type Query {
-    customers: [Customer!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Customer")
+    customers(
+        first_name: String @where(operator: "like")
+        last_name: String @where(operator: "like")
+        identity_document: String @where(operator: "like")
+        email_address: String @where(operator: "like")
+        customer_status: String @eq
+    ): [Customer!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Customer")
     customer(id: ID! @eq): Customer @find(model: "App\\Models\\Customers\\Customer")
 
-    services: [Service!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Service")
+    services(
+        service_ip: String @where(operator: "like")
+        service_status: String @eq
+        customer_id: ID @eq
+        mac_address: String @where(operator: "like")
+        service_type: String @eq
+    ): [Service!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Service")
     service(id: ID! @eq): Service @find(model: "App\\Models\\Services\\Service")
 
-    invoices: [Invoice!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
+    invoices(
+        increment_id: String @where(operator: "like")
+        status: String @eq
+        customer_id: ID @eq
+    ): [Invoice!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
     invoice(id: ID! @eq): Invoice @find(model: "App\\Models\\Invoice\\Invoice")
 
     billingNovedades: [BillingNovedad!]! @paginate(defaultCount: 10, model: "App\\Models\\BillingNovedad")

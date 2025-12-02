@@ -455,6 +455,8 @@ mutation {
     service_type: "ftth"
     mac_address: "00:1A:2B:3C:4D:5E"
     bandwidth: 100
+    activation_date: "2025-11-04 18:01:00"
+    installation_date: "2025-11-04 18:01:00"
     service_notes: "Instalación en segundo piso"
     static_ip: true
     service_priority: "normal"
@@ -464,9 +466,15 @@ mutation {
     service_status
     service_type
     mac_address
+    activation_date
+    installation_date
   }
 }
 ```
+
+**Date/Time format:**
+- `DateTime` fields must use format: `"YYYY-MM-DD HH:MM:SS"` (e.g., `"2025-11-04 18:01:00"`)
+- `Date` fields must use format: `"YYYY-MM-DD"` (e.g., `"2025-11-04"`)
 
 **Required fields:**
 - `customer_id`: ID of the customer
