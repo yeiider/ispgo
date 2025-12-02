@@ -404,30 +404,87 @@ mutation {
 
 ### Create Service
 
-To create a new service for a customer:
+To create a new service for a customer (required fields):
 
 ```graphql
 mutation {
   createService(
     customer_id: 1
     plan_id: 2
-    service_ip: "192.168.1.100"
-    service_status: "active"
     router_id: 1
+    service_ip: "192.168.1.100"
+    service_location: 1
   ) {
     id
     service_ip
+    service_location
     service_status
     router {
       name
       ip_address
     }
+    address {
+      address
+      city
+    }
     customer {
       first_name
+      last_name
+    }
+    plan {
+      name
+      monthly_price
     }
   }
 }
 ```
+
+To create a service with all optional fields:
+
+```graphql
+mutation {
+  createService(
+    customer_id: 1
+    plan_id: 2
+    router_id: 1
+    service_ip: "192.168.1.100"
+    service_location: 1
+    service_status: "active"
+    username_router: "user123"
+    password_router: "pass123"
+    service_type: "ftth"
+    mac_address: "00:1A:2B:3C:4D:5E"
+    bandwidth: 100
+    service_notes: "Instalación en segundo piso"
+    static_ip: true
+    service_priority: "normal"
+  ) {
+    id
+    service_ip
+    service_status
+    service_type
+    mac_address
+  }
+}
+```
+
+**Required fields:**
+- `customer_id`: ID of the customer
+- `plan_id`: ID of the plan
+- `router_id`: ID of the router
+- `service_ip`: IP address for the service
+- `service_location`: ID of the address (from addresses table)
+
+**Service Status options:**
+- `active`, `inactive`, `suspended`, `pending`, `free`
+
+**Service Type options:**
+- `ftth`: Fiber to the Home
+- `adsl`: ADSL connection
+- `satellite`: Satellite connection
+
+**Service Priority options:**
+- `normal`, `high`, `critical`
 
 ### Update Service
 
@@ -439,12 +496,39 @@ mutation {
     id: 1
     service_status: "suspended"
     router_id: 2
+    service_location: 3
   ) {
     id
     service_status
     router {
       name
     }
+    address {
+      address
+      city
+    }
+  }
+}
+```
+
+### Create Address (for service location)
+
+Before creating a service, you may need to create an address:
+
+```graphql
+mutation {
+  createAddress(
+    customer_id: 1
+    address: "Calle 123 #45-67"
+    city: "Bogotá"
+    state_province: "Cundinamarca"
+    postal_code: "110111"
+    country: "Colombia"
+    address_type: "service"
+  ) {
+    id
+    address
+    city
   }
 }
 ```

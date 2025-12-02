@@ -50,20 +50,86 @@ type Mutation {
         id: ID! @rules(apply: ["required", "exists:customers,id"])
     ): Customer @delete(model: "App\\Models\\Customers\\Customer")
 
+    createAddress(
+        customer_id: Int! @rules(apply: ["required", "exists:customers,id"])
+        address: String! @rules(apply: ["required", "max:255"])
+        city: String
+        state_province: String
+        postal_code: String
+        country: String
+        address_type: String
+    ): Address @create(model: "App\\Models\\Customers\\Address")
+
+    updateAddress(
+        id: ID! @rules(apply: ["required", "exists:addresses,id"])
+        address: String
+        city: String
+        state_province: String
+        postal_code: String
+        country: String
+        address_type: String
+    ): Address @update(model: "App\\Models\\Customers\\Address")
+
+    deleteAddress(
+        id: ID! @rules(apply: ["required", "exists:addresses,id"])
+    ): Address @delete(model: "App\\Models\\Customers\\Address")
+
     createService(
         customer_id: Int! @rules(apply: ["required", "exists:customers,id"])
-        plan_id: Int @rules(apply: ["exists:plans,id"])
-        service_ip: String
-        service_status: String
-        router_id: Int @rules(apply: ["exists:routers,id"])
+        plan_id: Int! @rules(apply: ["required", "exists:plans,id"])
+        router_id: Int! @rules(apply: ["required", "exists:routers,id"])
+        service_ip: String! @rules(apply: ["required", "ip"])
+        service_location: Int! @rules(apply: ["required", "exists:addresses,id"])
+        service_status: String @rules(apply: ["in:active,inactive,suspended,pending,free"])
+        username_router: String
+        password_router: String
+        activation_date: DateTime
+        deactivation_date: DateTime
+        bandwidth: Int
+        mac_address: String
+        installation_date: DateTime
+        service_notes: String
+        support_contact: String
+        service_type: String @rules(apply: ["in:ftth,adsl,satellite"])
+        static_ip: Boolean
+        data_limit: Int
+        last_maintenance: Date
+        billing_cycle: String
+        service_priority: String @rules(apply: ["in:normal,high,critical"])
+        sn: String
+        unu_longitude: String
+        unu_latitude: String
+        assigned_technician: Int
+        service_contract: String
     ): Service @create(model: "App\\Models\\Services\\Service")
 
     updateService(
         id: ID! @rules(apply: ["required", "exists:services,id"])
-        service_ip: String
-        service_status: String
-        plan_id: Int
+        service_ip: String @rules(apply: ["ip"])
+        service_location: Int @rules(apply: ["exists:addresses,id"])
+        service_status: String @rules(apply: ["in:active,inactive,suspended,pending,free"])
+        plan_id: Int @rules(apply: ["exists:plans,id"])
         router_id: Int @rules(apply: ["exists:routers,id"])
+        username_router: String
+        password_router: String
+        activation_date: DateTime
+        deactivation_date: DateTime
+        bandwidth: Int
+        mac_address: String
+        installation_date: DateTime
+        service_notes: String
+        support_contact: String
+        service_type: String @rules(apply: ["in:ftth,adsl,satellite"])
+        static_ip: Boolean
+        data_limit: Int
+        last_maintenance: Date
+        billing_cycle: String
+        service_priority: String @rules(apply: ["in:normal,high,critical"])
+        sn: String
+        unu_longitude: String
+        unu_latitude: String
+        assigned_technician: Int
+        service_contract: String
     ): Service @update(model: "App\\Models\\Services\\Service")
 
     createRouter(
@@ -178,19 +244,43 @@ type Address {
 
 type Service {
     id: ID!
-    service_ip: String
-    plan_id: Int
+    router_id: Int!
+    customer_id: Int!
+    plan_id: Int!
+    service_ip: String!
+    username_router: String
+    password_router: String
     service_status: String
-    activation_date: Date
-    service_location: Int
-    router_id: Int
+    activation_date: DateTime
+    deactivation_date: DateTime
+    bandwidth: Int
+    mac_address: String
+    installation_date: DateTime
+    service_notes: String
+    contract_id: Int
+    support_contact: String
+    service_location: Int!
+    service_type: String
+    static_ip: Boolean
+    data_limit: Int
+    last_maintenance: Date
+    billing_cycle: String
+    service_priority: String
+    sn: String
+    unu_longitude: String
+    unu_latitude: String
+    assigned_technician: Int
+    service_contract: String
+    created_by: Int
+    updated_by: Int
     created_at: DateTime!
     updated_at: DateTime!
 
     customer: Customer! @belongsTo
     invoices: [Invoice!]! @hasMany
-    plan: Plan @belongsTo
-    router: Router @belongsTo
+    plan: Plan! @belongsTo
+    router: Router! @belongsTo
+    address: Address @belongsTo(relation: "address")
 }
 
 type Invoice {
