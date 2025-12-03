@@ -1,4 +1,18 @@
-        /*
+<?php declare(strict_types=1);
+
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Route Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Controls the HTTP route that your GraphQL server responds to.
+    | You may set `route` => false, to disable the default route
+    | registration and take full control.
+    |
+    */
+
+    'route' => [ /*
          * The URI the endpoint responds to, e.g. mydomain.com/graphql.
          */
         'uri' => '/graphql',
