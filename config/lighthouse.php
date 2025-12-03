@@ -35,7 +35,7 @@ return [
             Nuwave\Lighthouse\Http\Middleware\AcceptJson::class,
 
             // Require authentication for all GraphQL requests (tries web first, then api)
-            'auth:web,api',
+            'auth:api',
 
             // Logs every incoming GraphQL query.
             // Nuwave\Lighthouse\Http\Middleware\LogGraphQLQueries::class,
