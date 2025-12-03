@@ -5,7 +5,10 @@ namespace App\GraphQL\Mutations;
 use App\Events\FinalizeInvoice;
 use App\Models\Customers\Customer;
 use App\Models\Services\Service;
+use App\Models\User;
 use App\Services\Billing\CustomerBillingService;
+use App\Settings\GeneralProviderConfig;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class GenerateInvoiceMutation
@@ -41,6 +44,17 @@ class GenerateInvoiceMutation
                     'message' => __('El cliente no tiene servicios activos. Verifique que el cliente tenga servicios con estado diferente a "free" o "inactive".'),
                     'invoice' => null,
                 ];
+            }
+
+            // Si no hay usuario autenticado, establecer el usuario por defecto
+            if (!Auth::check()) {
+                $defaultUserId = GeneralProviderConfig::getDefaultUser();
+                if ($defaultUserId) {
+                    $defaultUser = User::find($defaultUserId);
+                    if ($defaultUser) {
+                        Auth::setUser($defaultUser);
+                    }
+                }
             }
 
             // Generar la factura

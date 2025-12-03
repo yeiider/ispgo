@@ -3,7 +3,10 @@
 namespace App\GraphQL\Mutations;
 
 use App\Models\Invoice\Invoice;
+use App\Models\User;
+use App\Settings\GeneralProviderConfig;
 use App\Settings\InvoiceProviderConfig;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class RegisterPaymentPromiseMutation
@@ -27,6 +30,17 @@ class RegisterPaymentPromiseMutation
                     'message' => __('There is already a promise to pay for this invoice :id', ['id' => $invoice->id]),
                     'payment_promise' => null,
                 ];
+            }
+
+            // Si no hay usuario autenticado, establecer el usuario por defecto
+            if (!Auth::check()) {
+                $defaultUserId = GeneralProviderConfig::getDefaultUser();
+                if ($defaultUserId) {
+                    $defaultUser = User::find($defaultUserId);
+                    if ($defaultUser) {
+                        Auth::setUser($defaultUser);
+                    }
+                }
             }
 
             $promise = $invoice->createPromisePayment($args['promise_date'], $args['notes'] ?? null);

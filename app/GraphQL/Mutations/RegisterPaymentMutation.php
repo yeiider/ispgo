@@ -3,6 +3,9 @@
 namespace App\GraphQL\Mutations;
 
 use App\Models\Invoice\Invoice;
+use App\Models\User;
+use App\Settings\GeneralProviderConfig;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class RegisterPaymentMutation
@@ -24,6 +27,17 @@ class RegisterPaymentMutation
                     'success' => false,
                     'message' => __('This invoice has already been paid!'),
                 ];
+            }
+
+            // Si no hay usuario autenticado, establecer el usuario por defecto
+            if (!Auth::check()) {
+                $defaultUserId = GeneralProviderConfig::getDefaultUser();
+                if ($defaultUserId) {
+                    $defaultUser = User::find($defaultUserId);
+                    if ($defaultUser) {
+                        Auth::setUser($defaultUser);
+                    }
+                }
             }
 
             $paymentMethod = $args['payment_method'];
