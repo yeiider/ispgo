@@ -48,9 +48,15 @@ class GenerateInvoiceMutation
             $invoice = $serviceBuildInvoice->generateForPeriod($customer, now());
 
             if (!$invoice) {
+                Log::warning('No se generó factura para el cliente', [
+                    'customer_id' => $customerId,
+                    'active_services_count' => $activeServices,
+                    'customer_status' => $customer->customer_status,
+                ]);
+
                 return [
                     'success' => false,
-                    'message' => __('No se pudo generar la factura para el cliente.'),
+                    'message' => __('No se pudo generar la factura para el cliente. Puede que ya exista una factura para este período o que no haya servicios facturables.'),
                     'invoice' => null,
                 ];
             }
@@ -81,12 +87,16 @@ class GenerateInvoiceMutation
                 'customer_id' => $args['customer_id'] ?? null,
                 'service_id' => $args['service_id'] ?? null,
                 'error' => $e->getMessage(),
+                'error_class' => get_class($e),
                 'trace' => $e->getTraceAsString()
             ]);
 
+            // Si el mensaje incluye información útil del CustomerBillingService, lo mostramos
+            $errorMessage = $e->getMessage();
+
             return [
                 'success' => false,
-                'message' => __('Error al generar la factura: :message', ['message' => $e->getMessage()]),
+                'message' => __('Error al generar la factura: :message', ['message' => $errorMessage]),
                 'invoice' => null,
             ];
         }
