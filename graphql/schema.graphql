@@ -42,6 +42,16 @@ type Query {
     plans: [Plan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Plan")
     plan(id: ID! @eq): Plan @find(model: "App\\Models\\Services\\Plan")
 
+    tickets(
+        status: String @eq
+        priority: String @eq
+        customer_id: ID @eq
+        service_id: ID @eq
+        title: String @where(operator: "like")
+    ): [Ticket!]! @paginate(defaultCount: 10, model: "App\\Models\\Ticket")
+    ticket(id: ID! @eq): Ticket @find(model: "App\\Models\\Ticket")
+    myTickets: [Ticket!]! @field(resolver: "App\\GraphQL\\Queries\\TicketQuery@myTickets")
+
     # Configuration schema and values for external frontend
     configSchema: [ConfigSection!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@schema")
     configFields(scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@fields")
@@ -274,6 +284,97 @@ type Mutation @guard {
         promise_date: Date! @rules(apply: ["required"])
         notes: String
     ): PaymentPromiseResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentPromiseMutation@resolve")
+
+    # Ticket Mutations
+    createTicket(
+        customer_id: ID @rules(apply: ["exists:customers,id"])
+        service_id: ID @rules(apply: ["exists:services,id"])
+        issue_type: String! @rules(apply: ["required", "max:255"])
+        priority: String! @rules(apply: ["required", "in:low,medium,high,urgent"])
+        status: String @rules(apply: ["in:open,in_progress,resolved,closed"])
+        title: String! @rules(apply: ["required", "max:255"])
+        description: String! @rules(apply: ["required"])
+        contact_method: String
+        user_ids: [ID!] @rules(apply: ["exists:users,id"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@create")
+
+    updateTicket(
+        id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        customer_id: ID @rules(apply: ["exists:customers,id"])
+        service_id: ID @rules(apply: ["exists:services,id"])
+        issue_type: String
+        priority: String @rules(apply: ["in:low,medium,high,urgent"])
+        status: String @rules(apply: ["in:open,in_progress,resolved,closed"])
+        title: String
+        description: String
+        contact_method: String
+        resolution_notes: String
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@update")
+
+    deleteTicket(
+        id: ID! @rules(apply: ["required", "exists:tickets,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@delete")
+
+    assignUsersToTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        user_ids: [ID!]! @rules(apply: ["required"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignUsers")
+
+    removeUserFromTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@removeUser")
+
+    assignCustomerToTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        customer_id: ID @rules(apply: ["exists:customers,id"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignCustomer")
+
+    assignServiceToTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        service_id: ID @rules(apply: ["exists:services,id"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignService")
+
+    # Ticket Comments
+    addTicketComment(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        comment: String! @rules(apply: ["required"])
+        is_internal: Boolean
+    ): TicketComment @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@add")
+
+    updateTicketComment(
+        id: ID! @rules(apply: ["required", "exists:ticket_comments,id"])
+        comment: String! @rules(apply: ["required"])
+    ): TicketComment @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@update")
+
+    deleteTicketComment(
+        id: ID! @rules(apply: ["required", "exists:ticket_comments,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@delete")
+
+    # Ticket Attachments
+    addTicketAttachment(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        file_name: String! @rules(apply: ["required", "max:255"])
+        file_path: String! @rules(apply: ["required", "max:500"])
+        file_type: String
+        file_size: Int
+    ): TicketAttachment @field(resolver: "App\\GraphQL\\Mutations\\TicketAttachmentMutation@add")
+
+    deleteTicketAttachment(
+        id: ID! @rules(apply: ["required", "exists:ticket_attachments,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketAttachmentMutation@delete")
+
+    # Ticket Labels
+    addTicketLabel(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        name: String! @rules(apply: ["required", "max:50"])
+        color: String @rules(apply: ["max:7"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketLabelMutation@add")
+
+    removeTicketLabel(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        name: String! @rules(apply: ["required"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketLabelMutation@remove")
 }
 
 # --------------- Config types ---------------
@@ -545,4 +646,74 @@ type PaymentPromiseResult {
     success: Boolean!
     message: String
     payment_promise: PaymentPromise
+}
+
+# --------------- Ticket types ---------------
+
+type Ticket {
+    id: ID!
+    customer_id: ID
+    service_id: ID
+    issue_type: String!
+    priority: String!
+    status: String!
+    title: String!
+    description: String!
+    resolution_notes: String
+    contact_method: String
+    closed_at: DateTime
+    labels: [TicketLabel!]
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    customer: Customer @belongsTo
+    service: Service @belongsTo
+    users: [User!]! @belongsToMany
+    comments: [TicketComment!]! @hasMany
+    attachments: [TicketAttachment!]! @hasMany
+}
+
+type TicketLabel {
+    name: String!
+    color: String!
+}
+
+type TicketComment {
+    id: ID!
+    ticket_id: ID!
+    user_id: ID!
+    comment: String!
+    is_internal: Boolean!
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    ticket: Ticket! @belongsTo
+    user: User! @belongsTo
+}
+
+type TicketAttachment {
+    id: ID!
+    ticket_id: ID!
+    user_id: ID!
+    file_name: String!
+    file_path: String!
+    file_type: String
+    file_size: Int
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    ticket: Ticket! @belongsTo
+    user: User! @belongsTo
+}
+
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    role: String
+    router_id: ID
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    tickets: [Ticket!]! @belongsToMany
 }

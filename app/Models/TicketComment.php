@@ -19,7 +19,8 @@ class TicketComment extends Model
     protected $fillable = [
         'ticket_id',
         'user_id',
-        'content',
+        'comment',
+        'is_internal',
     ];
 
     /**

@@ -17,9 +17,11 @@ class TicketAttachment extends Model
      */
     protected $fillable = [
         'ticket_id',
-        'filename',
+        'file_name',
         'file_path',
-        'uploaded_by',
+        'file_type',
+        'file_size',
+        'user_id',
     ];
 
     /**
@@ -30,13 +32,20 @@ class TicketAttachment extends Model
         return $this->belongsTo(Ticket::class);
     }
 
-
     /**
      * Get the user who uploaded the attachment.
      */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the user who uploaded the attachment (alias for backward compatibility).
+     */
     public function uploader(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'uploaded_by');
+        return $this->user();
     }
 
     /**
