@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Validation\ValidationException;
 
 class Customer extends Authenticatable implements MustVerifyEmail
 {
@@ -159,6 +160,22 @@ class Customer extends Authenticatable implements MustVerifyEmail
             $builder->where('router_id', $user->router_id);
         });
 
+        static::creating(function ($customer) {
+            // Validar que el cliente sea mayor de edad si se proporciona fecha de nacimiento
+            if ($customer->date_of_birth) {
+                $birthDate = Carbon::parse($customer->date_of_birth);
+                $today = Carbon::now();
+                $age = $birthDate->diffInYears($today);
+                
+                // Verificar que tenga al menos 18 años completos
+                if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
+                    $validator = \Illuminate\Support\Facades\Validator::make([], []);
+                    $validator->errors()->add('date_of_birth', 'El cliente debe ser mayor de edad (18 años o más).');
+                    throw new ValidationException($validator);
+                }
+            }
+        });
+
         static::created(function ($customer) {
             $customer->created_by = Auth::id();
             $customer->updated_by = Auth::id();
@@ -166,6 +183,20 @@ class Customer extends Authenticatable implements MustVerifyEmail
         });
         
         static::updating(function ($customer) {
+            // Validar que el cliente sea mayor de edad si se actualiza la fecha de nacimiento
+            if ($customer->isDirty('date_of_birth') && $customer->date_of_birth) {
+                $birthDate = Carbon::parse($customer->date_of_birth);
+                $today = Carbon::now();
+                $age = $birthDate->diffInYears($today);
+                
+                // Verificar que tenga al menos 18 años completos
+                if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
+                    $validator = \Illuminate\Support\Facades\Validator::make([], []);
+                    $validator->errors()->add('date_of_birth', 'El cliente debe ser mayor de edad (18 años o más).');
+                    throw new ValidationException($validator);
+                }
+            }
+            
             if ($customer->isDirty('customer_status')) {
                 $customer->updated_by = Auth::id();
                 event(new CustomerStatusUpdated($customer));
@@ -177,6 +208,20 @@ class Customer extends Authenticatable implements MustVerifyEmail
     {
         return $query->where('customer_status', 'active');
         //how use $activeCustomers = Customer::active()->get();
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        if (!$search) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($search) {
+            $q->where('first_name', 'LIKE', "%{$search}%")
+              ->orWhere('last_name', 'LIKE', "%{$search}%")
+              ->orWhere('identity_document', 'LIKE', "%{$search}%")
+              ->orWhere('email_address', 'LIKE', "%{$search}%");
+        });
     }
 
     public static function findByIdentityDocument($identityDocument)
