@@ -4,18 +4,128 @@ Esta documentación describe todas las acciones (mutations) disponibles en la AP
 
 ## Índice
 
-1. [Customers](#customers)
+1. [Autenticación](#autenticación)
+2. [Customers](#customers)
    - [Generate Invoice](#1-generate-invoice)
    - [Update Customer Status](#2-update-customer-status)
 
-2. [Services](#services)
+3. [Services](#services)
    - [Activate Service](#3-activate-service)
    - [Suspend Service](#4-suspend-service)
 
-3. [Invoices](#invoices)
+4. [Invoices](#invoices)
    - [Register Payment](#5-register-payment)
    - [Apply Discount](#6-apply-discount)
    - [Register Payment Promise](#7-register-payment-promise)
+
+---
+
+## Autenticación
+
+Todas las mutations requieren autenticación mediante **Bearer Token** (Laravel Passport).
+
+### Cómo obtener el token
+
+1. **Login via API REST:**
+
+```bash
+POST /api/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password"
+}
+```
+
+Respuesta:
+```json
+{
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "user@example.com"
+  }
+}
+```
+
+2. **Usar el token en GraphQL:**
+
+Todas las peticiones GraphQL deben incluir el header de autorización:
+
+```
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
+```
+
+### Ejemplo con cURL
+
+```bash
+curl -X POST https://your-api.com/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -d '{
+    "query": "mutation { generateInvoice(customer_id: \"1\") { success message } }"
+  }'
+```
+
+### Ejemplo con JavaScript/Apollo Client
+
+```javascript
+import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+
+const httpLink = createHttpLink({
+  uri: 'https://your-api.com/graphql',
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('auth_token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    }
+  }
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache()
+});
+```
+
+### Roles y Permisos
+
+Las mutations respetan los roles y permisos configurados en el sistema. Si un usuario no tiene permisos para ejecutar una acción, recibirá un error de autorización.
+
+**Ejemplo de error sin autenticación:**
+```json
+{
+  "errors": [
+    {
+      "message": "Unauthenticated.",
+      "extensions": {
+        "category": "authentication"
+      }
+    }
+  ]
+}
+```
+
+**Ejemplo de error sin permisos:**
+```json
+{
+  "errors": [
+    {
+      "message": "This action is unauthorized.",
+      "extensions": {
+        "category": "authorization"
+      }
+    }
+  ]
+}
+```
 
 ---
 
