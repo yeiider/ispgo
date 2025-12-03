@@ -90,6 +90,22 @@ class AuthController extends Controller
             'last_name' => 'required|string|max:100',
             'email_address' => 'required|string|email|max:255|unique:customers',
             'password' => 'required|string|min:8|confirmed',
+            'date_of_birth' => [
+                'nullable',
+                'date',
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $birthDate = \Carbon\Carbon::parse($value);
+                        $today = \Carbon\Carbon::now();
+                        $age = $birthDate->diffInYears($today);
+                        
+                        // Verificar que tenga al menos 18 años completos
+                        if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
+                            $fail('El cliente debe ser mayor de edad (18 años o más).');
+                        }
+                    }
+                }
+            ],
         ]);
 
         $customer = Customer::create([
