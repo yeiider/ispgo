@@ -21,6 +21,7 @@ type Query {
         customer_id: ID @eq
         mac_address: String @where(operator: "like")
         service_type: String @eq
+        sn: String @where(operator: "like")
     ): [Service!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Service")
     service(id: ID! @eq): Service @find(model: "App\\Models\\Services\\Service")
 
