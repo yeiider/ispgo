@@ -29,13 +29,13 @@ return [
         'middleware' => [
             // Ensures the request is not vulnerable to cross-site request forgery.
             // Nuwave\Lighthouse\Http\Middleware\EnsureXHR::class,
-
+            "auth:api",
             // Always set the `Accept: application/json` header.
             Nuwave\Lighthouse\Http\Middleware\AcceptJson::class,
 
             // Attempt to authenticate if a valid Authorization header is present,
             // but do not block unauthenticated requests (guards are applied per field/type).
-            Nuwave\Lighthouse\Support\Http\Middleware\AttemptAuthentication::class,
+            //Nuwave\Lighthouse\Support\Http\Middleware\AttemptAuthentication::class,
 
             // Logs every incoming GraphQL query.
             // Nuwave\Lighthouse\Http\Middleware\LogGraphQLQueries::class,
