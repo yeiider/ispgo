@@ -40,6 +40,12 @@ type Query {
 
     plans: [Plan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Plan")
     plan(id: ID! @eq): Plan @find(model: "App\\Models\\Services\\Plan")
+
+    # Configuration schema and values for external frontend
+    configSchema: [ConfigSection!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@schema")
+    configFields(scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@fields")
+    configValues(paths: [String!]!, scope_id: Int = 0): [ConfigItem!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@values")
+    configSearch(term: String!, scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@search")
 }
 
 type Mutation {
@@ -90,6 +96,12 @@ type Mutation {
     deleteAddress(
         id: ID! @rules(apply: ["required", "exists:addresses,id"])
     ): Address @delete(model: "App\\Models\\Customers\\Address")
+
+    # Upsert configuration values by scope
+    upsertConfigValues(
+        scope_id: Int = 0,
+        items: [ConfigItemInput!]! @rulesForArray(apply: ["required"])
+    ): [ConfigItem!]! @field(resolver: "App\\GraphQL\\Mutations\\ConfigMutation@upsert")
 
     createService(
         customer_id: Int! @rules(apply: ["required", "exists:customers,id"])
@@ -261,6 +273,53 @@ type Mutation {
         promise_date: Date! @rules(apply: ["required"])
         notes: String
     ): PaymentPromiseResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentPromiseMutation@resolve")
+}
+
+# --------------- Config types ---------------
+
+type ConfigSection {
+    key: String!
+    label: String
+    path: String
+    groups: [ConfigGroup!]!
+}
+
+type ConfigGroup {
+    key: String!
+    label: String
+    path: String
+    fields: [ConfigField!]!
+}
+
+type ConfigOption {
+    label: String!
+    value: String!
+}
+
+type ConfigField {
+    section: String!
+    group: String!
+    key: String!
+    label: String
+    description: String
+    path: String!
+    type: String!
+    required: Boolean
+    default: String
+    options: [ConfigOption!]
+    value: String
+}
+
+input ConfigItemInput {
+    path: String!
+    value: String
+}
+
+type ConfigItem {
+    path: String!
+    value: String
+    type: String
+    label: String
 }
 
 type Customer {
