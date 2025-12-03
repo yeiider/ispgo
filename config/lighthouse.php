@@ -1,18 +1,3 @@
-<?php declare(strict_types=1);
-
-return [
-    /*
-    |--------------------------------------------------------------------------
-    | Route Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Controls the HTTP route that your GraphQL server responds to.
-    | You may set `route` => false, to disable the default route
-    | registration and take full control.
-    |
-    */
-
-    'route' => [
         /*
          * The URI the endpoint responds to, e.g. mydomain.com/graphql.
          */
@@ -34,8 +19,9 @@ return [
             // Always set the `Accept: application/json` header.
             Nuwave\Lighthouse\Http\Middleware\AcceptJson::class,
 
-            // Require authentication for all GraphQL requests (tries web first, then api)
-            'auth:api',
+            // Attempt to authenticate if a valid Authorization header is present,
+            // but do not block unauthenticated requests (guards are applied per field/type).
+            Nuwave\Lighthouse\Support\Http\Middleware\AttemptAuthentication::class,
 
             // Logs every incoming GraphQL query.
             // Nuwave\Lighthouse\Http\Middleware\LogGraphQLQueries::class,

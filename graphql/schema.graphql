@@ -48,7 +48,7 @@ type Query {
     configSearch(term: String!, scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@search")
 }
 
-type Mutation {
+type Mutation @guard {
     createCustomer(
         first_name: String! @rules(apply: ["required", "max:255"])
         last_name: String! @rules(apply: ["required", "max:255"])
