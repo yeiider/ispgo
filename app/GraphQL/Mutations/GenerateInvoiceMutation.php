@@ -46,13 +46,15 @@ class GenerateInvoiceMutation
                 ];
             }
 
-            // Si no hay usuario autenticado, establecer el usuario por defecto
-            if (!Auth::check()) {
+            // Asegurar que hay un usuario autenticado
+            // El middleware AttemptAuthentication de Lighthouse ya maneja la autenticación via Bearer token
+            // Si no hay usuario autenticado, usar el usuario por defecto como fallback
+            if (!Auth::guard('api')->check()) {
                 $defaultUserId = GeneralProviderConfig::getDefaultUser();
                 if ($defaultUserId) {
                     $defaultUser = User::find($defaultUserId);
                     if ($defaultUser) {
-                        Auth::setUser($defaultUser);
+                        Auth::guard('api')->setUser($defaultUser);
                     }
                 }
             }

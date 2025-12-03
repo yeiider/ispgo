@@ -228,39 +228,39 @@ type Mutation {
     generateInvoice(
         customer_id: ID! @rules(apply: ["required", "exists:customers,id"])
         service_id: ID @rules(apply: ["exists:services,id"])
-    ): GenerateInvoiceResult @field(resolver: "App\\GraphQL\\Mutations\\GenerateInvoiceMutation@resolve")
+    ): GenerateInvoiceResult @guard @field(resolver: "App\\GraphQL\\Mutations\\GenerateInvoiceMutation@resolve")
 
     updateCustomerStatus(
         customer_id: ID! @rules(apply: ["required", "exists:customers,id"])
         status: String! @rules(apply: ["required", "in:active,inactive,suspended"])
-    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\UpdateCustomerStatusMutation@resolve")
+    ): ActionResult @guard @field(resolver: "App\\GraphQL\\Mutations\\UpdateCustomerStatusMutation@resolve")
 
     activateService(
         service_id: ID! @rules(apply: ["required", "exists:services,id"])
-    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ActivateServiceMutation@resolve")
+    ): ActionResult @guard @field(resolver: "App\\GraphQL\\Mutations\\ActivateServiceMutation@resolve")
 
     suspendService(
         service_id: ID! @rules(apply: ["required", "exists:services,id"])
-    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SuspendServiceMutation@resolve")
+    ): ActionResult @guard @field(resolver: "App\\GraphQL\\Mutations\\SuspendServiceMutation@resolve")
 
     registerPayment(
         invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
         payment_method: String! @rules(apply: ["required", "in:cash,transfer,card,online"])
         notes: String
-    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentMutation@resolve")
+    ): ActionResult @guard @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentMutation@resolve")
 
     applyDiscount(
         invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
         discount: Float! @rules(apply: ["required", "numeric", "min:0"])
         is_percentage: Boolean! @rules(apply: ["required"])
         include_tax: Boolean! @rules(apply: ["required"])
-    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ApplyDiscountMutation@resolve")
+    ): ActionResult @guard @field(resolver: "App\\GraphQL\\Mutations\\ApplyDiscountMutation@resolve")
 
     registerPaymentPromise(
         invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
         promise_date: Date! @rules(apply: ["required"])
         notes: String
-    ): PaymentPromiseResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentPromiseMutation@resolve")
+    ): PaymentPromiseResult @guard @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentPromiseMutation@resolve")
 }
 
 type Customer {
