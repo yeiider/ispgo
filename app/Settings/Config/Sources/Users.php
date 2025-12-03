@@ -10,7 +10,8 @@ class Users implements ConfigProviderInterface
 
     static public function getConfig(): array
     {
-        $users = User::createInvoiceUsers();
+        $users = User::all();
+        //$users = User::createInvoiceUsers();
         $options = [];
 
         foreach ($users as $user) {
