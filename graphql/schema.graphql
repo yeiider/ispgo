@@ -5,6 +5,21 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
 type Query {
+    # Users
+    users(
+        name: String @where(operator: "like")
+        email: String @where(operator: "like")
+        role: String
+    ): [User!]! @paginate(defaultCount: 10, model: "App\\Models\\User")
+    user(id: ID! @eq): User @find(model: "App\\Models\\User")
+
+    # Roles and Permissions
+    roles: [Role!]! @all(model: "Spatie\\Permission\\Models\\Role")
+    role(id: ID! @eq): Role @find(model: "Spatie\\Permission\\Models\\Role")
+
+    permissions: [Permission!]! @all(model: "Spatie\\Permission\\Models\\Permission")
+    permission(id: ID! @eq): Permission @find(model: "Spatie\\Permission\\Models\\Permission")
+
     customers(
         first_name: String @where(operator: "like")
         last_name: String @where(operator: "like")
@@ -375,6 +390,106 @@ type Mutation @guard {
         ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
         name: String! @rules(apply: ["required"])
     ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketLabelMutation@remove")
+
+    # User Mutations
+    createUser(
+        name: String! @rules(apply: ["required", "max:255"])
+        email: String! @rules(apply: ["required", "email", "unique:users,email"])
+        password: String! @rules(apply: ["required", "min:8"])
+        telephone: String
+        router_id: ID @rules(apply: ["nullable", "exists:routers,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@create")
+
+    updateUser(
+        id: ID! @rules(apply: ["required", "exists:users,id"])
+        name: String
+        email: String @rules(apply: ["email"])
+        password: String @rules(apply: ["min:8"])
+        telephone: String
+        router_id: ID @rules(apply: ["nullable", "exists:routers,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@update")
+
+    deleteUser(
+        id: ID! @rules(apply: ["required", "exists:users,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@delete")
+
+    # Role Mutations
+    createRole(
+        name: String! @rules(apply: ["required", "unique:roles,name"])
+        guard_name: String @rules(apply: ["required"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\RoleMutation@create")
+
+    updateRole(
+        id: ID! @rules(apply: ["required", "exists:roles,id"])
+        name: String @rules(apply: ["unique:roles,name"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\RoleMutation@update")
+
+    deleteRole(
+        id: ID! @rules(apply: ["required", "exists:roles,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\RoleMutation@delete")
+
+    # Permission Mutations
+    createPermission(
+        name: String! @rules(apply: ["required", "unique:permissions,name"])
+        guard_name: String @rules(apply: ["required"])
+    ): Permission @field(resolver: "App\\GraphQL\\Mutations\\PermissionMutation@create")
+
+    updatePermission(
+        id: ID! @rules(apply: ["required", "exists:permissions,id"])
+        name: String @rules(apply: ["unique:permissions,name"])
+    ): Permission @field(resolver: "App\\GraphQL\\Mutations\\PermissionMutation@update")
+
+    deletePermission(
+        id: ID! @rules(apply: ["required", "exists:permissions,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\PermissionMutation@delete")
+
+    # Assign Role to User
+    assignRoleToUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserRoleMutation@assignRole")
+
+    removeRoleFromUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserRoleMutation@removeRole")
+
+    syncRolesToUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        role_ids: [ID!]! @rules(apply: ["required"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserRoleMutation@syncRoles")
+
+    # Assign Permission to Role
+    assignPermissionToRole(
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+        permission_id: ID! @rules(apply: ["required", "exists:permissions,id"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\RolePermissionMutation@assignPermission")
+
+    removePermissionFromRole(
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+        permission_id: ID! @rules(apply: ["required", "exists:permissions,id"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\RolePermissionMutation@removePermission")
+
+    syncPermissionsToRole(
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+        permission_ids: [ID!]! @rules(apply: ["required"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\RolePermissionMutation@syncPermissions")
+
+    # Assign Permission directly to User
+    assignPermissionToUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        permission_id: ID! @rules(apply: ["required", "exists:permissions,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserPermissionMutation@assignPermission")
+
+    removePermissionFromUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        permission_id: ID! @rules(apply: ["required", "exists:permissions,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserPermissionMutation@removePermission")
+
+    syncPermissionsToUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        permission_ids: [ID!]! @rules(apply: ["required"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserPermissionMutation@syncPermissions")
 }
 
 # --------------- Config types ---------------
@@ -710,10 +825,36 @@ type User {
     id: ID!
     name: String!
     email: String!
-    role: String
+    telephone: String
     router_id: ID
     created_at: DateTime!
     updated_at: DateTime!
 
+    router: Router @belongsTo
     tickets: [Ticket!]! @belongsToMany
+    roles: [Role!]! @morphToMany(relation: "roles")
+    permissions: [Permission!]! @morphToMany(relation: "permissions")
+    allPermissions: [Permission!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@allPermissions")
+}
+
+type Role {
+    id: ID!
+    name: String!
+    guard_name: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    permissions: [Permission!]! @morphToMany(relation: "permissions")
+    users: [User!]! @morphedByMany(relation: "roles")
+}
+
+type Permission {
+    id: ID!
+    name: String!
+    guard_name: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    roles: [Role!]! @morphToMany(relation: "roles")
+    users: [User!]! @morphedByMany(relation: "permissions")
 }
