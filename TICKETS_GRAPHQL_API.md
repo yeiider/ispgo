@@ -19,7 +19,12 @@ Esta API GraphQL proporciona funcionalidad completa para gestionar tickets de so
 - Archivos adjuntos
 - Sistema de etiquetas (labels)
 
-**Nota importante:** Los campos `customer_id` y `service_id` son **opcionales** en los tickets, permitiendo crear tickets generales que no estén vinculados a clientes o servicios específicos.
+**Notas importantes:**
+- Los campos `customer_id` y `service_id` son **opcionales** en los tickets, permitiendo crear tickets generales que no estén vinculados a clientes o servicios específicos.
+- **Validación**: Cuando se envían `customer_id` o `service_id` (no null), deben existir en sus respectivas tablas. Si deseas crear un ticket sin customer o service, simplemente envía `null` o no incluyas el campo.
+- **Ejemplo válido con null**: `customer_id: null` ✅
+- **Ejemplo válido sin el campo**: No incluir `customer_id` en la mutación ✅
+- **Ejemplo inválido**: `customer_id: "999"` (si el ID 999 no existe) ❌
 
 ---
 
@@ -307,11 +312,11 @@ mutation CreateTicket($input: CreateTicketInput!) {
 - `description`: String!
 
 **Campos opcionales:**
-- `customer_id`: ID (puede ser null)
-- `service_id`: ID (puede ser null)
+- `customer_id`: ID (puede ser null) - Si se envía, debe existir en la tabla customers
+- `service_id`: ID (puede ser null) - Si se envía, debe existir en la tabla services
 - `status`: String (default: `open`)
 - `contact_method`: String
-- `user_ids`: [ID!] (array de IDs de usuarios a asignar)
+- `user_ids`: [ID!] (array de IDs de usuarios a asignar, puede estar vacío)
 
 ---
 

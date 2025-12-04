@@ -287,21 +287,21 @@ type Mutation @guard {
 
     # Ticket Mutations
     createTicket(
-        customer_id: ID @rules(apply: ["exists:customers,id"])
-        service_id: ID @rules(apply: ["exists:services,id"])
+        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
+        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
         issue_type: String! @rules(apply: ["required", "max:255"])
         priority: String! @rules(apply: ["required", "in:low,medium,high,urgent"])
         status: String @rules(apply: ["in:open,in_progress,resolved,closed"])
         title: String! @rules(apply: ["required", "max:255"])
         description: String! @rules(apply: ["required"])
         contact_method: String
-        user_ids: [ID!] @rules(apply: ["exists:users,id"])
+        user_ids: [ID!]
     ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@create")
 
     updateTicket(
         id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        customer_id: ID @rules(apply: ["exists:customers,id"])
-        service_id: ID @rules(apply: ["exists:services,id"])
+        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
+        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
         issue_type: String
         priority: String @rules(apply: ["in:low,medium,high,urgent"])
         status: String @rules(apply: ["in:open,in_progress,resolved,closed"])
@@ -327,12 +327,12 @@ type Mutation @guard {
 
     assignCustomerToTicket(
         ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        customer_id: ID @rules(apply: ["exists:customers,id"])
+        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
     ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignCustomer")
 
     assignServiceToTicket(
         ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        service_id: ID @rules(apply: ["exists:services,id"])
+        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
     ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignService")
 
     # Ticket Comments
