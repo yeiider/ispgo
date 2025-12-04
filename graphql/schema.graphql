@@ -832,8 +832,8 @@ type User {
 
     router: Router @belongsTo
     tickets: [Ticket!]! @belongsToMany
-    roles: [Role!]! @morphToMany(relation: "roles")
-    permissions: [Permission!]! @morphToMany(relation: "permissions")
+    roles: [Role!]! @belongsToMany(relation: "roles")
+    permissions: [Permission!]! @belongsToMany(relation: "permissions")
     allPermissions: [Permission!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@allPermissions")
 }
 
@@ -844,8 +844,8 @@ type Role {
     created_at: DateTime!
     updated_at: DateTime!
 
-    permissions: [Permission!]! @morphToMany(relation: "permissions")
-    users: [User!]! @morphedByMany(relation: "roles")
+    permissions: [Permission!]! @belongsToMany(relation: "permissions")
+    users: [User!]! @belongsToMany(relation: "users")
 }
 
 type Permission {
@@ -855,6 +855,6 @@ type Permission {
     created_at: DateTime!
     updated_at: DateTime!
 
-    roles: [Role!]! @morphToMany(relation: "roles")
-    users: [User!]! @morphedByMany(relation: "permissions")
+    roles: [Role!]! @belongsToMany(relation: "roles")
+    users: [User!]! @belongsToMany(relation: "users")
 }
