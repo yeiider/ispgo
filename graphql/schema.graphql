@@ -858,3 +858,5 @@ type Permission {
     roles: [Role!]! @belongsToMany(relation: "roles")
     users: [User!]! @belongsToMany(relation: "users")
 }
+
+#import smartolt.graphql

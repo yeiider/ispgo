@@ -460,5 +460,67 @@ class ApiManager
         return $this->request('api/onu/authorize_onu', $payload, true);
     }
 
+    /**
+     * Get OLT PON ports details.
+     *
+     * @param int $oltId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOltPonPortsDetails(int $oltId): Response
+    {
+        try {
+            return $this->request('api/system/get_olt_pon_ports_details/' . $oltId, [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error getting OLT PON ports details: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Get ODBs by Zone ID.
+     *
+     * @param int $zoneId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOdbs(int $zoneId): Response
+    {
+        try {
+            return $this->request('api/system/get_odbs/' . $zoneId, [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error getting ODBs: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Get Speed Profiles.
+     *
+     * @return Response
+     * @throws \Exception
+     */
+    public function getSpeedProfiles(): Response
+    {
+        try {
+            return $this->request('api/system/get_speed_profiles', [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error getting speed profiles: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Get OLTs Uptime and Environment Temperature.
+     *
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOltsUptimeAndEnvTemperature(): Response
+    {
+        try {
+            return $this->request('api/olt/get_olts_uptime_and_env_temperature', [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error getting OLTs uptime and temperature: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
 
 }
