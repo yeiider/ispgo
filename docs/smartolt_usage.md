@@ -109,6 +109,7 @@ query GetUnconfiguredOnus($oltId: ID!) {
     board
     port
     onu
+    onu_type_name
     status
     signal
   }

@@ -69,6 +69,7 @@ type SmartOltOnu {
     port: String
     onu: String
     name: String
+    onu_type_name: String
     zone_id: String
     odb_id: String
     mode: String
