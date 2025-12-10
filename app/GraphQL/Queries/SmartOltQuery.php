@@ -69,4 +69,32 @@ class SmartOltQuery
         $data = $response->json();
         return $data['response'] ?? [];
     }
+
+    public function getOnuDetails($root, array $args)
+    {
+        $response = $this->apiManager->getOnuDetailsBySn($args['sn']);
+        $data = $response->json();
+
+        if (isset($data['onus']) && count($data['onus']) > 0) {
+            return $data['onus'][0];
+        }
+
+        return null;
+    }
+
+    public function getOnuTypeImage($root, array $args)
+    {
+        $response = $this->apiManager->getOnuTypeImage($args['onu_type_id']);
+
+        // Retornar la imagen como base64
+        if ($response->successful()) {
+            $imageData = base64_encode($response->body());
+            return [
+                'image_base64' => $imageData,
+                'content_type' => $response->header('Content-Type') ?? 'image/jpeg'
+            ];
+        }
+
+        return null;
+    }
 }

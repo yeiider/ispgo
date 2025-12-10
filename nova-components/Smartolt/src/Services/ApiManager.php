@@ -522,5 +522,86 @@ class ApiManager
         }
     }
 
+    /**
+     * Obtener detalles de ONU por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOnuDetailsBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/get_onus_details_by_sn/' . $sn, [], false, 'get');
+    }
+
+    /**
+     * Obtener imagen del tipo de ONU por ID.
+     *
+     * @param int $onuTypeId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOnuTypeImage(int $onuTypeId): Response
+    {
+        try {
+            return $this->request('api/system/get_onu_type_image/' . $onuTypeId, [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error getting ONU type image: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Habilitar ONU por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function enableOnuBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/enable/' . $sn);
+    }
+
+    /**
+     * Deshabilitar ONU por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function disableOnuBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/disable/' . $sn);
+    }
+
+    /**
+     * Reiniciar ONU por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function rebootOnuBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/reboot', ['sn' => $sn]);
+    }
+
+    /**
+     * Eliminar ONU del SmartOLT por external_id.
+     *
+     * @param string $externalId
+     * @return Response
+     * @throws \Exception
+     */
+    public function deleteOnuByExternalId(string $externalId): Response
+    {
+        $this->validateExternalId($externalId);
+        return $this->request('api/onu/delete/' . $externalId, [], false, 'post');
+    }
+
 
 }
