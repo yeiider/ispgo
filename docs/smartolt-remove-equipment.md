@@ -33,7 +33,7 @@ El sistema identifica el servicio asociado al número de serie (SN) del equipo O
 
 ```graphql
 query {
-  getOnuDetails(sn: "ZTEGD38EC236") {
+  smartOltOnuDetails(sn: "ZTEGD38EC236") {
     sn
     name
     address
@@ -53,7 +53,7 @@ Se ejecuta la mutación para eliminar el SN del servicio:
 
 ```graphql
 mutation {
-  removeEquipment(sn: "ZTEGD38EC236") {
+  smartOltRemoveEquipment(sn: "ZTEGD38EC236") {
     success
     message
   }
@@ -89,7 +89,7 @@ sn: null
 ### Archivo: app/GraphQL/Mutations/SmartOltMutation.php
 
 ```php
-public function removeEquipment($root, array $args)
+public function smartOltRemoveEquipment($root, array $args)
 {
     try {
         // Buscar el servicio por SN
@@ -211,7 +211,7 @@ Después de retirar el equipo, considere:
 ### Habilitar ONU
 ```graphql
 mutation {
-  enableOnu(sn: "ZTEGD38EC236") {
+  smartOltEnableOnu(sn: "ZTEGD38EC236") {
     success
     message
   }
@@ -221,7 +221,7 @@ mutation {
 ### Deshabilitar ONU
 ```graphql
 mutation {
-  disableOnu(sn: "ZTEGD38EC236") {
+  smartOltDisableOnu(sn: "ZTEGD38EC236") {
     success
     message
   }
@@ -231,7 +231,7 @@ mutation {
 ### Reiniciar ONU
 ```graphql
 mutation {
-  rebootOnu(external_id: "ZTEGD38EC236") {
+  smartOltRebootOnu(external_id: "ZTEGD38EC236") {
     success
     message
   }
@@ -243,7 +243,7 @@ mutation {
 ### Obtener Detalles del ONU
 ```graphql
 query {
-  getOnuDetails(sn: "ZTEGD38EC236") {
+  smartOltOnuDetails(sn: "ZTEGD38EC236") {
     unique_external_id
     sn
     olt_name
@@ -278,7 +278,7 @@ query {
 ### Obtener Imagen del Tipo de ONU
 ```graphql
 query {
-  getOnuTypeImage(onu_type_id: 105) {
+  smartOltOnuTypeImage(onu_type_id: 105) {
     image_base64
     content_type
   }
@@ -290,7 +290,7 @@ query {
 1. **Consultar detalles del equipo antes del retiro**
 ```graphql
 query {
-  getOnuDetails(sn: "ZTEGD38EC236") {
+  smartOltOnuDetails(sn: "ZTEGD38EC236") {
     sn
     status
     name
@@ -302,7 +302,7 @@ query {
 2. **Deshabilitar el equipo (opcional)**
 ```graphql
 mutation {
-  disableOnu(sn: "ZTEGD38EC236") {
+  smartOltDisableOnu(sn: "ZTEGD38EC236") {
     success
     message
   }
@@ -312,7 +312,7 @@ mutation {
 3. **Retirar el equipo del servicio**
 ```graphql
 mutation {
-  removeEquipment(sn: "ZTEGD38EC236") {
+  smartOltRemoveEquipment(sn: "ZTEGD38EC236") {
     success
     message
   }

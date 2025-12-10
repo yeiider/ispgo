@@ -72,11 +72,11 @@ class SmartOltQuery
 
     public function getOnuDetails($root, array $args)
     {
-        $response = $this->apiManager->getOnuDetailsBySn($args['sn']);
+        $response = $this->apiManager->getOnuDetailsByExternalId($args['sn']);
         $data = $response->json();
 
-        if (isset($data['onus']) && count($data['onus']) > 0) {
-            return $data['onus'][0];
+        if (isset($data['onu_details'])) {
+            return $data['onu_details'];
         }
 
         return null;
