@@ -535,20 +535,6 @@ class ApiManager
         return $this->request('api/onu/get_onus_details_by_sn/' . $sn, [], false, 'get');
     }
 
-
-    /**
-     * Obtener detalles de ONU por número de codigo externo.
-     *
-     * @param string $externalId
-     * @return Response
-     * @throws \Exception
-     */
-    public function getOnuDetailsByExternalId(string $externalId): Response
-    {
-        $this->validateSerialNumber($externalId);
-        return $this->request('api/onu/get_onu_details/' . $externalId, [], false, 'get');
-    }
-
     /**
      * Obtener imagen del tipo de ONU por ID.
      *
