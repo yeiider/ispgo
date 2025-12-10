@@ -4,6 +4,8 @@ namespace Ispgo\NapManager\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Router;
 
 class NapBox extends Model
 {
@@ -21,6 +23,8 @@ class NapBox extends Model
         'model',
         'distribution_order',
         'parent_nap_id', // Para jerarquía de distribución
+        'router_id',
+        'fiber_color',
     ];
 
     protected $casts = [
@@ -48,6 +52,11 @@ class NapBox extends Model
     public function distributionFlow()
     {
         return $this->hasOne(NapDistribution::class, 'nap_box_id');
+    }
+
+    public function router(): BelongsTo
+    {
+        return $this->belongsTo(Router::class, 'router_id');
     }
 
     // Scopes

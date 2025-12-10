@@ -16,6 +16,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Ispgo\NapManager\Models\NapPort;
+use Ispgo\NapManager\Models\NapBox;
 
 /**
  * Service is an Eloquent model that represents a service entity in the application.
@@ -87,6 +89,23 @@ class Service extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    public function napPort()
+    {
+        return $this->hasOne(NapPort::class, 'service_id');
+    }
+
+    public function napBox()
+    {
+        return $this->hasOneThrough(
+            NapBox::class,
+            NapPort::class,
+            'service_id',   // Foreign key on NapPort table...
+            'id',           // Foreign key on NapBox table (NapBox primary key referenced by NapPort.nap_box_id)
+            'id',           // Local key on Service table
+            'nap_box_id'    // Local key on NapPort table pointing to NapBox
+        );
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -95,7 +114,7 @@ class Service extends Model
         static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = \Illuminate\Support\Facades\Auth::user();
-            
+
             // If not authenticated, no filtering
             if (!$user) {
                 return;
