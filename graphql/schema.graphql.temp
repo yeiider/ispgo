@@ -4,9 +4,6 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 "A date string with format 'Y-m-d', e.g. '2011-05-23'."
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
-"Arbitrary JSON object."
-scalar JSON @scalar(class: "App\\GraphQL\\Scalars\\JSON")
-
 type Query {
     # Users
     users(
@@ -851,141 +848,11 @@ type Role {
     users: [User!]! @belongsToMany(relation: "users")
 }
 
-# --------------- NAP (Network Access Point) types ---------------
-
-type NapBox {
-  id: ID!
-  name: String!
-  code: String
-  address: String
-  latitude: Float
-  longitude: Float
-  status: String
-  capacity: Int
-  technology_type: String
-  installation_date: String
-  brand: String
-  model: String
-  distribution_order: Int
-  parent_nap_id: ID
-  router_id: ID
-  fiber_color: String
-  ports: [NapPort!] @hasMany(relation: "ports")
-  # Servicios relacionados a esta caja (a través de sus puertos)
-  services: [Service!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxServices")
-}
-
-type NapPort {
-  id: ID!
-  nap_box_id: ID!
-  port_number: Int!
-  port_name: String
-  status: String
-  connection_type: String
-  service_id: ID
-  code: String
-  color: String
-  last_signal_check: String
-  signal_strength: Float
-  port_config: JSON
-  notes: String
-  technician_notes: String
-  last_maintenance: String
-  warranty_until: String
-  # Relaciones
-  service: Service @belongsTo(relation: "service")
-  napBox: NapBox @belongsTo(relation: "napBox")
-}
-
-input CreateNapBoxInput {
-  name: String!
-  code: String!
-  address: String
-  latitude: Float
-  longitude: Float
-  status: String
-  capacity: Int
-  technology_type: String
-  installation_date: String
-  brand: String
-  model: String
-  distribution_order: Int
-  parent_nap_id: ID
-  router_id: ID
-  fiber_color: String
-}
-
-input UpdateNapBoxInput {
-  name: String
-  code: String
-  address: String
-  latitude: Float
-  longitude: Float
-  status: String
-  capacity: Int
-  technology_type: String
-  installation_date: String
-  brand: String
-  model: String
-  distribution_order: Int
-  parent_nap_id: ID
-  router_id: ID
-  fiber_color: String
-}
-
-input CreateNapPortInput {
-  nap_box_id: ID!
-  port_number: Int!
-  port_name: String
-  status: String
-  connection_type: String
-  service_id: ID
-  code: String
-  color: String
-  last_signal_check: String
-  signal_strength: Float
-  port_config: JSON
-  notes: String
-  technician_notes: String
-  last_maintenance: String
-  warranty_until: String
-}
-
-input UpdateNapPortInput {
-  port_name: String
-  status: String
-  connection_type: String
-  service_id: ID
-  code: String
-  color: String
-  last_signal_check: String
-  signal_strength: Float
-  port_config: JSON
-  notes: String
-  technician_notes: String
-  last_maintenance: String
-  warranty_until: String
-}
-
-extend type Query {
-  napBoxes(router_id: ID): [NapBox!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxes")
-  napBox(id: ID!): NapBox @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBox")
-  napPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPorts")
-  napPort(id: ID!): NapPort @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPort")
-  availableNapPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@availableNapPorts")
-  # Lista directa de servicios relacionados a una caja NAP
-  napBoxServices(nap_box_id: ID!): [Service!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxServices")
-}
-
-extend type Mutation {
-  createNapBox(input: CreateNapBoxInput!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@createNapBox")
-  updateNapBox(id: ID!, input: UpdateNapBoxInput!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@updateNapBox")
-  createNapPort(input: CreateNapPortInput!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@createNapPort")
-  updateNapPort(id: ID!, input: UpdateNapPortInput!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@updateNapPort")
-  assignServiceToNapPort(service_id: ID!, nap_port_id: ID!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@assignServiceToNapPort")
-  releaseNapPort(nap_port_id: ID!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@releaseNapPort")
-  assignRouterToNapBox(nap_box_id: ID!, router_id: ID!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@assignRouterToNapBox")
-}
+# Import extended schemas
+# Ensure external modules are included in the executable schema
+# (SmartOLT already imported; add NAP schema too)
+#import smartolt.graphql
+#import nap.graphql
 
 type Permission {
     id: ID!
