@@ -116,7 +116,7 @@ input UpdateNapPortInput {
 }
 
 extend type Query {
-  napBoxes(router_id: ID): [NapBox!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxes")
+  napBoxes(router_id: ID, first: Int, page: Int): [NapBox!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxes")
   napBox(id: ID!): NapBox @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBox")
   napPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPorts")
   napPort(id: ID!): NapPort @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPort")

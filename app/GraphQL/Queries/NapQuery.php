@@ -17,6 +17,13 @@ class NapQuery
             $query->where('router_id', $args['router_id']);
         }
 
+        // Paginación
+        if (isset($args['first']) || isset($args['page'])) {
+            $first = $args['first'] ?? 15;
+            $page = $args['page'] ?? 1;
+            return $query->paginate($first, ['*'], 'page', $page)->items();
+        }
+
         return $query->get();
     }
 
