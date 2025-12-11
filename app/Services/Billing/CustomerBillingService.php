@@ -22,13 +22,7 @@ class CustomerBillingService
                 return null;
             }
 
-            $periodKey = $period->format('Y-m');
-            $invoice = $customer->openDraftInvoice($periodKey);
-
-            // Verificar si el cliente está al día con sus pagos
-            $isCustomerUpToDate = $this->isCustomerUpToDate($customer);
-
-            // Verificar configuraciones
+            // Verificar configuraciones ANTES de crear el draft
             $skipIfSuspendedAndUnpaid = filter_var(
                 InvoiceProviderConfig::skipInvoiceIfSuspendedAndUnpaid(),
                 FILTER_VALIDATE_BOOLEAN,
@@ -42,6 +36,41 @@ class CustomerBillingService
             $routerRentalAmount = (float) InvoiceProviderConfig::routerRentalAmount();
             $routerRentalName = InvoiceProviderConfig::routerRentalName() ?: 'Arrendamiento de Router';
 
+            // Verificar si el cliente está al día con sus pagos
+            $isCustomerUpToDate = $this->isCustomerUpToDate($customer);
+
+            // Verificar si TODOS los servicios están suspendidos
+            $allServicesSuspended = $this->allServicesSuspended($services);
+
+            // Verificar si la última factura del cliente está sin pagar
+            $lastInvoiceUnpaid = $this->customerLastInvoiceUnpaid($customer);
+
+            // VALIDACIÓN PRINCIPAL: Si está activa la opción de omitir factura
+            // y TODOS los servicios están suspendidos y la última factura está sin pagar
+            if ($skipIfSuspendedAndUnpaid && $allServicesSuspended && $lastInvoiceUnpaid) {
+                // Si NO está activo el arrendamiento de router, NO generar factura
+                if (!$enableRouterRental || $routerRentalAmount <= 0) {
+                    Log::info("Cliente {$customer->id}: No se genera factura - todos los servicios suspendidos y última factura sin pagar", [
+                        'customer_id' => $customer->id,
+                        'all_services_suspended' => $allServicesSuspended,
+                        'last_invoice_unpaid' => $lastInvoiceUnpaid,
+                    ]);
+                    return null;
+                }
+
+                // Si SÍ está activo el arrendamiento, generar factura SOLO con el arrendamiento
+                Log::info("Cliente {$customer->id}: Generando factura solo con arrendamiento de router", [
+                    'customer_id' => $customer->id,
+                    'router_rental_amount' => $routerRentalAmount,
+                ]);
+
+                return $this->generateRouterRentalOnlyInvoice($customer, $period, $routerRentalAmount, $routerRentalName);
+            }
+
+            // Flujo normal: crear el draft invoice
+            $periodKey = $period->format('Y-m');
+            $invoice = $customer->openDraftInvoice($periodKey);
+
             DB::transaction(function () use (
                 $invoice,
                 $services,
@@ -49,24 +78,22 @@ class CustomerBillingService
                 $enableRouterRental,
                 $routerRentalAmount,
                 $routerRentalName,
-                $isCustomerUpToDate
+                $isCustomerUpToDate,
+                $customer
             ) {
                 $hasServiceItems = false;
-                $hasSkippedServices = false;
 
                 foreach ($services as $service) {
-                    // Verificar si debemos omitir la factura del servicio
+                    // Verificar si debemos omitir el item del servicio
                     $shouldSkipService = false;
 
                     if ($skipIfSuspendedAndUnpaid) {
-                        // Verificar si el servicio está suspendido y tiene facturas sin pagar
                         $isSuspended = $service->service_status === 'suspended';
-                        $hasUnpaidInvoices = $this->serviceHasUnpaidInvoices($service);
+                        $serviceLastInvoiceUnpaid = $this->serviceLastInvoiceUnpaid($service);
 
-                        if ($isSuspended && $hasUnpaidInvoices) {
+                        if ($isSuspended && $serviceLastInvoiceUnpaid) {
                             $shouldSkipService = true;
-                            $hasSkippedServices = true;
-                            Log::info("Servicio {$service->id} omitido: está suspendido y tiene facturas sin pagar", [
+                            Log::info("Servicio {$service->id} omitido: está suspendido y última factura sin pagar", [
                                 'service_id' => $service->id,
                                 'customer_id' => $service->customer_id,
                             ]);
@@ -112,45 +139,29 @@ class CustomerBillingService
                     }
                 }
 
-                // Agregar el item de arrendamiento de router si está activo
-                if ($enableRouterRental && $routerRentalAmount > 0) {
-                    // Lógica para agregar el arrendo:
-                    // 1. Si el cliente está al día: siempre agregar el arrendo (ya fue descontado del servicio)
-                    // 2. Si el cliente NO está al día pero se omitieron servicios: agregar el arrendo (solo cobrar arrendo)
-                    // 3. Si el cliente NO está al día y hay items de servicio: NO agregar el arrendo (cobrar servicio completo + arrendo no aplica)
-                    $shouldAddRental = false;
+                // Agregar el item de arrendamiento de router si está activo y el cliente está al día
+                if ($enableRouterRental && $routerRentalAmount > 0 && $isCustomerUpToDate && $hasServiceItems) {
+                    $rentalItem = $invoice->items()->create([
+                        'description' => $routerRentalName,
+                        'invoice_id' => $invoice->id,
+                        'unit_price' => $routerRentalAmount,
+                        'service_id' => null,
+                        'quantity' => 1,
+                        'subtotal' => $routerRentalAmount,
+                    ]);
 
-                    if ($isCustomerUpToDate) {
-                        // Cliente al día: siempre agregar el arrendo (ya fue descontado del servicio)
-                        $shouldAddRental = true;
-                    } elseif ($hasSkippedServices && !$hasServiceItems) {
-                        // Se omitieron servicios y no hay items de servicio: solo cobrar el arrendo
-                        $shouldAddRental = true;
-                    }
-
-                    if ($shouldAddRental) {
-                        $rentalItem = $invoice->items()->create([
-                            'description' => $routerRentalName,
-                            'invoice_id' => $invoice->id,
-                            'unit_price' => $routerRentalAmount,
-                            'service_id' => null,
-                            'quantity' => 1,
-                            'subtotal' => $routerRentalAmount,
-                        ]);
-
-                        $invoice->adjustments()->create([
-                            'kind' => 'charge',
-                            'amount' => $rentalItem->subtotal,
-                            'source_type' => 'router_rental',
-                            'source_id' => null,
-                            'label' => "Ajuste: {$routerRentalName}",
-                            'metadata' => [
-                                'type' => 'router_rental',
-                                'invoice_item_id' => $rentalItem->id,
-                            ],
-                            'created_by' => auth()->id(),
-                        ]);
-                    }
+                    $invoice->adjustments()->create([
+                        'kind' => 'charge',
+                        'amount' => $rentalItem->subtotal,
+                        'source_type' => 'router_rental',
+                        'source_id' => null,
+                        'label' => "Ajuste: {$routerRentalName}",
+                        'metadata' => [
+                            'type' => 'router_rental',
+                            'invoice_item_id' => $rentalItem->id,
+                        ],
+                        'created_by' => auth()->id(),
+                    ]);
                 }
 
                 $invoice->recalcTotals();
@@ -177,6 +188,50 @@ class CustomerBillingService
     }
 
     /**
+     * Genera una factura solo con el arrendamiento del router
+     */
+    private function generateRouterRentalOnlyInvoice(
+        Customer $customer,
+        Carbon $period,
+        float $routerRentalAmount,
+        string $routerRentalName
+    ): Invoice {
+        $periodKey = $period->format('Y-m');
+        $invoice = $customer->openDraftInvoice($periodKey);
+
+        DB::transaction(function () use ($invoice, $routerRentalAmount, $routerRentalName) {
+            $rentalItem = $invoice->items()->create([
+                'description' => $routerRentalName,
+                'invoice_id' => $invoice->id,
+                'unit_price' => $routerRentalAmount,
+                'service_id' => null,
+                'quantity' => 1,
+                'subtotal' => $routerRentalAmount,
+            ]);
+
+            $invoice->adjustments()->create([
+                'kind' => 'charge',
+                'amount' => $rentalItem->subtotal,
+                'source_type' => 'router_rental',
+                'source_id' => null,
+                'label' => "Ajuste: {$routerRentalName}",
+                'metadata' => [
+                    'type' => 'router_rental',
+                    'invoice_item_id' => $rentalItem->id,
+                ],
+                'created_by' => auth()->id(),
+            ]);
+
+            $invoice->recalcTotals();
+            $invoice->update(['state' => 'building']);
+        });
+
+        event(new \App\Events\InvoiceItemsCreated($invoice));
+
+        return $invoice;
+    }
+
+    /**
      * Verifica si un cliente está al día con sus pagos
      * (no tiene facturas con saldo pendiente)
      */
@@ -189,9 +244,45 @@ class CustomerBillingService
     }
 
     /**
+     * Verifica si TODOS los servicios del cliente están suspendidos
+     */
+    private function allServicesSuspended($services): bool
+    {
+        if ($services->isEmpty()) {
+            return false;
+        }
+
+        foreach ($services as $service) {
+            if ($service->service_status !== 'suspended') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Verifica si la última factura del cliente está sin pagar
+     */
+    private function customerLastInvoiceUnpaid(Customer $customer): bool
+    {
+        $lastInvoice = $customer->invoices()
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$lastInvoice) {
+            return false;
+        }
+
+        return $lastInvoice->outstanding_balance > 0
+            && in_array($lastInvoice->status, ['unpaid', 'overdue']);
+    }
+
+    /**
      * Verifica si la última factura del servicio está sin pagar
      */
-    private function serviceHasUnpaidInvoices($service): bool
+    private function serviceLastInvoiceUnpaid($service): bool
     {
         $lastInvoice = $service->invoices()
             ->orderBy('created_at', 'desc')
@@ -202,7 +293,7 @@ class CustomerBillingService
             return false;
         }
 
-        return $lastInvoice->outstanding_balance > 0 
+        return $lastInvoice->outstanding_balance > 0
             && in_array($lastInvoice->status, ['unpaid', 'overdue']);
     }
 }
