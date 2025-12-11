@@ -33,7 +33,7 @@ class CustomerBillingService
                 FILTER_VALIDATE_BOOLEAN,
                 FILTER_NULL_ON_FAILURE
             );
-            $routerRentalAmount = (float) InvoiceProviderConfig::routerRentalAmount();
+            $routerRentalAmount = (float)InvoiceProviderConfig::routerRentalAmount();
             $routerRentalName = InvoiceProviderConfig::routerRentalName() ?: 'Arrendamiento de Router';
 
             // Verificar si el cliente está al día con sus pagos
@@ -55,7 +55,7 @@ class CustomerBillingService
                         'all_services_suspended' => $allServicesSuspended,
                         'last_invoice_unpaid' => $lastInvoiceUnpaid,
                     ]);
-                    return null;
+                    throw new Exception("Cliente {$customer->id}: No se genera factura - todos los servicios suspendidos y última factura sin pagar");
                 }
 
                 // Si SÍ está activo el arrendamiento, generar factura SOLO con el arrendamiento
@@ -153,8 +153,8 @@ class CustomerBillingService
                     $invoice->adjustments()->create([
                         'kind' => 'charge',
                         'amount' => $rentalItem->subtotal,
-                        'source_type' => 'router_rental',
-                        'source_id' => null,
+                        'source_type' => get_class($rentalItem),
+                        'source_id' => $rentalItem->id,
                         'label' => "Ajuste: {$routerRentalName}",
                         'metadata' => [
                             'type' => 'router_rental',
@@ -192,13 +192,13 @@ class CustomerBillingService
      */
     private function generateRouterRentalOnlyInvoice(
         Customer $customer,
-        Carbon $period,
-        float $routerRentalAmount,
-        string $routerRentalName
-    ): Invoice {
+        Carbon   $period,
+        float    $routerRentalAmount,
+        string   $routerRentalName
+    ): Invoice
+    {
         $periodKey = $period->format('Y-m');
         $invoice = $customer->openDraftInvoice($periodKey);
-
         DB::transaction(function () use ($invoice, $routerRentalAmount, $routerRentalName) {
             $rentalItem = $invoice->items()->create([
                 'description' => $routerRentalName,
@@ -212,8 +212,8 @@ class CustomerBillingService
             $invoice->adjustments()->create([
                 'kind' => 'charge',
                 'amount' => $rentalItem->subtotal,
-                'source_type' => 'router_rental',
-                'source_id' => null,
+                'source_type' => get_class($rentalItem),
+                'source_id' => $rentalItem->id,
                 'label' => "Ajuste: {$routerRentalName}",
                 'metadata' => [
                     'type' => 'router_rental',
@@ -267,8 +267,7 @@ class CustomerBillingService
     private function customerLastInvoiceUnpaid(Customer $customer): bool
     {
         $lastInvoice = $customer->invoices()
-            ->orderBy('created_at', 'desc')
-            ->orderBy('id', 'desc')
+            ->orderBy('issue_date', 'desc')
             ->first();
 
         if (!$lastInvoice) {
