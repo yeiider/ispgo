@@ -848,6 +848,12 @@ type Role {
     users: [User!]! @belongsToMany(relation: "users")
 }
 
+# Import extended schemas
+# Ensure external modules are included in the executable schema
+# (SmartOLT already imported; add NAP schema too)
+#import smartolt.graphql
+#import nap.graphql
+
 type Permission {
     id: ID!
     name: String!
