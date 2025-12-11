@@ -26,6 +26,38 @@ class NapMutation
         return $napBox->fresh('ports');
     }
 
+    public function deleteNapBox($root, array $args)
+    {
+        try {
+            $napBox = NapBox::findOrFail($args['id']);
+
+            // Verificar si tiene puertos ocupados
+            $occupiedPorts = $napBox->ports()->where('status', NapPort::STATUS_OCCUPIED)->count();
+            if ($occupiedPorts > 0) {
+                return [
+                    'success' => false,
+                    'message' => "No se puede eliminar la caja NAP porque tiene {$occupiedPorts} puerto(s) ocupado(s). Libere los puertos primero."
+                ];
+            }
+
+            // Eliminar todos los puertos de la caja NAP
+            $napBox->ports()->delete();
+
+            // Eliminar la caja NAP
+            $napBox->delete();
+
+            return [
+                'success' => true,
+                'message' => 'Caja NAP eliminada exitosamente.'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error al eliminar la caja NAP: ' . $e->getMessage()
+            ];
+        }
+    }
+
     public function createNapPort($root, array $args)
     {
         $input = $args['input'];
@@ -51,6 +83,34 @@ class NapMutation
         $port->fill($this->onlyNapPortFillable($args['input']));
         $port->save();
         return $port;
+    }
+
+    public function deleteNapPort($root, array $args)
+    {
+        try {
+            $port = NapPort::findOrFail($args['id']);
+
+            // Verificar si el puerto está ocupado
+            if ($port->status === NapPort::STATUS_OCCUPIED && $port->service_id) {
+                return [
+                    'success' => false,
+                    'message' => "No se puede eliminar el puerto porque está ocupado por el servicio ID: {$port->service_id}. Libere el puerto primero."
+                ];
+            }
+
+            // Eliminar el puerto
+            $port->delete();
+
+            return [
+                'success' => true,
+                'message' => 'Puerto NAP eliminado exitosamente.'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error al eliminar el puerto NAP: ' . $e->getMessage()
+            ];
+        }
     }
 
     public function assignServiceToNapPort($root, array $args)

@@ -998,8 +998,10 @@ extend type Query {
 extend type Mutation {
   createNapBox(input: CreateNapBoxInput!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@createNapBox")
   updateNapBox(id: ID!, input: UpdateNapBoxInput!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@updateNapBox")
+  deleteNapBox(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@deleteNapBox")
   createNapPort(input: CreateNapPortInput!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@createNapPort")
   updateNapPort(id: ID!, input: UpdateNapPortInput!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@updateNapPort")
+  deleteNapPort(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@deleteNapPort")
   assignServiceToNapPort(service_id: ID!, nap_port_id: ID!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@assignServiceToNapPort")
   releaseNapPort(nap_port_id: ID!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@releaseNapPort")
   assignRouterToNapBox(nap_box_id: ID!, router_id: ID!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@assignRouterToNapBox")
