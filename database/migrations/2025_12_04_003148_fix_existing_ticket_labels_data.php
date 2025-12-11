@@ -13,7 +13,10 @@ return new class extends Migration
     public function up(): void
     {
         // Fix any existing tickets with invalid labels data
-        DB::table('tickets')->whereNotNull('labels')->each(function ($ticket) {
+        DB::table('tickets')
+            ->whereNotNull('labels')
+            ->orderBy('id')
+            ->each(function ($ticket) {
             $labels = $ticket->labels;
 
             // If labels is empty string or invalid JSON, set to null
