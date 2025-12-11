@@ -614,6 +614,7 @@ type Service {
     plan: Plan! @belongsTo
     router: Router! @belongsTo
     address: Address @belongsTo(relation: "address")
+    napPort: NapPort @hasOne(relation: "napPort")
 }
 
 type Invoice {
