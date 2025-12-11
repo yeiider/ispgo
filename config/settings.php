@@ -305,6 +305,24 @@ return [
                 "field" => "boolean-field",
                 "label" => "Attach PDF invoice",
             ],
+            "skip_invoice_if_suspended_and_unpaid" => [
+                "field" => "boolean-field",
+                "label" => "Skip Invoice Generation if Service is Suspended and Last Invoice is Unpaid",
+            ],
+            "enable_router_rental" => [
+                "field" => "boolean-field",
+                "label" => "Enable Router Rental Charge",
+            ],
+            "router_rental_amount" => [
+                "field" => "text-field",
+                "label" => "Router Rental Amount",
+                "placeholder" => "Enter rental amount",
+            ],
+            "router_rental_name" => [
+                "field" => "text-field",
+                "label" => "Router Rental Item Name",
+                "placeholder" => "Enter rental item name (e.g., Router Rental)",
+            ],
         ]
     ],
     "payment" => [
