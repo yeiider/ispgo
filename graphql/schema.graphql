@@ -1018,4 +1018,237 @@ type Permission {
     users: [User!]! @belongsToMany(relation: "users")
 }
 
+# --------------- Inventory types ---------------
+
+type InventoryProduct {
+    id: ID!
+    name: String!
+    sku: String!
+    brand: String
+    image: String
+    price: Float!
+    special_price: Float
+    cost_price: Float!
+    description: String
+    reference: String
+    taxes: Float
+    status: Boolean
+    url_key: String
+    qty: String
+    warehouse_id: ID
+    category_id: ID
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    category: InventoryCategory @belongsTo
+    warehouse: InventoryWarehouse @belongsTo
+    stocks: [ProductStock!]! @hasMany
+    total_stock: Int @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productTotalStockField")
+}
+
+type InventoryWarehouse {
+    id: ID!
+    name: String!
+    address: String
+    code: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    products: [InventoryProduct!]! @hasMany
+    stocks: [ProductStock!]! @hasMany
+    total_stock: Int
+}
+
+type InventoryCategory {
+    id: ID!
+    name: String!
+    description: String
+    url_key: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    products: [InventoryProduct!]! @hasMany
+}
+
+type ProductStock {
+    id: ID!
+    product_id: ID!
+    warehouse_id: ID!
+    quantity: Int!
+    min_stock: Int
+    max_stock: Int
+    location: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    product: InventoryProduct! @belongsTo
+    warehouse: InventoryWarehouse! @belongsTo
+    is_below_min_stock: Boolean
+    is_above_max_stock: Boolean
+}
+
+type ProductTotalStock {
+    product: InventoryProduct!
+    total_quantity: Int!
+    warehouses_count: Int!
+}
+
+type TransferStockResult {
+    success: Boolean!
+    message: String
+    from_stock: ProductStock
+    to_stock: ProductStock
+}
+
+type ProductPaginator {
+    data: [InventoryProduct!]!
+    paginatorInfo: PaginatorInfo!
+}
+
+type WarehousePaginator {
+    data: [InventoryWarehouse!]!
+    paginatorInfo: PaginatorInfo!
+}
+
+type ProductStockPaginator {
+    data: [ProductStock!]!
+    paginatorInfo: PaginatorInfo!
+}
+
+# Inputs para Inventory
+input CreateProductInput {
+    name: String!
+    sku: String!
+    price: Float!
+    cost_price: Float!
+    brand: String
+    image: String
+    special_price: Float
+    description: String
+    reference: String
+    taxes: Float
+    status: Boolean
+    url_key: String!
+    warehouse_id: ID!
+    category_id: ID!
+    qty: String
+}
+
+input UpdateProductInput {
+    name: String
+    sku: String
+    price: Float
+    cost_price: Float
+    brand: String
+    image: String
+    special_price: Float
+    description: String
+    reference: String
+    taxes: Float
+    status: Boolean
+    url_key: String
+    warehouse_id: ID
+    category_id: ID
+    qty: String
+}
+
+input CreateWarehouseInput {
+    name: String!
+    address: String
+    code: String
+}
+
+input UpdateWarehouseInput {
+    name: String
+    address: String
+    code: String
+}
+
+input UpsertProductStockInput {
+    product_id: ID!
+    warehouse_id: ID!
+    quantity: Int
+    min_stock: Int
+    max_stock: Int
+    location: String
+}
+
+# Extend Query para Inventory
+extend type Query {
+    # Productos
+    inventoryProducts(
+        name: String
+        sku: String
+        category_id: ID
+        warehouse_id: ID
+        status: Boolean
+        first: Int = 15
+        page: Int
+    ): ProductPaginator @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@products")
+    
+    inventoryProduct(id: ID!): InventoryProduct @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@product")
+    
+    # Bodegas
+    inventoryWarehouses(
+        name: String
+        code: String
+        first: Int = 15
+        page: Int
+    ): WarehousePaginator @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@warehouses")
+    
+    inventoryWarehouse(id: ID!): InventoryWarehouse @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@warehouse")
+    
+    # Stock
+    productStocks(
+        product_id: ID
+        warehouse_id: ID
+        low_stock: Boolean
+        first: Int = 15
+        page: Int
+    ): ProductStockPaginator @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productStocks")
+    
+    productStock(id: ID!): ProductStock @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productStock")
+    
+    productStockByProduct(product_id: ID!): [ProductStock!]! @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productStockByProduct")
+    
+    productStockByWarehouse(warehouse_id: ID!): [ProductStock!]! @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productStockByWarehouse")
+    
+    productTotalStock(product_id: ID!): ProductTotalStock @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productTotalStock")
+}
+
+# Extend Mutation para Inventory
+extend type Mutation {
+    # Productos
+    createInventoryProduct(input: CreateProductInput!): InventoryProduct @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@createProduct")
+    
+    updateInventoryProduct(id: ID!, input: UpdateProductInput!): InventoryProduct @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@updateProduct")
+    
+    deleteInventoryProduct(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteProduct")
+    
+    # Bodegas
+    createInventoryWarehouse(input: CreateWarehouseInput!): InventoryWarehouse @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@createWarehouse")
+    
+    updateInventoryWarehouse(id: ID!, input: UpdateWarehouseInput!): InventoryWarehouse @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@updateWarehouse")
+    
+    deleteInventoryWarehouse(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteWarehouse")
+    
+    # Stock
+    upsertProductStock(input: UpsertProductStockInput!): ProductStock @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@upsertProductStock")
+    
+    updateStockQuantity(id: ID!, quantity: Int!): ProductStock @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@updateStockQuantity")
+    
+    incrementStock(product_id: ID!, warehouse_id: ID!, amount: Int!): ProductStock @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@incrementStock")
+    
+    decrementStock(product_id: ID!, warehouse_id: ID!, amount: Int!): ProductStock @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@decrementStock")
+    
+    transferStock(
+        product_id: ID!
+        from_warehouse_id: ID!
+        to_warehouse_id: ID!
+        amount: Int!
+    ): TransferStockResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@transferStock")
+    
+    deleteProductStock(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteProductStock")
+}
+
 #import smartolt.graphql
