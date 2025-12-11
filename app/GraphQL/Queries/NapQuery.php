@@ -18,13 +18,23 @@ class NapQuery
         }
 
         // Paginación
-        if (isset($args['first']) || isset($args['page'])) {
-            $first = $args['first'] ?? 15;
-            $page = $args['page'] ?? 1;
-            return $query->paginate($first, ['*'], 'page', $page)->items();
-        }
+        $first = $args['first'] ?? 15;
+        $page = $args['page'] ?? 1;
+        $paginator = $query->paginate($first, ['*'], 'page', $page);
 
-        return $query->get();
+        return [
+            'data' => $paginator->items(),
+            'paginatorInfo' => [
+                'count' => $paginator->count(),
+                'currentPage' => $paginator->currentPage(),
+                'firstItem' => $paginator->firstItem(),
+                'hasMorePages' => $paginator->hasMorePages(),
+                'lastItem' => $paginator->lastItem(),
+                'lastPage' => $paginator->lastPage(),
+                'perPage' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]
+        ];
     }
 
     public function napBox($root, array $args)

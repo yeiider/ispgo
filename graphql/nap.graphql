@@ -19,8 +19,25 @@ type NapBox {
   router_id: ID
   fiber_color: String
   ports: [NapPort!] @hasMany(relation: "ports")
+  available_ports_count: Int
   # Servicios relacionados a esta caja (a través de sus puertos)
   services: [Service!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxServices")
+}
+
+type NapBoxPaginator {
+  data: [NapBox!]!
+  paginatorInfo: PaginatorInfo!
+}
+
+type PaginatorInfo {
+  count: Int!
+  currentPage: Int!
+  firstItem: Int
+  hasMorePages: Boolean!
+  lastItem: Int
+  lastPage: Int!
+  perPage: Int!
+  total: Int!
 }
 
 type NapPort {
@@ -116,7 +133,7 @@ input UpdateNapPortInput {
 }
 
 extend type Query {
-  napBoxes(router_id: ID, first: Int, page: Int): [NapBox!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxes")
+  napBoxes(router_id: ID, first: Int = 15, page: Int): NapBoxPaginator @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxes")
   napBox(id: ID!): NapBox @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBox")
   napPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPorts")
   napPort(id: ID!): NapPort @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPort")
