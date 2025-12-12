@@ -1150,7 +1150,10 @@ input UpdateProductInput {
     price: Float
     cost_price: Float
     brand: String
+    "Path de imagen existente (URL o path S3)"
     image: String
+    "Path temporal de imagen nueva (obtenido de uploadTempFile). Si se proporciona, reemplaza la imagen actual."
+    image_temp_path: String
     special_price: Float
     description: String
     reference: String

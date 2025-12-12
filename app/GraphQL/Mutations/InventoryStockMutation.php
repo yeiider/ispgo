@@ -35,14 +35,48 @@ class InventoryStockMutation
 
     /**
      * Actualiza un producto existente.
+     * 
+     * Si se proporciona image_temp_path, mueve la imagen temporal a ubicación permanente
+     * y actualiza el campo image del producto.
      */
     public function updateProduct($root, array $args)
     {
-        $product = Product::findOrFail($args['id']);
-        $product->fill($this->onlyProductFillable($args['input']));
-        $product->save();
+        $input = $args['input'];
+        
+        return DB::transaction(function () use ($args, $input) {
+            $product = Product::findOrFail($args['id']);
+            
+            // Si hay una imagen temporal, moverla a la carpeta permanente
+            if (!empty($input['image_temp_path'])) {
+                $imageResult = FileUploadMutation::moveToPermanentStorage(
+                    $input['image_temp_path'],
+                    'products'
+                );
+                
+                if ($imageResult['success']) {
+                    // Eliminar imagen anterior si existe y es diferente
+                    $oldImage = $product->image;
+                    if ($oldImage && !str_starts_with($oldImage, 'http')) {
+                        \Illuminate\Support\Facades\Storage::disk('s3')->delete($oldImage);
+                    }
+                    
+                    // Asignar la nueva imagen permanente
+                    $input['image'] = $imageResult['permanent_path'];
+                } else {
+                    throw ValidationException::withMessages([
+                        'image_temp_path' => [$imageResult['message'] ?? 'Error al procesar la imagen.']
+                    ]);
+                }
+            }
+            
+            // Preparar datos del producto (excluyendo image_temp_path)
+            $productData = $this->onlyProductFillable($input);
+            
+            $product->fill($productData);
+            $product->save();
 
-        return $product->fresh(['category', 'warehouse', 'stocks.warehouse']);
+            return $product->fresh(['category', 'warehouse', 'stocks.warehouse']);
+        });
     }
 
     /**
