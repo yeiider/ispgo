@@ -56,7 +56,8 @@ return [
             'throw' => true,
             // Si es true, genera URLs firmadas (presigned) con expiración
             // Si es false, genera URLs públicas simples (requiere bucket público)
-            'use_signed_urls' => env('AWS_USE_SIGNED_URLS', false),
+            // Default: true para mayor seguridad
+            'use_signed_urls' => env('AWS_USE_SIGNED_URLS', true),
         ],
 
     ],

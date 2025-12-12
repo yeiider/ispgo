@@ -29,8 +29,8 @@ class Product extends Model
     /**
      * Obtiene la URL completa de la imagen del producto.
      * 
-     * Si USE_SIGNED_URLS está habilitado, genera una URL firmada.
-     * De lo contrario, genera una URL pública simple.
+     * Siempre genera una URL firmada (presigned) con expiración de 60 minutos
+     * para mayor seguridad y compatibilidad con buckets privados.
      */
     protected function imageUrl(): Attribute
     {
@@ -48,14 +48,25 @@ class Product extends Model
                     return $path;
                 }
 
-                $useSignedUrls = config('filesystems.disks.s3.use_signed_urls', false);
+                try {
+                    $useSignedUrls = config('filesystems.disks.s3.use_signed_urls', true);
 
-                if ($useSignedUrls) {
-                    // URL firmada con expiración de 60 minutos
-                    return Storage::disk($disk)->temporaryUrl($path, now()->addMinutes(60));
+                    if ($useSignedUrls) {
+                        // URL firmada con expiración de 60 minutos
+                        return Storage::disk($disk)->temporaryUrl($path, now()->addMinutes(60));
+                    }
+
+                    return Storage::disk($disk)->url($path);
+                } catch (\Exception $e) {
+                    // Si falla la generación de URL firmada, intentar URL simple
+                    \Illuminate\Support\Facades\Log::warning('Product: Error generando URL firmada', [
+                        'product_id' => $this->id ?? null,
+                        'path' => $path,
+                        'error' => $e->getMessage(),
+                    ]);
+                    
+                    return Storage::disk($disk)->url($path);
                 }
-
-                return Storage::disk($disk)->url($path);
             }
         );
     }
