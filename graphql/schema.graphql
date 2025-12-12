@@ -1312,4 +1312,107 @@ extend type Mutation {
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@removeWarehouseFromProduct")
 }
 
+# --------------- File Upload types ---------------
+
+"""
+Resultado de la carga temporal de archivo.
+Contiene la URL de previsualización y el path temporal para usar en el paso de confirmación.
+"""
+type TempUploadResult {
+    success: Boolean!
+    message: String
+    preview_url: String
+    temp_path: String
+    original_name: String
+    mime_type: String
+    size: Int
+}
+
+"""
+Resultado de la confirmación de archivo.
+Contiene el path permanente y la URL pública del archivo.
+"""
+type ConfirmUploadResult {
+    success: Boolean!
+    message: String
+    permanent_path: String
+    url: String
+}
+
+"""
+Input para carga de archivo en base64.
+Usado cuando no se puede usar multipart/form-data.
+"""
+input TempUploadInput {
+    "Contenido del archivo codificado en base64"
+    file_base64: String!
+    "Nombre original del archivo con extensión"
+    file_name: String!
+    "Tipo MIME del archivo (opcional, se detecta automáticamente)"
+    mime_type: String
+    "Subcarpeta opcional dentro de tmp/"
+    folder: String
+}
+
+# Extend Mutation para File Upload
+extend type Mutation {
+    """
+    Paso 1: Carga temporal de archivo (base64).
+    Almacena el archivo en S3/tmp/ para previsualización.
+    El archivo será eliminado automáticamente por las políticas de ciclo de vida de S3 si no se confirma.
+    """
+    uploadTempFile(input: TempUploadInput!): TempUploadResult 
+        @field(resolver: "App\\GraphQL\\Mutations\\FileUploadMutation@uploadTempBase64")
+    
+    """
+    Paso 2: Confirmar y mover archivo a ubicación permanente.
+    Mueve el archivo de tmp/ a la carpeta destino especificada.
+    """
+    confirmFileUpload(
+        temp_path: String! @rules(apply: ["required", "string"])
+        destination_folder: String! @rules(apply: ["required", "string", "max:100"])
+        new_file_name: String
+    ): ConfirmUploadResult 
+        @field(resolver: "App\\GraphQL\\Mutations\\FileUploadMutation@confirmUpload")
+    
+    """
+    Eliminar archivo temporal.
+    Útil si el usuario cancela el formulario.
+    """
+    deleteTempFile(
+        temp_path: String! @rules(apply: ["required", "string"])
+    ): ActionResult 
+        @field(resolver: "App\\GraphQL\\Mutations\\FileUploadMutation@deleteTempFile")
+    
+    """
+    Crear producto de inventario con imagen.
+    Recibe el temp_path de una imagen previamente cargada y la mueve automáticamente a products/.
+    """
+    createInventoryProductWithImage(input: CreateProductWithImageInput!): InventoryProduct 
+        @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@createProductWithImage")
+}
+
+"""
+Input para crear producto con imagen temporal.
+"""
+input CreateProductWithImageInput {
+    name: String!
+    sku: String!
+    price: Float!
+    cost_price: Float!
+    brand: String
+    "Path temporal de la imagen (obtenido de uploadTempFile)"
+    image_temp_path: String
+    special_price: Float
+    description: String
+    reference: String
+    taxes: Float
+    status: Boolean
+    url_key: String!
+    warehouse_id: ID
+    category_id: ID!
+    qty: String
+    warehouses: [WarehouseStockInput!]
+}
+
 #import smartolt.graphql

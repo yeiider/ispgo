@@ -8,6 +8,7 @@ use App\Models\Inventory\ProductStock;
 use App\Models\Inventory\Warehouse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\GraphQL\Mutations\FileUploadMutation;
 
 class InventoryStockMutation
 {
@@ -506,5 +507,59 @@ class InventoryStockMutation
         return array_intersect_key($input, array_flip([
             'name', 'description', 'url_key'
         ]));
+    }
+
+    /**
+     * Crea un nuevo producto con imagen temporal.
+     * 
+     * Este método recibe un path temporal de imagen (obtenido de uploadTempFile)
+     * y lo mueve automáticamente a la carpeta products/ antes de crear el producto.
+     * 
+     * @param mixed $root
+     * @param array $args
+     * @return Product
+     */
+    public function createProductWithImage($root, array $args)
+    {
+        $input = $args['input'];
+        
+        return DB::transaction(function () use ($input) {
+            // Si hay una imagen temporal, moverla a la carpeta permanente
+            $permanentImagePath = null;
+            if (!empty($input['image_temp_path'])) {
+                $imageResult = FileUploadMutation::moveToPermanentStorage(
+                    $input['image_temp_path'],
+                    'products'
+                );
+                
+                if ($imageResult['success']) {
+                    $permanentImagePath = $imageResult['permanent_path'];
+                } else {
+                    throw ValidationException::withMessages([
+                        'image_temp_path' => [$imageResult['message'] ?? 'Error al procesar la imagen.']
+                    ]);
+                }
+            }
+            
+            // Preparar datos del producto
+            $productData = $this->onlyProductFillable($input);
+            
+            // Asignar la imagen permanente si se procesó
+            if ($permanentImagePath) {
+                $productData['image'] = $permanentImagePath;
+            }
+            
+            // Crear el producto
+            $product = new Product();
+            $product->fill($productData);
+            $product->save();
+
+            // Si se proporcionaron bodegas con stock, asignarlas
+            if (!empty($input['warehouses'])) {
+                $this->assignWarehousesStockToProduct($product, $input['warehouses']);
+            }
+
+            return $product->fresh(['category', 'warehouse', 'stocks.warehouse']);
+        });
     }
 }

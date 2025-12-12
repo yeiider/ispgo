@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\McpController;
 use App\Http\Controllers\Api\TaskAttachmentController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskControllerApi;
+use App\Http\Controllers\API\FileUploadController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Webhooks\OnePayWebhookController;
@@ -52,6 +53,21 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('tasks', TaskControllerApi::class);
     Route::apiResource('comments', TaskCommentController::class);
     Route::apiResource('attachments', TaskAttachmentController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | File Upload Routes - Two-Step Upload Pattern
+    |--------------------------------------------------------------------------
+    | Endpoints para carga de archivos con el patrón de dos pasos:
+    | 1. POST /upload/temp - Carga temporal para previsualización
+    | 2. POST /upload/confirm - Confirmar y mover a ubicación permanente
+    | 3. DELETE /upload/temp - Eliminar archivo temporal (opcional)
+    */
+    Route::prefix('upload')->group(function () {
+        Route::post('/temp', [FileUploadController::class, 'uploadTemp']);
+        Route::post('/confirm', [FileUploadController::class, 'confirmUpload']);
+        Route::delete('/temp', [FileUploadController::class, 'deleteTempFile']);
+    });
 });
 
 /*
