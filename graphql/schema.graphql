@@ -1129,9 +1129,11 @@ input CreateProductInput {
     taxes: Float
     status: Boolean
     url_key: String!
-    warehouse_id: ID!
+    warehouse_id: ID
     category_id: ID!
     qty: String
+    # Opcionalmente asignar bodegas con stock al crear el producto
+    warehouses: [WarehouseStockInput!]
 }
 
 input UpdateProductInput {
@@ -1150,6 +1152,14 @@ input UpdateProductInput {
     warehouse_id: ID
     category_id: ID
     qty: String
+}
+
+input WarehouseStockInput {
+    warehouse_id: ID!
+    quantity: Int!
+    min_stock: Int
+    max_stock: Int
+    location: String
 }
 
 input CreateWarehouseInput {
@@ -1249,6 +1259,24 @@ extend type Mutation {
     ): TransferStockResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@transferStock")
     
     deleteProductStock(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteProductStock")
+    
+    # Asignar múltiples bodegas con stock a un producto
+    assignWarehousesToProduct(
+        product_id: ID!
+        warehouses: [WarehouseStockInput!]!
+    ): InventoryProduct @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@assignWarehousesToProduct")
+    
+    # Sincronizar bodegas de un producto (reemplaza todas las asignaciones existentes)
+    syncWarehousesToProduct(
+        product_id: ID!
+        warehouses: [WarehouseStockInput!]!
+    ): InventoryProduct @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@syncWarehousesToProduct")
+    
+    # Remover una bodega de un producto
+    removeWarehouseFromProduct(
+        product_id: ID!
+        warehouse_id: ID!
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@removeWarehouseFromProduct")
 }
 
 #import smartolt.graphql

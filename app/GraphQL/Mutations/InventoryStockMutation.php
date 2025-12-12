@@ -17,11 +17,19 @@ class InventoryStockMutation
     public function createProduct($root, array $args)
     {
         $input = $args['input'];
-        $product = new Product();
-        $product->fill($this->onlyProductFillable($input));
-        $product->save();
+        
+        return DB::transaction(function () use ($input) {
+            $product = new Product();
+            $product->fill($this->onlyProductFillable($input));
+            $product->save();
 
-        return $product->fresh(['category', 'warehouse', 'stocks.warehouse']);
+            // Si se proporcionaron bodegas con stock, asignarlas
+            if (!empty($input['warehouses'])) {
+                $this->assignWarehousesStockToProduct($product, $input['warehouses']);
+            }
+
+            return $product->fresh(['category', 'warehouse', 'stocks.warehouse']);
+        });
     }
 
     /**
@@ -323,6 +331,100 @@ class InventoryStockMutation
                 'success' => false,
                 'message' => 'Error al eliminar el registro de stock: ' . $e->getMessage()
             ];
+        }
+    }
+
+    /**
+     * Asigna múltiples bodegas con stock a un producto (agrega a las existentes).
+     */
+    public function assignWarehousesToProduct($root, array $args)
+    {
+        return DB::transaction(function () use ($args) {
+            $product = Product::findOrFail($args['product_id']);
+            
+            $this->assignWarehousesStockToProduct($product, $args['warehouses']);
+
+            return $product->fresh(['category', 'warehouse', 'stocks.warehouse']);
+        });
+    }
+
+    /**
+     * Sincroniza las bodegas de un producto (reemplaza todas las asignaciones existentes).
+     */
+    public function syncWarehousesToProduct($root, array $args)
+    {
+        return DB::transaction(function () use ($args) {
+            $product = Product::findOrFail($args['product_id']);
+            
+            // Eliminar todos los stocks existentes
+            $product->stocks()->delete();
+            
+            // Asignar nuevas bodegas
+            $this->assignWarehousesStockToProduct($product, $args['warehouses']);
+
+            return $product->fresh(['category', 'warehouse', 'stocks.warehouse']);
+        });
+    }
+
+    /**
+     * Remueve una bodega de un producto.
+     */
+    public function removeWarehouseFromProduct($root, array $args)
+    {
+        try {
+            $stock = ProductStock::where('product_id', $args['product_id'])
+                ->where('warehouse_id', $args['warehouse_id'])
+                ->first();
+
+            if (!$stock) {
+                return [
+                    'success' => false,
+                    'message' => 'El producto no está asignado a esta bodega.'
+                ];
+            }
+
+            if ($stock->quantity > 0) {
+                return [
+                    'success' => false,
+                    'message' => "No se puede remover la bodega porque tiene {$stock->quantity} unidades en stock. Vacíe el stock primero."
+                ];
+            }
+
+            $stock->delete();
+
+            return [
+                'success' => true,
+                'message' => 'Bodega removida del producto exitosamente.'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error al remover la bodega: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Método auxiliar para asignar bodegas con stock a un producto.
+     */
+    private function assignWarehousesStockToProduct(Product $product, array $warehouses): void
+    {
+        foreach ($warehouses as $warehouseData) {
+            // Verificar que la bodega existe
+            Warehouse::findOrFail($warehouseData['warehouse_id']);
+
+            ProductStock::updateOrCreate(
+                [
+                    'product_id' => $product->id,
+                    'warehouse_id' => $warehouseData['warehouse_id'],
+                ],
+                [
+                    'quantity' => $warehouseData['quantity'] ?? 0,
+                    'min_stock' => $warehouseData['min_stock'] ?? null,
+                    'max_stock' => $warehouseData['max_stock'] ?? null,
+                    'location' => $warehouseData['location'] ?? null,
+                ]
+            );
         }
     }
 

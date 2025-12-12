@@ -554,6 +554,119 @@ mutation EliminarStock($id: ID!) {
 }
 ```
 
+### 13. Asignar Múltiples Bodegas a un Producto
+
+Agrega bodegas con stock a un producto existente (no elimina las asignaciones previas).
+
+```graphql
+mutation AsignarBodegas($product_id: ID!, $warehouses: [WarehouseStockInput!]!) {
+  assignWarehousesToProduct(product_id: $product_id, warehouses: $warehouses) {
+    id
+    name
+    sku
+    stocks {
+      id
+      quantity
+      min_stock
+      max_stock
+      location
+      warehouse {
+        id
+        name
+        code
+      }
+    }
+  }
+}
+```
+
+**Variables:**
+```json
+{
+  "product_id": "1",
+  "warehouses": [
+    {
+      "warehouse_id": "1",
+      "quantity": 50,
+      "min_stock": 10,
+      "max_stock": 200,
+      "location": "Estante A1"
+    },
+    {
+      "warehouse_id": "2",
+      "quantity": 30,
+      "min_stock": 5,
+      "max_stock": 100,
+      "location": "Rack B2"
+    },
+    {
+      "warehouse_id": "3",
+      "quantity": 20,
+      "min_stock": 5,
+      "location": "Zona C"
+    }
+  ]
+}
+```
+
+### 14. Sincronizar Bodegas de un Producto
+
+Reemplaza TODAS las asignaciones de bodegas existentes por las nuevas proporcionadas.
+
+```graphql
+mutation SincronizarBodegas($product_id: ID!, $warehouses: [WarehouseStockInput!]!) {
+  syncWarehousesToProduct(product_id: $product_id, warehouses: $warehouses) {
+    id
+    name
+    stocks {
+      id
+      quantity
+      warehouse {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+**Variables:**
+```json
+{
+  "product_id": "1",
+  "warehouses": [
+    {
+      "warehouse_id": "1",
+      "quantity": 100,
+      "min_stock": 20
+    },
+    {
+      "warehouse_id": "4",
+      "quantity": 50
+    }
+  ]
+}
+```
+
+### 15. Remover Bodega de un Producto
+
+```graphql
+mutation RemoverBodega($product_id: ID!, $warehouse_id: ID!) {
+  removeWarehouseFromProduct(product_id: $product_id, warehouse_id: $warehouse_id) {
+    success
+    message
+  }
+}
+```
+
+**Variables:**
+```json
+{
+  "product_id": "1",
+  "warehouse_id": "3"
+}
+```
+
 ---
 
 ## Casos de Uso
@@ -562,7 +675,58 @@ mutation EliminarStock($id: ID!) {
 
 **Escenario:** Un nuevo producto llega y debe registrarse en el sistema con stock inicial en 3 bodegas diferentes.
 
-**Pasos:**
+**Opción 1: Crear producto con bodegas en una sola mutación (Recomendado)**
+
+```graphql
+mutation {
+  createInventoryProduct(input: {
+    name: "Router WiFi 6"
+    sku: "RTR-WIFI6-001"
+    price: 150.00
+    cost_price: 100.00
+    url_key: "router-wifi-6"
+    category_id: "2"
+    brand: "TP-Link"
+    status: true
+    warehouses: [
+      {
+        warehouse_id: "1"
+        quantity: 50
+        min_stock: 5
+        max_stock: 100
+        location: "Rack A1"
+      },
+      {
+        warehouse_id: "2"
+        quantity: 30
+        min_stock: 5
+        max_stock: 100
+        location: "Estante B2"
+      },
+      {
+        warehouse_id: "3"
+        quantity: 20
+        min_stock: 5
+        max_stock: 100
+        location: "Zona C"
+      }
+    ]
+  }) {
+    id
+    name
+    sku
+    stocks {
+      quantity
+      warehouse {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+**Opción 2: Crear producto y luego asignar bodegas (en pasos separados)**
 
 1. Crear el producto:
 
@@ -574,7 +738,6 @@ mutation {
     price: 150.00
     cost_price: 100.00
     url_key: "router-wifi-6"
-    warehouse_id: "1"
     category_id: "2"
     brand: "TP-Link"
     status: true
@@ -586,36 +749,24 @@ mutation {
 }
 ```
 
-2. Asignar stock a cada bodega:
+2. Asignar bodegas con stock:
 
 ```graphql
 mutation {
-  stock1: upsertProductStock(input: {
+  assignWarehousesToProduct(
     product_id: "NUEVO_ID"
-    warehouse_id: "1"
-    quantity: 50
-    min_stock: 5
-    max_stock: 100
-    location: "Rack A1"
-  }) { id quantity }
-  
-  stock2: upsertProductStock(input: {
-    product_id: "NUEVO_ID"
-    warehouse_id: "2"
-    quantity: 30
-    min_stock: 5
-    max_stock: 100
-    location: "Estante B2"
-  }) { id quantity }
-  
-  stock3: upsertProductStock(input: {
-    product_id: "NUEVO_ID"
-    warehouse_id: "3"
-    quantity: 20
-    min_stock: 5
-    max_stock: 100
-    location: "Zona C"
-  }) { id quantity }
+    warehouses: [
+      { warehouse_id: "1", quantity: 50, min_stock: 5, max_stock: 100, location: "Rack A1" },
+      { warehouse_id: "2", quantity: 30, min_stock: 5, max_stock: 100, location: "Estante B2" },
+      { warehouse_id: "3", quantity: 20, min_stock: 5, max_stock: 100, location: "Zona C" }
+    ]
+  ) {
+    id
+    stocks {
+      quantity
+      warehouse { name }
+    }
+  }
 }
 ```
 
