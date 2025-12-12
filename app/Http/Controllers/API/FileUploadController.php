@@ -31,6 +31,12 @@ class FileUploadController extends Controller
     private string $disk = 's3';
 
     /**
+     * Tiempo de expiración para URLs firmadas (en minutos).
+     * Usado para previsualización de archivos temporales.
+     */
+    private int $signedUrlExpiration = 60; // 1 hora
+
+    /**
      * Paso 1: Carga temporal de archivo.
      * 
      * Almacena el archivo en una carpeta temporal de S3 y retorna
@@ -156,7 +162,7 @@ class FileUploadController extends Controller
                 ], 500);
             }
 
-            $url = Storage::disk($this->disk)->url($fullPath);
+            $url = $this->getFileUrl($fullPath);
 
             Log::info('FileUpload: Archivo cargado exitosamente', [
                 'disk' => $this->disk,
@@ -310,7 +316,7 @@ class FileUploadController extends Controller
             // Eliminar archivo temporal
             Storage::disk($this->disk)->delete($tempPath);
 
-            $url = Storage::disk($this->disk)->url($destinationPath);
+            $url = $this->getFileUrl($destinationPath);
 
             Log::info('FileUpload: Archivo movido a ubicación permanente', [
                 'from' => $tempPath,
@@ -392,5 +398,42 @@ class FileUploadController extends Controller
     private function generateUniqueFileName(string $extension): string
     {
         return Str::uuid() . '_' . time() . '.' . strtolower($extension);
+    }
+
+    /**
+     * Genera la URL del archivo.
+     * 
+     * Si USE_SIGNED_URLS está habilitado, genera una URL firmada (presigned) con expiración.
+     * De lo contrario, genera una URL pública simple.
+     *
+     * @param string $path Path del archivo en S3
+     * @param int|null $expirationMinutes Minutos de expiración para URL firmada (null = usar default)
+     * @return string URL del archivo
+     */
+    public function getFileUrl(string $path, ?int $expirationMinutes = null): string
+    {
+        $useSignedUrls = config('filesystems.disks.s3.use_signed_urls', false);
+
+        if ($useSignedUrls) {
+            $expiration = now()->addMinutes($expirationMinutes ?? $this->signedUrlExpiration);
+            return Storage::disk($this->disk)->temporaryUrl($path, $expiration);
+        }
+
+        return Storage::disk($this->disk)->url($path);
+    }
+
+    /**
+     * Genera una URL firmada (presigned) para un archivo en S3.
+     * 
+     * Útil cuando necesitas dar acceso temporal a un archivo privado.
+     *
+     * @param string $path Path del archivo en S3
+     * @param int $expirationMinutes Minutos de expiración (default: 60)
+     * @return string URL firmada
+     */
+    public function getSignedUrl(string $path, int $expirationMinutes = 60): string
+    {
+        $expiration = now()->addMinutes($expirationMinutes);
+        return Storage::disk($this->disk)->temporaryUrl($path, $expiration);
     }
 }

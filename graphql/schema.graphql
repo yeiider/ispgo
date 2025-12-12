@@ -1025,7 +1025,10 @@ type InventoryProduct {
     name: String!
     sku: String!
     brand: String
+    "Path relativo de la imagen en S3 (para almacenamiento interno)"
     image: String
+    "URL completa de la imagen (usar este campo para mostrar en UI)"
+    image_url: String
     price: Float!
     special_price: Float
     cost_price: Float!

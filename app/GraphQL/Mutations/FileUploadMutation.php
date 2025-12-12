@@ -26,6 +26,11 @@ class FileUploadMutation
     private string $disk = 's3';
 
     /**
+     * Tiempo de expiración para URLs firmadas (en minutos).
+     */
+    private int $signedUrlExpiration = 60;
+
+    /**
      * Sube un archivo temporal a S3.
      * 
      * Este método recibe un archivo en base64 y lo almacena en la carpeta temporal.
@@ -116,7 +121,7 @@ class FileUploadMutation
                 ];
             }
 
-            $url = Storage::disk($this->disk)->url($fullPath);
+            $url = $this->getFileUrl($fullPath);
 
             Log::info('FileUploadMutation: Archivo cargado exitosamente', [
                 'disk' => $this->disk,
@@ -223,7 +228,7 @@ class FileUploadMutation
             // Eliminar temporal
             Storage::disk($this->disk)->delete($tempPath);
 
-            $url = Storage::disk($this->disk)->url($destinationPath);
+            $url = $this->getFileUrl($destinationPath);
 
             Log::info('FileUploadMutation: Archivo movido a ubicación permanente', [
                 'from' => $tempPath,
@@ -326,5 +331,27 @@ class FileUploadMutation
             'svg' => 'image/svg+xml',
             default => 'application/octet-stream',
         };
+    }
+
+    /**
+     * Genera la URL del archivo.
+     * 
+     * Si USE_SIGNED_URLS está habilitado, genera una URL firmada (presigned) con expiración.
+     * De lo contrario, genera una URL pública simple.
+     *
+     * @param string $path Path del archivo en S3
+     * @param int|null $expirationMinutes Minutos de expiración para URL firmada
+     * @return string URL del archivo
+     */
+    private function getFileUrl(string $path, ?int $expirationMinutes = null): string
+    {
+        $useSignedUrls = config('filesystems.disks.s3.use_signed_urls', false);
+
+        if ($useSignedUrls) {
+            $expiration = now()->addMinutes($expirationMinutes ?? $this->signedUrlExpiration);
+            return Storage::disk($this->disk)->temporaryUrl($path, $expiration);
+        }
+
+        return Storage::disk($this->disk)->url($path);
     }
 }
