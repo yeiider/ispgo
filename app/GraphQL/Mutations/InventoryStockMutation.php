@@ -2,10 +2,10 @@
 
 namespace App\GraphQL\Mutations;
 
+use App\Models\Inventory\Category;
 use App\Models\Inventory\Product;
 use App\Models\Inventory\ProductStock;
 use App\Models\Inventory\Warehouse;
-use App\Models\Inventory\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -144,6 +144,62 @@ class InventoryStockMutation
             return [
                 'success' => false,
                 'message' => 'Error al eliminar la bodega: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Crea una nueva categoría.
+     */
+    public function createCategory($root, array $args)
+    {
+        $input = $args['input'];
+        $category = new Category();
+        $category->fill($this->onlyCategoryFillable($input));
+        $category->save();
+
+        return $category->fresh(['products']);
+    }
+
+    /**
+     * Actualiza una categoría existente.
+     */
+    public function updateCategory($root, array $args)
+    {
+        $category = Category::findOrFail($args['id']);
+        $category->fill($this->onlyCategoryFillable($args['input']));
+        $category->save();
+
+        return $category->fresh(['products']);
+    }
+
+    /**
+     * Elimina una categoría.
+     */
+    public function deleteCategory($root, array $args)
+    {
+        try {
+            $category = Category::findOrFail($args['id']);
+
+            // Verificar si tiene productos asignados
+            $productsCount = $category->products()->count();
+            if ($productsCount > 0) {
+                return [
+                    'success' => false,
+                    'message' => "No se puede eliminar la categoría porque tiene {$productsCount} producto(s) asignado(s)."
+                ];
+            }
+
+            $category->delete();
+
+            return [
+                'success' => true,
+                'message' => 'Categoría eliminada exitosamente.'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error al eliminar la categoría: ' . $e->getMessage()
             ];
         }
     }
@@ -442,6 +498,13 @@ class InventoryStockMutation
     {
         return array_intersect_key($input, array_flip([
             'name', 'address', 'code'
+        ]));
+    }
+
+    private function onlyCategoryFillable(array $input): array
+    {
+        return array_intersect_key($input, array_flip([
+            'name', 'description', 'url_key'
         ]));
     }
 }

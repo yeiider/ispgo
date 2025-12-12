@@ -2,6 +2,7 @@
 
 namespace App\GraphQL\Queries;
 
+use App\Models\Inventory\Category;
 use App\Models\Inventory\Product;
 use App\Models\Inventory\ProductStock;
 use App\Models\Inventory\Warehouse;
@@ -102,6 +103,44 @@ class InventoryQuery
     public function warehouse($root, array $args)
     {
         return Warehouse::with(['stocks.product'])->find($args['id']);
+    }
+
+    /**
+     * Obtiene todas las categorías con paginación.
+     */
+    public function categories($root, array $args)
+    {
+        $query = Category::query()->with(['products']);
+
+        if (isset($args['name'])) {
+            $query->where('name', 'like', '%' . $args['name'] . '%');
+        }
+
+        $first = $args['first'] ?? 15;
+        $page = $args['page'] ?? 1;
+        $paginator = $query->paginate($first, ['*'], 'page', $page);
+
+        return [
+            'data' => $paginator->items(),
+            'paginatorInfo' => [
+                'count' => $paginator->count(),
+                'currentPage' => $paginator->currentPage(),
+                'firstItem' => $paginator->firstItem(),
+                'hasMorePages' => $paginator->hasMorePages(),
+                'lastItem' => $paginator->lastItem(),
+                'lastPage' => $paginator->lastPage(),
+                'perPage' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]
+        ];
+    }
+
+    /**
+     * Obtiene una categoría por ID.
+     */
+    public function category($root, array $args)
+    {
+        return Category::with(['products'])->find($args['id']);
     }
 
     /**

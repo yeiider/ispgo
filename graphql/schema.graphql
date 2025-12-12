@@ -1115,6 +1115,11 @@ type ProductStockPaginator {
     paginatorInfo: PaginatorInfo!
 }
 
+type CategoryPaginator {
+    data: [InventoryCategory!]!
+    paginatorInfo: PaginatorInfo!
+}
+
 # Inputs para Inventory
 input CreateProductInput {
     name: String!
@@ -1174,6 +1179,18 @@ input UpdateWarehouseInput {
     code: String
 }
 
+input CreateCategoryInput {
+    name: String!
+    description: String
+    url_key: String!
+}
+
+input UpdateCategoryInput {
+    name: String
+    description: String
+    url_key: String
+}
+
 input UpsertProductStockInput {
     product_id: ID!
     warehouse_id: ID!
@@ -1208,6 +1225,15 @@ extend type Query {
     
     inventoryWarehouse(id: ID!): InventoryWarehouse @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@warehouse")
     
+    # Categorías
+    inventoryCategories(
+        name: String
+        first: Int = 15
+        page: Int
+    ): CategoryPaginator @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@categories")
+    
+    inventoryCategory(id: ID!): InventoryCategory @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@category")
+    
     # Stock
     productStocks(
         product_id: ID
@@ -1241,6 +1267,13 @@ extend type Mutation {
     updateInventoryWarehouse(id: ID!, input: UpdateWarehouseInput!): InventoryWarehouse @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@updateWarehouse")
     
     deleteInventoryWarehouse(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteWarehouse")
+    
+    # Categorías
+    createInventoryCategory(input: CreateCategoryInput!): InventoryCategory @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@createCategory")
+    
+    updateInventoryCategory(id: ID!, input: UpdateCategoryInput!): InventoryCategory @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@updateCategory")
+    
+    deleteInventoryCategory(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteCategory")
     
     # Stock
     upsertProductStock(input: UpsertProductStockInput!): ProductStock @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@upsertProductStock")
