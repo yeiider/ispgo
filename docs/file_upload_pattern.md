@@ -222,11 +222,62 @@ await fetch('/api/upload/temp', {
 });
 ```
 
-## Limpieza Automática con S3 Lifecycle
+## Configuración de AWS S3
+
+### Política del Bucket para Acceso Público
+
+Los buckets S3 modernos tienen **ACLs deshabilitadas por defecto**. Para hacer los archivos accesibles públicamente, debes configurar una **Bucket Policy**.
+
+**Pasos para configurar:**
+
+1. Ir a AWS S3 Console
+2. Seleccionar tu bucket (`ispgo`)
+3. Ir a **"Permissions"** → **"Bucket policy"**
+4. Agregar la siguiente política:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::ispgo/*"
+        }
+    ]
+}
+```
+
+> ⚠️ **Nota**: Reemplaza `ispgo` con el nombre de tu bucket.
+
+### Desbloquear Acceso Público (si es necesario)
+
+Si la política no funciona, verifica que el bucket permita acceso público:
+
+1. Ir a **"Permissions"** → **"Block public access"**
+2. Desmarcar **"Block all public access"** (o al menos "Block public access to buckets and objects granted through new bucket policies")
+3. Guardar cambios
+
+### Limpieza Automática con S3 Lifecycle
 
 Los archivos en `tmp/` son eliminados automáticamente por AWS S3 Lifecycle Policies. No se necesita un cron job.
 
-### Configuración de S3 Lifecycle Policy
+**Pasos para configurar:**
+
+1. Ir a AWS S3 Console
+2. Seleccionar el bucket
+3. Ir a **"Management"** → **"Lifecycle rules"**
+4. Click en **"Create lifecycle rule"**
+5. Configurar:
+   - **Rule name**: `CleanupTempUploads`
+   - **Prefix**: `tmp/`
+   - **Lifecycle rule actions**: Marcar "Expire current versions of objects"
+   - **Days after object creation**: `1` (o 7 días si prefieres)
+6. Crear la regla
+
+**Configuración XML equivalente:**
 
 ```xml
 <LifecycleConfiguration>
@@ -240,14 +291,6 @@ Los archivos en `tmp/` son eliminados automáticamente por AWS S3 Lifecycle Poli
   </Rule>
 </LifecycleConfiguration>
 ```
-
-**Pasos para configurar:**
-
-1. Ir a AWS S3 Console
-2. Seleccionar el bucket
-3. Ir a "Management" → "Lifecycle rules"
-4. Crear regla con prefix `tmp/`
-5. Configurar expiración en 1-7 días
 
 ## Lógica de "Move" (Copy + Delete)
 
@@ -340,6 +383,7 @@ bucket/
 3. **Límite de tamaño**: Máximo 5MB
 4. **Path validation**: Solo se pueden mover archivos de `tmp/`
 5. **Nombres únicos**: UUID + timestamp evitan ataques de sobreescritura
+6. **Sin ACLs**: Usamos Bucket Policy en lugar de ACLs (más seguro y compatible con buckets modernos)
 
 ## Testing
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -25,14 +26,9 @@ class FileUploadController extends Controller
     private const TEMP_FOLDER = 'tmp';
 
     /**
-     * Disco de almacenamiento a utilizar.
+     * Disco de almacenamiento a utilizar (siempre S3).
      */
-    private string $disk;
-
-    public function __construct()
-    {
-        $this->disk = config('filesystems.default', 's3');
-    }
+    private string $disk = 's3';
 
     /**
      * Paso 1: Carga temporal de archivo.
@@ -115,29 +111,82 @@ class FileUploadController extends Controller
         }
         $fullPath = $tempPath . '/' . $uniqueName;
 
-        // Almacenar en S3 con visibilidad pública para previsualización
-        $storedPath = Storage::disk($this->disk)->putFileAs(
-            $tempPath,
-            $file,
-            $uniqueName,
-            'public'
-        );
+        try {
+            // Leer el contenido del archivo
+            $fileContent = file_get_contents($file->getRealPath());
+            
+            if ($fileContent === false) {
+                Log::error('FileUpload: No se pudo leer el archivo temporal', [
+                    'original_name' => $file->getClientOriginalName(),
+                    'path' => $file->getRealPath(),
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al leer el archivo. Por favor, intente nuevamente.',
+                ], 500);
+            }
 
-        if (!$storedPath) {
+            // Almacenar en S3 SIN ACL (buckets modernos no permiten ACLs)
+            // La visibilidad pública se maneja via política del bucket
+            $stored = Storage::disk($this->disk)->put($fullPath, $fileContent);
+
+            if (!$stored) {
+                Log::error('FileUpload: Storage::put retornó false', [
+                    'disk' => $this->disk,
+                    'path' => $fullPath,
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al cargar el archivo a S3. Por favor, intente nuevamente.',
+                ], 500);
+            }
+
+            // Verificar que el archivo existe en S3
+            if (!Storage::disk($this->disk)->exists($fullPath)) {
+                Log::error('FileUpload: El archivo no existe después de put()', [
+                    'disk' => $this->disk,
+                    'path' => $fullPath,
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El archivo no se almacenó correctamente en S3.',
+                ], 500);
+            }
+
+            $url = Storage::disk($this->disk)->url($fullPath);
+
+            Log::info('FileUpload: Archivo cargado exitosamente', [
+                'disk' => $this->disk,
+                'path' => $fullPath,
+                'url' => $url,
+                'size' => $file->getSize(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'preview_url' => $url,
+                'temp_path' => $fullPath,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('FileUpload: Excepción al cargar archivo', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'disk' => $this->disk,
+                'path' => $fullPath,
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cargar el archivo. Por favor, intente nuevamente.',
+                'message' => 'Error al cargar el archivo: ' . $e->getMessage(),
             ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'preview_url' => Storage::disk($this->disk)->url($storedPath),
-            'temp_path' => $storedPath,
-            'original_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
-        ]);
     }
 
     /**
@@ -209,47 +258,84 @@ class FileUploadController extends Controller
     {
         // Validar que el path comienza con la carpeta temporal
         if (!str_starts_with($tempPath, self::TEMP_FOLDER . '/')) {
+            Log::warning('FileUpload: Intento de mover archivo no temporal', [
+                'path' => $tempPath,
+            ]);
+            
             return [
                 'success' => false,
                 'message' => 'El path proporcionado no corresponde a un archivo temporal válido.',
             ];
         }
 
-        // Verificar que el archivo existe en S3
-        if (!Storage::disk($this->disk)->exists($tempPath)) {
+        try {
+            // Verificar que el archivo existe en S3
+            if (!Storage::disk($this->disk)->exists($tempPath)) {
+                Log::warning('FileUpload: Archivo temporal no encontrado', [
+                    'path' => $tempPath,
+                    'disk' => $this->disk,
+                ]);
+                
+                return [
+                    'success' => false,
+                    'message' => 'El archivo temporal no existe o ya fue procesado. El archivo puede haber expirado.',
+                ];
+            }
+
+            // Obtener el nombre del archivo
+            $fileName = $newFileName ?? basename($tempPath);
+            
+            // Construir el path de destino
+            $destinationPath = trim($destinationFolder, '/') . '/' . $fileName;
+
+            // Copiar archivo a ubicación permanente
+            $copied = Storage::disk($this->disk)->copy($tempPath, $destinationPath);
+
+            if (!$copied) {
+                Log::error('FileUpload: Error al copiar archivo', [
+                    'from' => $tempPath,
+                    'to' => $destinationPath,
+                    'disk' => $this->disk,
+                ]);
+                
+                return [
+                    'success' => false,
+                    'message' => 'Error al mover el archivo a la ubicación permanente.',
+                ];
+            }
+
+            // Nota: No usamos setVisibility() porque el bucket no permite ACLs
+            // La visibilidad pública se maneja via política del bucket en AWS
+
+            // Eliminar archivo temporal
+            Storage::disk($this->disk)->delete($tempPath);
+
+            $url = Storage::disk($this->disk)->url($destinationPath);
+
+            Log::info('FileUpload: Archivo movido a ubicación permanente', [
+                'from' => $tempPath,
+                'to' => $destinationPath,
+                'url' => $url,
+            ]);
+
+            return [
+                'success' => true,
+                'permanent_path' => $destinationPath,
+                'url' => $url,
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('FileUpload: Excepción al mover archivo', [
+                'error' => $e->getMessage(),
+                'from' => $tempPath,
+                'destination_folder' => $destinationFolder,
+            ]);
+            
             return [
                 'success' => false,
-                'message' => 'El archivo temporal no existe o ya fue procesado. El archivo puede haber expirado.',
+                'message' => 'Error al mover el archivo: ' . $e->getMessage(),
             ];
         }
-
-        // Obtener el nombre del archivo
-        $fileName = $newFileName ?? basename($tempPath);
-        
-        // Construir el path de destino
-        $destinationPath = trim($destinationFolder, '/') . '/' . $fileName;
-
-        // Copiar archivo a ubicación permanente
-        $copied = Storage::disk($this->disk)->copy($tempPath, $destinationPath);
-
-        if (!$copied) {
-            return [
-                'success' => false,
-                'message' => 'Error al mover el archivo a la ubicación permanente.',
-            ];
-        }
-
-        // Hacer el archivo público en la ubicación permanente
-        Storage::disk($this->disk)->setVisibility($destinationPath, 'public');
-
-        // Eliminar archivo temporal
-        Storage::disk($this->disk)->delete($tempPath);
-
-        return [
-            'success' => true,
-            'permanent_path' => $destinationPath,
-            'url' => Storage::disk($this->disk)->url($destinationPath),
-        ];
     }
 
     /**
