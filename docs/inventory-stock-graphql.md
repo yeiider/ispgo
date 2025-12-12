@@ -171,6 +171,66 @@ query ObtenerBodega($id: ID!) {
 }
 ```
 
+### 4.1 Listar Categorías
+
+```graphql
+query ListarCategorias($first: Int, $page: Int, $name: String) {
+  inventoryCategories(first: $first, page: $page, name: $name) {
+    data {
+      id
+      name
+      description
+      url_key
+      products {
+        id
+        name
+        sku
+      }
+    }
+    paginatorInfo {
+      total
+      currentPage
+      lastPage
+      hasMorePages
+    }
+  }
+}
+```
+
+**Variables:**
+```json
+{
+  "first": 20,
+  "page": 1,
+  "name": "FTTH"
+}
+```
+
+### 4.2 Obtener Categoría por ID
+
+```graphql
+query ObtenerCategoria($id: ID!) {
+  inventoryCategory(id: $id) {
+    id
+    name
+    description
+    url_key
+    products {
+      id
+      name
+      sku
+      price
+      stocks {
+        quantity
+        warehouse {
+          name
+        }
+      }
+    }
+  }
+}
+```
+
 ### 5. Listar Stock con Filtros
 
 ```graphql
@@ -391,6 +451,66 @@ mutation EliminarBodega($id: ID!) {
   }
 }
 ```
+
+### 6.1 Crear Categoría
+
+```graphql
+mutation CrearCategoria($input: CreateCategoryInput!) {
+  createInventoryCategory(input: $input) {
+    id
+    name
+    description
+    url_key
+  }
+}
+```
+
+**Variables:**
+```json
+{
+  "input": {
+    "name": "FTTH",
+    "description": "Equipos de fibra óptica hasta el hogar",
+    "url_key": "ftth"
+  }
+}
+```
+
+### 6.2 Actualizar Categoría
+
+```graphql
+mutation ActualizarCategoria($id: ID!, $input: UpdateCategoryInput!) {
+  updateInventoryCategory(id: $id, input: $input) {
+    id
+    name
+    description
+    url_key
+  }
+}
+```
+
+**Variables:**
+```json
+{
+  "id": "1",
+  "input": {
+    "description": "Equipos y materiales FTTH"
+  }
+}
+```
+
+### 6.3 Eliminar Categoría
+
+```graphql
+mutation EliminarCategoria($id: ID!) {
+  deleteInventoryCategory(id: $id) {
+    success
+    message
+  }
+}
+```
+
+**Nota:** No se puede eliminar una categoría si tiene productos asignados.
 
 ### 7. Crear/Actualizar Stock (Upsert)
 
@@ -932,6 +1052,106 @@ query {
         sku
         price
         cost_price
+      }
+    }
+  }
+}
+```
+
+---
+
+### Caso 8: Gestión de categorías de productos
+
+**Escenario:** Organizar productos en categorías para facilitar la búsqueda y clasificación.
+
+**Paso 1: Crear categorías**
+
+```graphql
+mutation {
+  ftth: createInventoryCategory(input: {
+    name: "FTTH"
+    description: "Equipos de fibra óptica hasta el hogar"
+    url_key: "ftth"
+  }) { id name }
+  
+  herramientas: createInventoryCategory(input: {
+    name: "Herramientas"
+    description: "Herramientas para instalación y mantenimiento"
+    url_key: "herramientas"
+  }) { id name }
+  
+  cables: createInventoryCategory(input: {
+    name: "Cables y Conectores"
+    description: "Cables de red, fibra y conectores"
+    url_key: "cables-conectores"
+  }) { id name }
+}
+```
+
+**Paso 2: Crear productos asignándolos a categorías**
+
+```graphql
+mutation {
+  createInventoryProduct(input: {
+    name: "ONU GPON"
+    sku: "ONU-GPON-001"
+    price: 45.00
+    cost_price: 30.00
+    url_key: "onu-gpon"
+    category_id: "1"  # FTTH
+    warehouses: [
+      { warehouse_id: "1", quantity: 100, min_stock: 20 }
+    ]
+  }) {
+    id
+    name
+    category {
+      id
+      name
+    }
+    stocks {
+      quantity
+      warehouse { name }
+    }
+  }
+}
+```
+
+**Paso 3: Consultar productos por categoría**
+
+```graphql
+query {
+  inventoryProducts(category_id: "1", first: 50) {
+    data {
+      id
+      name
+      sku
+      price
+      stocks {
+        quantity
+        warehouse { name }
+      }
+    }
+    paginatorInfo {
+      total
+    }
+  }
+}
+```
+
+**Paso 4: Ver todas las categorías con sus productos**
+
+```graphql
+query {
+  inventoryCategories(first: 100) {
+    data {
+      id
+      name
+      description
+      products {
+        id
+        name
+        sku
       }
     }
   }
