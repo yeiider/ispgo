@@ -60,6 +60,10 @@ class Service extends Model
     }
     public function rules() { return $this->hasMany(ServiceRule::class); }
 
+    public function billingNovedades()
+    {
+        return $this->hasMany(\App\Models\BillingNovedad::class);
+    }
 
     public function address()
     {

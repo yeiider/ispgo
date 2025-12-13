@@ -50,7 +50,7 @@ type Query {
     ): [Invoice!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
     invoice(id: ID! @eq): Invoice @find(model: "App\\Models\\Invoice\\Invoice")
 
-    billingNovedades: [BillingNovedad!]! @paginate(defaultCount: 10, model: "App\\Models\\BillingNovedad")
+    # billingNovedades movido a billing.graphql con más opciones de filtrado
     creditNotes: [CreditNote!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\CreditNote")
     paymentPromises: [PaymentPromise!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\PaymentPromise")
 
@@ -615,6 +615,12 @@ type Service {
     router: Router! @belongsTo
     address: Address @belongsTo(relation: "address")
     napPort: NapPort @hasOne(relation: "napPort")
+    
+    # Relaciones de facturación
+    "Reglas de descuento/beneficio aplicables al servicio"
+    rules: [ServiceRule!]! @hasMany(relation: "rules")
+    "Novedades de facturación asociadas al servicio"
+    billingNovedades: [BillingNovedad!]! @hasMany(relation: "billingNovedades")
 }
 
 type Invoice {
@@ -687,20 +693,7 @@ type InvoiceItem {
     service: Service @belongsTo
 }
 
-type BillingNovedad {
-    id: ID!
-    type: String!
-    amount: Float!
-    description: String
-    applied: Boolean!
-    effective_period: Date
-    created_at: DateTime!
-    updated_at: DateTime!
-
-    service: Service @belongsTo
-    customer: Customer @belongsTo
-    invoice: Invoice @belongsTo
-}
+# BillingNovedad type movido a billing.graphql
 
 type InvoiceAdjustment {
     id: ID!
@@ -1421,4 +1414,5 @@ input CreateProductWithImageInput {
     warehouses: [WarehouseStockInput!]
 }
 
+#import billing.graphql
 #import smartolt.graphql
