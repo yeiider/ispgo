@@ -5,10 +5,7 @@ namespace App\GraphQL\Queries;
 use App\Models\BillingNovedad;
 use App\Models\ServiceRule;
 use Carbon\Carbon;
-use GraphQL\Type\Definition\ResolveInfo;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
 class BillingQuery
 {
@@ -19,13 +16,11 @@ class BillingQuery
      *
      * @param mixed $root
      * @param array $args
-     * @param GraphQLContext $context
-     * @param ResolveInfo $resolveInfo
-     * @return LengthAwarePaginator
+     * @return array
      */
-    public function serviceRules($root, array $args, GraphQLContext $context, ResolveInfo $resolveInfo): LengthAwarePaginator
+    public function serviceRules($root, array $args): array
     {
-        $query = ServiceRule::query();
+        $query = ServiceRule::query()->with(['service']);
 
         if (!empty($args['service_id'])) {
             $query->where('service_id', $args['service_id']);
@@ -42,7 +37,21 @@ class BillingQuery
         $first = $args['first'] ?? 15;
         $page = $args['page'] ?? 1;
 
-        return $query->orderBy('created_at', 'desc')->paginate($first, ['*'], 'page', $page);
+        $paginator = $query->orderBy('created_at', 'desc')->paginate($first, ['*'], 'page', $page);
+
+        return [
+            'data' => $paginator->items(),
+            'paginatorInfo' => [
+                'count' => $paginator->count(),
+                'currentPage' => $paginator->currentPage(),
+                'firstItem' => $paginator->firstItem(),
+                'hasMorePages' => $paginator->hasMorePages(),
+                'lastItem' => $paginator->lastItem(),
+                'lastPage' => $paginator->lastPage(),
+                'perPage' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]
+        ];
     }
 
     /**
@@ -50,11 +59,9 @@ class BillingQuery
      *
      * @param mixed $root
      * @param array $args
-     * @param GraphQLContext $context
-     * @param ResolveInfo $resolveInfo
      * @return ServiceRule|null
      */
-    public function serviceRule($root, array $args, GraphQLContext $context, ResolveInfo $resolveInfo): ?ServiceRule
+    public function serviceRule($root, array $args): ?ServiceRule
     {
         return ServiceRule::with(['service'])->find($args['id']);
     }
@@ -64,11 +71,9 @@ class BillingQuery
      *
      * @param mixed $root
      * @param array $args
-     * @param GraphQLContext $context
-     * @param ResolveInfo $resolveInfo
      * @return Collection
      */
-    public function activeServiceRules($root, array $args, GraphQLContext $context, ResolveInfo $resolveInfo): Collection
+    public function activeServiceRules($root, array $args): Collection
     {
         return ServiceRule::where('service_id', $args['service_id'])
             ->active()
@@ -84,13 +89,11 @@ class BillingQuery
      *
      * @param mixed $root
      * @param array $args
-     * @param GraphQLContext $context
-     * @param ResolveInfo $resolveInfo
-     * @return LengthAwarePaginator
+     * @return array
      */
-    public function billingNovedades($root, array $args, GraphQLContext $context, ResolveInfo $resolveInfo): LengthAwarePaginator
+    public function billingNovedades($root, array $args): array
     {
-        $query = BillingNovedad::query();
+        $query = BillingNovedad::query()->with(['service', 'customer', 'invoice', 'creator']);
 
         if (!empty($args['service_id'])) {
             $query->where('service_id', $args['service_id']);
@@ -115,10 +118,21 @@ class BillingQuery
         $first = $args['first'] ?? 15;
         $page = $args['page'] ?? 1;
 
-        return $query
-            ->with(['service', 'customer', 'invoice', 'creator'])
-            ->orderBy('created_at', 'desc')
-            ->paginate($first, ['*'], 'page', $page);
+        $paginator = $query->orderBy('created_at', 'desc')->paginate($first, ['*'], 'page', $page);
+
+        return [
+            'data' => $paginator->items(),
+            'paginatorInfo' => [
+                'count' => $paginator->count(),
+                'currentPage' => $paginator->currentPage(),
+                'firstItem' => $paginator->firstItem(),
+                'hasMorePages' => $paginator->hasMorePages(),
+                'lastItem' => $paginator->lastItem(),
+                'lastPage' => $paginator->lastPage(),
+                'perPage' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]
+        ];
     }
 
     /**
@@ -126,11 +140,9 @@ class BillingQuery
      *
      * @param mixed $root
      * @param array $args
-     * @param GraphQLContext $context
-     * @param ResolveInfo $resolveInfo
      * @return BillingNovedad|null
      */
-    public function billingNovedad($root, array $args, GraphQLContext $context, ResolveInfo $resolveInfo): ?BillingNovedad
+    public function billingNovedad($root, array $args): ?BillingNovedad
     {
         return BillingNovedad::with(['service', 'customer', 'invoice', 'creator'])->find($args['id']);
     }
@@ -140,11 +152,9 @@ class BillingQuery
      *
      * @param mixed $root
      * @param array $args
-     * @param GraphQLContext $context
-     * @param ResolveInfo $resolveInfo
      * @return Collection
      */
-    public function pendingNovedades($root, array $args, GraphQLContext $context, ResolveInfo $resolveInfo): Collection
+    public function pendingNovedades($root, array $args): Collection
     {
         return BillingNovedad::where('service_id', $args['service_id'])
             ->pending()
@@ -159,11 +169,9 @@ class BillingQuery
      *
      * @param mixed $root
      * @param array $args
-     * @param GraphQLContext $context
-     * @param ResolveInfo $resolveInfo
      * @return Collection
      */
-    public function novedadesByPeriod($root, array $args, GraphQLContext $context, ResolveInfo $resolveInfo): Collection
+    public function novedadesByPeriod($root, array $args): Collection
     {
         $period = Carbon::parse($args['effective_period']);
 
