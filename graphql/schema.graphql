@@ -1416,3 +1416,4 @@ input CreateProductWithImageInput {
 
 #import billing.graphql
 #import smartolt.graphql
+#import mikrotik.graphql

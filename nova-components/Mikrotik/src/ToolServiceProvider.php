@@ -2,19 +2,27 @@
 
 namespace Ispgo\Mikrotik;
 
-use App\Events\ServiceCreated;
-use App\Events\ServiceUpdateStatus;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Ispgo\Mikrotik\Listener\ServiceChangeStatus;
-use Ispgo\Mikrotik\Listener\ServiceCreateListener;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Http\Middleware\Authenticate;
 use Laravel\Nova\Nova;
 use Ispgo\Mikrotik\Http\Middleware\Authorize;
 
+/**
+ * Service Provider para el módulo Mikrotik
+ * 
+ * NOTA: Este módulo ya no registra listeners automáticos para eventos de servicio.
+ * La provisión de servicios (bind IP + create queue) se realiza manualmente
+ * a través de la API GraphQL o las acciones de Nova.
+ * 
+ * Flujo de trabajo:
+ * 1. El usuario crea un servicio
+ * 2. El usuario consulta los DHCP leases disponibles via GraphQL
+ * 3. El usuario selecciona una IP y MAC y ejecuta la provisión via GraphQL
+ * 4. El sistema amarra la IP y crea el Simple Queue
+ */
 class ToolServiceProvider extends ServiceProvider
 {
     /**
@@ -24,15 +32,8 @@ class ToolServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Event::listen(
-            ServiceCreated::class,
-            [ServiceCreateListener::class, 'handle']
-        );
-        Event::listen(
-            ServiceUpdateStatus::class,
-            [ServiceChangeStatus::class, 'handle']
-        );
-
+        // Ya no registramos listeners automáticos
+        // La provisión se hace manualmente via GraphQL
 
         $this->app->booted(function () {
             $this->routes();
