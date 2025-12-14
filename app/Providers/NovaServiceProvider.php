@@ -165,12 +165,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     ->icon('cog')->canSee(function ($request) {
                         return ProviderSmartOlt::getEnabled();
                     }),
-                MenuSection::make(__('panel.mikrotik_manager'), [
-                    MenuItem::link(__('panel.plans_PPPoe'), 'mikrotik/planes-ppp'),
-                    MenuItem::link(__('panel.ip_pools'), 'mikrotik/ip-pool'),
-                    MenuItem::link(__('panel.ipv6_pools'), 'mikrotik/ipv6-pool'),
-                    MenuItem::link(__('panel.DHCP_server_Ipv6'), 'mikrotik/dhcp-serve'),
-                ])->icon('cog')->collapsable(),
+               
 
                 $this->getNovaPermissionsMenu($request),
             ];
@@ -228,7 +223,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         return [
             new SettingsManager,
             new NovaPermissions,
-            new Mikrotik,
             new Smartolt,
             new NapManager
         ];

@@ -8,7 +8,6 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Http\Middleware\Authenticate;
 use Laravel\Nova\Nova;
-use Ispgo\Mikrotik\Http\Middleware\Authorize;
 
 /**
  * Service Provider para el módulo Mikrotik
@@ -54,12 +53,6 @@ class ToolServiceProvider extends ServiceProvider
         if ($this->app->routesAreCached()) {
             return;
         }
-
-        Nova::router(['nova', Authenticate::class, Authorize::class], 'mikrotik')
-            ->group(__DIR__ . '/../routes/inertia.php');
-
-        Route::prefix('mikrotik')
-            ->group(__DIR__ . '/../routes/api.php');
     }
 
     /**
