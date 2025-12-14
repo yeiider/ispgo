@@ -31,10 +31,11 @@ class MikrotikConfigProvider
 
     /**
      * Obtener la URL base del microservicio
+     * Nota: Usa host.docker.internal para acceder desde Docker al host
      */
     public static function getApiBaseUrl(int $routerId = 0): string
     {
-        return self::getValue('general/api_base_url', $routerId, 'http://localhost:8000/api/v1');
+        return self::getValue('general/api_base_url', $routerId, 'http://host.docker.internal:8000/api/v1');
     }
 
     /**
