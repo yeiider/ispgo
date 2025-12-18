@@ -59,6 +59,9 @@ class UpdateCotizacionEstado extends Action
                 ->options([
                     'pendiente' => 'Pendiente',
                     'atendida' => 'Atendida',
+                    'cancelada' => 'Cancelada',
+                    'no_contactado' => 'No Contactado',
+                    'completada' => 'Completada',
                 ])
                 ->displayUsingLabels()
                 ->rules('required')

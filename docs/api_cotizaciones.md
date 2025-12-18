@@ -27,7 +27,7 @@ Esta API permite registrar solicitudes de cotización provenientes del portal we
   "ciudad": "Cali",
   "plan": "Plan Premium 500 Mbps",
   "canal": "web",            // valores permitidos: web | whatsapp
-  "estado": "pendiente",     // opcional, por defecto: pendiente (valores: pendiente | atendida)
+  "estado": "pendiente",     // opcional, por defecto: pendiente (valores: pendiente | atendida | cancelada | no_contactado | completada)
   "notas": "Cliente prefiere contacto en la tarde" // opcional
 }
 ```
