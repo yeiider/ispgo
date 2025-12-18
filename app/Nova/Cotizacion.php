@@ -68,6 +68,9 @@ class Cotizacion extends Resource
                 ->options([
                     'pendiente' => 'Pendiente',
                     'atendida' => 'Atendida',
+                    'cancelada' => 'Cancelada',
+                    'no_contactado' => 'No Contactado',
+                    'completada' => 'Completada',
                 ])->displayUsingLabels()->rules('required')->sortable()->default('pendiente'),
 
             Text::make('Notas')->hideFromIndex()->nullable(),
