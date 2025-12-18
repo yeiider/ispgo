@@ -1,0 +1,348 @@
+# =============================================================================
+# Schema GraphQL para el módulo Mikrotik
+# =============================================================================
+# Este schema define las operaciones para:
+# - Consultar DHCP leases
+# - Amarrar IP a MAC address
+# - Crear/gestionar Simple Queues
+# - Provisionar servicios completos
+# =============================================================================
+
+# --------------- Tipos de Mikrotik ---------------
+
+"""
+Información de un DHCP Lease del router Mikrotik
+"""
+type MikrotikDhcpLease {
+    "Dirección IP asignada"
+    address: String!
+    "Dirección MAC del dispositivo"
+    mac_address: String!
+    "Nombre del servidor DHCP"
+    server: String
+    "Estado del lease (bound, waiting, etc.)"
+    status: String
+    "Nombre del host/dispositivo"
+    host_name: String
+    "Comentario del lease"
+    comment: String
+    "Si es un lease estático (binding)"
+    is_static: Boolean
+    "Tiempo restante del lease"
+    expires_after: String
+}
+
+"""
+Información de un Simple Queue de Mikrotik
+"""
+type MikrotikSimpleQueue {
+    "ID interno del queue"
+    id: String
+    "Nombre del queue"
+    name: String!
+    "IP objetivo del queue"
+    target: String!
+    "Límite máximo (upload/download)"
+    max_limit: String
+    "Configuración de burst"
+    burst_limit: String
+    "Si está deshabilitado"
+    disabled: Boolean
+    "Comentario del queue"
+    comment: String
+    "Bytes transmitidos"
+    bytes: String
+    "Paquetes transmitidos"
+    packets: String
+}
+
+"""
+Recursos del sistema del router
+"""
+type MikrotikSystemResources {
+    "Tiempo de actividad"
+    uptime: String
+    "Versión de RouterOS"
+    version: String
+    "Carga de CPU"
+    cpu_load: String
+    "Memoria libre"
+    free_memory: String
+    "Memoria total"
+    total_memory: String
+    "Espacio libre en disco"
+    free_hdd: String
+    "Espacio total en disco"
+    total_hdd: String
+    "Nombre del board"
+    board_name: String
+    "Modelo del router"
+    model: String
+}
+
+"""
+Resultado de una operación de provisión
+"""
+type MikrotikProvisionResult {
+    "Si la operación fue exitosa"
+    success: Boolean!
+    "Mensaje descriptivo"
+    message: String
+    "IP asignada al servicio"
+    ip: String
+    "MAC address vinculada"
+    mac: String
+    "Nombre del queue creado"
+    queue_name: String
+    "Límite de velocidad aplicado"
+    max_limit: String
+}
+
+"""
+Resultado de operación genérica de Mikrotik
+"""
+type MikrotikActionResult {
+    "Si la operación fue exitosa"
+    success: Boolean!
+    "Mensaje descriptivo"
+    message: String
+    "Acción ejecutada"
+    action: String
+    "Detalles adicionales"
+    details: JSON
+}
+
+"""
+Resultado de consulta de leases
+"""
+type MikrotikDhcpLeasesResult {
+    "Si la consulta fue exitosa"
+    success: Boolean!
+    "Mensaje descriptivo"
+    message: String
+    "Cantidad de leases"
+    count: Int
+    "Lista de leases"
+    leases: [MikrotikDhcpLease!]!
+}
+
+"""
+Resultado de consulta de queues
+"""
+type MikrotikQueuesResult {
+    "Si la consulta fue exitosa"
+    success: Boolean!
+    "Mensaje descriptivo"
+    message: String
+    "Cantidad de queues"
+    count: Int
+    "Lista de queues"
+    queues: [MikrotikSimpleQueue!]!
+}
+
+"""
+Estado de configuración de Mikrotik para un router
+"""
+type MikrotikConfigStatus {
+    "Si el módulo está habilitado"
+    enabled: Boolean!
+    "Si DHCP binding está habilitado"
+    dhcp_enabled: Boolean!
+    "Si Simple Queue está habilitado"
+    queue_enabled: Boolean!
+    "URL del microservicio configurada"
+    api_url: String
+    "Host del router configurado"
+    router_host: String
+}
+
+# --------------- Inputs ---------------
+
+"""
+Input para amarrar una IP a un servicio
+"""
+input MikrotikBindIpInput {
+    "ID del servicio"
+    service_id: ID!
+    "IP seleccionada del DHCP lease"
+    ip_address: String!
+    "MAC address del dispositivo"
+    mac_address: String!
+}
+
+"""
+Input para provisionar un servicio completo
+"""
+input MikrotikProvisionInput {
+    "ID del servicio"
+    service_id: ID!
+    "IP seleccionada del DHCP lease"
+    ip_address: String!
+    "MAC address del dispositivo"
+    mac_address: String!
+}
+
+"""
+Input para crear un Simple Queue manualmente
+"""
+input MikrotikCreateQueueInput {
+    "ID del servicio"
+    service_id: ID!
+}
+
+"""
+Input para actualizar velocidad de un servicio
+"""
+input MikrotikUpdateSpeedInput {
+    "ID del servicio"
+    service_id: ID!
+}
+
+# --------------- Extend Query ---------------
+
+extend type Query {
+    """
+    Obtener DHCP leases del router asociado a un servicio
+    Requiere el service_id para determinar el router_id
+    """
+    mikrotikDhcpLeases(
+        "ID del router (scope_id para la configuración)"
+        router_id: ID!
+    ): MikrotikDhcpLeasesResult! @guard @field(resolver: "App\\GraphQL\\Queries\\MikrotikQuery@dhcpLeases")
+
+    """
+    Buscar un lease específico por MAC address
+    """
+    mikrotikFindLeaseByMac(
+        router_id: ID!
+        mac_address: String!
+    ): MikrotikDhcpLease @guard @field(resolver: "App\\GraphQL\\Queries\\MikrotikQuery@findLeaseByMac")
+
+    """
+    Buscar un lease específico por IP
+    """
+    mikrotikFindLeaseByIp(
+        router_id: ID!
+        ip_address: String!
+    ): MikrotikDhcpLease @guard @field(resolver: "App\\GraphQL\\Queries\\MikrotikQuery@findLeaseByIp")
+
+    """
+    Obtener todos los Simple Queues del router
+    """
+    mikrotikSimpleQueues(
+        router_id: ID!
+    ): MikrotikQueuesResult! @guard @field(resolver: "App\\GraphQL\\Queries\\MikrotikQuery@simpleQueues")
+
+    """
+    Buscar un queue específico por nombre
+    """
+    mikrotikFindQueue(
+        router_id: ID!
+        name: String!
+    ): MikrotikSimpleQueue @guard @field(resolver: "App\\GraphQL\\Queries\\MikrotikQuery@findQueue")
+
+    """
+    Obtener recursos del sistema del router
+    """
+    mikrotikSystemResources(
+        router_id: ID!
+    ): MikrotikSystemResources @guard @field(resolver: "App\\GraphQL\\Queries\\MikrotikQuery@systemResources")
+
+    """
+    Obtener estado de configuración de Mikrotik para un router
+    """
+    mikrotikConfigStatus(
+        router_id: ID!
+    ): MikrotikConfigStatus! @guard @field(resolver: "App\\GraphQL\\Queries\\MikrotikQuery@configStatus")
+
+    """
+    Obtener el queue asociado a un servicio específico
+    """
+    mikrotikServiceQueue(
+        service_id: ID!
+    ): MikrotikSimpleQueue @guard @field(resolver: "App\\GraphQL\\Queries\\MikrotikQuery@serviceQueue")
+}
+
+# --------------- Extend Mutation ---------------
+
+extend type Mutation {
+    """
+    Amarrar una IP del DHCP a un servicio
+    Actualiza la IP y MAC en el servicio y crea el binding en Mikrotik
+    """
+    mikrotikBindIp(
+        input: MikrotikBindIpInput!
+    ): MikrotikProvisionResult! @guard @field(resolver: "App\\GraphQL\\Mutations\\MikrotikMutation@bindIp")
+
+    """
+    Crear un Simple Queue para un servicio
+    Usa las velocidades del plan asociado al servicio
+    """
+    mikrotikCreateQueue(
+        input: MikrotikCreateQueueInput!
+    ): MikrotikProvisionResult! @guard @field(resolver: "App\\GraphQL\\Mutations\\MikrotikMutation@createQueue")
+
+    """
+    Provisionar un servicio completo
+    Ejecuta bind IP + create queue en una sola operación
+    """
+    mikrotikProvisionService(
+        input: MikrotikProvisionInput!
+    ): MikrotikProvisionResult! @guard @field(resolver: "App\\GraphQL\\Mutations\\MikrotikMutation@provisionService")
+
+    """
+    Suspender un servicio en Mikrotik
+    Deshabilita o limita el queue según configuración
+    """
+    mikrotikSuspendService(
+        service_id: ID!
+    ): MikrotikActionResult! @guard @field(resolver: "App\\GraphQL\\Mutations\\MikrotikMutation@suspendService")
+
+    """
+    Activar un servicio en Mikrotik
+    Habilita el queue o restaura la velocidad
+    """
+    mikrotikActivateService(
+        service_id: ID!
+    ): MikrotikActionResult! @guard @field(resolver: "App\\GraphQL\\Mutations\\MikrotikMutation@activateService")
+
+    """
+    Actualizar la velocidad de un servicio
+    Útil cuando se cambia de plan
+    """
+    mikrotikUpdateSpeed(
+        input: MikrotikUpdateSpeedInput!
+    ): MikrotikActionResult! @guard @field(resolver: "App\\GraphQL\\Mutations\\MikrotikMutation@updateSpeed")
+
+    """
+    Eliminar configuración de Mikrotik de un servicio
+    Elimina el queue y el binding DHCP
+    """
+    mikrotikDeprovisionService(
+        service_id: ID!
+    ): MikrotikActionResult! @guard @field(resolver: "App\\GraphQL\\Mutations\\MikrotikMutation@deprovisionService")
+
+    """
+    Habilitar un queue específico
+    """
+    mikrotikEnableQueue(
+        router_id: ID!
+        queue_name: String!
+    ): MikrotikActionResult! @guard @field(resolver: "App\\GraphQL\\Mutations\\MikrotikMutation@enableQueue")
+
+    """
+    Deshabilitar un queue específico
+    """
+    mikrotikDisableQueue(
+        router_id: ID!
+        queue_name: String!
+    ): MikrotikActionResult! @guard @field(resolver: "App\\GraphQL\\Mutations\\MikrotikMutation@disableQueue")
+
+    """
+    Eliminar un queue específico
+    """
+    mikrotikDeleteQueue(
+        router_id: ID!
+        queue_name: String!
+    ): MikrotikActionResult! @guard @field(resolver: "App\\GraphQL\\Mutations\\MikrotikMutation@deleteQueue")
+}

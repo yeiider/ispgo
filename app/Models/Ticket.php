@@ -34,6 +34,25 @@ class Ticket extends Model
         'labels' => 'array'
     ];
 
+    /**
+     * Get the labels attribute, ensuring it's always an array.
+     */
+    public function getLabelsAttribute($value)
+    {
+        if (is_null($value) || $value === '') {
+            return [];
+        }
+
+        // If it's already decoded as array (via cast)
+        if (is_array($value)) {
+            return $value;
+        }
+
+        // Try to decode if it's still a string
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
 
     /**
      * Get the users assigned to the ticket.

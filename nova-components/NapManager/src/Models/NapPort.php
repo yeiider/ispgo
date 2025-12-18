@@ -18,8 +18,9 @@ class NapPort extends Model
         'port_name',
         'status',
         'connection_type',
-        'client_id',
-        'service_plan_id',
+        'service_id',
+        'code',
+        'color',
         'last_signal_check',
         'signal_strength',
         'port_config',
@@ -58,7 +59,7 @@ class NapPort extends Model
     }
 
 
-    public function services(): BelongsTo
+    public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class, 'service_id');
     }

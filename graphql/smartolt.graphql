@@ -1,0 +1,246 @@
+
+# --------------- SmartOLT types ---------------
+
+type SmartOltOlt {
+    id: ID!
+    name: String
+    olt_hardware_version: String
+    ip: String
+    telnet_port: String
+    snmp_port: String
+}
+
+type SmartOltOltCard {
+    slot: String
+    type: String
+    real_type: String
+    ports: String
+    software_version: String
+    status: String
+    role: String
+    info_updated: String
+}
+
+type SmartOltPonPort {
+    board: String
+    pon_port: String
+    pon_type: String
+    admin_status: String
+    operational_status: String
+    description: String
+    min_range: String
+    max_range: String
+    tx_power: String
+    onus_count: Int
+    online_onus_count: String
+    average_signal: Float
+}
+
+type SmartOltZone {
+    id: ID!
+    name: String
+    imported_date: String
+    imported_from_olt: String
+}
+
+type SmartOltOdb {
+    id: ID!
+    name: String
+    nr_of_ports: String
+    latitude: String
+    longitude: String
+    imported_date: String
+    imported_from_olt: String
+    zone_id: String
+    zone_name: String
+}
+
+type SmartOltSpeedProfile {
+    id: ID!
+    name: String
+    speed: String
+    direction: String
+    type: String
+}
+
+type SmartOltOnu {
+    sn: String
+    board: String
+    port: String
+    onu: String
+    name: String
+    onu_type_name: String
+    zone_id: String
+    odb_id: String
+    mode: String
+    signal: String
+    status: String
+    online_status: String
+}
+
+type SmartOltUptime {
+    olt_id: ID!
+    olt_name: String
+    uptime: String
+    env_temp: String
+}
+
+type SmartOltOnuDetails {
+    unique_external_id: String
+    pon_type: String
+    sn: String
+    olt_id: String
+    olt_name: String
+    board: String
+    port: String
+    onu: String
+    onu_type_id: String
+    onu_type_name: String
+    zone_id: String
+    zone_name: String
+    name: String
+    address: String
+    contact: String
+    latitude: String
+    longitude: String
+    odb_name: String
+    mode: String
+    wan_mode: String
+    vlan: String
+    ip_address: String
+    subnet_mask: String
+    default_gateway: String
+    dns1: String
+    dns2: String
+    username: String
+    password: String
+    mgmt_ip_mode: String
+    mgmt_ip_address: String
+    mgmt_ip_subnet_mask: String
+    mgmt_ip_default_gateway: String
+    mgmt_ip_dns1: String
+    mgmt_ip_dns2: String
+    mgmt_ip_service_port: String
+    mgmt_ip_vlan: String
+    mgmt_ip_cvlan: String
+    mgmt_ip_svlan: String
+    mgmt_ip_tag_transform_mode: String
+    voip_service: String
+    voip_ip_mode: String
+    voip_ip_address: String
+    voip_ip_subnet_mask: String
+    voip_ip_default_gateway: String
+    voip_ip_dns1: String
+    voip_ip_dns2: String
+    voip_ip_service_port: String
+    voip_ip_vlan: String
+    voip_ip_cvlan: String
+    voip_ip_svlan: String
+    voip_ip_tag_transform_mode: String
+    iptv: String
+    iptv_service_port: String
+    iptv_vlan: String
+    iptv_cvlan: String
+    iptv_svlan: String
+    iptv_tag_transform_mode: String
+    iptv_upload_speed: String
+    iptv_download_speed: String
+    iptv_allowed_macs: String
+    iptv_filtered_macs: String
+    catv: String
+    custom_template_name: String
+    administrative_status: String
+    tr069: String
+    tr069_profile: String
+    authorization_date: String
+    status: String
+    signal: String
+    signal_1310: String
+    signal_1490: String
+    service_ports: [SmartOltServicePort!]
+    ethernet_ports: [SmartOltEthernetPort!]
+    wifi_ports: [SmartOltWifiPort!]
+    voip_ports: [SmartOltVoipPort!]
+}
+
+type SmartOltServicePort {
+    service_port: String
+    vlan: String
+    cvlan: String
+    svlan: String
+    tag_transform_mode: String
+    upload_speed: String
+    download_speed: String
+}
+
+type SmartOltEthernetPort {
+    port: String
+    admin_state: String
+    mode: String
+    dhcp: String
+    vlan: String
+    allowed_vlans: String
+}
+
+type SmartOltWifiPort {
+    port: String
+    admin_state: String
+    mode: String
+    dhcp: String
+    vlan: String
+    allowed_vlans: String
+    auth_mode: String
+    ssid: String
+    password: String
+}
+
+type SmartOltVoipPort {
+    port: String
+    admin_state: String
+    mode: String
+    dhcp: String
+    vlan: String
+    allowed_vlans: String
+}
+
+type SmartOltOnuTypeImage {
+    image_base64: String!
+    content_type: String!
+}
+
+extend type Query {
+    smartOltOlts: [SmartOltOlt!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOlts")
+    smartOltOltCards(olt_id: ID!): [SmartOltOltCard!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltCards")
+    smartOltOltPonPorts(olt_id: ID!): [SmartOltPonPort!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltPonPorts")
+    smartOltZones: [SmartOltZone!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getZones")
+    smartOltOdbs(zone_id: ID!): [SmartOltOdb!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOdbs")
+    smartOltSpeedProfiles: [SmartOltSpeedProfile!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getSpeedProfiles")
+    smartOltUnconfiguredOnus(olt_id: ID!): [SmartOltOnu!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getUnconfiguredOnus")
+    smartOltOltsUptime: [SmartOltUptime!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltsUptime")
+    smartOltOnuDetails(sn: String!): SmartOltOnuDetails @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuDetails")
+    smartOltOnuTypeImage(onu_type_id: ID!): SmartOltOnuTypeImage @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuTypeImage")
+}
+
+extend type Mutation {
+    authorizeOnu(
+        olt_id: ID!
+        pon_type: String!
+        board: String!
+        port: String!
+        sn: String!
+        vlan: Int!
+        onu_mode: String!
+        onu_type: String!
+        zone_id: ID!
+        odb_id: ID
+        name: String!
+        address: String
+        contact: String
+        speed_profile_id: ID!
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@authorizeOnu")
+
+    smartOltRebootOnu(external_id: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@rebootOnu")
+    smartOltEnableOnu(sn: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@enableOnu")
+    smartOltDisableOnu(sn: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@disableOnu")
+    smartOltRemoveEquipment(sn: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@removeEquipment")
+}

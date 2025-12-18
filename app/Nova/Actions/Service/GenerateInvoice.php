@@ -34,7 +34,7 @@ class GenerateInvoice extends Action
         $serviceBuildInvoice = new CustomerBillingService();
         $service = null;
         $lastError = null;
-        
+
         foreach ($models as $model) {
             try {
                 // Detectar si el modelo es un Customer o un Service
@@ -52,8 +52,12 @@ class GenerateInvoice extends Action
                     $lastError = __('El cliente no está asociado correctamente.');
                     continue;
                 }
+                try {
+                    $invoice = $serviceBuildInvoice->generateForPeriod($customer, now());
+                } catch (\Exception $exception) {
+                    return ActionResponse::danger($exception->getMessage());
+                }
 
-                $invoice = $serviceBuildInvoice->generateForPeriod($customer, now());
 
                 if ($invoice) {
                     // Si se generó desde un Service, asociar el servicio a la factura
@@ -86,7 +90,7 @@ class GenerateInvoice extends Action
                 continue;
             }
         }
-        
+
         if ($models->count() > 1) {
             if ($invoice) {
                 return ActionResponse::visit('/resources/invoices');

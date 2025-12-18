@@ -12,7 +12,7 @@ class ServiceRule extends Model
     ];
 
     protected $casts = [
-        'starts_at' => 'datetime'
+        'starts_at' => 'date'
     ];
 
     public function service()

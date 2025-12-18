@@ -305,6 +305,24 @@ return [
                 "field" => "boolean-field",
                 "label" => "Attach PDF invoice",
             ],
+            "skip_invoice_if_suspended_and_unpaid" => [
+                "field" => "boolean-field",
+                "label" => "Skip Invoice Generation if Service is Suspended and Last Invoice is Unpaid",
+            ],
+            "enable_router_rental" => [
+                "field" => "boolean-field",
+                "label" => "Enable Router Rental Charge",
+            ],
+            "router_rental_amount" => [
+                "field" => "text-field",
+                "label" => "Router Rental Amount",
+                "placeholder" => "Enter rental amount",
+            ],
+            "router_rental_name" => [
+                "field" => "text-field",
+                "label" => "Router Rental Item Name",
+                "placeholder" => "Enter rental item name (e.g., Router Rental)",
+            ],
         ]
     ],
     "payment" => [
@@ -539,15 +557,11 @@ return [
             "class" => "form-control",
         ],
         "general" => SettingMikrotik::getGeneralSettings(),
-        "ppp" => SettingMikrotik::getPPPSettings(),
+        "router_connection" => SettingMikrotik::getRouterConnectionSettings(),
+        "dhcp" => SettingMikrotik::getDhcpSettings(),
         "simple_queue" => SettingMikrotik::getSimpleQueueSettings(),
-        "dhcp" => SettingMikrotik::getDHCPSettings(),
-
-        // Métodos adicionales
-        // Configuración de IP Estáticas
-        "qos" => SettingMikrotik::getQoSSettings(),                 // Configuración de QoS y Prioridades
-        "ipv6" => SettingMikrotik::getIPv6Settings(),               // Configuración de IPv6
-        "monitoring" => SettingMikrotik::getMonitoringSettings(),   // Configuración de Monitoreo y Notificaciones
+        "service_actions" => SettingMikrotik::getServiceActionsSettings(),
+        "advanced" => SettingMikrotik::getAdvancedSettings(),
     ],
     "smartolt" => [
         "setting" => [

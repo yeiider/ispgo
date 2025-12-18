@@ -1,0 +1,310 @@
+# --------------- Billing Novedades & Service Rules ---------------
+# Este archivo contiene los tipos, inputs, queries y mutations para
+# la gestión de novedades de facturación y reglas de servicios.
+
+# --------------- Enums ---------------
+
+"""
+Tipos de novedades de facturación disponibles.
+Cada tipo tiene comportamientos específicos de cálculo.
+"""
+enum BillingNovedadType {
+    saldo_favor
+    cargo_adicional
+    prorrateo_inicial
+    prorrateo_cancelacion
+    cambio_plan
+    descuento_promocional
+    cargo_reconexion
+    mora
+    nota_credito
+    compensacion
+    exceso_consumo
+    impuesto
+    product_delivery
+}
+
+"""
+Tipos de reglas de servicio disponibles.
+"""
+enum ServiceRuleType {
+    percentage
+    fixed
+    free_month
+}
+
+# --------------- Types ---------------
+
+"""
+ServiceRule representa una regla de descuento o beneficio aplicable a un servicio.
+Las reglas pueden ser descuentos porcentuales, fijos o meses gratis,
+y se aplican durante un número determinado de ciclos de facturación.
+"""
+type ServiceRule {
+    id: ID!
+    service_id: ID!
+    "Tipo de regla: percentage, fixed, free_month"
+    type: String!
+    "Valor de la regla (porcentaje o monto fijo según el tipo)"
+    value: Float
+    "Número total de ciclos que aplica la regla"
+    cycles: Int!
+    "Número de ciclos ya utilizados"
+    cycles_used: Int!
+    "Fecha de inicio de la regla (opcional)"
+    starts_at: DateTime
+    "Indica si la regla aún está activa (cycles_used < cycles)"
+    is_active: Boolean
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    # Relaciones
+    service: Service! @belongsTo
+}
+
+"""
+BillingNovedad representa un ajuste o novedad que se aplica en la facturación.
+Incluye cargos adicionales, descuentos, prorrateos, moras, compensaciones, etc.
+"""
+type BillingNovedad {
+    id: ID!
+    service_id: ID!
+    customer_id: ID
+    invoice_id: ID
+    "Tipo de novedad (saldo_favor, cargo_adicional, mora, etc.)"
+    type: String!
+    "Monto de la novedad (positivo = cargo, negativo = descuento)"
+    amount: Float!
+    "Descripción opcional de la novedad"
+    description: String
+    "Parámetros adicionales según el tipo de novedad"
+    rule: JSON
+    "Periodo de facturación al que aplica (formato YYYY-MM-01)"
+    effective_period: Date
+    "Indica si la novedad ya fue aplicada a una factura"
+    applied: Boolean!
+    "Líneas de producto (solo para entregas de producto)"
+    product_lines: JSON
+    "Cantidad (para entregas de producto)"
+    quantity: Int
+    "Precio unitario (para entregas de producto)"
+    unit_price: Float
+    "Usuario que creó la novedad"
+    created_by: ID
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    # Relaciones
+    service: Service @belongsTo
+    customer: Customer @belongsTo
+    invoice: Invoice @belongsTo
+    creator: User @belongsTo(relation: "creator")
+}
+
+# --------------- Paginators ---------------
+
+type ServiceRulePaginator {
+    data: [ServiceRule!]!
+    paginatorInfo: PaginatorInfo!
+}
+
+type BillingNovedadPaginator {
+    data: [BillingNovedad!]!
+    paginatorInfo: PaginatorInfo!
+}
+
+# --------------- Inputs ---------------
+
+"""
+Input para crear una nueva regla de servicio.
+"""
+input CreateServiceRuleInput {
+    "ID del servicio al que se aplica la regla"
+    service_id: ID!
+    "Tipo de regla: percentage, fixed, free_month"
+    type: String!
+    "Valor de la regla (porcentaje o monto fijo)"
+    value: Float
+    "Número de ciclos que aplica la regla"
+    cycles: Int!
+    "Fecha de inicio de la regla (opcional)"
+    starts_at: DateTime
+}
+
+"""
+Input para actualizar una regla de servicio existente.
+"""
+input UpdateServiceRuleInput {
+    "Tipo de regla: percentage, fixed, free_month"
+    type: String
+    "Valor de la regla"
+    value: Float
+    "Número total de ciclos"
+    cycles: Int
+    "Ciclos ya utilizados"
+    cycles_used: Int
+    "Fecha de inicio"
+    starts_at: DateTime
+}
+
+"""
+Input para crear una novedad de facturación.
+Los campos disponibles varían según el tipo de novedad.
+"""
+input CreateBillingNovedadInput {
+    "ID del servicio al que aplica la novedad (requerido)"
+    service_id: ID!
+    "Tipo de novedad (requerido)"
+    type: String!
+    "Monto (requerido para tipos manuales: saldo_favor, cargo_adicional, nota_credito, compensacion, exceso_consumo, impuesto)"
+    amount: Float
+    "Descripción opcional"
+    description: String
+    "Periodo de facturación (formato YYYY-MM-DD, se ajusta al primer día del mes)"
+    effective_period: Date
+    "Parámetros adicionales según el tipo de novedad"
+    rule: JSON
+    "Líneas de producto (solo para type = product_delivery)"
+    product_lines: JSON
+}
+
+"""
+Input para actualizar una novedad de facturación.
+Solo novedades no aplicadas pueden ser modificadas.
+"""
+input UpdateBillingNovedadInput {
+    "Monto de la novedad"
+    amount: Float
+    "Descripción"
+    description: String
+    "Periodo de facturación"
+    effective_period: Date
+    "Parámetros adicionales"
+    rule: JSON
+    "Líneas de producto"
+    product_lines: JSON
+}
+
+# --------------- Queries ---------------
+
+extend type Query {
+    # ===== Service Rules =====
+    
+    """
+    Lista paginada de reglas de servicio.
+    Filtrable por servicio y tipo.
+    """
+    serviceRules(
+        service_id: ID
+        type: String
+        active_only: Boolean
+        first: Int = 15
+        page: Int
+    ): ServiceRulePaginator @field(resolver: "App\\GraphQL\\Queries\\BillingQuery@serviceRules")
+    
+    """
+    Obtener una regla de servicio por ID.
+    """
+    serviceRule(id: ID!): ServiceRule @field(resolver: "App\\GraphQL\\Queries\\BillingQuery@serviceRule")
+    
+    """
+    Obtener todas las reglas activas de un servicio.
+    """
+    activeServiceRules(service_id: ID!): [ServiceRule!]! @field(resolver: "App\\GraphQL\\Queries\\BillingQuery@activeServiceRules")
+
+    # ===== Billing Novedades =====
+    
+    """
+    Lista paginada de novedades de facturación.
+    Filtrable por servicio, cliente, tipo, estado y periodo.
+    """
+    billingNovedades(
+        service_id: ID
+        customer_id: ID
+        type: String
+        applied: Boolean
+        effective_period: Date
+        first: Int = 15
+        page: Int
+    ): BillingNovedadPaginator @field(resolver: "App\\GraphQL\\Queries\\BillingQuery@billingNovedades")
+    
+    """
+    Obtener una novedad de facturación por ID.
+    """
+    billingNovedad(id: ID!): BillingNovedad @field(resolver: "App\\GraphQL\\Queries\\BillingQuery@billingNovedad")
+    
+    """
+    Obtener novedades pendientes (no aplicadas) de un servicio.
+    """
+    pendingNovedades(service_id: ID!): [BillingNovedad!]! @field(resolver: "App\\GraphQL\\Queries\\BillingQuery@pendingNovedades")
+    
+    """
+    Obtener novedades de un servicio para un periodo específico.
+    """
+    novedadesByPeriod(
+        service_id: ID!
+        effective_period: Date!
+    ): [BillingNovedad!]! @field(resolver: "App\\GraphQL\\Queries\\BillingQuery@novedadesByPeriod")
+}
+
+# --------------- Mutations ---------------
+
+extend type Mutation {
+    # ===== Service Rules =====
+    
+    """
+    Crear una nueva regla de servicio.
+    Las reglas se usan para aplicar descuentos o beneficios recurrentes.
+    """
+    createServiceRule(input: CreateServiceRuleInput!): ServiceRule 
+        @field(resolver: "App\\GraphQL\\Mutations\\ServiceRuleMutation@create")
+    
+    """
+    Actualizar una regla de servicio existente.
+    """
+    updateServiceRule(id: ID!, input: UpdateServiceRuleInput!): ServiceRule 
+        @field(resolver: "App\\GraphQL\\Mutations\\ServiceRuleMutation@update")
+    
+    """
+    Eliminar una regla de servicio.
+    """
+    deleteServiceRule(id: ID!): ActionResult 
+        @field(resolver: "App\\GraphQL\\Mutations\\ServiceRuleMutation@delete")
+    
+    """
+    Reiniciar los ciclos usados de una regla.
+    Útil para reactivar una regla que ya alcanzó su límite.
+    """
+    resetServiceRuleCycles(id: ID!): ServiceRule 
+        @field(resolver: "App\\GraphQL\\Mutations\\ServiceRuleMutation@resetCycles")
+
+    # ===== Billing Novedades =====
+    
+    """
+    Crear una nueva novedad de facturación.
+    El monto se calcula automáticamente para ciertos tipos.
+    """
+    createBillingNovedad(input: CreateBillingNovedadInput!): BillingNovedad 
+        @field(resolver: "App\\GraphQL\\Mutations\\BillingNovedadMutation@create")
+    
+    """
+    Actualizar una novedad de facturación.
+    Solo novedades no aplicadas pueden ser modificadas.
+    """
+    updateBillingNovedad(id: ID!, input: UpdateBillingNovedadInput!): BillingNovedad 
+        @field(resolver: "App\\GraphQL\\Mutations\\BillingNovedadMutation@update")
+    
+    """
+    Eliminar una novedad de facturación.
+    Solo novedades no aplicadas pueden ser eliminadas.
+    """
+    deleteBillingNovedad(id: ID!): ActionResult 
+        @field(resolver: "App\\GraphQL\\Mutations\\BillingNovedadMutation@delete")
+    
+    """
+    Marcar una novedad como aplicada manualmente.
+    Normalmente las novedades se marcan como aplicadas al generar una factura.
+    """
+    markNovedadAsApplied(id: ID!, invoice_id: ID!): BillingNovedad 
+        @field(resolver: "App\\GraphQL\\Mutations\\BillingNovedadMutation@markAsApplied")
+}

@@ -15,8 +15,6 @@ use App\Nova\Filters\ServiceType;
 use App\Nova\Lenses\TelephonicServiceLens;
 use App\Nova\Lenses\TelevisionServiceLens;
 use Illuminate\Http\Request;
-use Ispgo\Mikrotik\Nova\Actions\MikrotikAction;
-use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
 use Ispgo\Smartolt\Nova\Actions\LoadPlanSmartOlt;
 use Ispgo\Smartolt\Nova\OnuManager;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
@@ -169,9 +167,7 @@ class Service extends Resource
             new SuspendService(),
             new CreateActionsServiceInstall(),
             new CreateActionsServiceUninstall(),
-            (new MikrotikAction())->canSee(function () {
-                return MikrotikConfigProvider::getEnabled();
-            }),
+        
             (new LoadPlanSmartOlt())->canSee(function () {
                 return ProviderSmartOlt::getEnabled();
             }),

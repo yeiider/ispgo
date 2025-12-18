@@ -43,7 +43,7 @@ class Product extends Resource
             Text::make(__('Brand'), 'brand')
                 ->sortable()
                 ->rules('nullable', 'max:255'),
-            Image::make(__('Image'), 'image')->path('inventory/img'),
+            Image::make(__('Image'), 'image')->path('inventory/img')->disk("s3"),
             Currency::make(__('Price'), 'price')
                 ->sortable()
                 ->rules('required', 'numeric'),
