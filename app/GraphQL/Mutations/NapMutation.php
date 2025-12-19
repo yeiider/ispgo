@@ -12,10 +12,28 @@ class NapMutation
     public function createNapBox($root, array $args)
     {
         $input = $args['input'];
-        $napBox = new NapBox();
-        $napBox->fill($this->onlyNapBoxFillable($input));
-        $napBox->save();
-        return $napBox->fresh('ports');
+        
+        return DB::transaction(function () use ($input) {
+            // Create NAP box
+            $napBox = new NapBox();
+            $napBox->fill($this->onlyNapBoxFillable($input));
+            $napBox->save();
+            
+            // Auto-create ports based on capacity
+            if (isset($input['capacity']) && $input['capacity'] > 0) {
+                for ($i = 1; $i <= $input['capacity']; $i++) {
+                    NapPort::create([
+                        'nap_box_id' => $napBox->id,
+                        'port_number' => $i,
+                        'port_name' => "Puerto {$i}",
+                        'status' => NapPort::STATUS_AVAILABLE,
+                        'connection_type' => NapPort::CONNECTION_FIBER,
+                    ]);
+                }
+            }
+            
+            return $napBox->fresh('ports');
+        });
     }
 
     public function updateNapBox($root, array $args)

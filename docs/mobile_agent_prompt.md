@@ -125,162 +125,208 @@ mutation AssignService($serviceId: ID!, $portId: ID!) {
 }
 ```
 
-## Full GraphQL Schema Definition
+### 5. Querying Routers
+To get a list of available routers in the system (needed when creating NAP boxes or filtering data).
 
-Use the following schema definition to generate your API client types and models.
-
+**Query:** `routers`
 ```graphql
-scalar JSON @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Json")
-
-type NapBox {
-  id: ID!
-  name: String!
-  code: String
-  address: String
-  latitude: Float
-  longitude: Float
-  status: String
-  capacity: Int
-  technology_type: String
-  installation_date: String
-  brand: String
-  model: String
-  distribution_order: Int
-  parent_nap_id: ID
-  router_id: ID
-  fiber_color: String
-  ports: [NapPort!] @hasMany(relation: "ports")
-  available_ports_count: Int
-  # Services related to this box (via ports)
-  services: [Service!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxServices")
-}
-
-type NapBoxPaginator {
-  data: [NapBox!]!
-  paginatorInfo: PaginatorInfo!
-}
-
-type PaginatorInfo {
-  count: Int!
-  currentPage: Int!
-  firstItem: Int
-  hasMorePages: Boolean!
-  lastItem: Int
-  lastPage: Int!
-  perPage: Int!
-  total: Int!
-}
-
-type NapPort {
-  id: ID!
-  nap_box_id: ID!
-  port_number: Int!
-  port_name: String
-  status: String
-  connection_type: String
-  service_id: ID
-  code: String
-  color: String
-  last_signal_check: String
-  signal_strength: Float
-  port_config: JSON
-  notes: String
-  technician_notes: String
-  last_maintenance: String
-  warranty_until: String
-  # Relations
-  service: Service @belongsTo(relation: "service")
-  napBox: NapBox @belongsTo(relation: "napBox")
-}
-
-input CreateNapBoxInput {
-  name: String!
-  code: String!
-  address: String
-  latitude: Float
-  longitude: Float
-  status: String
-  capacity: Int
-  technology_type: String
-  installation_date: String
-  brand: String
-  model: String
-  distribution_order: Int
-  parent_nap_id: ID
-  router_id: ID
-  fiber_color: String
-}
-
-input UpdateNapBoxInput {
-  name: String
-  code: String
-  address: String
-  latitude: Float
-  longitude: Float
-  status: String
-  capacity: Int
-  technology_type: String
-  installation_date: String
-  brand: String
-  model: String
-  distribution_order: Int
-  parent_nap_id: ID
-  router_id: ID
-  fiber_color: String
-}
-
-input CreateNapPortInput {
-  nap_box_id: ID!
-  port_number: Int!
-  port_name: String
-  status: String
-  connection_type: String
-  service_id: ID
-  code: String
-  color: String
-  last_signal_check: String
-  signal_strength: Float
-  port_config: JSON
-  notes: String
-  technician_notes: String
-  last_maintenance: String
-  warranty_until: String
-}
-
-input UpdateNapPortInput {
-  port_name: String
-  status: String
-  connection_type: String
-  service_id: ID
-  code: String
-  color: String
-  last_signal_check: String
-  signal_strength: Float
-  port_config: JSON
-  notes: String
-  technician_notes: String
-  last_maintenance: String
-  warranty_until: String
-}
-
-extend type Query {
-  napBoxes(router_id: ID, first: Int = 15, page: Int): NapBoxPaginator @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxes")
-  napBox(id: ID!): NapBox @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBox")
-  napPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPorts")
-  napPort(id: ID!): NapPort @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPort")
-  availableNapPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@availableNapPorts")
-  napBoxServices(nap_box_id: ID!): [Service!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxServices")
-  # Radar: Find nearby boxes
-  nearbyNapBoxes(latitude: Float!, longitude: Float!, radius: Int = 500): [NapBox!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@nearbyNapBoxes")
-}
-
-extend type Mutation {
-  createNapBox(input: CreateNapBoxInput!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@createNapBox")
-  updateNapBox(id: ID!, input: UpdateNapBoxInput!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@updateNapBox")
-  createNapPort(input: CreateNapPortInput!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@createNapPort")
-  updateNapPort(id: ID!, input: UpdateNapPortInput!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@updateNapPort")
-  assignServiceToNapPort(service_id: ID!, nap_port_id: ID!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@assignServiceToNapPort")
-  releaseNapPort(nap_port_id: ID!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@releaseNapPort")
-  assignRouterToNapBox(nap_box_id: ID!, router_id: ID!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@assignRouterToNapBox")
+query GetRouters($first: Int = 10, $page: Int = 1) {
+  routers(first: $first, page: $page) {
+    data {
+      id
+      name
+      ip_address
+      description
+    }
+    paginatorInfo {
+      total
+      currentPage
+      hasMorePages
+    }
+  }
 }
 ```
+
+**Get Single Router:**
+```graphql
+query GetRouter($id: ID!) {
+  router(id: $id) {
+    id
+    name
+    ip_address
+    description
+  }
+}
+```
+
+### 6. Searching Customers and Their Services
+When assigning a service to a NAP port, you need to search for customers and get their service IDs.
+
+**Search Customers:**
+```graphql
+query SearchCustomers($search: String, $first: Int = 10) {
+  customers(search: $search, first: $first) {
+    data {
+      id
+      first_name
+      last_name
+      identity_document
+      phone_number
+      email_address
+      customer_status
+      services {
+        id
+        service_status
+        service_ip
+        sn
+        mac_address
+        service_type
+        plan {
+          id
+          name
+          download_speed
+          upload_speed
+        }
+      }
+    }
+    paginatorInfo {
+      total
+      currentPage
+    }
+  }
+}
+```
+
+**Get Customer by ID with Services:**
+```graphql
+query GetCustomer($id: ID!) {
+  customer(id: $id) {
+    id
+    first_name
+    last_name
+    identity_document
+    phone_number
+    email_address
+    services {
+      id
+      service_status
+      service_ip
+      sn
+      mac_address
+      router_id
+      plan {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+**Variables Example for Customer Search:**
+```json
+{
+  "search": "John",
+  "first": 10
+}
+```
+
+### 7. Complete Service Assignment Workflow
+Here's the complete flow for assigning a service to a NAP port:
+
+1. **Search for Customer** using `customers` query with search parameter
+2. **Select Service** from the customer's services list (get the `service_id`)
+3. **Find Available Port** in the NAP box using `availableNapPorts` query
+4. **Assign Service to Port** using `assignServiceToNapPort` mutation
+
+**Complete Example:**
+```graphql
+# Step 1: Search customer
+query SearchCustomer {
+  customers(search: "Garcia", first: 5) {
+    data {
+      id
+      first_name
+      last_name
+      services {
+        id
+        service_status
+        sn
+      }
+    }
+  }
+}
+
+# Step 2: Get available ports
+query GetAvailablePorts($napBoxId: ID!) {
+  availableNapPorts(nap_box_id: $napBoxId) {
+    id
+    port_number
+    status
+  }
+}
+
+# Step 3: Assign service to port
+mutation AssignServiceToPort($serviceId: ID!, $portId: ID!) {
+  assignServiceToNapPort(service_id: $serviceId, nap_port_id: $portId) {
+    id
+    port_number
+    status
+    service {
+      id
+      sn
+      customer {
+        first_name
+        last_name
+      }
+    }
+  }
+}
+```
+
+## Additional Important Queries
+
+### Get Services by Router
+```graphql
+query GetServicesByRouter($routerId: ID!, $first: Int = 10) {
+  services(router_id: $routerId, first: $first) {
+    data {
+      id
+      service_ip
+      service_status
+      sn
+      customer {
+        id
+        first_name
+        last_name
+      }
+    }
+  }
+}
+```
+
+### Get Services by Customer
+```graphql
+query GetServicesByCustomer($customerId: ID!, $first: Int = 10) {
+  services(customer_id: $customerId, first: $first) {
+    data {
+      id
+      service_ip
+      service_status
+      sn
+      mac_address
+    }
+  }
+}
+```
+
+## Summary
+
+This mobile app should provide technicians with:
+- **Radar/Map view** to find nearby NAP boxes
+- **Customer search** to find services that need to be assigned
+- **Router listing** for filtering and NAP creation
+- **Service assignment** workflow to connect customers to physical ports
+- **NAP and Port management** for field installations
+
+All queries support pagination where applicable, and the service assignment workflow ensures proper tracking of which customer service is connected to which physical port in the network infrastructure.
