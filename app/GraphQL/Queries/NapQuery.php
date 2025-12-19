@@ -81,4 +81,22 @@ class NapQuery
         // campos de relaciones (si el tipo Service los tiene en el schema).
         return $ports->pluck('service')->filter()->values();
     }
+
+    public function nearbyNapBoxes($root, array $args)
+    {
+        $lat = $args['latitude'];
+        $lng = $args['longitude'];
+        $radiusMeters = $args['radius'] ?? 500;
+        $radiusKm = $radiusMeters / 1000;
+
+        // Fórmula Haversine para calcular distancia en km
+        return NapBox::select('*')
+            ->selectRaw(
+                "(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance",
+                [$lat, $lng, $lat]
+            )
+            ->having('distance', '<', $radiusKm)
+            ->orderBy('distance')
+            ->get();
+    }
 }

@@ -38,8 +38,8 @@ class Service extends Model
     ];
 
     protected $casts = [
-        'deactivation_date' => 'date',
-        'activation_date' => 'date',
+        'deactivation_date' => 'datetime',
+        'activation_date' => 'datetime',
         'installation_date' => 'date',
         'last_maintenance' => 'date',
     ];

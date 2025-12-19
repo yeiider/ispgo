@@ -274,8 +274,7 @@ class CustomerBillingService
             return false;
         }
 
-        return $lastInvoice->outstanding_balance > 0
-            && in_array($lastInvoice->status, ['unpaid', 'overdue']);
+        return $lastInvoice->status === 'unpaid';
     }
 
     /**

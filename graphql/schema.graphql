@@ -141,11 +141,11 @@ type Mutation @guard {
         service_status: String @rules(apply: ["in:active,inactive,suspended,pending,free"])
         username_router: String
         password_router: String
-        activation_date: DateTime
-        deactivation_date: DateTime
+        activation_date: String
+        deactivation_date: String
         bandwidth: Int
         mac_address: String
-        installation_date: DateTime
+        installation_date: String
         service_notes: String
         support_contact: String
         service_type: String @rules(apply: ["in:ftth,adsl,satellite"])
@@ -615,7 +615,7 @@ type Service {
     router: Router! @belongsTo
     address: Address @belongsTo(relation: "address")
     napPort: NapPort @hasOne(relation: "napPort")
-    
+
     # Relaciones de facturación
     "Reglas de descuento/beneficio aplicables al servicio"
     rules: [ServiceRule!]! @hasMany(relation: "rules")
@@ -984,8 +984,8 @@ extend type Query {
   napPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPorts")
   napPort(id: ID!): NapPort @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPort")
   availableNapPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@availableNapPorts")
-  # Lista directa de servicios relacionados a una caja NAP
   napBoxServices(nap_box_id: ID!): [Service!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxServices")
+  nearbyNapBoxes(latitude: Float!, longitude: Float!, radius: Int = 500): [NapBox!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@nearbyNapBoxes")
 }
 
 extend type Mutation {
@@ -1211,9 +1211,9 @@ extend type Query {
         first: Int = 15
         page: Int
     ): ProductPaginator @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@products")
-    
+
     inventoryProduct(id: ID!): InventoryProduct @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@product")
-    
+
     # Bodegas
     inventoryWarehouses(
         name: String
@@ -1221,18 +1221,18 @@ extend type Query {
         first: Int = 15
         page: Int
     ): WarehousePaginator @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@warehouses")
-    
+
     inventoryWarehouse(id: ID!): InventoryWarehouse @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@warehouse")
-    
+
     # Categorías
     inventoryCategories(
         name: String
         first: Int = 15
         page: Int
     ): CategoryPaginator @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@categories")
-    
+
     inventoryCategory(id: ID!): InventoryCategory @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@category")
-    
+
     # Stock
     productStocks(
         product_id: ID
@@ -1241,13 +1241,13 @@ extend type Query {
         first: Int = 15
         page: Int
     ): ProductStockPaginator @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productStocks")
-    
+
     productStock(id: ID!): ProductStock @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productStock")
-    
+
     productStockByProduct(product_id: ID!): [ProductStock!]! @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productStockByProduct")
-    
+
     productStockByWarehouse(warehouse_id: ID!): [ProductStock!]! @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productStockByWarehouse")
-    
+
     productTotalStock(product_id: ID!): ProductTotalStock @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productTotalStock")
 }
 
@@ -1255,55 +1255,55 @@ extend type Query {
 extend type Mutation {
     # Productos
     createInventoryProduct(input: CreateProductInput!): InventoryProduct @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@createProduct")
-    
+
     updateInventoryProduct(id: ID!, input: UpdateProductInput!): InventoryProduct @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@updateProduct")
-    
+
     deleteInventoryProduct(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteProduct")
-    
+
     # Bodegas
     createInventoryWarehouse(input: CreateWarehouseInput!): InventoryWarehouse @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@createWarehouse")
-    
+
     updateInventoryWarehouse(id: ID!, input: UpdateWarehouseInput!): InventoryWarehouse @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@updateWarehouse")
-    
+
     deleteInventoryWarehouse(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteWarehouse")
-    
+
     # Categorías
     createInventoryCategory(input: CreateCategoryInput!): InventoryCategory @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@createCategory")
-    
+
     updateInventoryCategory(id: ID!, input: UpdateCategoryInput!): InventoryCategory @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@updateCategory")
-    
+
     deleteInventoryCategory(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteCategory")
-    
+
     # Stock
     upsertProductStock(input: UpsertProductStockInput!): ProductStock @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@upsertProductStock")
-    
+
     updateStockQuantity(id: ID!, quantity: Int!): ProductStock @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@updateStockQuantity")
-    
+
     incrementStock(product_id: ID!, warehouse_id: ID!, amount: Int!): ProductStock @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@incrementStock")
-    
+
     decrementStock(product_id: ID!, warehouse_id: ID!, amount: Int!): ProductStock @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@decrementStock")
-    
+
     transferStock(
         product_id: ID!
         from_warehouse_id: ID!
         to_warehouse_id: ID!
         amount: Int!
     ): TransferStockResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@transferStock")
-    
+
     deleteProductStock(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteProductStock")
-    
+
     # Asignar múltiples bodegas con stock a un producto
     assignWarehousesToProduct(
         product_id: ID!
         warehouses: [WarehouseStockInput!]!
     ): InventoryProduct @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@assignWarehousesToProduct")
-    
+
     # Sincronizar bodegas de un producto (reemplaza todas las asignaciones existentes)
     syncWarehousesToProduct(
         product_id: ID!
         warehouses: [WarehouseStockInput!]!
     ): InventoryProduct @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@syncWarehousesToProduct")
-    
+
     # Remover una bodega de un producto
     removeWarehouseFromProduct(
         product_id: ID!
@@ -1360,9 +1360,9 @@ extend type Mutation {
     Almacena el archivo en S3/tmp/ para previsualización.
     El archivo será eliminado automáticamente por las políticas de ciclo de vida de S3 si no se confirma.
     """
-    uploadTempFile(input: TempUploadInput!): TempUploadResult 
+    uploadTempFile(input: TempUploadInput!): TempUploadResult
         @field(resolver: "App\\GraphQL\\Mutations\\FileUploadMutation@uploadTempBase64")
-    
+
     """
     Paso 2: Confirmar y mover archivo a ubicación permanente.
     Mueve el archivo de tmp/ a la carpeta destino especificada.
@@ -1371,23 +1371,23 @@ extend type Mutation {
         temp_path: String! @rules(apply: ["required", "string"])
         destination_folder: String! @rules(apply: ["required", "string", "max:100"])
         new_file_name: String
-    ): ConfirmUploadResult 
+    ): ConfirmUploadResult
         @field(resolver: "App\\GraphQL\\Mutations\\FileUploadMutation@confirmUpload")
-    
+
     """
     Eliminar archivo temporal.
     Útil si el usuario cancela el formulario.
     """
     deleteTempFile(
         temp_path: String! @rules(apply: ["required", "string"])
-    ): ActionResult 
+    ): ActionResult
         @field(resolver: "App\\GraphQL\\Mutations\\FileUploadMutation@deleteTempFile")
-    
+
     """
     Crear producto de inventario con imagen.
     Recibe el temp_path de una imagen previamente cargada y la mueve automáticamente a products/.
     """
-    createInventoryProductWithImage(input: CreateProductWithImageInput!): InventoryProduct 
+    createInventoryProductWithImage(input: CreateProductWithImageInput!): InventoryProduct
         @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@createProductWithImage")
 }
 
@@ -1414,6 +1414,7 @@ input CreateProductWithImageInput {
     warehouses: [WarehouseStockInput!]
 }
 
+#import service_actions.graphql
 #import billing.graphql
 #import smartolt.graphql
 #import mikrotik.graphql

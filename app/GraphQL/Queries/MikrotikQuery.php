@@ -67,6 +67,55 @@ class MikrotikQuery
     }
 
     /**
+     * Obtener DHCP servers del router
+     */
+    public function dhcpServers($root, array $args): array
+    {
+        $routerId = (int) $args['router_id'];
+
+        if (!MikrotikConfigProvider::isEnabled($routerId)) {
+            return [
+                'success' => false,
+                'message' => 'El módulo Mikrotik no está habilitado para este router',
+                'count' => 0,
+                'servers' => [],
+            ];
+        }
+
+        try {
+            $client = new MikrotikApiClient($routerId);
+            $response = $client->getDhcpServers();
+
+            $servers = [];
+            if (isset($response['servers']) && is_array($response['servers'])) {
+                foreach ($response['servers'] as $server) {
+                    $servers[] = [
+                        'name' => $server['name'] ?? '',
+                        'interface' => $server['interface'] ?? '',
+                        'lease_time' => $server['lease_time'] ?? $server['lease-time'] ?? null,
+                        'address_pool' => $server['address_pool'] ?? $server['address-pool'] ?? null,
+                    ];
+                }
+            }
+
+            return [
+                'success' => true,
+                'message' => 'Servidores DHCP obtenidos exitosamente',
+                'count' => count($servers),
+                'servers' => $servers,
+            ];
+
+        } catch (MikrotikApiException $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'count' => 0,
+                'servers' => [],
+            ];
+        }
+    }
+
+    /**
      * Buscar lease por MAC address
      */
     public function findLeaseByMac($root, array $args): ?array
