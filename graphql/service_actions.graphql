@@ -1,0 +1,12 @@
+extend type Mutation @guard {
+    "Actualizar IP y MAC desde SmartOLT para una lista de servicios."
+    updateServicesIpMac(
+        service_ids: [ID!]!
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ServiceActionsMutation@updateIpMac")
+
+    "Provisionar servicios en Mikrotik (Binding DHCP + Queue) para una lista de servicios."
+    provisionServicesDhcp(
+        service_ids: [ID!]!
+        dhcp_server: String!
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ServiceActionsMutation@provisionDhcp")
+}

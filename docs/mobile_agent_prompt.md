@@ -1,4 +1,135 @@
-"Arbitrary JSON object."
+# Prompt for Mobile App Agent: NAP Management & Radar
+
+You are an expert mobile developer agent building a "NAP Manager" application for ISP field technicians.
+Your goal is to implement screens that allow technicians to:
+1.  **Radar View**: Find nearby NAP boxes based on their current GPS location.
+2.  **NAP Details**: View ports, status, and assigned services of a specific NAP box.
+3.  **Manage NAPs**: Create new boxes, update existing ones, add ports, and assign customer services to ports.
+
+## Backend GraphQL API
+
+The backend provides a GraphQL API to interact with the system. Below are the specific queries and mutations designed for the mobile app.
+
+### 1. Radar Query (Geo-spatial)
+Use this query to find NAP boxes within a specific radius (default 500 meters) of the user's current position. This is used for the "Radar" or "Map" view.
+
+**Query Field:** `nearbyNapBoxes`
+**Arguments:**
+- `latitude`: Float! (Required)
+- `longitude`: Float! (Required)
+- `radius`: Int (Optional, in meters, default: 500)
+
+**Example Query:**
+```graphql
+query Radar($lat: Float!, $lng: Float!) {
+  nearbyNapBoxes(latitude: $lat, longitude: $lng, radius: 500) {
+    id
+    name
+    code
+    address
+    latitude
+    longitude
+    status
+    available_ports_count
+    fiber_color
+    # The backend returns results ordered by distance
+  }
+}
+```
+
+### 2. NAP Details & Port Management
+To view all details of a NAP, including its ports and connected services.
+
+**Query:** `napBox`
+```graphql
+query NapDetails($id: ID!) {
+  napBox(id: $id) {
+    id
+    name
+    code
+    address
+    fiber_color
+    router_id
+    ports {
+      id
+      port_number
+      port_name
+      status
+      code # Port code/label
+      color # Fiber strand color
+      service {
+        id
+        service_status
+        sn
+        customer_id
+      }
+    }
+  }
+}
+```
+
+### 3. Creating & Updating NAPs
+Technicians can register new NAP boxes installed in the field.
+
+**Mutation:** `createNapBox`
+```graphql
+mutation CreateNAP($input: CreateNapBoxInput!) {
+  createNapBox(input: $input) {
+    id
+    name
+    code
+  }
+}
+```
+
+**Input Variables Example:**
+```json
+{
+  "input": {
+    "name": "NAP-Sector-A",
+    "code": "NAP-055",
+    "latitude": 4.12345,
+    "longitude": -74.12345,
+    "address": "Street 1 #2-3",
+    "capacity": 16,
+    "fiber_color": "Blue",
+    "router_id": 1
+  }
+}
+```
+
+### 4. Port Management
+Add ports to a NAP or assign a service to a port.
+
+**Create Port:**
+```graphql
+mutation CreatePort($input: CreateNapPortInput!) {
+  createNapPort(input: $input) {
+    id
+    port_number
+  }
+}
+```
+
+**Assign Service:**
+```graphql
+mutation AssignService($serviceId: ID!, $portId: ID!) {
+  assignServiceToNapPort(service_id: $serviceId, nap_port_id: $portId) {
+    id
+    status
+    service {
+      id
+      sn
+    }
+  }
+}
+```
+
+## Full GraphQL Schema Definition
+
+Use the following schema definition to generate your API client types and models.
+
+```graphql
 scalar JSON @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Json")
 
 type NapBox {
@@ -20,7 +151,7 @@ type NapBox {
   fiber_color: String
   ports: [NapPort!] @hasMany(relation: "ports")
   available_ports_count: Int
-  # Servicios relacionados a esta caja (a través de sus puertos)
+  # Services related to this box (via ports)
   services: [Service!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxServices")
 }
 
@@ -57,7 +188,7 @@ type NapPort {
   technician_notes: String
   last_maintenance: String
   warranty_until: String
-  # Relaciones
+  # Relations
   service: Service @belongsTo(relation: "service")
   napBox: NapBox @belongsTo(relation: "napBox")
 }
@@ -138,9 +269,8 @@ extend type Query {
   napPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPorts")
   napPort(id: ID!): NapPort @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPort")
   availableNapPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@availableNapPorts")
-  # Lista directa de servicios relacionados a una caja NAP
   napBoxServices(nap_box_id: ID!): [Service!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxServices")
-  # Radar: Buscar cajas cercanas
+  # Radar: Find nearby boxes
   nearbyNapBoxes(latitude: Float!, longitude: Float!, radius: Int = 500): [NapBox!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@nearbyNapBoxes")
 }
 
@@ -153,3 +283,4 @@ extend type Mutation {
   releaseNapPort(nap_port_id: ID!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@releaseNapPort")
   assignRouterToNapBox(nap_box_id: ID!, router_id: ID!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@assignRouterToNapBox")
 }
+```

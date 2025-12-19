@@ -31,6 +31,14 @@ class MikrotikApiClient
     }
 
     /**
+     * Obtener los DHCP servers del router
+     */
+    public function getDhcpServers(): array
+    {
+        return $this->post('/mikrotik/dhcp/servers', $this->credentials);
+    }
+
+    /**
      * Obtener los DHCP leases del router
      */
     public function getDhcpLeases(): array
@@ -214,27 +222,19 @@ class MikrotikApiClient
     public function provisionService(
         string $macAddress,
         string $ipAddress,
+        string $serverName,
         string $queueName,
         string $maxLimit,
         ?string $comment = null
     ): array {
-        $dhcpServer = MikrotikConfigProvider::getDhcpServer($this->routerId);
-
-        return $this->post('/provision/simple-flow', [
-            'lease_request' => [
-                'mac_address' => $macAddress,
-                'ip_address' => $ipAddress,
-                'server' => $dhcpServer,
-                'comment' => $comment,
-                'credentials' => $this->credentials,
-            ],
-            'queue_request' => [
-                'name' => $queueName,
-                'target' => $ipAddress,
-                'max_limit' => $maxLimit,
-                'comment' => $comment,
-                'credentials' => $this->credentials,
-            ],
+        return $this->post('/mikrotik/provision/simple-flow', [
+            'credentials' => $this->credentials,
+            'mac_address' => $macAddress,
+            'ip_address' => $ipAddress,
+            'server' => $serverName,
+            'queue_name' => $queueName,
+            'max_limit' => $maxLimit,
+            'comment' => $comment,
         ]);
     }
 

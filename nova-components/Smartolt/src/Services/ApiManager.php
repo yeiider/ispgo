@@ -445,7 +445,7 @@ class ApiManager
     public function setOnuManagementIpDhcpByExternalId(string $externalId, int $vlan): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/set_onu_mgmt_ip_dhcp/' . $externalId, ['vlan' => $vlan], true);
+        return $this->request('api/onu/set_onu_wan_mode_dhcp/' . $externalId, ['vlan' => $vlan], true);
     }
 
     /**
