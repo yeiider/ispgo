@@ -18,7 +18,8 @@ class Product extends Model
         'name', 'sku', 'brand', 'image', 'price',
         'special_price', 'cost_price', 'description',
         'reference', 'taxes', 'status', 'url_key',
-        'warehouse_id', 'category_id', 'qty'
+        'warehouse_id', 'category_id', 'qty',
+        'assignable_to_service'
     ];
 
     /**
