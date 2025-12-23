@@ -110,6 +110,8 @@ type CategoryPaginator {
 
 type EquipmentAssignment {
     id: ID!
+    user_id: ID!
+    product_id: ID!
     user: User! @belongsTo
     product: InventoryProduct! @belongsTo
     quantity: Int!
