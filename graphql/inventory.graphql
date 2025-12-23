@@ -127,6 +127,9 @@ type EquipmentAssignment {
 
 type ServiceMaterial {
     id: ID!
+    service_id: ID!
+    product_id: ID!
+    user_id: ID
     service: Service! @belongsTo
     product: InventoryProduct! @belongsTo
     user: User @belongsTo
