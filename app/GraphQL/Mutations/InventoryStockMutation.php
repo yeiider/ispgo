@@ -18,7 +18,7 @@ class InventoryStockMutation
     public function createProduct($root, array $args)
     {
         $input = $args['input'];
-        
+
         return DB::transaction(function () use ($input) {
             $product = new Product();
             $product->fill($this->onlyProductFillable($input));
@@ -35,31 +35,31 @@ class InventoryStockMutation
 
     /**
      * Actualiza un producto existente.
-     * 
+     *
      * Si se proporciona image_temp_path, mueve la imagen temporal a ubicación permanente
      * y actualiza el campo image del producto.
      */
     public function updateProduct($root, array $args)
     {
         $input = $args['input'];
-        
+
         return DB::transaction(function () use ($args, $input) {
             $product = Product::findOrFail($args['id']);
-            
+
             // Si hay una imagen temporal, moverla a la carpeta permanente
             if (!empty($input['image_temp_path'])) {
                 $imageResult = FileUploadMutation::moveToPermanentStorage(
                     $input['image_temp_path'],
                     'products'
                 );
-                
+
                 if ($imageResult['success']) {
                     // Eliminar imagen anterior si existe y es diferente
                     $oldImage = $product->image;
                     if ($oldImage && !str_starts_with($oldImage, 'http')) {
                         \Illuminate\Support\Facades\Storage::disk('s3')->delete($oldImage);
                     }
-                    
+
                     // Asignar la nueva imagen permanente
                     $input['image'] = $imageResult['permanent_path'];
                 } else {
@@ -68,10 +68,10 @@ class InventoryStockMutation
                     ]);
                 }
             }
-            
+
             // Preparar datos del producto (excluyendo image_temp_path)
             $productData = $this->onlyProductFillable($input);
-            
+
             $product->fill($productData);
             $product->save();
 
@@ -98,7 +98,7 @@ class InventoryStockMutation
 
             // Eliminar registros de stock
             $product->stocks()->delete();
-            
+
             // Eliminar el producto
             $product->delete();
 
@@ -167,7 +167,7 @@ class InventoryStockMutation
 
             // Eliminar registros de stock
             $warehouse->stocks()->delete();
-            
+
             // Eliminar la bodega
             $warehouse->delete();
 
@@ -249,7 +249,7 @@ class InventoryStockMutation
         return DB::transaction(function () use ($input) {
             // Verificar que el producto existe
             $product = Product::findOrFail($input['product_id']);
-            
+
             // Verificar que la bodega existe
             $warehouse = Warehouse::findOrFail($input['warehouse_id']);
 
@@ -432,7 +432,7 @@ class InventoryStockMutation
     {
         return DB::transaction(function () use ($args) {
             $product = Product::findOrFail($args['product_id']);
-            
+
             $this->assignWarehousesStockToProduct($product, $args['warehouses']);
 
             return $product->fresh(['category', 'warehouse', 'stocks.warehouse']);
@@ -446,10 +446,10 @@ class InventoryStockMutation
     {
         return DB::transaction(function () use ($args) {
             $product = Product::findOrFail($args['product_id']);
-            
+
             // Eliminar todos los stocks existentes
             $product->stocks()->delete();
-            
+
             // Asignar nuevas bodegas
             $this->assignWarehousesStockToProduct($product, $args['warehouses']);
 
@@ -525,7 +525,7 @@ class InventoryStockMutation
             'name', 'sku', 'brand', 'image', 'price',
             'special_price', 'cost_price', 'description',
             'reference', 'taxes', 'status', 'url_key',
-            'warehouse_id', 'category_id', 'qty'
+            'warehouse_id', 'category_id', 'qty','assignable_to_service','unit_of_measure'
         ]));
     }
 
@@ -545,10 +545,10 @@ class InventoryStockMutation
 
     /**
      * Crea un nuevo producto con imagen temporal.
-     * 
+     *
      * Este método recibe un path temporal de imagen (obtenido de uploadTempFile)
      * y lo mueve automáticamente a la carpeta products/ antes de crear el producto.
-     * 
+     *
      * @param mixed $root
      * @param array $args
      * @return Product
@@ -556,7 +556,7 @@ class InventoryStockMutation
     public function createProductWithImage($root, array $args)
     {
         $input = $args['input'];
-        
+
         return DB::transaction(function () use ($input) {
             // Si hay una imagen temporal, moverla a la carpeta permanente
             $permanentImagePath = null;
@@ -565,7 +565,7 @@ class InventoryStockMutation
                     $input['image_temp_path'],
                     'products'
                 );
-                
+
                 if ($imageResult['success']) {
                     $permanentImagePath = $imageResult['permanent_path'];
                 } else {
@@ -574,15 +574,15 @@ class InventoryStockMutation
                     ]);
                 }
             }
-            
+
             // Preparar datos del producto
             $productData = $this->onlyProductFillable($input);
-            
+
             // Asignar la imagen permanente si se procesó
             if ($permanentImagePath) {
                 $productData['image'] = $permanentImagePath;
             }
-            
+
             // Crear el producto
             $product = new Product();
             $product->fill($productData);
