@@ -376,14 +376,14 @@ extend type Mutation {
         user_id: ID! @rules(apply: ["required", "exists:users,id"])
         product_id: ID! @rules(apply: ["required", "exists:products,id"])
         quantity: Int! @rules(apply: ["required", "numeric", "min:1"])
-        assigned_at: DateTime
+        assigned_at: String
         condition: String
         notes: String
     ): EquipmentAssignment @create(model: "App\\Models\\Inventory\\EquipmentAssignment")
 
     updateEquipmentAssignment(
         id: ID! @rules(apply: ["required", "exists:equipment_assignments,id"])
-        returned_at: DateTime
+        returned_at: String
         status: String
         condition_on_return: String
         notes: String
