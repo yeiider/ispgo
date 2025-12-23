@@ -19,7 +19,8 @@ class Product extends Model
         'special_price', 'cost_price', 'description',
         'reference', 'taxes', 'status', 'url_key',
         'warehouse_id', 'category_id', 'qty',
-        'assignable_to_service'
+        'assignable_to_service',
+        'unit_of_measure'
     ];
 
     /**

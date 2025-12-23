@@ -4,7 +4,7 @@ Esta funcionalidad permite asignar productos del inventario a usuarios (técnico
 
 ## 1. Configuración de Productos
 
-Para que un producto pueda ser asignado, se recomienda marcar el atributo `assignable_to_service` (o usarlo como lógica de negocio para filtrar en el frontend).
+Para que un producto pueda ser asignado, se recomienda marcar el atributo `assignable_to_service` (o usarlo como lógica de negocio para filtrar en el frontend). Este campo es requerido agregarlo al formulario ya existente para actualizar y crear productos.
 
 ### Crear/Actualizar Producto
 Se ha añadido el campo `assignable_to_service` a las mutaciones de producto.
@@ -19,10 +19,12 @@ mutation CreateAssignableProduct {
     category_id: 1
     url_key: "router-huawei-hg8245"
     assignable_to_service: true
+    unit_of_measure: "units"
   }) {
     id
     name
     assignable_to_service
+    unit_of_measure
   }
 }
 ```
@@ -104,18 +106,57 @@ query GetTechnicianAssignments {
 
 Para registrar la devolución o cambiar el estado.
 
+
+## 6. Asignar Producto a Servicio (Materiales)
+
+Se puede asignar un producto directamente a un servicio. Hay dos modos:
+1.  **Asignación Normal**: Registra el material en el servicio (no descuenta del stock del técnico).
+2.  **Desde Stock de Usuario**: Descuenta el producto del inventario asignado al técnico (`from_user_stock: true`).
+
+### Ejemplo: Asignación desde Stock del Técnico
+Este caso es común cuando un técnico instala un equipo que previamente le fue asignado.
+
 ```graphql
-mutation ReturnEquipment {
-  updateEquipmentAssignment(
-    id: 123
-    returned_at: "2023-10-28 17:00:00"
-    status: "returned"
-    condition_on_return: "Usado, buen estado"
-    notes: "Devolución tras instalación fallida"
+mutation InstallRouterOnService {
+  assignProductToService(
+    service_id: 100
+    product_id: 10
+    quantity: 1
+    from_user_stock: true # Importante: Descuenta del usuario
+    user_id: 5 # Opcional si el usuario está autenticado, obligatorio si es admin asignando por otro
+    notes: "Instalación de Router HG8245"
   ) {
     id
-    status
-    returned_at
+    service {
+      id
+    }
+    product {
+      name
+    }
+    quantity
+    from_user_stock
+  }
+}
+```
+
+### Consultar Materiales de un Servicio
+
+```graphql
+query GetServiceMaterials {
+  serviceMaterials(service_id: 100) {
+    data {
+      id
+      product {
+        name
+        unit_of_measure
+      }
+      quantity
+      from_user_stock
+      user {
+        name
+      }
+      created_at
+    }
   }
 }
 ```

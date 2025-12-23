@@ -20,6 +20,9 @@ type InventoryProduct {
     assignable_to_service: Boolean
     url_key: String
     qty: String
+    assignable_to_service: Boolean
+    unit_of_measure: String
+    warehouse_id: ID
     warehouse_id: ID
     category_id: ID
     created_at: DateTime!
@@ -110,11 +113,23 @@ type EquipmentAssignment {
     user: User! @belongsTo
     product: InventoryProduct! @belongsTo
     quantity: Int!
-    assigned_at: DateTime
-    returned_at: DateTime
+    assigned_at: String
+    returned_at: String
     status: String
     condition_on_assignment: String
     condition_on_return: String
+    notes: String
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type ServiceMaterial {
+    id: ID!
+    service: Service! @belongsTo
+    product: InventoryProduct! @belongsTo
+    user: User @belongsTo
+    quantity: Float!
+    from_user_stock: Boolean!
     notes: String
     created_at: DateTime!
     updated_at: DateTime!
@@ -138,6 +153,7 @@ input CreateProductInput {
     warehouse_id: ID
     category_id: ID!
     qty: String
+    unit_of_measure: String
     # Opcionalmente asignar bodegas con stock al crear el producto
     warehouses: [WarehouseStockInput!]
 }
@@ -162,6 +178,7 @@ input UpdateProductInput {
     warehouse_id: ID
     category_id: ID
     qty: String
+    unit_of_measure: String
 }
 
 input WarehouseStockInput {
@@ -223,6 +240,7 @@ input CreateProductWithImageInput {
     warehouse_id: ID
     category_id: ID!
     qty: String
+    unit_of_measure: String
     warehouses: [WarehouseStockInput!]
 }
 
@@ -285,6 +303,12 @@ extend type Query {
     ): [EquipmentAssignment!]! @paginate(defaultCount: 15, model: "App\\Models\\Inventory\\EquipmentAssignment")
 
     equipmentAssignment(id: ID! @eq): EquipmentAssignment @find(model: "App\\Models\\Inventory\\EquipmentAssignment")
+
+    serviceMaterials(
+        service_id: ID @eq
+        product_id: ID @eq
+        user_id: ID @eq
+    ): [ServiceMaterial!]! @paginate(defaultCount: 15, model: "App\\Models\\Services\\ServiceMaterial")
 }
 
 extend type Mutation {
@@ -364,4 +388,13 @@ extend type Mutation {
         condition_on_return: String
         notes: String
     ): EquipmentAssignment @update(model: "App\\Models\\Inventory\\EquipmentAssignment")
+
+    assignProductToService(
+        service_id: ID! @rules(apply: ["required", "exists:services,id"])
+        product_id: ID! @rules(apply: ["required", "exists:products,id"])
+        quantity: Float! @rules(apply: ["required", "numeric", "min:0.01"])
+        from_user_stock: Boolean = false
+        user_id: ID @rules(apply: ["exists:users,id"])
+        notes: String
+    ): ServiceMaterial @field(resolver: "App\\GraphQL\\Mutations\\ServiceMaterialMutation@assign")
 }
