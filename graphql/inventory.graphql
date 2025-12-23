@@ -395,11 +395,11 @@ extend type Mutation {
     ): EquipmentAssignment @update(model: "App\\Models\\Inventory\\EquipmentAssignment")
 
     assignProductToService(
-        service_id: ID! @rules(apply: ["required", "exists:services,id"])
-        product_id: ID! @rules(apply: ["required", "exists:products,id"])
+        service_id: Int! @rules(apply: ["required", "exists:services,id"])
+        product_id: Int! @rules(apply: ["required", "exists:products,id"])
         quantity: Float! @rules(apply: ["required", "numeric", "min:0.01"])
         from_user_stock: Boolean = false
-        user_id: ID @rules(apply: ["exists:users,id"])
+        user_id: Int @rules(apply: ["exists:users,id"])
         notes: String
     ): ServiceMaterial @field(resolver: "App\\GraphQL\\Mutations\\ServiceMaterialMutation@assign")
 }
