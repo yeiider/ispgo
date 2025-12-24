@@ -809,6 +809,7 @@ type TicketAttachment {
     user_id: ID!
     file_name: String!
     file_path: String!
+    image_url: String
     file_type: String
     file_size: Int
     created_at: DateTime!

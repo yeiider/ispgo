@@ -2,17 +2,17 @@
 
 namespace App\Models\Inventory;
 
+use App\Traits\HasSignedUrls;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, HasSignedUrls;
 
     protected $fillable = [
         'name', 'sku', 'brand', 'image', 'price',
@@ -30,47 +30,13 @@ class Product extends Model
 
     /**
      * Obtiene la URL completa de la imagen del producto.
-     * 
+     *
      * Siempre genera una URL firmada (presigned) con expiración de 60 minutos
      * para mayor seguridad y compatibilidad con buckets privados.
      */
     protected function imageUrl(): Attribute
     {
-        return Attribute::make(
-            get: function () {
-                if (empty($this->attributes['image'])) {
-                    return null;
-                }
-
-                $path = $this->attributes['image'];
-                $disk = 's3';
-
-                // Si ya es una URL completa, retornarla tal cual
-                if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-                    return $path;
-                }
-
-                try {
-                    $useSignedUrls = config('filesystems.disks.s3.use_signed_urls', true);
-
-                    if ($useSignedUrls) {
-                        // URL firmada con expiración de 60 minutos
-                        return Storage::disk($disk)->temporaryUrl($path, now()->addMinutes(60));
-                    }
-
-                    return Storage::disk($disk)->url($path);
-                } catch (\Exception $e) {
-                    // Si falla la generación de URL firmada, intentar URL simple
-                    \Illuminate\Support\Facades\Log::warning('Product: Error generando URL firmada', [
-                        'product_id' => $this->id ?? null,
-                        'path' => $path,
-                        'error' => $e->getMessage(),
-                    ]);
-                    
-                    return Storage::disk($disk)->url($path);
-                }
-            }
-        );
+        return $this->signedUrlAttribute('image', 's3', 60);
     }
 
     /**
