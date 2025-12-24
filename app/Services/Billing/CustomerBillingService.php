@@ -55,7 +55,7 @@ class CustomerBillingService
                         'all_services_suspended' => $allServicesSuspended,
                         'last_invoice_unpaid' => $lastInvoiceUnpaid,
                     ]);
-                    throw new Exception("Cliente {$customer->id}: No se genera factura - todos los servicios suspendidos y última factura sin pagar");
+                    return null;
                 }
 
                 // Si SÍ está activo el arrendamiento, generar factura SOLO con el arrendamiento

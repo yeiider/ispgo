@@ -30,14 +30,14 @@ class WiivoServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Event::listen(
-            InvoicePaid::class,
-            [PaymentInvoice::class, 'handle']
-        );
-        Event::listen(
-            InvoiceIssued::class,
-            [GeneratedInvoice::class, 'handle']
-        );
+//        Event::listen(
+//            InvoicePaid::class,
+//            [PaymentInvoice::class, 'handle']
+//        );
+//        Event::listen(
+//            InvoiceIssued::class,
+//            [GeneratedInvoice::class, 'handle']
+//        );
 
 
         Route::middleware([Authorize::class])

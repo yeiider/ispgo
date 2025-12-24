@@ -23,8 +23,7 @@ class GenerateCustomerInvoices extends Command
     {
         $billingDate = GeneralProviderConfig::getBillingDate();
         $currentDate = Carbon::now();
-
-        if ($currentDate->day == $billingDate) {
+        if ($currentDate->day) {
             $period = $this->option('period')
                 ? Carbon::createFromFormat('Y-m', $this->option('period'))
                 : now();
@@ -41,7 +40,11 @@ class GenerateCustomerInvoices extends Command
                         Log::error("Error al generar factura para el cliente {$customer->id}: {$e->getMessage()}");
 
                         // Enviar notificación al administrador
-                        Notify::notifyError("Error al generar factura para el cliente ID: {$customer->id}. Revise los logs para más detalles.");
+                        try {
+                            Notify::notifyError("Error cliente ID: {$customer->id}. Ver logs.");
+                        } catch (\Throwable $notifyError) {
+                            Log::error("Fallo al enviar notificación de error: " . $notifyError->getMessage());
+                        }
 
                         // Continuar con el siguiente cliente
                         continue;
