@@ -79,6 +79,9 @@ class ImportCustomers extends Action
                 // Split data by prefixes: customer., address., service.
                 [$customerData, $addressData, $serviceData] = $this->splitData($data);
 
+                // Track if any update occurred in this row
+                $rowUpdated = false;
+
                 // Basic normalization
                 $identity = $customerData['identity_document'] ?? null;
                 if (!$identity) {
@@ -116,9 +119,7 @@ class ImportCustomers extends Action
                     $customer->fill($customerData);
                     if ($customer->isDirty()) {
                         $customer->save();
-                        $updated++;
-                    } else {
-                        $skipped++;
+                        $rowUpdated = true;
                     }
                 }
 
@@ -126,15 +127,27 @@ class ImportCustomers extends Action
                 if (!empty($addressData)) {
                     $addressId = $addressData['id'] ?? null;
                     $addressModel = null;
+                    
+                    // First try to find by ID if provided
                     if ($addressId) {
                         $addressModel = Address::where('customer_id', $customer->id)->where('id', $addressId)->first();
                     }
+                    
+                    // If not found by ID, check if customer already has an address
+                    if (!$addressModel) {
+                        $addressModel = Address::where('customer_id', $customer->id)->first();
+                    }
+                    
                     if ($addressModel) {
+                        // Update existing address
                         $addressModel->fill($addressData);
                         $addressModel->customer_id = $customer->id;
-                        $addressModel->save();
+                        if ($addressModel->isDirty()) {
+                            $addressModel->save();
+                            $rowUpdated = true;
+                        }
                     } else {
-                        // minimal required for address on create
+                        // Create new address - minimal required validation
                         $addrValidator = Validator::make($addressData, [
                             'address' => 'required|max:100',
                             'city' => 'required|max:100',
@@ -160,54 +173,63 @@ class ImportCustomers extends Action
 
                 // Service handling: if any service fields provided, create or update
                 if (!empty($serviceData)) {
-                    // Verificar si el cliente ya tiene algún servicio
-                    $existingService = Service::where('customer_id', $customer->id)->first();
+                    $serviceId = $serviceData['id'] ?? null;
+                    $serviceModel = null;
                     
-                    if (!$existingService) {
-                        // El cliente no tiene servicios, proceder a crear uno
-                        $serviceId = $serviceData['id'] ?? null;
-                        $serviceModel = null;
-                        if ($serviceId) {
-                            $serviceModel = Service::where('customer_id', $customer->id)->where('id', $serviceId)->first();
-                        }
+                    // First try to find by ID if provided
+                    if ($serviceId) {
+                        $serviceModel = Service::where('customer_id', $customer->id)->where('id', $serviceId)->first();
+                    }
+                    
+                    // If not found by ID, check if customer already has a service
+                    if (!$serviceModel) {
+                        $serviceModel = Service::where('customer_id', $customer->id)->first();
+                    }
 
-                        // If creating and service_location not provided, try to use first address
-                        if (!isset($serviceData['service_location'])) {
-                            $firstAddress = $customer->addresses()->first();
-                            if ($firstAddress) {
-                                $serviceData['service_location'] = $firstAddress->id;
-                            }
-                        }
-
-                        if ($serviceModel) {
-                            // Si se encontró por ID, actualizar
-                            $serviceModel->fill($serviceData);
-                            $serviceModel->customer_id = $customer->id;
-                            $serviceModel->save();
-                        } else {
-                            // Crear nuevo servicio solo si el cliente no tiene ninguno
-                            $svcValidator = Validator::make($serviceData, [
-                                'router_id' => 'required|exists:routers,id',
-                                'service_ip' => 'required|ip',
-                                'username_router' => 'required|string|max:255',
-                                'password_router' => 'required|string|max:255',
-                                'service_status' => 'required|in:active,inactive,suspended,pending,free',
-                                'activation_date' => 'required|date',
-                                'plan_id' => 'required|exists:plans,id',
-                            ]);
-                            if ($svcValidator->fails()) {
-                                if ($mode === 'update_only') {
-                                    // ignore service errors in update-only mode
-                                } else {
-                                    throw new \RuntimeException('Errores de validación (service): ' . $svcValidator->errors()->toJson());
-                                }
-                            } else {
-                                $serviceModel = new Service($serviceData);
-                                $serviceModel->customer_id = $customer->id;
-                                $serviceModel->save();
-                            }
+                    // If creating and service_location not provided, try to use first address
+                    if (!isset($serviceData['service_location'])) {
+                        $firstAddress = $customer->addresses()->first();
+                        if ($firstAddress) {
+                            $serviceData['service_location'] = $firstAddress->id;
                         }
                     }
+
+                    if ($serviceModel) {
+                        // Update existing service
+                        $serviceModel->fill($serviceData);
+                        $serviceModel->customer_id = $customer->id;
+                        if ($serviceModel->isDirty()) {
+                            $serviceModel->save();
+                            $rowUpdated = true;
+                        }
+                    } else {
+                        // Create new service - minimal required validation
+                        $svcValidator = Validator::make($serviceData, [
+                            'router_id' => 'required|exists:routers,id',
+                            'service_ip' => 'required|ip',
+                            'service_status' => 'required|in:active,inactive,suspended,pending,free',
+                            'plan_id' => 'required|exists:plans,id',
+                        ]);
+                        if ($svcValidator->fails()) {
+                            if ($mode === 'update_only') {
+                                // ignore service errors in update-only mode
+                            } else {
+                                throw new \RuntimeException('Errores de validación (service): ' . $svcValidator->errors()->toJson());
+                            }
+                        } else {
+                            $serviceModel = new Service($serviceData);
+                            $serviceModel->customer_id = $customer->id;
+                            $serviceModel->save();
+                        }
+                    }
+                }
+
+                // If something was updated but not counted yet, count it now
+                if ($rowUpdated) {
+                    $updated++;
+                } else if (!$rowUpdated && $customer->wasRecentlyCreated === false && $created === 0) {
+                    // Nothing was updated or created in this iteration
+                    $skipped++;
                 }
 
                 DB::commit();
