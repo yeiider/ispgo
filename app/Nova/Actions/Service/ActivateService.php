@@ -13,6 +13,7 @@ class ActivateService extends Action
 {
 
     use InteractsWithQueue, Queueable;
+    public $withoutActionEvents = true;
 
     /**
      * Perform the action on the given models.
