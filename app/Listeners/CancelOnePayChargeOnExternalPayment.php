@@ -4,11 +4,45 @@ namespace App\Listeners;
 
 use App\Events\InvoicePaid;
 use App\Settings\OnePaySettings;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class CancelOnePayChargeOnExternalPayment
+class CancelOnePayChargeOnExternalPayment implements ShouldQueue
 {
+    use InteractsWithQueue;
+
+
+    /**
+     * The name of the queue the job should be sent to.
+     *
+     * @var string|null
+     */
+    public $queue = 'redis';
+
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
+     * The number of seconds the job can run before timing out.
+     *
+     * @var int
+     */
+    public $timeout = 120;
+
+    /**
+     * The number of seconds to delay the job.
+     *
+     * @var int
+     */
+    public $delay = 10;
+
+
     /**
      * Handle the event.
      */
