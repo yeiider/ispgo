@@ -36,6 +36,8 @@ Totales generales para el rango de fechas seleccionado.
 ### 2. `charts` (Gráficos)
 Datos listos para ser consumidos por librerías de gráficos.
 - `revenue_over_time`: Ingresos agrupados por fecha (según `chart_frequency`).
+- `paid_over_time`: Ingresos de facturas cobradas por fecha.
+- `unpaid_over_time`: Ingresos/Deuda de facturas no cobradas por fecha.
 - `status_distribution`: Distribución de montos y cantidades por estado.
 - `payment_method_distribution`: Distribución de montos y cantidades por método de pago.
 

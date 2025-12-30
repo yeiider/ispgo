@@ -19,6 +19,8 @@ type InvoiceChartPoint {
 
 type InvoiceChartData {
     revenue_over_time: [InvoiceChartPoint!]!
+    paid_over_time: [InvoiceChartPoint!]!
+    unpaid_over_time: [InvoiceChartPoint!]!
     status_distribution: [InvoiceChartPoint!]!
     payment_method_distribution: [InvoiceChartPoint!]!
 }

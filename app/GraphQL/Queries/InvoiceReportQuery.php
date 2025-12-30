@@ -114,12 +114,43 @@ class InvoiceReportQuery
                     'count' => (int) $item->count,
                 ];
             });
+        // 4. Paid vs Unpaid Over Time
+        // Paid
+        $paidOverTimeData = $chartQuery->clone()
+             ->where('status', 'paid')
+             ->select(DB::raw("DATE_FORMAT(issue_date, '$dateFormat') as label"), DB::raw('SUM(total) as value'), DB::raw('COUNT(*) as count'))
+             ->groupBy('label')
+             ->orderBy('label')
+             ->get()
+             ->map(function ($item) {
+                 return [
+                     'label' => $item->label,
+                     'value' => (float) $item->value,
+                     'count' => (int) $item->count,
+                 ];
+             });
 
+        // Unpaid (Everything not paid, e.g. unpaid, overdue)
+        $unpaidOverTimeData = $chartQuery->clone()
+             ->where('status', '!=', 'paid')
+             ->select(DB::raw("DATE_FORMAT(issue_date, '$dateFormat') as label"), DB::raw('SUM(total) as value'), DB::raw('COUNT(*) as count'))
+             ->groupBy('label')
+             ->orderBy('label')
+             ->get()
+             ->map(function ($item) {
+                 return [
+                     'label' => $item->label,
+                     'value' => (float) $item->value,
+                     'count' => (int) $item->count,
+                 ];
+             });
 
         return [
             'summary' => $summary,
             'charts' => [
                 'revenue_over_time' => $revenueData,
+                'paid_over_time' => $paidOverTimeData,
+                'unpaid_over_time' => $unpaidOverTimeData,
                 'status_distribution' => $statusData,
                 'payment_method_distribution' => $paymentMethodData,
             ],
