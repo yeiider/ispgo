@@ -125,10 +125,18 @@ class ConfigQuery
         $result = [];
         foreach ($paths as $path) {
             $meta = $index[$path] ?? ['label' => null, 'type' => 'string'];
+            $type = $meta['type'] ?? 'string';
+            $value = array_key_exists($path, $values) ? $values[$path] : null;
+
+            // Si el tipo es image y hay un valor, firmar la URL
+            if ($type === 'image' && !empty($value)) {
+                $value = $this->generateSignedUrl($value);
+            }
+
             $result[] = [
                 'path' => $path,
-                'value' => array_key_exists($path, $values) ? (string)$values[$path] : null,
-                'type' => $meta['type'] ?? 'string',
+                'value' => $value !== null ? (string)$value : null,
+                'type' => $type,
                 'label' => $meta['label'] ?? null,
             ];
         }
@@ -146,10 +154,17 @@ class ConfigQuery
         $values = $this->service->getValues(array_keys($fields), $scopeId);
         $result = [];
         foreach ($fields as $path => $meta) {
+            $value = array_key_exists($path, $values)
+                ? $values[$path]
+                : ($meta['default'] ?? null);
+
+            // Si el tipo es image y hay un valor, firmar la URL
+            if (($meta['type'] ?? 'string') === 'image' && !empty($value)) {
+                $value = $this->generateSignedUrl($value);
+            }
+
             $result[] = array_merge($meta, [
-                'value' => array_key_exists($path, $values)
-                    ? (string)$values[$path]
-                    : (isset($meta['default']) ? (string)$meta['default'] : null),
+                'value' => $value !== null ? (string)$value : null,
             ]);
         }
         return array_values($result);
