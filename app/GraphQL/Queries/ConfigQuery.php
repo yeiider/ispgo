@@ -90,15 +90,15 @@ class ConfigQuery
         $list = $this->service->fieldsWithValues($scopeId);
         // Ensure value/default/options are string types where needed
         return array_map(function ($item) {
-            // Si el campo es de tipo image-field, generar URL firmada
-            if (($item['type'] ?? null) === 'image-field' && !empty($item['value'])) {
+            // Si el campo es de tipo image, generar URL firmada
+            if (($item['type'] ?? null) === 'image' && !empty($item['value'])) {
                 $item['value'] = $this->generateSignedUrl($item['value']);
             }
 
-            if (isset($item['value']) && $item['value'] !== null && !is_string($item['value'])) {
+            if (isset($item['value']) && !is_string($item['value'])) {
                 $item['value'] = (string)$item['value'];
             }
-            if (isset($item['default']) && $item['default'] !== null && !is_string($item['default'])) {
+            if (isset($item['default']) && !is_string($item['default'])) {
                 $item['default'] = (string)$item['default'];
             }
             if (isset($item['options']) && is_array($item['options'])) {
