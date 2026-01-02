@@ -4,9 +4,12 @@ namespace App\GraphQL\Queries;
 
 use App\Services\Config\ConfigSchema;
 use App\Services\Config\ConfigService;
+use App\Traits\HasSignedUrls;
+use Illuminate\Support\Facades\Storage;
 
 class ConfigQuery
 {
+    use HasSignedUrls;
     protected ConfigService $service;
 
     public function __construct()
@@ -87,6 +90,11 @@ class ConfigQuery
         $list = $this->service->fieldsWithValues($scopeId);
         // Ensure value/default/options are string types where needed
         return array_map(function ($item) {
+            // Si el campo es de tipo image-field, generar URL firmada
+            if (($item['type'] ?? null) === 'image-field' && !empty($item['value'])) {
+                $item['value'] = $this->generateSignedUrl($item['value']);
+            }
+
             if (isset($item['value']) && $item['value'] !== null && !is_string($item['value'])) {
                 $item['value'] = (string)$item['value'];
             }
