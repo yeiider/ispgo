@@ -48,6 +48,13 @@ class Invoice extends Resource
         'id', 'amount', 'issue_date', 'status', 'customer_name'
     ];
 
+    /**
+     * Disable action events to avoid conflicts with actionable_id column type.
+     * The action_events table uses CHAR for actionable_id (to support UUIDs),
+     * but Invoice uses INT primary keys, causing SQL errors.
+     */
+    public static bool $withoutActionEvents = true;
+
     public function fields(NovaRequest $request): array
     {
         return [
