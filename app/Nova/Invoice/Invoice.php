@@ -157,7 +157,7 @@ class Invoice extends Resource
             DestructiveAction::using(__('invoice.cancel_invoice'), function (ActionFields $fields, Collection $models) {
                 $models->each->canceled();
             })->showInline(),
-            Action::openInNewTab(__('invoice.view_invoice'), function ($invoice) {
+            Action::withoutActionEvents()->openInNewTab(__('invoice.view_invoice'), function ($invoice) {
                 return route('preview.invoice', $invoice->increment_id);
             })->sole(),
             Action::withoutActionEvents()->openInNewTab(__('invoice.view_receipt'), function ($invoice) {
