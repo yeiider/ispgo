@@ -227,6 +227,20 @@ class Invoice extends Model
     {
         $this->status = 'canceled';
         $this->save();
+
+        // Delete OnePay payment if exists
+        if ($this->onepay_charge_id) {
+            try {
+                $onePayHandler = app(\App\Services\Payments\OnePay\OnePayHandler::class);
+                $onePayHandler->deletePayment($this->onepay_charge_id);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Error eliminando cobro OnePay al cancelar factura', [
+                    'invoice_id' => $this->id,
+                    'onepay_charge_id' => $this->onepay_charge_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     public function applyDiscountWithoutTax(float $discount)
@@ -302,6 +316,22 @@ class Invoice extends Model
             $model->updated_by = Auth::id();
             if ($model->isDirty('status')) {
                 //  event(new InvoiceUpdateStatus($model));
+            }
+        });
+
+        static::deleting(function ($model) {
+            // Delete OnePay payment if exists
+            if ($model->onepay_charge_id) {
+                try {
+                    $onePayHandler = app(\App\Services\Payments\OnePay\OnePayHandler::class);
+                    $onePayHandler->deletePayment($model->onepay_charge_id);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Error eliminando cobro OnePay al eliminar factura', [
+                        'invoice_id' => $model->id,
+                        'onepay_charge_id' => $model->onepay_charge_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
         });
     }
