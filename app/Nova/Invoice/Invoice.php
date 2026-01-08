@@ -97,9 +97,26 @@ class Invoice extends Resource
                 ->step(0.01)
                 ->readonly(),
 
-            Currency::make(__('invoice.amount'), 'amount')  // ¿Este es un campo manual de abono o pago?
-            ->step(0.01)
-                ->readonly(),
+            Currency::make(__('invoice.amount'), 'amount')  // Total pagado (legacy field)
+                ->step(0.01)
+                ->readonly()
+                ->hideFromIndex(),
+
+            Currency::make(__('Total Pagado'), 'total_paid')
+                ->step(0.01)
+                ->readonly()
+                ->help('Suma de todos los pagos realizados'),
+
+            Currency::make(__('Notas de Crédito'), 'credit_notes_total')
+                ->step(0.01)
+                ->readonly()
+                ->hideFromIndex()
+                ->help('Total de notas de crédito aplicadas'),
+
+            Currency::make(__('Saldo Real'), 'real_outstanding_balance')
+                ->step(0.01)
+                ->readonly()
+                ->help('Saldo pendiente = Total - Pagos - Notas de Crédito'),
 
             // 📆 Fechas y estado
             Date::make(__('invoice.issue_date'), 'issue_date'),

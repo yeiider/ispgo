@@ -32,6 +32,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'Permission',
             'Installation',
             'CreditNote',
+            'InvoicePayment',
             'PaymentPromise',
             'Ticket',
             'Product',
