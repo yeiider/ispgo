@@ -33,7 +33,7 @@ class SuspendServicesMonthly extends Command
         $this->info("[EVERYDAY] Fecha actual: {$today->toDateString()}");
 
         Service::where('service_status', 'active')
-            ->whereHas('invoices', function ($query) use ($today) {
+            ->whereHas('customer.invoices', function ($query) use ($today) {
                 $query->where('status', 'unpaid')
                     ->where('outstanding_balance', '>', 0)
                     ->whereDate('due_date', '<', $today)
