@@ -89,7 +89,13 @@ class AfterPayingInvoice implements ShouldQueue
         if (!InvoiceProviderConfig::enableServiceWhenPaying()) {
             return;
         }
-
+        
+        $invoiceStatus = $invoice->status;
+        
+        if ($invoiceStatus !== 'paid') {
+            return;
+        }
+        
         try {
             $customerId = $invoice->customer_id;
             
