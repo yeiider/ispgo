@@ -62,6 +62,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the invoice payments registered by this user.
+     */
+    public function invoicePayments()
+    {
+        return $this->hasMany(\App\Models\Invoice\InvoicePayment::class);
+    }
+
+    /**
      * Check if user can see all data (super admin, admin without router, or no router assigned).
      */
     public function canSeeAllData(): bool
