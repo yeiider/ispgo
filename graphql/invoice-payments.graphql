@@ -1,0 +1,151 @@
+"Representa un abono o pago aplicado a una factura"
+type InvoicePayment {
+    "ID único del abono"
+    id: ID!
+
+    "Factura a la que pertenece este abono"
+    invoice: Invoice! @belongsTo
+
+    "Usuario que registró el abono"
+    user: User! @belongsTo
+
+    "Monto del abono"
+    amount: Float!
+
+    "Fecha en que se realizó el pago"
+    paymentDate: Date! @rename(attribute: "payment_date")
+
+    "Método de pago utilizado"
+    paymentMethod: PaymentMethod @rename(attribute: "payment_method")
+
+    "Número de referencia o transacción"
+    referenceNumber: String @rename(attribute: "reference_number")
+
+    "Notas adicionales sobre el pago"
+    notes: String
+
+    "Ruta al comprobante de pago"
+    paymentSupport: String @rename(attribute: "payment_support")
+
+    "Información adicional en formato JSON"
+    additionalInformation: JSON @rename(attribute: "additional_information")
+
+    "Fecha de creación del registro"
+    createdAt: DateTime! @rename(attribute: "created_at")
+
+    "Última actualización del registro"
+    updatedAt: DateTime! @rename(attribute: "updated_at")
+}
+
+"Métodos de pago disponibles"
+enum PaymentMethod {
+    CASH @enum(value: "cash")
+    TRANSFER @enum(value: "transfer")
+    CARD @enum(value: "card")
+    ONLINE @enum(value: "online")
+}
+
+"Input para crear un nuevo abono"
+input CreateInvoicePaymentInput {
+    "ID de la factura"
+    invoiceId: ID! @rename(attribute: "invoice_id")
+
+    "Monto del abono"
+    amount: Float! @rules(apply: ["required", "numeric", "min:0.01"])
+
+    "Fecha del pago"
+    paymentDate: Date! @rename(attribute: "payment_date") @rules(apply: ["required", "date"])
+
+    "Método de pago"
+    paymentMethod: PaymentMethod @rename(attribute: "payment_method")
+
+    "Número de referencia"
+    referenceNumber: String @rename(attribute: "reference_number") @rules(apply: ["max:255"])
+
+    "Notas sobre el pago"
+    notes: String
+
+    "Comprobante de pago"
+    paymentSupport: String @rename(attribute: "payment_support")
+}
+
+"Input para actualizar un abono existente"
+input UpdateInvoicePaymentInput {
+    "Nuevo monto (opcional)"
+    amount: Float @rules(apply: ["numeric", "min:0.01"])
+
+    "Nueva fecha (opcional)"
+    paymentDate: Date @rename(attribute: "payment_date") @rules(apply: ["date"])
+
+    "Nuevo método de pago (opcional)"
+    paymentMethod: PaymentMethod @rename(attribute: "payment_method")
+
+    "Nuevo número de referencia (opcional)"
+    referenceNumber: String @rename(attribute: "reference_number") @rules(apply: ["max:255"])
+
+    "Nuevas notas (opcional)"
+    notes: String
+}
+
+"Respuesta al eliminar un abono"
+type DeleteInvoicePaymentPayload {
+    "Indica si se eliminó correctamente"
+    success: Boolean!
+
+    "Mensaje de respuesta"
+    message: String!
+
+    "Factura actualizada tras eliminar el abono"
+    invoice: Invoice
+}
+
+extend type Query @guard {
+    "Obtener todos los abonos (opcionalmente filtrados por factura)"
+    invoicePayments(
+        "Filtrar por ID de factura"
+        invoiceId: ID @eq(key: "invoice_id")
+
+        "Ordenar por campo"
+        orderBy: [OrderByClause!] @orderBy
+    ): [InvoicePayment!]!
+        @paginate(defaultCount: 20, model: "App\\Models\\Invoice\\InvoicePayment")
+
+    "Obtener un abono específico por ID"
+    invoicePayment(
+        "ID del abono"
+        id: ID! @eq
+    ): InvoicePayment
+        @find(model: "App\\Models\\Invoice\\InvoicePayment")
+
+    "Obtener abonos de una factura específica"
+    invoicePaymentsByInvoice(
+        "ID de la factura"
+        invoiceId: ID!
+    ): [InvoicePayment!]!
+        @field(resolver: "App\\GraphQL\\Queries\\InvoicePaymentQueries@getByInvoice")
+}
+
+extend type Mutation @guard {
+    "Crear un nuevo abono a una factura"
+    createInvoicePayment(
+        input: CreateInvoicePaymentInput! @spread
+    ): InvoicePayment!
+        @field(resolver: "App\\GraphQL\\Mutations\\InvoicePaymentMutations@create")
+
+    "Actualizar un abono existente"
+    updateInvoicePayment(
+        "ID del abono a actualizar"
+        id: ID!
+
+        "Datos a actualizar"
+        input: UpdateInvoicePaymentInput! @spread
+    ): InvoicePayment!
+        @field(resolver: "App\\GraphQL\\Mutations\\InvoicePaymentMutations@update")
+
+    "Eliminar un abono"
+    deleteInvoicePayment(
+        "ID del abono a eliminar"
+        id: ID!
+    ): DeleteInvoicePaymentPayload!
+        @field(resolver: "App\\GraphQL\\Mutations\\InvoicePaymentMutations@delete")
+}

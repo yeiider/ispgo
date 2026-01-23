@@ -2,6 +2,7 @@
 scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
 
 #import reports.graphql
+#import invoice-payments.graphql
 
 "A date string with format 'Y-m-d', e.g. '2011-05-23'."
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
@@ -642,7 +643,12 @@ type Invoice {
     adjustments: [InvoiceAdjustment!]! @hasMany
     creditNotes: [CreditNote!]! @hasMany
     paymentPromises: [PaymentPromise!]! @hasMany
+    payments: [InvoicePayment!]! @hasMany
     router: Router @belongsTo
+    
+    totalPaid: Float! @method(name: "getTotalPaidAttribute")
+    realOutstandingBalance: Float! @method(name: "getRealOutstandingBalanceAttribute")
+    isFullyPaid: Boolean! @method(name: "isFullyPaid")
 }
 
 type Plan {
@@ -835,6 +841,7 @@ type User {
     roles: [Role!]! @belongsToMany(relation: "roles")
     permissions: [Permission!]! @belongsToMany(relation: "permissions")
     allPermissions: [Permission!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@allPermissions")
+    registeredPayments: [InvoicePayment!]! @hasMany(relation: "invoicePayments")
 }
 
 type Role {
