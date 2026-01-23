@@ -103,6 +103,7 @@ class ImportCustomers extends Action
                         'document_type' => 'required|max:20',
                         'identity_document' => 'required|max:12',
                         'customer_status' => 'required|in:active,inactive',
+                        'router_id' => 'required|exists:routers,id',
                     ]);
                     if ($validator->fails()) {
                         throw new \RuntimeException('Errores de validación (customer): ' . $validator->errors()->toJson());
