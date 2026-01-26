@@ -74,28 +74,16 @@ class User extends Authenticatable
      */
     public function canSeeAllData(): bool
     {
-        // Super-admin siempre ve todo
-        if ($this->isSuperAdmin()) {
-            return true;
-        }
-
-        // Si no tiene router_id, ve todo
-        if (!$this->router_id) {
-            return true;
-        }
-
-        // Si es admin con router_id, solo ve su router
-        // Si es usuario normal con router_id, solo ve su router
-        return false;
+        return is_null($this->router_id);
     }
 
     /**
      * Check if user should filter by router.
-     * Returns true if user has router_id and is not super-admin.
+     * Returns true if user has router_id assigned.
      */
     public function shouldFilterByRouter(): bool
     {
-        return !$this->isSuperAdmin() && !is_null($this->router_id);
+        return !is_null($this->router_id);
     }
 
     public function isSuperAdmin()

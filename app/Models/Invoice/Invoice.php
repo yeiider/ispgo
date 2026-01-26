@@ -347,12 +347,13 @@ class Invoice extends Model
                 return;
             }
 
-            // If super admin always sees all, or if no router assigned, show all
-            if ($user->isSuperAdmin() || !$user->router_id) {
+            // If user has no router assigned, show all data
+            // Role permissions control what actions they can perform
+            if (!$user->router_id) {
                 return;
             }
 
-            // Filter by router_id directly or through customer relationship (applies to admin with router_id and regular users with router_id)
+            // Filter by user's assigned router_id (direct or through customer)
             $builder->where(function ($query) use ($user) {
                 $query->where('router_id', $user->router_id)
                     ->orWhereHas('customer', function ($q) use ($user) {

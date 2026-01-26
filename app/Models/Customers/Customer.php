@@ -151,12 +151,13 @@ class Customer extends Authenticatable implements MustVerifyEmail
                 return;
             }
 
-            // If super admin always sees all, or if no router assigned, show all
-            if ($user->isSuperAdmin() || !$user->router_id) {
+            // If user has no router assigned, show all data
+            // Role permissions control what actions they can perform
+            if (!$user->router_id) {
                 return;
             }
 
-            // Filter by router_id (applies to admin with router_id and regular users with router_id)
+            // Filter by user's assigned router_id
             $builder->where('router_id', $user->router_id);
         });
 
