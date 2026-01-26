@@ -114,7 +114,7 @@ class Service extends Model
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router through customer
+        // Global Scope: Filter by user's router(s) through customer
         static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = \Illuminate\Support\Facades\Auth::user();
@@ -124,17 +124,19 @@ class Service extends Model
                 return;
             }
 
-            // If user has no router assigned, show all data
+            // If user has no routers assigned, show all data
             // Role permissions control what actions they can perform
-            if (!$user->router_id) {
+            $routerIds = $user->getRouterIds();
+            
+            if (empty($routerIds)) {
                 return;
             }
 
-            // Filter by user's assigned router_id (through customer or direct)
-            $builder->where(function ($query) use ($user) {
-                $query->whereHas('customer', function ($q) use ($user) {
-                    $q->where('router_id', $user->router_id);
-                })->orWhere('router_id', $user->router_id);
+            // Filter by user's assigned router(s) (through customer or direct)
+            $builder->where(function ($query) use ($routerIds) {
+                $query->whereHas('customer', function ($q) use ($routerIds) {
+                    $q->whereIn('router_id', $routerIds);
+                })->orWhereIn('router_id', $routerIds);
             });
         });
 
