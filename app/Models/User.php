@@ -27,7 +27,6 @@ class User extends Authenticatable
         'telephone',
         'created_by',
         'updated_by',
-        'router_id',
     ];
 
     /**
@@ -53,41 +52,52 @@ class User extends Authenticatable
         ];
     }
 
+
+
     /**
-     * Get the router assigned to this user.
+     * Get all routers assigned to this user (many-to-many relationship).
      */
-    public function router()
+    public function routers()
     {
-        return $this->belongsTo(Router::class);
+        return $this->belongsToMany(Router::class, 'user_router')
+            ->withTimestamps();
     }
 
     /**
-     * Check if user can see all data (super admin, admin without router, or no router assigned).
+     * Get the invoice payments registered by this user.
+     */
+    public function invoicePayments()
+    {
+        return $this->hasMany(\App\Models\Invoice\InvoicePayment::class);
+    }
+
+    /**
+     * Check if user can see all data (no routers assigned).
+     * If user has no routers, they see all data.
+     * Role permissions control what actions they can perform.
      */
     public function canSeeAllData(): bool
     {
-        // Super-admin siempre ve todo
-        if ($this->isSuperAdmin()) {
-            return true;
-        }
-
-        // Si no tiene router_id, ve todo
-        if (!$this->router_id) {
-            return true;
-        }
-
-        // Si es admin con router_id, solo ve su router
-        // Si es usuario normal con router_id, solo ve su router
-        return false;
+        return $this->routers()->count() === 0;
     }
 
     /**
      * Check if user should filter by router.
-     * Returns true if user has router_id and is not super-admin.
+     * Returns true if user has one or more routers assigned.
      */
     public function shouldFilterByRouter(): bool
     {
-        return !$this->isSuperAdmin() && !is_null($this->router_id);
+        return $this->routers()->count() > 0;
+    }
+
+    /**
+     * Get all router IDs assigned to this user.
+     * 
+     * @return array
+     */
+    public function getRouterIds(): array
+    {
+        return $this->routers()->pluck('routers.id')->toArray();
     }
 
     public function isSuperAdmin()

@@ -41,7 +41,7 @@ class Invoice extends Model
         'onepay_metadata' => 'array',
 
     ];
-    protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay'];
+    protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay', 'total_paid', 'credit_notes_total', 'real_outstanding_balance'];
 
     public function getFullNameAttribute()
     {
@@ -117,10 +117,50 @@ class Invoice extends Model
         return $this->customer->email_address;
     }
 
+    /**
+     * Get the total amount paid through InvoicePayment records or direct payments.
+     * Note: The 'amount' field contains the total paid (updated by both payment records and direct payments)
+     */
+    public function getTotalPaidAttribute(): float
+    {
+        return $this->amount ?? 0;
+    }
+
+    /**
+     * Get the total amount of credit notes applied.
+     */
+    public function getCreditNotesTotalAttribute(): float
+    {
+        return $this->creditNotes()->sum('amount');
+    }
+
+    /**
+     * Get the real outstanding balance considering payments and credit notes.
+     * Formula: total - amount - credit_notes
+     * Note: 'amount' field contains total paid (from both InvoicePayment records and direct payments)
+     */
+    public function getRealOutstandingBalanceAttribute(): float
+    {
+        return max(0, $this->total - $this->amount - $this->credit_notes_total);
+    }
+
+    /**
+     * Check if the invoice is fully paid.
+     */
+    public function isFullyPaid(): bool
+    {
+        return $this->real_outstanding_balance <= 0;
+    }
+
 
     public function creditNotes()
     {
         return $this->hasMany(CreditNote::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(InvoicePayment::class);
     }
 
     public function paymentPromises()
@@ -180,33 +220,55 @@ class Invoice extends Model
         return $incrementId;
     }
 
-    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null, $dailyBoxId = null): void
+    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null, $dailyBoxId = null, $createPaymentRecord = false): void
     {
-
-        $amount = $amount ?? $this->total;
+        $amount = $amount ?? $this->real_outstanding_balance;
+        
         if ($this->status === 'paid') {
             throw new \Exception('La factura ya ha sido pagada');
         }
-        if ($amount > $this->total - $this->amount) {
-            throw new \Exception('El monto pagado no puede ser mayor que el adeudado.');
+        
+        if ($amount > $this->real_outstanding_balance) {
+            throw new \Exception('El monto pagado no puede ser mayor que el saldo pendiente.');
         }
 
-        $this->amount += $amount;
-        $this->outstanding_balance = $this->total - $this->amount;
+        // Only create InvoicePayment record for partial payments (when explicitly requested)
+        if ($createPaymentRecord) {
+            InvoicePayment::create([
+                'invoice_id' => $this->id,
+                'user_id' => Auth::id(),
+                'amount' => $amount,
+                'payment_date' => now(),
+                'payment_method' => $paymentMethod,
+                'notes' => $notes,
+                'additional_information' => $additional,
+            ]);
+            
+            // Update amount from sum of payments
+            $this->amount = $this->payments()->sum('amount');
+        } else {
+            // For full payments or console commands: update amount directly
+            $this->amount += $amount;
+        }
+
+        $this->outstanding_balance = $this->real_outstanding_balance;
         $this->payment_method = $paymentMethod;
 
-        if ($this->outstanding_balance <= 0) {
+        if ($this->isFullyPaid()) {
             $this->status = 'paid';
             $this->outstanding_balance = 0;
         } else if ($this->due_date < now() && $this->outstanding_balance > 0) {
-            $this->status = 'overdue';
+            $this->status = 'unpaid';
         }
+        
         if ($notes) {
             $this->notes = $notes;
         }
+        
         $this->daily_box_id = $dailyBoxId;
         $this->additional_information = $additional;
         $this->save();
+        
         event(new InvoicePaid($this));
     }
 
@@ -275,7 +337,7 @@ class Invoice extends Model
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router
+        // Global Scope: Filter by user's router(s)
         static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
@@ -285,16 +347,19 @@ class Invoice extends Model
                 return;
             }
 
-            // If super admin always sees all, or if no router assigned, show all
-            if ($user->isSuperAdmin() || !$user->router_id) {
+            // If user has no routers assigned, show all data
+            // Role permissions control what actions they can perform
+            $routerIds = $user->getRouterIds();
+            
+            if (empty($routerIds)) {
                 return;
             }
 
-            // Filter by router_id directly or through customer relationship (applies to admin with router_id and regular users with router_id)
-            $builder->where(function ($query) use ($user) {
-                $query->where('router_id', $user->router_id)
-                    ->orWhereHas('customer', function ($q) use ($user) {
-                        $q->where('router_id', $user->router_id);
+            // Filter by user's assigned router(s) (direct or through customer)
+            $builder->where(function ($query) use ($routerIds) {
+                $query->whereIn('router_id', $routerIds)
+                    ->orWhereHas('customer', function ($q) use ($routerIds) {
+                        $q->whereIn('router_id', $routerIds);
                     });
             });
         });

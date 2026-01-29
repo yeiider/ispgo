@@ -44,6 +44,8 @@ Route::apiResource('/invoices', \App\Http\Controllers\API\Invoice\InvoiceControl
 
 Route::apiResource('/payment-promises', \App\Http\Controllers\API\Invoice\PaymentPromiseController::class);
 
+Route::apiResource('/invoice-payments', \App\Http\Controllers\API\Invoice\InvoicePaymentController::class);
+
 Route::apiResource('/pages', \App\Http\Controllers\API\PageBuilder\PagesController::class);
 
 Route::apiResource('/page-translations', \App\Http\Controllers\API\PageBuilder\PageTranslationController::class);
