@@ -103,7 +103,7 @@ type Mutation @guard {
 
     deleteCustomer(
         id: ID! @rules(apply: ["required", "exists:customers,id"])
-    ): Customer @delete(model: "App\\Models\\Customers\\Customer")
+    ): Customer @field(resolver: "App\\GraphQL\\Mutations\\DeleteCustomerMutation@resolve")
 
     createAddress(
         customer_id: Int! @rules(apply: ["required", "exists:customers,id"])
@@ -645,7 +645,7 @@ type Invoice {
     paymentPromises: [PaymentPromise!]! @hasMany
     payments: [InvoicePayment!]! @hasMany
     router: Router @belongsTo
-    
+
     totalPaid: Float! @method(name: "getTotalPaidAttribute")
     realOutstandingBalance: Float! @method(name: "getRealOutstandingBalanceAttribute")
     isFullyPaid: Boolean! @method(name: "isFullyPaid")
