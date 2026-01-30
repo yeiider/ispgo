@@ -173,11 +173,11 @@ type Mutation @guard {
         router_id: Int @rules(apply: ["exists:routers,id"])
         username_router: String
         password_router: String
-        activation_date: DateTime
-        deactivation_date: DateTime
+        activation_date: String
+        deactivation_date: String
         bandwidth: Int
         mac_address: String
-        installation_date: DateTime
+        installation_date: String
         service_notes: String
         support_contact: String
         service_type: String @rules(apply: ["in:ftth,adsl,satellite"])
