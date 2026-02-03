@@ -40,18 +40,18 @@ class DeleteCustomerMutation
             // Eliminar relaciones en orden
             // Primero eliminar servicios y sus facturas (los servicios referencian addresses)
             foreach ($customer->services as $service) {
-                $service->invoices()->delete();
+                $service->invoices()->where('service_id', $service->id)->delete();
                 $service->delete();
             }
 
             // Ahora sí podemos eliminar las direcciones
-            $customer->addresses()->delete();
+            $customer->addresses()->where('customer_id', $customer->id)->delete();
 
             // Eliminar contratos
-            $customer->contracts()->delete();
+            $customer->contracts()->where('customer_id', $customer->id)->delete();
 
             // Eliminar facturas restantes
-            $customer->invoices()->delete();
+            $customer->invoices()->where('customer_id', $customer->id)->delete();
 
             // Eliminar detalles fiscales si existen
             if ($customer->taxDetails) {
