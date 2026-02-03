@@ -103,7 +103,7 @@ type Mutation @guard {
 
     deleteCustomer(
         id: ID! @rules(apply: ["required", "exists:customers,id"])
-    ): Customer @delete(model: "App\\Models\\Customers\\Customer")
+    ): Customer @field(resolver: "App\\GraphQL\\Mutations\\DeleteCustomerMutation@resolve")
 
     createAddress(
         customer_id: Int! @rules(apply: ["required", "exists:customers,id"])
@@ -173,11 +173,11 @@ type Mutation @guard {
         router_id: Int @rules(apply: ["exists:routers,id"])
         username_router: String
         password_router: String
-        activation_date: DateTime
-        deactivation_date: DateTime
+        activation_date: String
+        deactivation_date: String
         bandwidth: Int
         mac_address: String
-        installation_date: DateTime
+        installation_date: String
         service_notes: String
         support_contact: String
         service_type: String @rules(apply: ["in:ftth,adsl,satellite"])
@@ -266,7 +266,7 @@ type Mutation @guard {
     ): Plan @update(model: "App\\Models\\Services\\Plan")
 
     deletePlan(
-        id: ID! @rules(apply: ["required", "exists:plans,id"])
+        id: ID! @rules(apply: ["required", "exists:plans,id"]) @eq
     ): Plan @delete(model: "App\\Models\\Services\\Plan")
 
     generateInvoice(
@@ -645,7 +645,7 @@ type Invoice {
     paymentPromises: [PaymentPromise!]! @hasMany
     payments: [InvoicePayment!]! @hasMany
     router: Router @belongsTo
-    
+
     totalPaid: Float! @method(name: "getTotalPaidAttribute")
     realOutstandingBalance: Float! @method(name: "getRealOutstandingBalanceAttribute")
     isFullyPaid: Boolean! @method(name: "isFullyPaid")
