@@ -59,19 +59,24 @@ class UpdateServiceIpMacJob implements ShouldQueue
                  return;
             }
             
+            // Try to find MAC and IP in 'ONU WAN Interfaces' first
             $wanInterfaces = $data['full_status_json']['ONU WAN Interfaces'] ?? null;
-            
-            if (!$wanInterfaces) {
-                Log::error("SmartOLT response missing 'ONU WAN Interfaces' for SN: {$service->sn}");
-                return;
-            }
 
             $ipAddress = $wanInterfaces['IPv4 address'] ?? null;
             $macAddress = $wanInterfaces['MAC address'] ?? null;
 
-            if (!$ipAddress || !$macAddress) {
-                 Log::error("Could not find IP or MAC in SmartOLT response for SN: {$service->sn}", ['wan_interfaces' => $wanInterfaces]);
+            // If not found, search for MAC in entire JSON
+            if (!$macAddress) {
+                $macAddress = $this->findMacInJson($data['full_status_json']);
+            }
+
+            if (!$macAddress) {
+                 Log::error("Could not find MAC address in SmartOLT response for SN: {$service->sn}", ['full_status_json' => $data['full_status_json']]);
                  return;
+            }
+
+            if (!$ipAddress) {
+                 Log::warning("Could not find IP address in SmartOLT response for SN: {$service->sn}");
             }
 
             $normalizedMac = $this->normalizeMac($macAddress);
@@ -90,6 +95,44 @@ class UpdateServiceIpMacJob implements ShouldQueue
             // Fail safely without retrying indefinitely unless configured
             $this->fail($e);
         }
+    }
+
+    private function findMacInJson($data)
+    {
+        // Recursively search for MAC addresses in the JSON structure
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                // Check if the key suggests it's a MAC address field
+                if (is_string($key) && stripos($key, 'mac') !== false && is_string($value)) {
+                    if ($this->isMacAddress($value)) {
+                        return $value;
+                    }
+                }
+
+                // Check if the value itself looks like a MAC address
+                if (is_string($value) && $this->isMacAddress($value)) {
+                    return $value;
+                }
+
+                // Recurse into nested arrays/objects
+                if (is_array($value)) {
+                    $result = $this->findMacInJson($value);
+                    if ($result) {
+                        return $result;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function isMacAddress($string)
+    {
+        // Match MAC addresses in various formats:
+        // aa:bb:cc:dd:ee:ff, aa-bb-cc-dd-ee-ff, aabbccddeeff, aabb.ccdd.eeff
+        $pattern = '/^([0-9a-fA-F]{2}[:\-]?){5}([0-9a-fA-F]{2})$|^([0-9a-fA-F]{4}\.){2}([0-9a-fA-F]{4})$/';
+        return preg_match($pattern, trim($string)) === 1;
     }
 
     private function normalizeMac($mac)
