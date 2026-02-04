@@ -70,6 +70,25 @@ class SmartOltMutation
                     $service->save();
                     $this->apiManager->setOnuManagementIpDhcpByExternalId($args['sn'], $args['vlan']);
 
+                    // Habilitar TR069 si se proporciona el perfil
+
+                    try {
+                        $tr069Response = $this->apiManager->enableTr069($args['sn'], "SmartOLT");
+                        $tr069Data = $tr069Response->json();
+
+                        if ($tr069Data['status'] !== true) {
+                            Log::warning('Failed to enable TR069 for ONU', [
+                                'sn' => $args['sn'],
+                                'error' => $tr069Data['error'] ?? 'Unknown error'
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Error enabling TR069 for ONU', [
+                            'sn' => $args['sn'],
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+
                     // Dispatch job to finalize configuration after 3 minutes
                     ProcessOnuAuthorization::dispatch($service->id, $args['sn'], $args['vlan'], $args['olt_id'])
                         ->delay(now()->addMinutes(3))->onQueue('redis');

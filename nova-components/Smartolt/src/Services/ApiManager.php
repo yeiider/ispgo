@@ -603,5 +603,18 @@ class ApiManager
         return $this->request('api/onu/delete/' . $externalId, [], false, 'post');
     }
 
+    /**
+     * Habilitar TR069 para una ONU por número de serie.
+     *
+     * @param string $sn
+     * @param string $tr069Profile
+     * @return Response
+     * @throws \Exception
+     */
+    public function enableTr069(string $sn, string $tr069Profile): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/enable_tr069/' . $sn, ['tr069_profile' => $tr069Profile], true);
+    }
 
 }
