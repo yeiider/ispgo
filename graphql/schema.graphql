@@ -139,7 +139,7 @@ type Mutation @guard {
         customer_id: Int! @rules(apply: ["required", "exists:customers,id"])
         plan_id: Int! @rules(apply: ["required", "exists:plans,id"])
         router_id: Int! @rules(apply: ["required", "exists:routers,id"])
-        service_ip: String! @rules(apply: ["required", "ip"])
+        service_ip: String @rules(apply: ["ip"])
         service_location: Int! @rules(apply: ["required", "exists:addresses,id"])
         service_status: String @rules(apply: ["in:active,inactive,suspended,pending,free"])
         username_router: String
@@ -583,7 +583,7 @@ type Service {
     router_id: Int!
     customer_id: Int!
     plan_id: Int!
-    service_ip: String!
+    service_ip: String
     username_router: String
     password_router: String
     service_status: String
