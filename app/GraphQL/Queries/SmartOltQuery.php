@@ -107,40 +107,54 @@ class SmartOltQuery
             'graph_type' => $graphType
         ]);
 
-        $response = $this->apiManager->getOnuTrafficGraphByExternalId($args['external_id'], $graphType);
+        try {
+            $response = $this->apiManager->getOnuTrafficGraphByExternalId($args['external_id'], $graphType);
 
-        Log::info('SmartOLT Traffic Graph Response', [
-            'status' => $response->status(),
-            'successful' => $response->successful(),
-            'body_length' => strlen($response->body()),
-            'content_type' => $response->header('Content-Type')
-        ]);
-
-        // Retornar la imagen como base64
-        if ($response->successful()) {
             $body = $response->body();
+            $bodyLength = strlen($body);
+            $contentType = $response->header('Content-Type') ?? 'image/png';
 
-            // Verificar si el body no está vacío
-            if (empty($body)) {
-                Log::warning('SmartOLT Traffic Graph: Empty response body');
+            Log::info('SmartOLT Traffic Graph Response', [
+                'status' => $response->status(),
+                'successful' => $response->successful(),
+                'body_length' => $bodyLength,
+                'content_type' => $contentType,
+                'body_is_empty' => empty($body),
+                'body_preview' => $bodyLength > 0 ? substr($body, 0, 100) : 'EMPTY'
+            ]);
+
+            // La API retorna binario directo de la imagen
+            if ($response->successful() && !empty($body)) {
+                $imageData = base64_encode($body);
+
+                Log::info('SmartOLT Traffic Graph: Image encoded successfully', [
+                    'base64_length' => strlen($imageData),
+                    'base64_preview' => substr($imageData, 0, 50) . '...'
+                ]);
+
                 return [
-                    'image_base64' => '',
-                    'content_type' => 'image/png'
+                    'image_base64' => $imageData,
+                    'content_type' => $contentType
                 ];
             }
 
-            $imageData = base64_encode($body);
+            Log::warning('SmartOLT Traffic Graph: Empty or failed response', [
+                'status' => $response->status(),
+                'body_length' => $bodyLength
+            ]);
+
             return [
-                'image_base64' => $imageData,
-                'content_type' => $response->header('Content-Type') ?? 'image/png'
+                'image_base64' => '',
+                'content_type' => 'image/png'
             ];
+
+        } catch (\Exception $e) {
+            Log::error('SmartOLT Traffic Graph: Exception', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return null;
         }
-
-        Log::error('SmartOLT Traffic Graph: Request failed', [
-            'status' => $response->status(),
-            'body' => $response->body()
-        ]);
-
-        return null;
     }
 }
