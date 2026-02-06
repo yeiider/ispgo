@@ -97,4 +97,21 @@ class SmartOltQuery
 
         return null;
     }
+
+    public function getOnuTrafficGraph($root, array $args)
+    {
+        $graphType = $args['graph_type'] ?? 'hourly';
+        $response = $this->apiManager->getOnuTrafficGraphByExternalId($args['external_id'], $graphType);
+
+        // Retornar la imagen como base64
+        if ($response->successful()) {
+            $imageData = base64_encode($response->body());
+            return [
+                'image_base64' => $imageData,
+                'content_type' => $response->header('Content-Type') ?? 'image/png'
+            ];
+        }
+
+        return null;
+    }
 }

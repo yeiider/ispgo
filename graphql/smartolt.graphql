@@ -208,6 +208,11 @@ type SmartOltOnuTypeImage {
     content_type: String!
 }
 
+type SmartOltOnuTrafficGraph {
+    image_base64: String!
+    content_type: String!
+}
+
 extend type Query {
     smartOltOlts: [SmartOltOlt!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOlts")
     smartOltOltCards(olt_id: ID!): [SmartOltOltCard!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltCards")
@@ -219,6 +224,7 @@ extend type Query {
     smartOltOltsUptime: [SmartOltUptime!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltsUptime")
     smartOltOnuDetails(sn: String!): SmartOltOnuDetails @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuDetails")
     smartOltOnuTypeImage(onu_type_id: ID!): SmartOltOnuTypeImage @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuTypeImage")
+    smartOltOnuTrafficGraph(external_id: String!, graph_type: String = "hourly"): SmartOltOnuTrafficGraph @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuTrafficGraph")
 }
 
 extend type Mutation {
