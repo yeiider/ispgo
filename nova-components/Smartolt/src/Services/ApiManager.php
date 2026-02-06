@@ -264,7 +264,20 @@ class ApiManager
     public function getOnuSignalGraphByExternalId(string $externalId): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/get_onu_signal_graph/' . $externalId, [], false, 'get');
+
+        // Para imágenes, necesitamos manejar la respuesta binaria directamente
+        try {
+            $response = Http::withHeaders(['X-Token' => $this->token])
+                ->withOptions([
+                    'stream' => false, // No usar stream
+                    'decode_content' => true, // Decodificar contenido
+                ])
+                ->get($this->baseUrl . 'api/onu/get_onu_signal_graph/' . $externalId);
+
+            return $response;
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -278,7 +291,20 @@ class ApiManager
     public function getOnuTrafficGraphByExternalId(string $externalId, string $graphType = 'hourly'): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/get_onu_traffic_graph/' . $externalId . '/' . $graphType, [], false, 'get');
+
+        // Para imágenes, necesitamos manejar la respuesta binaria directamente
+        try {
+            $response = Http::withHeaders(['X-Token' => $this->token])
+                ->withOptions([
+                    'stream' => false, // No usar stream
+                    'decode_content' => true, // Decodificar contenido
+                ])
+                ->get($this->baseUrl . 'api/onu/get_onu_traffic_graph/' . $externalId . '/' . $graphType);
+
+            return $response;
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**

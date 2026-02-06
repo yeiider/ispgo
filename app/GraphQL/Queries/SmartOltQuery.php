@@ -120,7 +120,9 @@ class SmartOltQuery
                 'body_length' => $bodyLength,
                 'content_type' => $contentType,
                 'body_is_empty' => empty($body),
-                'body_preview' => $bodyLength > 0 ? substr($body, 0, 100) : 'EMPTY'
+                'body_preview' => $bodyLength > 0 ? substr($body, 0, 100) : 'EMPTY',
+                'all_headers' => $response->headers(),
+                'transfer_stats' => method_exists($response, 'transferStats') ? $response->transferStats?->getHandlerStats() : null
             ]);
 
             // La API retorna binario directo de la imagen
