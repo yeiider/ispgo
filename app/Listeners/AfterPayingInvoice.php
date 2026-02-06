@@ -59,7 +59,7 @@ class AfterPayingInvoice implements ShouldQueue
     public function handle(InvoicePaid $event): void
     {
         $invoice = $event->invoice;
-        $this->sendEmail($invoice);
+        //$this->sendEmail($invoice);
         $this->activateService($invoice);
     }
 
@@ -89,16 +89,16 @@ class AfterPayingInvoice implements ShouldQueue
         if (!InvoiceProviderConfig::enableServiceWhenPaying()) {
             return;
         }
-        
+
         $invoiceStatus = $invoice->status;
-        
+
         if ($invoiceStatus !== 'paid') {
             return;
         }
-        
+
         try {
             $customerId = $invoice->customer_id;
-            
+
             // Obtener todos los servicios del cliente
             $services = Service::where('customer_id', $customerId)->get();
 
