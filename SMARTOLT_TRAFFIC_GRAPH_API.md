@@ -2,9 +2,170 @@
 
 ## Descripción
 
-Esta API permite obtener el gráfico de tráfico de una ONU específica mediante su `external_id`. La API retorna una imagen en formato base64 que puede ser mostrada directamente en el navegador.
+Esta API permite obtener el gráfico de tráfico de una ONU específica mediante su `external_id`.
 
-## Endpoint GraphQL
+Existen **dos formas** de consumir esta API:
+1. **REST API** - Retorna la imagen binaria directamente (recomendado)
+2. **GraphQL API** - Retorna la imagen en formato base64
+
+---
+
+## 1. REST API (Recomendado)
+
+### Endpoint
+
+```
+GET /nova-vendor/smartolt/api/onu/traffic-graph/{external_id}/{graph_type?}
+```
+
+### Parámetros
+
+| Parámetro | Ubicación | Tipo | Requerido | Default | Descripción |
+|-----------|-----------|------|-----------|---------|-------------|
+| `external_id` | Path | String | Sí | - | Identificador externo único de la ONU |
+| `graph_type` | Path | String | No | "hourly" | Tipo de gráfico a generar |
+
+### Valores permitidos para `graph_type`
+
+⚠️ **IMPORTANTE**: Usa los valores exactos como están escritos aquí:
+
+- `hourly` - Gráfico por hora (default)
+- `daily` - Gráfico diario
+- `weekly` - Gráfico semanal
+- `monthly` - Gráfico mensual
+- `yearly` - Gráfico anual (NO usar "year", debe ser "yearly")
+
+### Respuesta
+
+La API retorna directamente los **bytes binarios de la imagen PNG** con header `Content-Type: image/png`.
+
+Puedes usar la URL directamente en el atributo `src` de una etiqueta `<img>`.
+
+### Ejemplos de uso REST API
+
+#### Ejemplo 1: HTML directo
+
+```html
+<!-- Gráfico por hora (default) -->
+<img src="/nova-vendor/smartolt/api/onu/traffic-graph/HWTC48A8F2B2" alt="Traffic Graph">
+
+<!-- Gráfico diario -->
+<img src="/nova-vendor/smartolt/api/onu/traffic-graph/HWTC48A8F2B2/daily" alt="Daily Traffic">
+
+<!-- Gráfico mensual -->
+<img src="/nova-vendor/smartolt/api/onu/traffic-graph/HWTC48A8F2B2/monthly" alt="Monthly Traffic">
+```
+
+#### Ejemplo 2: Vue.js
+
+```vue
+<template>
+  <div class="traffic-graph-container">
+    <h3>ONU Traffic Graph</h3>
+
+    <!-- Selector de tipo de gráfico -->
+    <div class="graph-type-selector">
+      <label>Graph Type:</label>
+      <select v-model="selectedGraphType">
+        <option value="hourly">Hourly</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+    </div>
+
+    <!-- Imagen del gráfico usando REST API -->
+    <img
+      :src="trafficGraphUrl"
+      alt="ONU Traffic Graph"
+      class="traffic-graph-image"
+      @error="handleImageError"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue';
+
+const props = defineProps({
+  externalId: {
+    type: String,
+    required: true
+  }
+});
+
+const selectedGraphType = ref('hourly');
+
+// URL se construye directamente - sin necesidad de fetch
+const trafficGraphUrl = computed(() => {
+  return `/nova-vendor/smartolt/api/onu/traffic-graph/${props.externalId}/${selectedGraphType.value}`;
+});
+
+const handleImageError = () => {
+  console.error('Failed to load traffic graph');
+};
+</script>
+
+<style scoped>
+.traffic-graph-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+}
+</style>
+```
+
+#### Ejemplo 3: React
+
+```jsx
+import React, { useState } from 'react';
+
+function TrafficGraph({ externalId }) {
+  const [graphType, setGraphType] = useState('hourly');
+
+  const trafficGraphUrl = `/nova-vendor/smartolt/api/onu/traffic-graph/${externalId}/${graphType}`;
+
+  return (
+    <div className="traffic-graph-container">
+      <h3>ONU Traffic Graph</h3>
+
+      <select value={graphType} onChange={(e) => setGraphType(e.target.value)}>
+        <option value="hourly">Hourly</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+
+      <img
+        src={trafficGraphUrl}
+        alt="ONU Traffic Graph"
+        className="traffic-graph-image"
+      />
+    </div>
+  );
+}
+```
+
+#### Ejemplo 4: cURL
+
+```bash
+# Descargar gráfico mensual
+curl -X GET "https://ispgo.raicesc.net/nova-vendor/smartolt/api/onu/traffic-graph/HWTC48A8F2B2/monthly" \
+  -H "Cookie: your-session-cookie" \
+  -o traffic_graph.png
+
+# Ver en navegador directamente
+open https://ispgo.raicesc.net/nova-vendor/smartolt/api/onu/traffic-graph/HWTC48A8F2B2/monthly
+```
+
+---
+
+## 2. GraphQL API (Alternativa)
+
+### Endpoint GraphQL
 
 ```graphql
 smartOltOnuTrafficGraph(external_id: String!, graph_type: String = "hourly"): SmartOltOnuTrafficGraph
@@ -346,8 +507,36 @@ const loadTrafficGraph = async () => {
 </script>
 ```
 
+## Comparación de APIs
+
+| Característica | REST API | GraphQL API |
+|----------------|----------|-------------|
+| **Facilidad de uso** | ⭐⭐⭐⭐⭐ Muy fácil | ⭐⭐⭐ Moderado |
+| **Performance** | ⭐⭐⭐⭐⭐ Excelente | ⭐⭐⭐ Bueno |
+| **Tamaño respuesta** | Binario (óptimo) | Base64 (+33% más grande) |
+| **Uso directo en `<img>`** | ✅ Sí | ❌ No (requiere conversión) |
+| **Requiere procesamiento** | ❌ No | ✅ Sí (decode base64) |
+| **Recomendado para** | Frontend, mobile apps | Consultas complejas |
+
+**Recomendación**: Usa **REST API** para mostrar imágenes directamente en el frontend.
+
+## URLs Disponibles
+
+### REST API
+```
+GET /nova-vendor/smartolt/api/onu/traffic-graph/{external_id}/{graph_type?}
+GET /nova-vendor/smartolt/api/onu/signal-graph/{external_id}
+```
+
+### GraphQL API
+```
+POST /graphql
+```
+
 ## Referencias
 
 - **API Original**: `\Ispgo\Smartolt\Services\ApiManager::getOnuTrafficGraphByExternalId`
+- **Controller REST**: `\Ispgo\Smartolt\Http\Controllers\OnuController@getTrafficGraphByExternalId`
+- **Routes REST**: `nova-components/Smartolt/routes/api.php:53-54`
 - **Resolver GraphQL**: `App\GraphQL\Queries\SmartOltQuery@getOnuTrafficGraph`
 - **Schema GraphQL**: `graphql/smartolt.graphql:227`

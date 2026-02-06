@@ -47,3 +47,9 @@ Route::prefix('onu')->group(function () {
     Route::post('{serviceId}/enable-catv', [OnuController::class, 'enableCatv']);
     Route::post('{serviceId}/disable-catv', [OnuController::class, 'disableCatv']);
 });
+
+// Direct ONU API Routes (by external_id)
+Route::prefix('api/onu')->group(function () {
+    Route::get('traffic-graph/{externalId}/{graphType?}', [OnuController::class, 'getTrafficGraphByExternalId']);
+    Route::get('signal-graph/{externalId}', [OnuController::class, 'getSignalGraphByExternalId']);
+});

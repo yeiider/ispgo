@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\McpController;
 use App\Http\Controllers\Api\TaskAttachmentController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskControllerApi;
+use App\Http\Controllers\Api\SmartOltController;
 use App\Http\Controllers\API\FileUploadController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -67,6 +68,22 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/temp', [FileUploadController::class, 'uploadTemp']);
         Route::post('/confirm', [FileUploadController::class, 'confirmUpload']);
         Route::delete('/temp', [FileUploadController::class, 'deleteTempFile']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | SmartOLT API Routes
+    |--------------------------------------------------------------------------
+    | Endpoints para consultar información de ONUs desde SmartOLT
+    */
+    Route::prefix('smartolt')->group(function () {
+        // Gráficos de ONU
+        Route::get('/onu/{externalId}/traffic-graph/{graphType?}', [SmartOltController::class, 'getTrafficGraph']);
+        Route::get('/onu/{externalId}/signal-graph', [SmartOltController::class, 'getSignalGraph']);
+
+        // Información de ONU
+        Route::get('/onu/{externalId}/details', [SmartOltController::class, 'getOnuDetails']);
+        Route::get('/onu/{externalId}/status', [SmartOltController::class, 'getOnuStatus']);
     });
 });
 
