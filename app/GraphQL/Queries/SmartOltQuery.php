@@ -101,16 +101,45 @@ class SmartOltQuery
     public function getOnuTrafficGraph($root, array $args)
     {
         $graphType = $args['graph_type'] ?? 'hourly';
+
+        Log::info('SmartOLT Traffic Graph Request', [
+            'external_id' => $args['external_id'],
+            'graph_type' => $graphType
+        ]);
+
         $response = $this->apiManager->getOnuTrafficGraphByExternalId($args['external_id'], $graphType);
+
+        Log::info('SmartOLT Traffic Graph Response', [
+            'status' => $response->status(),
+            'successful' => $response->successful(),
+            'body_length' => strlen($response->body()),
+            'content_type' => $response->header('Content-Type')
+        ]);
 
         // Retornar la imagen como base64
         if ($response->successful()) {
-            $imageData = base64_encode($response->body());
+            $body = $response->body();
+
+            // Verificar si el body no está vacío
+            if (empty($body)) {
+                Log::warning('SmartOLT Traffic Graph: Empty response body');
+                return [
+                    'image_base64' => '',
+                    'content_type' => 'image/png'
+                ];
+            }
+
+            $imageData = base64_encode($body);
             return [
                 'image_base64' => $imageData,
                 'content_type' => $response->header('Content-Type') ?? 'image/png'
             ];
         }
+
+        Log::error('SmartOLT Traffic Graph: Request failed', [
+            'status' => $response->status(),
+            'body' => $response->body()
+        ]);
 
         return null;
     }

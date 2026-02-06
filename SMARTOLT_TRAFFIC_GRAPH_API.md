@@ -19,11 +19,13 @@ smartOltOnuTrafficGraph(external_id: String!, graph_type: String = "hourly"): Sm
 
 ### Valores permitidos para `graph_type`
 
+⚠️ **IMPORTANTE**: Usa los valores exactos como están escritos aquí:
+
 - `hourly` - Gráfico por hora (default)
 - `daily` - Gráfico diario
 - `weekly` - Gráfico semanal
 - `monthly` - Gráfico mensual
-- `yearly` - Gráfico anual
+- `yearly` - Gráfico anual (NO usar "year", debe ser "yearly")
 
 ## Tipo de Respuesta
 
