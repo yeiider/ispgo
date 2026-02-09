@@ -23,7 +23,8 @@ Schedule::command('payment-promises:handle-expired')->dailyAt('00:30');
 
 // OnePay: run daily; the command itself checks the configured day in OnePaySettings
 Schedule::command('onepay:auto-create-charges')->daily();
-
+Schedule::command('backup:run')->dailyAt('01:00');
+Schedule::command('backup:clean')->dailyAt('01:30');
 //Schedule::call(function () {
 //    $cutoffTime = Carbon::now()->subMinutes(\Ispgo\Wiivo\WiivoConfigProvider::getSessionLife());
 //    SessionChatBot::where('updated_at', '<', $cutoffTime)->delete();
