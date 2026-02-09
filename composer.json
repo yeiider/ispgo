@@ -30,7 +30,9 @@
         "league/flysystem-aws-s3-v3": "^3.0",
         "nuwave/lighthouse": "^6.63",
         "predis/predis": "^2.3",
-        "sereny/nova-permissions": "@dev"
+        "sereny/nova-permissions": "@dev",
+        "spatie/laravel-backup": "^9.3",
+        "ext-zip": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
