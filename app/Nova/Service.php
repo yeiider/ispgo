@@ -10,6 +10,7 @@ use App\Nova\Actions\Service\CreateActionsServiceUninstall;
 use App\Nova\Actions\Service\GenerateInvoice;
 use App\Nova\Actions\Service\SuspendService;
 use App\Nova\Customers\Address;
+use App\Nova\Filters\RouterFilter;
 use App\Nova\Filters\ServiceStatus;
 use App\Nova\Filters\ServiceType;
 use App\Nova\Lenses\TelephonicServiceLens;
@@ -167,7 +168,7 @@ class Service extends Resource
             new SuspendService(),
             new CreateActionsServiceInstall(),
             new CreateActionsServiceUninstall(),
-        
+
             (new LoadPlanSmartOlt())->canSee(function () {
                 return ProviderSmartOlt::getEnabled();
             }),
@@ -201,7 +202,8 @@ class Service extends Resource
     {
         return [
             new ServiceStatus(),
-            new ServiceType()
+            new ServiceType(),
+            new RouterFilter()
         ];
     }
 
