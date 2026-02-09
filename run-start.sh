@@ -18,6 +18,4 @@ php artisan nova:check-license
 
 php artisan route:clear
 
-php artisan backup:run
-
 echo "¡Script completado con éxito!"
