@@ -291,7 +291,7 @@ extend type Query @guard {
     "Obtener todas las cajas registradoras"
     cashRegisters(
         "Filtrar por router"
-        routerId: ID @eq(key: "router_id")
+        routerId: Int @eq(key: "router_id")
 
         "Filtrar por estado"
         status: CashRegisterStatus @eq
