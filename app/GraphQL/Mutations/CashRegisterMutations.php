@@ -24,16 +24,21 @@ class CashRegisterMutations
             $user = Auth::user();
             $routerIds = $user->getRouterIds();
 
-            if (!empty($routerIds) && !in_array($args['routerId'], $routerIds)) {
+            // El @spread directive convierte camelCase a snake_case
+            $routerId = $args['router_id'] ?? $args['routerId'] ?? null;
+            $userId = $args['user_id'] ?? $args['userId'] ?? null;
+            $initialBalance = $args['initial_balance'] ?? $args['initialBalance'] ?? 0;
+
+            if (!empty($routerIds) && !in_array($routerId, $routerIds)) {
                 throw new Error('No tienes permisos para crear una caja en este router.');
             }
 
             $cashRegister = CashRegister::create([
                 'name' => $args['name'],
-                'router_id' => $args['routerId'],
-                'user_id' => $args['userId'] ?? null,
-                'initial_balance' => $args['initialBalance'],
-                'current_balance' => $args['initialBalance'],
+                'router_id' => $routerId,
+                'user_id' => $userId,
+                'initial_balance' => $initialBalance,
+                'current_balance' => $initialBalance,
                 'status' => CashRegister::STATUS_OPEN,
                 'notes' => $args['notes'] ?? null,
             ]);
@@ -71,12 +76,13 @@ class CashRegisterMutations
                 $updateData['name'] = $args['name'];
             }
 
-            if (isset($args['userId'])) {
-                $updateData['user_id'] = $args['userId'];
+            // Soportar ambos formatos
+            if (isset($args['user_id']) || isset($args['userId'])) {
+                $updateData['user_id'] = $args['user_id'] ?? $args['userId'];
             }
 
-            if (isset($args['currentBalance'])) {
-                $updateData['current_balance'] = $args['currentBalance'];
+            if (isset($args['current_balance']) || isset($args['currentBalance'])) {
+                $updateData['current_balance'] = $args['current_balance'] ?? $args['currentBalance'];
             }
 
             if (isset($args['notes'])) {
@@ -100,7 +106,12 @@ class CashRegisterMutations
     public function close($root, array $args)
     {
         try {
-            $cashRegister = CashRegister::findOrFail($args['cashRegisterId']);
+            // Soportar ambos formatos
+            $cashRegisterId = $args['cash_register_id'] ?? $args['cashRegisterId'] ?? null;
+            $closureDate = $args['closure_date'] ?? $args['closureDate'] ?? null;
+            $closingBalance = $args['closing_balance'] ?? $args['closingBalance'] ?? null;
+
+            $cashRegister = CashRegister::findOrFail($cashRegisterId);
 
             // Verificar permisos
             $user = Auth::user();
@@ -115,8 +126,7 @@ class CashRegisterMutations
                 throw new Error('La caja ya está cerrada.');
             }
 
-            $closureDate = Carbon::parse($args['closureDate']);
-            $closingBalance = $args['closingBalance'] ?? null;
+            $closureDate = Carbon::parse($closureDate);
             $notes = $args['notes'] ?? null;
 
             // Verificar si ya existe un cierre para esta fecha
