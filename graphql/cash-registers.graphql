@@ -331,7 +331,6 @@ extend type Query @guard {
         "Ordenar por campo"
         orderBy: [OrderByClause!] @orderBy
     ): [CashRegisterClosure!]!
-        @paginate(defaultCount: 20, model: "App\\Models\\Finance\\CashRegisterClosure")
         @field(resolver: "App\\GraphQL\\Queries\\CashRegisterQueries@closures")
 
     "Obtener un cierre específico"
