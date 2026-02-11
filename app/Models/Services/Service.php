@@ -127,7 +127,7 @@ class Service extends Model
             // If user has no routers assigned, show all data
             // Role permissions control what actions they can perform
             $routerIds = $user->getRouterIds();
-            
+
             if (empty($routerIds)) {
                 return;
             }
@@ -240,7 +240,7 @@ class Service extends Model
     {
         $this->service_status = 'suspended';
         $this->save();
-        event(new ServiceSuspend($this));
+        //event(new ServiceSuspend($this));
     }
 
     public function activate()

@@ -1,0 +1,394 @@
+"Representa una caja registradora asignada a un router (zona)"
+type CashRegister {
+    "ID único de la caja"
+    id: ID!
+
+    "Nombre de la caja"
+    name: String!
+
+    "Router (zona) asociado"
+    router: Router @belongsTo
+
+    "ID del router"
+    routerId: ID @rename(attribute: "router_id")
+
+    "Usuario asignado a esta caja"
+    user: User @belongsTo
+
+    "ID del usuario asignado"
+    userId: ID @rename(attribute: "user_id")
+
+    "Balance inicial de la caja"
+    initialBalance: Float! @rename(attribute: "initial_balance")
+
+    "Balance actual de la caja"
+    currentBalance: Float! @rename(attribute: "current_balance")
+
+    "Estado de la caja (open, closed)"
+    status: CashRegisterStatus!
+
+    "Fecha y hora de apertura"
+    openedAt: DateTime @rename(attribute: "opened_at")
+
+    "Fecha y hora de cierre"
+    closedAt: DateTime @rename(attribute: "closed_at")
+
+    "Notas adicionales"
+    notes: String
+
+    "Usuario que creó el registro"
+    creator: User @belongsTo(relation: "creator")
+
+    "ID del usuario creador"
+    createdBy: ID @rename(attribute: "created_by")
+
+    "Usuario que actualizó el registro"
+    updater: User @belongsTo(relation: "updater")
+
+    "ID del usuario que actualizó"
+    updatedBy: ID @rename(attribute: "updated_by")
+
+    "Cierres de caja asociados"
+    closures: [CashRegisterClosure!]! @hasMany
+
+    "Facturas asociadas a esta caja"
+    invoices: [Invoice!]! @hasMany(relation: "invoices")
+
+    "Fecha de creación"
+    createdAt: DateTime! @rename(attribute: "created_at")
+
+    "Última actualización"
+    updatedAt: DateTime! @rename(attribute: "updated_at")
+}
+
+"Representa un cierre de caja diario"
+type CashRegisterClosure {
+    "ID único del cierre"
+    id: ID!
+
+    "Caja registradora"
+    cashRegister: CashRegister! @belongsTo
+
+    "ID de la caja"
+    cashRegisterId: ID! @rename(attribute: "cash_register_id")
+
+    "Usuario que realizó el cierre"
+    user: User! @belongsTo
+
+    "ID del usuario"
+    userId: ID! @rename(attribute: "user_id")
+
+    "Fecha del cierre"
+    closureDate: Date! @rename(attribute: "closure_date")
+
+    "Balance de apertura"
+    openingBalance: Float! @rename(attribute: "opening_balance")
+
+    "Balance de cierre"
+    closingBalance: Float! @rename(attribute: "closing_balance")
+
+    "Balance esperado"
+    expectedBalance: Float! @rename(attribute: "expected_balance")
+
+    "Diferencia entre esperado y real"
+    difference: Float! @rename(attribute: "difference")
+
+    "Total cobrado en efectivo"
+    totalCash: Float! @rename(attribute: "total_cash")
+
+    "Total cobrado por transferencia"
+    totalTransfer: Float! @rename(attribute: "total_transfer")
+
+    "Total cobrado por tarjeta"
+    totalCard: Float! @rename(attribute: "total_card")
+
+    "Total cobrado online"
+    totalOnline: Float! @rename(attribute: "total_online")
+
+    "Total cobrado por otros métodos"
+    totalOther: Float! @rename(attribute: "total_other")
+
+    "Total de facturas procesadas"
+    totalInvoices: Int! @rename(attribute: "total_invoices")
+
+    "Facturas pagadas"
+    paidInvoices: Int! @rename(attribute: "paid_invoices")
+
+    "Total recaudado"
+    totalCollected: Float! @rename(attribute: "total_collected")
+
+    "Total de descuentos aplicados"
+    totalDiscounts: Float! @rename(attribute: "total_discounts")
+
+    "Total de ajustes"
+    totalAdjustments: Float! @rename(attribute: "total_adjustments")
+
+    "Detalles de pago por método"
+    paymentDetails: JSON @rename(attribute: "payment_details")
+
+    "Resumen de facturas"
+    invoiceSummary: JSON @rename(attribute: "invoice_summary")
+
+    "Metadata adicional"
+    metadata: JSON
+
+    "Estado del cierre (processing, completed, failed)"
+    status: ClosureStatus!
+
+    "Notas del cierre"
+    notes: String
+
+    "Fecha de procesamiento"
+    processedAt: DateTime @rename(attribute: "processed_at")
+
+    "Fecha de creación"
+    createdAt: DateTime! @rename(attribute: "created_at")
+
+    "Última actualización"
+    updatedAt: DateTime! @rename(attribute: "updated_at")
+}
+
+"Estado de la caja"
+enum CashRegisterStatus {
+    OPEN @enum(value: "open")
+    CLOSED @enum(value: "closed")
+}
+
+"Estado del cierre"
+enum ClosureStatus {
+    PROCESSING @enum(value: "processing")
+    COMPLETED @enum(value: "completed")
+    FAILED @enum(value: "failed")
+}
+
+"Input para crear una caja registradora"
+input CreateCashRegisterInput {
+    "Nombre de la caja"
+    name: String! @rules(apply: ["required", "string", "max:255"])
+
+    "ID del router (zona)"
+    routerId: ID! @rename(attribute: "router_id") @rules(apply: ["required", "exists:routers,id"])
+
+    "ID del usuario asignado"
+    userId: ID @rename(attribute: "user_id") @rules(apply: ["exists:users,id"])
+
+    "Balance inicial"
+    initialBalance: Float! @rename(attribute: "initial_balance") @rules(apply: ["required", "numeric", "min:0"])
+
+    "Notas"
+    notes: String
+}
+
+"Input para actualizar una caja"
+input UpdateCashRegisterInput {
+    "Nombre de la caja"
+    name: String @rules(apply: ["string", "max:255"])
+
+    "ID del usuario asignado"
+    userId: ID @rename(attribute: "user_id") @rules(apply: ["exists:users,id"])
+
+    "Balance actual"
+    currentBalance: Float @rename(attribute: "current_balance") @rules(apply: ["numeric", "min:0"])
+
+    "Notas"
+    notes: String
+}
+
+"Input para crear un cierre de caja"
+input CreateClosureInput {
+    "ID de la caja a cerrar"
+    cashRegisterId: ID! @rename(attribute: "cash_register_id") @rules(apply: ["required", "exists:cash_registers,id"])
+
+    "Fecha del cierre"
+    closureDate: Date! @rename(attribute: "closure_date") @rules(apply: ["required", "date"])
+
+    "Balance de cierre (opcional, se calcula automáticamente si no se provee)"
+    closingBalance: Float @rename(attribute: "closing_balance") @rules(apply: ["numeric", "min:0"])
+
+    "Notas del cierre"
+    notes: String
+}
+
+"Respuesta de cierre de caja"
+type CloseCashRegisterPayload {
+    "Indica si se inició correctamente"
+    success: Boolean!
+
+    "Mensaje de respuesta"
+    message: String!
+
+    "Cierre creado (puede estar en procesamiento)"
+    closure: CashRegisterClosure
+}
+
+"Respuesta de eliminación"
+type DeleteCashRegisterPayload {
+    "Indica si se eliminó correctamente"
+    success: Boolean!
+
+    "Mensaje de respuesta"
+    message: String!
+}
+
+"Filtros para buscar cierres"
+input ClosureFilters {
+    "Filtrar por caja"
+    cashRegisterId: ID @eq(key: "cash_register_id")
+
+    "Filtrar por estado"
+    status: ClosureStatus @eq
+
+    "Fecha desde"
+    dateFrom: Date
+
+    "Fecha hasta"
+    dateTo: Date
+}
+
+"Reporte consolidado de cierres"
+type ClosureReport {
+    "Total de cierres"
+    totalClosures: Int!
+
+    "Total recaudado en el período"
+    totalCollected: Float!
+
+    "Total de descuentos"
+    totalDiscounts: Float!
+
+    "Total por método de pago"
+    paymentMethodTotals: PaymentMethodTotals!
+
+    "Total de facturas procesadas"
+    totalInvoices: Int!
+
+    "Promedio por cierre"
+    averagePerClosure: Float!
+
+    "Cierres con diferencias"
+    closuresWithDifferences: Int!
+}
+
+"Totales por método de pago"
+type PaymentMethodTotals {
+    "Total en efectivo"
+    cash: Float!
+
+    "Total por transferencia"
+    transfer: Float!
+
+    "Total por tarjeta"
+    card: Float!
+
+    "Total online"
+    online: Float!
+
+    "Total otros métodos"
+    other: Float!
+}
+
+extend type Query @guard {
+    "Obtener todas las cajas registradoras"
+    cashRegisters(
+        "Filtrar por router"
+        routerId: ID @eq(key: "router_id")
+
+        "Filtrar por estado"
+        status: CashRegisterStatus @eq
+
+        "Filtrar por usuario"
+        userId: ID @eq(key: "user_id")
+
+        "Solo cajas del usuario autenticado"
+        onlyMyRouters: Boolean @scope(name: "byUserRouters")
+
+        "Ordenar por campo"
+        orderBy: [OrderByClause!] @orderBy
+    ): [CashRegister!]!
+        @paginate(defaultCount: 20, model: "App\\Models\\Finance\\CashRegister")
+
+    "Obtener una caja específica"
+    cashRegister(
+        "ID de la caja"
+        id: ID! @eq
+    ): CashRegister
+        @find(model: "App\\Models\\Finance\\CashRegister")
+
+    "Obtener cierres de caja"
+    cashRegisterClosures(
+        "Filtrar por caja"
+        cashRegisterId: ID @eq(key: "cash_register_id")
+
+        "Filtrar por estado"
+        status: ClosureStatus @eq
+
+        "Filtrar por rango de fechas"
+        dateFrom: Date
+
+        "Filtrar por rango de fechas"
+        dateTo: Date
+
+        "Ordenar por campo"
+        orderBy: [OrderByClause!] @orderBy
+    ): [CashRegisterClosure!]!
+        @paginate(defaultCount: 20, model: "App\\Models\\Finance\\CashRegisterClosure")
+        @field(resolver: "App\\GraphQL\\Queries\\CashRegisterQueries@closures")
+
+    "Obtener un cierre específico"
+    cashRegisterClosure(
+        "ID del cierre"
+        id: ID! @eq
+    ): CashRegisterClosure
+        @find(model: "App\\Models\\Finance\\CashRegisterClosure")
+
+    "Obtener reporte consolidado de cierres"
+    closureReport(
+        "Fecha desde"
+        dateFrom: Date!
+
+        "Fecha hasta"
+        dateTo: Date!
+
+        "Filtrar por caja"
+        cashRegisterId: ID
+    ): ClosureReport!
+        @field(resolver: "App\\GraphQL\\Queries\\CashRegisterQueries@closureReport")
+}
+
+extend type Mutation @guard {
+    "Crear una nueva caja registradora"
+    createCashRegister(
+        input: CreateCashRegisterInput! @spread
+    ): CashRegister!
+        @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@create")
+
+    "Actualizar una caja registradora"
+    updateCashRegister(
+        "ID de la caja"
+        id: ID!
+
+        "Datos a actualizar"
+        input: UpdateCashRegisterInput! @spread
+    ): CashRegister!
+        @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@update")
+
+    "Cerrar una caja y generar el reporte diario"
+    closeCashRegister(
+        input: CreateClosureInput! @spread
+    ): CloseCashRegisterPayload!
+        @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@close")
+
+    "Abrir una caja cerrada"
+    openCashRegister(
+        "ID de la caja"
+        id: ID!
+    ): CashRegister!
+        @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@open")
+
+    "Eliminar una caja registradora"
+    deleteCashRegister(
+        "ID de la caja"
+        id: ID!
+    ): DeleteCashRegisterPayload!
+        @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@delete")
+}
