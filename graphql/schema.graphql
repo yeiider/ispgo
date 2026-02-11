@@ -1105,3 +1105,4 @@ extend type Mutation {
 #import smartolt.graphql
 #import mikrotik.graphql
 #import inventory.graphql
+#import cash-registers.graphql
