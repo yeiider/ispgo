@@ -98,7 +98,7 @@ Postman
 - Método: POST
 - URL: `https://tu-dominio.com/api/v1/cotizaciones`
 - Authorization: Bearer Token
-- Body: JSON con los campos anteriores.
+  - Body: JSON con los campos anteriores (sin el header `Content-Type`).
 
 #### Migración y despliegue
 
