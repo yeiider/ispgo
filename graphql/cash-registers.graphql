@@ -209,6 +209,21 @@ input CreateClosureInput {
     notes: String
 }
 
+"Input para cerrar una caja registradora"
+input CloseCashRegisterInput {
+    "ID de la caja a cerrar"
+    cashRegisterId: ID! @rename(attribute: "cash_register_id") @rules(apply: ["required", "exists:cash_registers,id"])
+
+    "Fecha del cierre"
+    closureDate: Date! @rename(attribute: "closure_date") @rules(apply: ["required", "date"])
+
+    "Balance de cierre (opcional, se calcula automáticamente si no se provee)"
+    closingBalance: Float @rename(attribute: "closing_balance") @rules(apply: ["numeric", "min:0"])
+
+    "Notas del cierre"
+    notes: String
+}
+
 "Respuesta de cierre de caja"
 type CloseCashRegisterPayload {
     "Indica si se inició correctamente"
@@ -373,7 +388,7 @@ extend type Mutation @guard {
 
     "Cerrar una caja y generar el reporte diario"
     closeCashRegister(
-        input: CreateClosureInput! @spread
+        input: CloseCashRegisterInput! @spread
     ): CloseCashRegisterPayload!
         @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@close")
 
