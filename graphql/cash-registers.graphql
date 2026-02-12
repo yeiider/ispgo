@@ -236,11 +236,7 @@ type CloseCashRegisterPayload {
     closure: CashRegisterClosure @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@resolveClosure")
 }
 
-"Paginador para cierres de caja"
-type CashRegisterClosurePaginator {
-    data: [CashRegisterClosure!]!
-    paginatorInfo: PaginatorInfo!
-}
+
 
 "Respuesta de eliminación"
 type DeleteCashRegisterPayload {
@@ -351,7 +347,7 @@ extend type Query @guard {
 
         "Ordenar por campo"
         orderBy: [OrderByClause!] @orderBy
-    ): CashRegisterClosurePaginator!
+    ): [CashRegisterClosure!]!
         @paginate(builder: "App\\GraphQL\\Queries\\CashRegisterQueries@closures")
 
     "Obtener un cierre específico"
