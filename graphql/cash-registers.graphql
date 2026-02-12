@@ -233,7 +233,7 @@ type CloseCashRegisterPayload {
     message: String!
 
     "Cierre creado (puede estar en procesamiento)"
-    closure: CashRegisterClosure
+    closure: CashRegisterClosure @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@resolveClosure")
 }
 
 "Respuesta de eliminación"

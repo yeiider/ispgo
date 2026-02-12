@@ -110,7 +110,6 @@ class CashRegisterMutations
             $cashRegisterId = $args['cash_register_id'] ?? $args['cashRegisterId'] ?? null;
             $closureDate = $args['closure_date'] ?? $args['closureDate'] ?? null;
             $closingBalance = $args['closing_balance'] ?? $args['closingBalance'] ?? null;
-
             $cashRegister = CashRegister::findOrFail($cashRegisterId);
 
             // Verificar permisos
@@ -155,6 +154,22 @@ class CashRegisterMutations
         } catch (\Exception $e) {
             throw new Error('Error al cerrar la caja: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Resolver explícito para evitar que Lighthouse intente instanciar "Closure".
+     */
+    public function resolveClosure($root, array $args)
+    {
+        if (is_array($root)) {
+            return $root['closure'] ?? null;
+        }
+
+        if (is_object($root) && isset($root->closure)) {
+            return $root->closure;
+        }
+
+        return null;
     }
 
     /**

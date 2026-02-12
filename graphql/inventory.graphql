@@ -20,9 +20,7 @@ type InventoryProduct {
     assignable_to_service: Boolean
     url_key: String
     qty: String
-    assignable_to_service: Boolean
     unit_of_measure: String
-    warehouse_id: ID
     warehouse_id: ID
     category_id: ID
     created_at: DateTime!
