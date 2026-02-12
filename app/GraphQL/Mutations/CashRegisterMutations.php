@@ -145,7 +145,7 @@ class CashRegisterMutations
                 $closureDate,
                 $closingBalance,
                 $notes
-            );
+            )->onQueue('redis');
 
             return [
                 'success' => true,
