@@ -91,7 +91,7 @@ class CashRegisterClosure extends Model
      */
     public function invoices()
     {
-        return Invoice::where('daily_box_id', $this->cash_register_id)
+        return $this->hasMany(Invoice::class, 'daily_box_id', 'cash_register_id')
             ->whereDate('updated_at', $this->closure_date)
             ->where('status', 'paid');
     }
