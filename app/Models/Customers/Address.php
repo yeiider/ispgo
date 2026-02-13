@@ -4,6 +4,7 @@ namespace App\Models\Customers;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class Address extends Model
@@ -43,6 +44,30 @@ class Address extends Model
     protected static function boot()
     {
         parent::boot();
+
+        // Global Scope: Filter addresses by customer's router(s)
+        static::addGlobalScope('router_filter', function (Builder $builder) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+            
+            // If not authenticated, no filtering
+            if (!$user) {
+                return;
+            }
+
+            // If user has no routers assigned, show all data
+            // Role permissions control what actions they can perform
+            $routerIds = $user->getRouterIds();
+            
+            if (empty($routerIds)) {
+                return;
+            }
+
+            // Filter addresses by customer's router_id
+            $builder->whereHas('customer', function ($query) use ($routerIds) {
+                $query->whereIn('router_id', $routerIds);
+            });
+        });
 
         static::creating(function ($model) {
             $model->created_by = Auth::id();
