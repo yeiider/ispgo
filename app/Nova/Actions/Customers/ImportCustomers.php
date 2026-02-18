@@ -179,12 +179,12 @@ class ImportCustomers extends Action
                     
                     // First try to find by ID if provided
                     if ($serviceId) {
-                        $serviceModel = Service::where('customer_id', $customer->id)->where('id', $serviceId)->first();
+                        $serviceModel = Service::withoutGlobalScopes()->where('customer_id', $customer->id)->where('id', $serviceId)->first();
                     }
                     
                     // If not found by ID, check if customer already has a service
                     if (!$serviceModel) {
-                        $serviceModel = Service::where('customer_id', $customer->id)->first();
+                        $serviceModel = Service::withoutGlobalScopes()->where('customer_id', $customer->id)->first();
                     }
 
                     // If creating and service_location not provided, try to use first address
