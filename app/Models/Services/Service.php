@@ -150,11 +150,10 @@ class Service extends Model
 
         });
         static::updating(function ($service) {
+            $service->updated_by = Auth::id();
             if ($service->isDirty('service_status')) {
-                $service->updated_by = Auth::id();
                 event(new ServiceUpdateStatus($service));
             }
-            event(new ServiceUpdateStatus($service));
         });
     }
 
