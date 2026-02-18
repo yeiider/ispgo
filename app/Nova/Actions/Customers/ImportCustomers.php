@@ -200,7 +200,9 @@ class ImportCustomers extends Action
                         $serviceModel->fill($serviceData);
                         $serviceModel->customer_id = $customer->id;
                         if ($serviceModel->isDirty()) {
-                            $serviceModel->save();
+                            // saveQuietly() evita disparar eventos (ej: SmartOLT)
+                            // que hacen llamadas HTTP síncronas y cuelgan la importación masiva
+                            $serviceModel->saveQuietly();
                             $rowUpdated = true;
                         }
                     } else {
