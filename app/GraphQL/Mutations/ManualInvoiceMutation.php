@@ -77,6 +77,10 @@ class ManualInvoiceMutation
             $total = $subtotal + $taxes + $voids;
             $amountBeforeDiscounts = $itemsSubtotal + $charges + $taxes;
 
+            // Calcular billing_period en formato YYYY-MM
+            $issueDate = \Carbon\Carbon::parse($args['issue_date']);
+            $billingPeriod = $issueDate->format('Y-m');
+
             // Crear la factura
             $invoice = Invoice::create([
                 'customer_id' => $args['customer_id'],
@@ -86,6 +90,7 @@ class ManualInvoiceMutation
                 'invoice_type' => Invoice::TYPE_MANUAL,
                 'issue_date' => $args['issue_date'],
                 'due_date' => $args['due_date'],
+                'billing_period' => $billingPeriod, // Formato: YYYY-MM
                 'subtotal' => $subtotal,
                 'tax' => $taxes,
                 'tax_total' => $taxes,
