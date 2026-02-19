@@ -630,11 +630,20 @@ type Service {
 type Invoice {
     id: ID!
     increment_id: String
+    customer_id: ID!
+    customer_name: String
+    service_id: ID
     total: Float!
+    subtotal: Float
+    tax: Float
+    discount: Float
+    amount: Float
+    outstanding_balance: Float
     status: String!
     issue_date: Date
     due_date: Date
     router_id: Int
+    notes: String
     created_at: DateTime!
     updated_at: DateTime!
 
