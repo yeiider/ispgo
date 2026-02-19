@@ -156,7 +156,8 @@ extend type Mutation {
 extend type Query {
     "Obtener facturas manuales filtradas"
     manualInvoices(
-        customer_id: ID @eq
+        customer_id: ID @eq(key: "customer_id")
+        router_id: ID @eq(key: "router_id")
         status: InvoiceStatus @eq
         invoice_type: InvoiceType @eq
         issue_date_from: Date
