@@ -41,6 +41,7 @@ extend type Query {
         date_to: Date
         status: [String!]
         payment_method: [String!]
+        router_id: Int
         chart_frequency: String = "daily"
     ): InvoiceReport! @field(resolver: "App\\GraphQL\\Queries\\InvoiceReportQuery@resolve")
 }
