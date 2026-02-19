@@ -24,9 +24,15 @@ class Invoice extends Model
     use HasFactory;
 
     const STATUS_PAID = "paid";
+
+    // Invoice types
+    const TYPE_SUBSCRIPTION = 'subscription'; // Facturas mensuales de servicios
+    const TYPE_MANUAL = 'manual'; // Facturas manuales (instalaciones, otros)
+    const TYPE_ADJUSTMENT = 'adjustment'; // Ajustes/correcciones
+
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date', 'full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
+        'issue_date', 'due_date', 'full_name', 'status', 'invoice_type', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
         'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total','router_id',
         // OnePay integration fields
         'onepay_charge_id', 'onepay_payment_link', 'onepay_status', 'onepay_metadata'

@@ -24,6 +24,8 @@ class ProcessCashRegisterClosure implements ShouldQueue
     public int $tries = 3;
     public int $timeout = 300; // 5 minutos
 
+
+
     protected int $cashRegisterId;
     protected int $userId;
     protected Carbon $closureDate;
@@ -45,9 +47,6 @@ class ProcessCashRegisterClosure implements ShouldQueue
         $this->closureDate = $closureDate;
         $this->closingBalance = $closingBalance;
         $this->notes = $notes;
-
-        // Configurar cola Redis
-        $this->onQueue('cash-register-closures');
     }
 
     /**

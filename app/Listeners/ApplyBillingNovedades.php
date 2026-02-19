@@ -14,6 +14,12 @@ class ApplyBillingNovedades
     public function handle(InvoiceItemsCreated $event): void
     {
         $invoice = $event->invoice;
+
+        // No aplicar novedades a facturas manuales
+        if ($invoice->invoice_type === 'manual' || $invoice->invoice_type === 'adjustment') {
+            return;
+        }
+
         $period  = $invoice->billing_period_start;
 
         // 1) Encontrar los servicios vinculados mediante charge-adjustments

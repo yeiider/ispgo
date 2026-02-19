@@ -47,18 +47,18 @@ class RolesAndPermissionsSeeder extends Seeder
             'TemplateHtml',
             'Contract'
         ]);
-        Permission::create(['group' => "System Setting", 'name' => 'Setting']);
+        Permission::firstOrCreate(['name' => 'Setting', 'guard_name' => 'web'], ['group' => "System Setting"]);
         $collection->each(function ($item) {
             // Crear permisos para cada modelo
-            Permission::create(['group' => $item, 'name' => 'viewAny' . $item]);
-            Permission::create(['group' => $item, 'name' => 'view' . $item]);
-            Permission::create(['group' => $item, 'name' => 'update' . $item]);
-            Permission::create(['group' => $item, 'name' => 'create' . $item]);
-            Permission::create(['group' => $item, 'name' => 'delete' . $item]);
-            Permission::create(['group' => $item, 'name' => 'destroy' . $item]);
+            Permission::firstOrCreate(['name' => 'viewAny' . $item, 'guard_name' => 'web'], ['group' => $item]);
+            Permission::firstOrCreate(['name' => 'view' . $item, 'guard_name' => 'web'], ['group' => $item]);
+            Permission::firstOrCreate(['name' => 'update' . $item, 'guard_name' => 'web'], ['group' => $item]);
+            Permission::firstOrCreate(['name' => 'create' . $item, 'guard_name' => 'web'], ['group' => $item]);
+            Permission::firstOrCreate(['name' => 'delete' . $item, 'guard_name' => 'web'], ['group' => $item]);
+            Permission::firstOrCreate(['name' => 'destroy' . $item, 'guard_name' => 'web'], ['group' => $item]);
         });
-        Permission::create(['group' => "invoice", 'name' => 'PostInvoice']);
-        Permission::create(['group' => "invoice", 'name' => 'ViewDailyInvoiceBalance']);
+        Permission::firstOrCreate(['name' => 'PostInvoice', 'guard_name' => 'web'], ['group' => "invoice"]);
+        Permission::firstOrCreate(['name' => 'ViewDailyInvoiceBalance', 'guard_name' => 'web'], ['group' => "invoice"]);
 
 
 

@@ -12,9 +12,10 @@ class InvoiceReportQuery
     public function resolve($root, array $args)
     {
         $dateFrom = isset($args['date_from']) ? Carbon::parse($args['date_from']) : Carbon::now()->startOfMonth();
-        $dateTo = isset($args['date_to']) ? Carbon::parse($args['date_to']) : Carbon::now()->endOfMonth();
+        $dateTo = isset($args['date_to']) ? Carbon::parse($args['date_to']) : Carbon::now();
         $statuses = $args['status'] ?? null;
         $paymentMethods = $args['payment_method'] ?? null;
+        $routerId = $args['router_id'] ?? null;
         $chartFrequency = $args['chart_frequency'] ?? 'daily';
 
         $query = Invoice::query()
@@ -26,6 +27,10 @@ class InvoiceReportQuery
 
         if (!empty($paymentMethods)) {
             $query->whereIn('payment_method', $paymentMethods);
+        }
+
+        if (!empty($routerId)) {
+            $query->where('router_id', $routerId);
         }
 
         // Clone query for different aggregations to avoid mutating the base query state
