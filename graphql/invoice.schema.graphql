@@ -1,0 +1,315 @@
+# ========================================
+# MANUAL INVOICES SCHEMA
+# ========================================
+# Schema para crear y gestionar facturas manuales
+# Estas facturas son independientes de los servicios mensuales
+# y permiten facturar instalaciones, trabajos externos, etc.
+
+# ========================================
+# ENUMS
+# ========================================
+
+enum InvoiceType {
+    subscription @enum(value: "subscription") # Factura mensual de servicios
+    manual @enum(value: "manual") # Factura manual (instalaciones, otros)
+    adjustment @enum(value: "adjustment") # Ajustes/correcciones
+}
+
+enum InvoiceStatus {
+    paid @enum(value: "paid")
+    unpaid @enum(value: "unpaid")
+    overdue @enum(value: "overdue")
+    canceled @enum(value: "canceled")
+}
+
+# ========================================
+# INPUT TYPES
+# ========================================
+
+"""
+Input para crear un item de factura manual.
+Representa un concepto/producto/servicio a facturar.
+"""
+input ManualInvoiceItemInput {
+    """Descripción del item (ej: "Instalación de fibra óptica")"""
+    description: String! @rules(apply: ["required", "string", "max:255"])
+
+    """Cantidad"""
+    quantity: Int! @rules(apply: ["required", "integer", "min:1"])
+
+    """Precio unitario (sin impuestos)"""
+    unit_price: Float! @rules(apply: ["required", "numeric", "min:0"])
+
+    """ID del servicio relacionado (opcional)"""
+    service_id: ID
+
+    """Metadatos adicionales en formato JSON"""
+    metadata: JSON
+}
+
+"""
+Input para crear un ajuste/cargo adicional en la factura.
+Permite agregar cargos, descuentos, impuestos o anulaciones.
+"""
+input ManualInvoiceAdjustmentInput {
+    """Tipo de ajuste: charge (cargo), discount (descuento), tax (impuesto), void (anulación)"""
+    kind: String! @rules(apply: ["required", "in:charge,discount,tax,void"])
+
+    """Monto del ajuste (positivo para cargos/impuestos, negativo para descuentos)"""
+    amount: Float! @rules(apply: ["required", "numeric"])
+
+    """Etiqueta descriptiva del ajuste"""
+    label: String! @rules(apply: ["required", "string", "max:255"])
+
+    """Tipo de fuente del ajuste (opcional)"""
+    source_type: String
+
+    """ID de la fuente del ajuste (opcional)"""
+    source_id: ID
+
+    """Metadatos adicionales"""
+    metadata: JSON
+}
+
+"""
+Input para crear una factura manual completa.
+"""
+input CreateManualInvoiceInput {
+    """ID del cliente"""
+    customer_id: ID! @rules(apply: ["required", "exists:customers,id"])
+
+    """ID del router (opcional, se puede tomar del cliente)"""
+    router_id: ID @rules(apply: ["exists:routers,id"])
+
+    """Fecha de emisión (formato: YYYY-MM-DD)"""
+    issue_date: Date! @rules(apply: ["required", "date"])
+
+    """Fecha de vencimiento (formato: YYYY-MM-DD)"""
+    due_date: Date! @rules(apply: ["required", "date", "after_or_equal:issue_date"])
+
+    """Items de la factura (conceptos a facturar)"""
+    items: [ManualInvoiceItemInput!]! @rules(apply: ["required", "array", "min:1"])
+
+    """Ajustes adicionales (cargos, descuentos, impuestos)"""
+    adjustments: [ManualInvoiceAdjustmentInput!]
+
+    """Notas adicionales"""
+    notes: String
+
+    """Información adicional en formato JSON"""
+    additional_information: JSON
+
+    """Estado inicial (por defecto: unpaid)"""
+    status: InvoiceStatus
+}
+
+"""
+Input para actualizar una factura manual existente.
+Solo se pueden actualizar facturas que no han sido pagadas.
+"""
+input UpdateManualInvoiceInput {
+    """ID de la factura a actualizar"""
+    invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
+
+    """Nueva fecha de emisión"""
+    issue_date: Date @rules(apply: ["date"])
+
+    """Nueva fecha de vencimiento"""
+    due_date: Date @rules(apply: ["date", "after_or_equal:issue_date"])
+
+    """Nuevos items (reemplaza los existentes)"""
+    items: [ManualInvoiceItemInput!]
+
+    """Nuevos ajustes (reemplaza los existentes)"""
+    adjustments: [ManualInvoiceAdjustmentInput!]
+
+    """Nuevas notas"""
+    notes: String
+
+    """Nueva información adicional"""
+    additional_information: JSON
+
+    """Nuevo estado"""
+    status: InvoiceStatus
+}
+
+# ========================================
+# TYPES
+# ========================================
+
+"""
+Resultado de la creación de una factura manual.
+"""
+type ManualInvoiceResult {
+    """Indica si la operación fue exitosa"""
+    success: Boolean!
+
+    """Mensaje descriptivo del resultado"""
+    message: String!
+
+    """La factura creada/actualizada"""
+    invoice: Invoice
+
+    """Errores de validación (si existen)"""
+    errors: [String!]
+}
+
+# ========================================
+# EXTEND TYPES
+# ========================================
+
+"""
+Extender el tipo Invoice existente para incluir invoice_type
+"""
+extend type Invoice {
+    """Tipo de factura"""
+    invoice_type: InvoiceType!
+}
+
+# ========================================
+# MUTATIONS
+# ========================================
+
+extend type Mutation {
+    """
+    Crear una factura manual.
+
+    Esta mutación permite crear facturas para conceptos diferentes a los servicios mensuales,
+    como instalaciones, trabajos externos, venta de equipos, etc.
+
+    Características:
+    - No requiere service_id
+    - No aplica novedades automáticas
+    - Los totales se calculan desde los items y adjustments enviados
+    - Se puede modificar antes de ser pagada
+
+    Ejemplo:
+    ```
+    mutation {
+      createManualInvoice(input: {
+        customer_id: "123"
+        issue_date: "2026-02-19"
+        due_date: "2026-03-19"
+        items: [
+          {
+            description: "Instalación de fibra óptica"
+            quantity: 1
+            unit_price: 150000
+          }
+        ]
+        adjustments: [
+          {
+            kind: "tax"
+            amount: 28500
+            label: "IVA 19%"
+          }
+        ]
+      }) {
+        success
+        message
+        invoice {
+          id
+          increment_id
+          total
+        }
+      }
+    }
+    ```
+    """
+    createManualInvoice(
+        input: CreateManualInvoiceInput! @spread
+    ): ManualInvoiceResult
+        @field(resolver: "App\\GraphQL\\Mutations\\ManualInvoiceMutation@create")
+        @guard
+
+    """
+    Actualizar una factura manual existente.
+
+    Solo se pueden actualizar facturas manuales que no han sido pagadas.
+    La actualización reemplaza completamente los items y ajustes existentes.
+
+    Ejemplo:
+    ```
+    mutation {
+      updateManualInvoice(input: {
+        invoice_id: "456"
+        items: [
+          {
+            description: "Instalación de fibra óptica"
+            quantity: 1
+            unit_price: 180000
+          }
+        ]
+      }) {
+        success
+        message
+        invoice {
+          id
+          total
+        }
+      }
+    }
+    ```
+    """
+    updateManualInvoice(
+        input: UpdateManualInvoiceInput! @spread
+    ): ManualInvoiceResult
+        @field(resolver: "App\\GraphQL\\Mutations\\ManualInvoiceMutation@update")
+        @guard
+
+    """
+    Eliminar una factura manual.
+
+    Solo se pueden eliminar facturas manuales que no han sido pagadas.
+
+    Ejemplo:
+    ```
+    mutation {
+      deleteManualInvoice(invoice_id: "456") {
+        success
+        message
+      }
+    }
+    ```
+    """
+    deleteManualInvoice(
+        invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
+    ): ManualInvoiceResult
+        @field(resolver: "App\\GraphQL\\Mutations\\ManualInvoiceMutation@delete")
+        @guard
+}
+
+# ========================================
+# QUERIES
+# ========================================
+
+extend type Query {
+    """
+    Obtener facturas manuales filtradas.
+
+    Ejemplo:
+    ```
+    query {
+      manualInvoices(customer_id: "123", status: unpaid) {
+        data {
+          id
+          increment_id
+          total
+          status
+          invoice_type
+        }
+      }
+    }
+    ```
+    """
+    manualInvoices(
+        customer_id: ID @eq
+        status: InvoiceStatus @eq
+        invoice_type: InvoiceType @eq
+        issue_date_from: Date
+        issue_date_to: Date
+    ): [Invoice!]!
+        @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
+        @where(column: "invoice_type", operator: "IN", value: ["manual", "adjustment"])
+        @guard
+}
