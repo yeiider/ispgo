@@ -40,6 +40,14 @@ class InvoiceReportQuery
         $paymentMethodQuery = clone $query;
 
         // --- Summary Calculation ---
+        // Debug: Log the query and check amount values
+        \Illuminate\Support\Facades\Log::info('Invoice Report Query', [
+            'date_from' => $dateFrom->toDateString(),
+            'date_to' => $dateTo->toDateString(),
+            'statuses' => $statuses,
+            'router_id' => $routerId,
+        ]);
+
         $summaryData = $summaryQuery->selectRaw('
             COUNT(*) as total_invoices,
             SUM(total) as total_amount,
@@ -50,8 +58,13 @@ class InvoiceReportQuery
             SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid_count,
             SUM(CASE WHEN status = "unpaid" THEN 1 ELSE 0 END) as unpaid_count,
             SUM(CASE WHEN status = "overdue" THEN 1 ELSE 0 END) as overdue_count,
-            SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as canceled_count
+            SUM(CASE WHEN status = "canceled" THEN 1 ELSE 0 END) as canceled_count
         ')->first();
+
+        // Debug: Log summary data
+        \Illuminate\Support\Facades\Log::info('Invoice Report Summary Data', [
+            'summary_data' => $summaryData,
+        ]);
 
          // Note: canceled_count check above might be wrong if status is 'canceled', adjusting below if needed, 
          // assuming status 'canceled' exists based on typical invoice logic, though model analysis showed 'canceled' method.
