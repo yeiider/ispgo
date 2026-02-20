@@ -237,10 +237,12 @@ class Invoice extends Model
      * Scope to apply custom filters for GraphQL invoices query.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param array $args
+     * @param mixed $_ Unused parameter from Lighthouse
+     * @param mixed $__ Unused parameter from Lighthouse
+     * @param array $args GraphQL query arguments
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeInvoiceFilters($query, array $args)
+    public function scopeInvoiceFilters($query, $_ = null, $__ = null, array $args = [])
     {
         // Apply customer_name filter if provided
         if (!empty($args['customer_name'])) {
