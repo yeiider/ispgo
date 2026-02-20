@@ -43,7 +43,7 @@ class InvoiceReportQuery
         $summaryData = $summaryQuery->selectRaw('
             COUNT(*) as total_invoices,
             SUM(total) as total_amount,
-            SUM(amount) as total_paid,
+            SUM(CASE WHEN status = "paid" THEN total ELSE 0 END) as total_paid,
             SUM(outstanding_balance) as total_outstanding,
             SUM(discount) as total_discount,
             SUM(tax) as total_tax,
