@@ -48,10 +48,14 @@ type Query {
     service(id: ID! @eq): Service @find(model: "App\\Models\\Services\\Service")
 
     invoices(
-        increment_id: String @where(operator: "like")
-        status: String @eq
-        customer_id: ID @eq
-    ): [Invoice!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
+        increment_id: String
+        status: String
+        customer_id: ID
+        router_id: ID
+        created_at_from: DateTime
+        created_at_to: DateTime
+        customer_name: String
+    ): [Invoice!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\InvoiceQuery")
     invoice(id: ID! @eq): Invoice @find(model: "App\\Models\\Invoice\\Invoice")
 
     # billingNovedades movido a billing.graphql con más opciones de filtrado

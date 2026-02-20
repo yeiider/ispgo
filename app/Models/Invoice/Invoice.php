@@ -217,6 +217,22 @@ class Invoice extends Model
             ->get();
     }
 
+    /**
+     * Scope to search invoices by customer name (first_name or last_name).
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $name
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSearchByCustomerName($query, $name)
+    {
+        return $query->whereHas('customer', function ($q) use ($name) {
+            $q->where('first_name', 'LIKE', "%{$name}%")
+                ->orWhere('last_name', 'LIKE', "%{$name}%")
+                ->orWhere(\Illuminate\Support\Facades\DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%{$name}%");
+        });
+    }
+
 
     protected static function generateIncrementId()
     {
