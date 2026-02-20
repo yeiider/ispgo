@@ -233,6 +233,23 @@ class Invoice extends Model
         });
     }
 
+    /**
+     * Scope to apply custom filters for GraphQL invoices query.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $args
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeInvoiceFilters($query, array $args)
+    {
+        // Apply customer_name filter if provided
+        if (!empty($args['customer_name'])) {
+            $query->searchByCustomerName($args['customer_name']);
+        }
+
+        return $query;
+    }
+
 
     protected static function generateIncrementId()
     {

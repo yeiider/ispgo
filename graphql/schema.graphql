@@ -54,8 +54,8 @@ type Query {
         router_id: ID @eq
         created_at_from: DateTime @where(operator: ">=", key: "created_at")
         created_at_to: DateTime @where(operator: "<=", key: "created_at")
-        customer_name: String @scope(name: "searchByCustomerName")
-    ): [Invoice!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
+        customer_name: String
+    ): [Invoice!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice") @builder(method: "App\\Models\\Invoice\\Invoice@scopeInvoiceFilters")
     invoice(id: ID! @eq): Invoice @find(model: "App\\Models\\Invoice\\Invoice")
 
     # billingNovedades movido a billing.graphql con más opciones de filtrado
