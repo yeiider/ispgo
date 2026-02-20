@@ -43,10 +43,10 @@ class InvoiceReportQuery
         $summaryData = $summaryQuery->selectRaw('
             COUNT(*) as total_invoices,
             SUM(total) as total_amount,
-            SUM(amount) as total_paid,
-            SUM(outstanding_balance) as total_outstanding,
-            SUM(discount) as total_discount,
-            SUM(tax) as total_tax,
+            SUM(COALESCE(amount, 0)) as total_paid,
+            SUM(COALESCE(outstanding_balance, 0)) as total_outstanding,
+            SUM(COALESCE(discount, 0)) as total_discount,
+            SUM(COALESCE(tax, 0)) as total_tax,
             SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid_count,
             SUM(CASE WHEN status = "unpaid" THEN 1 ELSE 0 END) as unpaid_count,
             SUM(CASE WHEN status = "overdue" THEN 1 ELSE 0 END) as overdue_count,
@@ -109,7 +109,7 @@ class InvoiceReportQuery
         // 3. Payment Method Distribution
         $paymentMethodData = $paymentMethodQuery
             ->whereNotNull('payment_method') // Only count where payment method is set
-            ->select('payment_method as label', DB::raw('SUM(amount) as value'), DB::raw('COUNT(*) as count'))
+            ->select('payment_method as label', DB::raw('SUM(COALESCE(amount, 0)) as value'), DB::raw('COUNT(*) as count'))
             ->groupBy('payment_method')
             ->get()
             ->map(function ($item) {
