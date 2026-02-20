@@ -51,6 +51,10 @@ type Query {
         increment_id: String @where(operator: "like")
         status: String @eq
         customer_id: ID @eq
+        router_id: ID @eq
+        created_at_from: DateTime @where(operator: ">=", key: "created_at")
+        created_at_to: DateTime @where(operator: "<=", key: "created_at")
+        customer_name: String @scope(name: "searchByCustomerName")
     ): [Invoice!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
     invoice(id: ID! @eq): Invoice @find(model: "App\\Models\\Invoice\\Invoice")
 
