@@ -47,21 +47,22 @@ class InvoiceReportQuery
             SUM(outstanding_balance) as total_outstanding,
             SUM(discount) as total_discount,
             SUM(tax) as total_tax,
+            SUM(amount) as tota_paid,
             SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid_count,
             SUM(CASE WHEN status = "unpaid" THEN 1 ELSE 0 END) as unpaid_count,
             SUM(CASE WHEN status = "overdue" THEN 1 ELSE 0 END) as overdue_count,
             SUM(CASE WHEN status = "canceled" THEN 1 ELSE 0 END) as canceled_count
         ')->first();
 
-         // Note: canceled_count check above might be wrong if status is 'canceled', adjusting below if needed, 
+         // Note: canceled_count check above might be wrong if status is 'canceled', adjusting below if needed,
          // assuming status 'canceled' exists based on typical invoice logic, though model analysis showed 'canceled' method.
-         // Let's re-verify status for canceled. The model has a canceled() method setting status to 'canceled'. 
+         // Let's re-verify status for canceled. The model has a canceled() method setting status to 'canceled'.
          // So I will use 'canceled' string.
 
         $summary = [
             'total_invoices' => (int) ($summaryData->total_invoices ?? 0),
             'total_amount' => (float) ($summaryData->total_amount ?? 0),
-            'total_paid' => (float) ($summaryData->total_paid ?? 0),
+            'total_paid' => (float) ($summaryData->tota_paid ?? 0),
             'total_outstanding' => (float) ($summaryData->total_outstanding ?? 0),
             'total_discount' => (float) ($summaryData->total_discount ?? 0),
             'total_tax' => (float) ($summaryData->total_tax ?? 0),
@@ -70,9 +71,9 @@ class InvoiceReportQuery
             'overdue_count' => (int) ($summaryData->overdue_count ?? 0),
             'canceled_count' => (int) ($summaryData->canceled_count ?? 0),
         ];
-        
+
         // --- Charts Data ---
-        
+
         // 1. Revenue/Trends Over Time
         $dateFormat = match ($chartFrequency) {
             'monthly' => '%Y-%m',
