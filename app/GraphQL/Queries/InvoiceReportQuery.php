@@ -40,31 +40,18 @@ class InvoiceReportQuery
         $paymentMethodQuery = clone $query;
 
         // --- Summary Calculation ---
-        // Debug: Log the query and check amount values
-        \Illuminate\Support\Facades\Log::info('Invoice Report Query', [
-            'date_from' => $dateFrom->toDateString(),
-            'date_to' => $dateTo->toDateString(),
-            'statuses' => $statuses,
-            'router_id' => $routerId,
-        ]);
-
         $summaryData = $summaryQuery->selectRaw('
             COUNT(*) as total_invoices,
             SUM(total) as total_amount,
-            SUM(COALESCE(amount, 0)) as total_paid,
-            SUM(COALESCE(outstanding_balance, 0)) as total_outstanding,
-            SUM(COALESCE(discount, 0)) as total_discount,
-            SUM(COALESCE(tax, 0)) as total_tax,
+            SUM(amount) as total_paid,
+            SUM(outstanding_balance) as total_outstanding,
+            SUM(discount) as total_discount,
+            SUM(tax) as total_tax,
             SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid_count,
             SUM(CASE WHEN status = "unpaid" THEN 1 ELSE 0 END) as unpaid_count,
             SUM(CASE WHEN status = "overdue" THEN 1 ELSE 0 END) as overdue_count,
             SUM(CASE WHEN status = "canceled" THEN 1 ELSE 0 END) as canceled_count
         ')->first();
-
-        // Debug: Log summary data
-        \Illuminate\Support\Facades\Log::info('Invoice Report Summary Data', [
-            'summary_data' => $summaryData,
-        ]);
 
          // Note: canceled_count check above might be wrong if status is 'canceled', adjusting below if needed, 
          // assuming status 'canceled' exists based on typical invoice logic, though model analysis showed 'canceled' method.
@@ -72,16 +59,16 @@ class InvoiceReportQuery
          // So I will use 'canceled' string.
 
         $summary = [
-            'total_invoices' => $summaryData->total_invoices ?? 0,
-            'total_amount' => $summaryData->total_amount ?? 0,
-            'total_paid' => $summaryData->total_paid ?? 0,
-            'total_outstanding' => $summaryData->total_outstanding ?? 0,
-            'total_discount' => $summaryData->total_discount ?? 0,
-            'total_tax' => $summaryData->total_tax ?? 0,
-            'paid_count' => $summaryData->paid_count ?? 0,
-            'unpaid_count' => $summaryData->unpaid_count ?? 0,
-            'overdue_count' => $summaryData->overdue_count ?? 0,
-            'canceled_count' => $summaryQuery->clone()->where('status', 'canceled')->count(), // Separate count to be safe or use raw query properly
+            'total_invoices' => (int) ($summaryData->total_invoices ?? 0),
+            'total_amount' => (float) ($summaryData->total_amount ?? 0),
+            'total_paid' => (float) ($summaryData->total_paid ?? 0),
+            'total_outstanding' => (float) ($summaryData->total_outstanding ?? 0),
+            'total_discount' => (float) ($summaryData->total_discount ?? 0),
+            'total_tax' => (float) ($summaryData->total_tax ?? 0),
+            'paid_count' => (int) ($summaryData->paid_count ?? 0),
+            'unpaid_count' => (int) ($summaryData->unpaid_count ?? 0),
+            'overdue_count' => (int) ($summaryData->overdue_count ?? 0),
+            'canceled_count' => (int) ($summaryData->canceled_count ?? 0),
         ];
         
         // --- Charts Data ---
@@ -122,7 +109,7 @@ class InvoiceReportQuery
         // 3. Payment Method Distribution
         $paymentMethodData = $paymentMethodQuery
             ->whereNotNull('payment_method') // Only count where payment method is set
-            ->select('payment_method as label', DB::raw('SUM(COALESCE(amount, 0)) as value'), DB::raw('COUNT(*) as count'))
+            ->select('payment_method as label', DB::raw('SUM(amount) as value'), DB::raw('COUNT(*) as count'))
             ->groupBy('payment_method')
             ->get()
             ->map(function ($item) {
