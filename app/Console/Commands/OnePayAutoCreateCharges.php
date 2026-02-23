@@ -63,14 +63,14 @@ class OnePayAutoCreateCharges extends Command
         // Selecciona todas salvo las pagadas/canceladas
         // Filtra por issue_date: solo facturas donde el día del mes >= día configurado
         // Y solo la última factura por cliente
-        $latestInvoiceIds = Invoice::query()
+        $latestInvoiceIds = Invoice::withoutGlobalScope('router_filter')
             ->selectRaw('MAX(id) as id')
             ->whereNotIn('status', ['paid', 'canceled'])
             ->whereRaw('DAY(issue_date) >= ?', [$billingDate])
             ->groupBy('customer_id')
             ->pluck('id');
         
-        $query = Invoice::query()
+        $query = Invoice::withoutGlobalScope('router_filter')
             ->whereNotIn('status', ['paid', 'canceled'])
             ->whereRaw('DAY(issue_date) >= ?', [$billingDate])
             ->whereIn('id', $latestInvoiceIds)

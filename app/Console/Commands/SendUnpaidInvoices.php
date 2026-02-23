@@ -52,7 +52,7 @@ class SendUnpaidInvoices extends Command
         $periodOpt = (string)($this->option('period') ?? '');
         $dateRange = $this->parsePeriodOption($periodOpt);
 
-        $query = Invoice::query()
+        $query = Invoice::withoutGlobalScope('router_filter')
             ->whereIn('status', $statuses)
             ->where(function ($q) {
                 // Ensure the invoice has a recipient email available
