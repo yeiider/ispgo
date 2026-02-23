@@ -21,39 +21,51 @@ class GenerateCustomerInvoices extends Command
      */
     public function handle(CustomerBillingService $billing): void
     {
-        $billingDate = GeneralProviderConfig::getBillingDate();
         $currentDate = Carbon::now();
-        if ($currentDate->day == $billingDate) {
-            $period = $this->option('period')
-                ? Carbon::createFromFormat('Y-m', $this->option('period'))
-                : now();
+        $period = $this->option('period')
+            ? Carbon::createFromFormat('Y-m', $this->option('period'))
+            : now();
 
-            $this->info("Generando facturas para {$period->format('F Y')} …");
+        $this->info("Generando facturas para {$period->format('F Y')} …");
 
-            Customer::active()->chunk(200, function ($customers) use ($billing, $period) {
-                foreach ($customers as $customer) {
-                    try {
-                        $billing->generateForPeriod($customer, $period);
+        // Recorrer todos los routers
+        \App\Models\Router::all()->each(function ($router) use ($billing, $period, $currentDate) {
+            // Obtener la fecha de facturación configurada para este router
+            $billingDate = GeneralProviderConfig::getBillingDate($router->id);
 
-                    } catch (\Exception $e) {
-                        // Registrar el error en los logs
-                        Log::error("Error al generar factura para el cliente {$customer->id}: {$e->getMessage()}");
+            // Solo procesar si hoy es el día de facturación de este router
+            if ($currentDate->day == $billingDate) {
+                $this->info("Procesando router {$router->name} (ID: {$router->id}) - Día de facturación: {$billingDate}");
 
-                        // Enviar notificación al administrador
-                        try {
-                            Notify::notifyError("Error cliente ID: {$customer->id}. Ver logs.");
-                        } catch (\Throwable $notifyError) {
-                            Log::error("Fallo al enviar notificación de error: " . $notifyError->getMessage());
+                // Obtener los clientes activos de este router
+                Customer::active()
+                    ->where('router_id', $router->id)
+                    ->chunk(200, function ($customers) use ($billing, $period, $router) {
+                        foreach ($customers as $customer) {
+                            try {
+                                $billing->generateForPeriod($customer, $period);
+
+                            } catch (\Exception $e) {
+                                // Registrar el error en los logs
+                                Log::error("Error al generar factura para el cliente {$customer->id} del router {$router->id}: {$e->getMessage()}");
+
+                                // Enviar notificación al administrador
+                                try {
+                                    Notify::notifyError("Error cliente ID: {$customer->id} del router {$router->name}. Ver logs.");
+                                } catch (\Throwable $notifyError) {
+                                    Log::error("Fallo al enviar notificación de error: " . $notifyError->getMessage());
+                                }
+
+                                // Continuar con el siguiente cliente
+                                continue;
+                            }
                         }
+                    });
 
-                        // Continuar con el siguiente cliente
-                        continue;
-                    }
-                }
                 event(new FinalizeInvoiceBySchedule());
-            });
+            }
+        });
 
-            $this->info('Proceso de generación completado ✔');
-        }
+        $this->info('Proceso de generación completado ✔');
     }
 }

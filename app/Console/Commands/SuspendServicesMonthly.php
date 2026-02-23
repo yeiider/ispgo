@@ -20,40 +20,51 @@ class SuspendServicesMonthly extends Command
 
     public function handle()
     {
-        $cutOffDate = GeneralProviderConfig::getCutOffDate(); // Día configurado
         $currentDate = Carbon::now();
-
-        if ($currentDate->day != $cutOffDate) {
-            return;
-        }
-
         $today = Carbon::now()->startOfDay();
 
         $this->info("[EVERYDAY] Iniciando suspensión de servicios con facturas vencidas e impagas sin promesa vigente...");
         $this->info("[EVERYDAY] Fecha actual: {$today->toDateString()}");
 
-        Service::where('service_status', 'active')
-            ->whereHas('customer.invoices', function ($query) use ($today) {
-                $query->where('status', 'unpaid')
-                    ->where('outstanding_balance', '>', 0)
-                    ->whereDate('due_date', '<', $today)
-                    ->whereDoesntHave('paymentPromises', function ($promiseQuery) use ($today) {
-                        $promiseQuery->where('status', 'pending')
-                            ->whereDate('promise_date', '>=', $today);
-                    });
-            })
-            ->chunk(50, function ($services) {
-                foreach ($services as $service) {
-                    try {
-                        $service->suspend();
-                        Log::info("[EVERYDAY] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido por facturas vencidas sin promesa vigente del cliente ID: {$service->customer_id}");
-                        $this->info("[EVERYDAY] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido.");
-                    } catch (\Exception $e) {
-                        Log::error("[EVERYDAY] Error al suspender servicio ID: {$service->id} - {$e->getMessage()}");
-                        $this->error("[EVERYDAY] Error al suspender servicio ID: {$service->id}");
+        // Recorrer todos los routers
+        \App\Models\Router::all()->each(function ($router) use ($currentDate, $today) {
+            // Obtener la fecha de corte configurada para este router
+            $cutOffDate = GeneralProviderConfig::getCutOffDate($router->id);
+
+            // Solo procesar si hoy es el día de corte de este router
+            if ($currentDate->day != $cutOffDate) {
+                return;
+            }
+
+            $this->info("[EVERYDAY] Procesando router {$router->name} (ID: {$router->id}) - Día de corte: {$cutOffDate}");
+
+            // Suspender servicios activos de clientes asignados a este router
+            Service::where('service_status', 'active')
+                ->whereHas('customer', function ($query) use ($router) {
+                    $query->where('router_id', $router->id);
+                })
+                ->whereHas('customer.invoices', function ($query) use ($today) {
+                    $query->where('status', 'unpaid')
+                        ->where('outstanding_balance', '>', 0)
+                        ->whereDate('due_date', '<', $today)
+                        ->whereDoesntHave('paymentPromises', function ($promiseQuery) use ($today) {
+                            $promiseQuery->where('status', 'pending')
+                                ->whereDate('promise_date', '>=', $today);
+                        });
+                })
+                ->chunk(50, function ($services) use ($router) {
+                    foreach ($services as $service) {
+                        try {
+                            $service->suspend();
+                            Log::info("[EVERYDAY] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido por facturas vencidas sin promesa vigente del cliente ID: {$service->customer_id} del router {$router->id}");
+                            $this->info("[EVERYDAY] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido.");
+                        } catch (\Exception $e) {
+                            Log::error("[EVERYDAY] Error al suspender servicio ID: {$service->id} del router {$router->id} - {$e->getMessage()}");
+                            $this->error("[EVERYDAY] Error al suspender servicio ID: {$service->id}");
+                        }
                     }
-                }
-            });
+                });
+        });
 
         $this->info("[EVERYDAY] Proceso de suspensión completado.");
     }
