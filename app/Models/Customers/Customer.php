@@ -80,6 +80,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
                 'state' => 'draft',
                 'subtotal' => 0,
                 'customer_id' => $this->id,
+                'router_id' => $this->router_id,
                 'tax' => 0,
                 'amount' => 0,
                 'outstanding_balance' => 0,
