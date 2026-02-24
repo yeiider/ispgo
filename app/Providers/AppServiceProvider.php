@@ -80,5 +80,15 @@ class AppServiceProvider extends ServiceProvider
             InvoicePaid::class,
             [CancelOnePayChargeOnExternalPayment::class, 'handle']
         );
+
+        // When invoice items are created, apply pending billing novedades and rules
+        Event::listen(
+            InvoiceItemsCreated::class,
+            [ApplyBillingNovedades::class, 'handle']
+        );
+        Event::listen(
+            InvoiceItemsCreated::class,
+            [ApplyRuleInvoice::class, 'handle']
+        );
     }
 }

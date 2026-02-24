@@ -159,10 +159,12 @@ class BillingNovedad extends Model
         return $query->where('applied', false);
     }
 
-    /** Novedades para un periodo (YYYY-MM-01) */
-    public function scopeForPeriod(Builder $query, DateTimeInterface $period = null)   // <- aquí
+    /** Novedades para un periodo (compara por año y mes, ignorando el día exacto) */
+    public function scopeForPeriod(Builder $query, DateTimeInterface $period = null): Builder
     {
-        return $query->whereDate('effective_period', $period->format('Y-m-d'));
+        return $query
+            ->whereYear('effective_period', $period->format('Y'))
+            ->whereMonth('effective_period', $period->format('m'));
     }
     /** Novedades asociadas a un servicio específico */
     public function scopeForService(Builder $q, int $serviceId): Builder
