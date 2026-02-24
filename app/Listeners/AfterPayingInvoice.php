@@ -147,7 +147,8 @@ class AfterPayingInvoice implements ShouldQueue
      */
     private function hasUnpaidInvoicesForCustomer(int $customerId, int $excludeInvoiceId): bool
     {
-        return Invoice::where('customer_id', $customerId)
+        return Invoice::withoutGlobalScope('router_filter')
+            ->where('customer_id', $customerId)
             ->where('id', '!=', $excludeInvoiceId)
             ->where('status', '!=', 'paid')
             ->exists();
