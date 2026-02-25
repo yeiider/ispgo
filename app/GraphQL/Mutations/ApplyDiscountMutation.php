@@ -43,7 +43,7 @@ class ApplyDiscountMutation
                 $discountAmount = $discount;
             }
 
-            // Apply discount
+            // Aplicar el descuento respetando el flag include_tax
             if ($includeTax) {
                 $invoice->applyDiscountWithTax($discountAmount);
             } else {
