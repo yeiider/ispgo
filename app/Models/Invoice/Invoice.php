@@ -330,13 +330,13 @@ class Invoice extends Model
     public function applyDiscountWithoutTax(float $discount)
     {
         $this->discount = $discount;
+        // El descuento se aplica solo al subtotal, el impuesto existente NO cambia
         $subtotal = $this->subtotal - $discount;
-        $tax = $subtotal * 0.19;
-        $total = $subtotal + $tax;
+        $total    = $subtotal + $this->tax; // tax se conserva tal cual
 
         $this->subtotal = $subtotal;
-        $this->tax = $tax;
-        $this->total = $total;
+        // $this->tax permanece sin cambios
+        $this->total    = $total;
         $this->outstanding_balance = $total - $this->amount;
         $this->save();
     }
