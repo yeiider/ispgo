@@ -95,7 +95,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
     public function activeServices()
     {
-        return $this->services()->whereNotIn('service_status', ['free', 'inactive']);
+        return $this->services()->whereNotIn('service_status', ['free', 'inactive','pending']);
     }
 
     public function addresses()
@@ -146,7 +146,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
         static::addGlobalScope('router_filter', function (Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
-            
+
             // If not authenticated, no filtering
             if (!$user) {
                 return;
@@ -155,7 +155,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
             // If user has no routers assigned, show all data
             // Role permissions control what actions they can perform
             $routerIds = $user->getRouterIds();
-            
+
             if (empty($routerIds)) {
                 return;
             }
@@ -170,7 +170,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
                 $birthDate = Carbon::parse($customer->date_of_birth);
                 $today = Carbon::now();
                 $age = $birthDate->diffInYears($today);
-                
+
                 // Verificar que tenga al menos 18 años completos
                 if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
                     $validator = \Illuminate\Support\Facades\Validator::make([], []);
@@ -185,14 +185,14 @@ class Customer extends Authenticatable implements MustVerifyEmail
             $customer->updated_by = Auth::id();
             event(new CustomerCreated($customer));
         });
-        
+
         static::updating(function ($customer) {
             // Validar que el cliente sea mayor de edad si se actualiza la fecha de nacimiento
             if ($customer->isDirty('date_of_birth') && $customer->date_of_birth) {
                 $birthDate = Carbon::parse($customer->date_of_birth);
                 $today = Carbon::now();
                 $age = $birthDate->diffInYears($today);
-                
+
                 // Verificar que tenga al menos 18 años completos
                 if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
                     $validator = \Illuminate\Support\Facades\Validator::make([], []);
@@ -200,7 +200,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
                     throw new ValidationException($validator);
                 }
             }
-            
+
             if ($customer->isDirty('customer_status')) {
                 $customer->updated_by = Auth::id();
                 event(new CustomerStatusUpdated($customer));

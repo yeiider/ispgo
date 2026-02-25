@@ -82,6 +82,13 @@ class OnePayAutoCreateCharges extends Command
         $query->orderBy('id')->chunk(200, function ($invoices) use (&$processed, &$created, &$resent, &$errors, $handler, $dryRun) {
             foreach ($invoices as $invoice) {
                 $processed++;
+
+                // Validar que el customer esté activo
+                if (!$invoice->customer || $invoice->customer->status !== 'active') {
+                    $this->warn("Factura #{$invoice->increment_id}: Cliente inactivo o sin customer. Omitiendo.");
+                    continue;
+                }
+
                 try {
                     if ($dryRun) {
                         if (!$invoice->onepay_charge_id) {
