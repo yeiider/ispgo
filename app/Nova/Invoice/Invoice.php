@@ -15,7 +15,8 @@ use App\Nova\Customers;
 use App\Nova\Filters\Invoice\InvoiceStatusFilter;
 use App\Nova\Filters\Invoice\InvoiceDateRangeFilter;
 use App\Nova\Filters\Invoice\InvoiceDateToFilter;
-use App\Nova\Filters\Invoice\InvoicePaymentDateFilter;
+use App\Nova\Filters\Invoice\InvoicePaymentDateFromFilter;
+use App\Nova\Filters\Invoice\InvoicePaymentDateToFilter;
 use App\Nova\Filters\RouterFilter;
 use App\Nova\Metrics\Invoice\InvoicesStatus;
 use App\Nova\Metrics\Invoice\OutstandingBalance;
@@ -212,7 +213,8 @@ class Invoice extends Resource
             new InvoiceStatusFilter(),
             new InvoiceDateRangeFilter(),
             new InvoiceDateToFilter(),
-            new InvoicePaymentDateFilter(),
+            new InvoicePaymentDateFromFilter(),
+            new InvoicePaymentDateToFilter(),
             new RouterFilter(),
         ];
     }
