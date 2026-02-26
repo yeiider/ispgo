@@ -648,6 +648,7 @@ type Invoice {
     due_date: Date
     router_id: Int
     notes: String
+    additional_information: JSON
     created_at: DateTime!
     updated_at: DateTime!
 

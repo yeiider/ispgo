@@ -17,6 +17,7 @@ class InvoiceReportQuery
         $paymentMethods = $args['payment_method'] ?? null;
         $routerId = $args['router_id'] ?? null;
         $chartFrequency = $args['chart_frequency'] ?? 'daily';
+        $paymentDate = $args['payment_date'] ?? null;
 
         $query = Invoice::query()
             ->whereBetween('issue_date', [$dateFrom->toDateString(), $dateTo->toDateString()]);
@@ -31,6 +32,14 @@ class InvoiceReportQuery
 
         if (!empty($routerId)) {
             $query->where('router_id', $routerId);
+        }
+
+        // Filtrar por fecha de pago (extraída del campo JSON additional_information->finalized_at)
+        if (!empty($paymentDate)) {
+            $query->whereRaw(
+                "DATE(JSON_UNQUOTE(JSON_EXTRACT(additional_information, '$.finalized_at'))) = ?",
+                [$paymentDate]
+            );
         }
 
         // Clone query for different aggregations to avoid mutating the base query state
