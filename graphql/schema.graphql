@@ -55,6 +55,9 @@ type Query {
         created_at_from: DateTime
         created_at_to: DateTime
         customer_name: String
+        payment_method: String
+        payment_date_from: Date
+        payment_date_to: Date
     ): [Invoice!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\InvoiceQuery")
     invoice(id: ID! @eq): Invoice @find(model: "App\\Models\\Invoice\\Invoice")
 
@@ -648,6 +651,7 @@ type Invoice {
     due_date: Date
     router_id: Int
     notes: String
+    payment_method: String
     additional_information: JSON
     created_at: DateTime!
     updated_at: DateTime!
