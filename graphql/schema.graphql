@@ -55,6 +55,9 @@ type Query {
         created_at_from: DateTime
         created_at_to: DateTime
         customer_name: String
+        payment_method: String
+        payment_date_from: Date
+        payment_date_to: Date
         payment_date_from: DateTime
         payment_date_to: DateTime
     ): [Invoice!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\InvoiceQuery")
@@ -648,7 +651,6 @@ type Invoice {
     status: String!
     issue_date: Date
     due_date: Date
-    payment_date: DateTime
     router_id: Int
     notes: String
     created_at: DateTime!

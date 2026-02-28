@@ -68,6 +68,29 @@ class InvoiceQuery
             $query->where('payment_date', '<=', $args['payment_date_to']);
         }
 
+        // Apply payment_method filter directly on invoices table
+        if (!empty($args['payment_method'])) {
+            $query->where('payment_method', $args['payment_method']);
+        }
+
+        // Apply payment_date_from filter using additional_information->finalized_at (JSON)
+        if (!empty($args['payment_date_from'])) {
+            $from = $args['payment_date_from']; // formato: Y-m-d
+            $query->whereRaw(
+                "JSON_UNQUOTE(JSON_EXTRACT(additional_information, '$.finalized_at')) >= ?",
+                [$from]
+            );
+        }
+
+        // Apply payment_date_to filter using additional_information->finalized_at (JSON)
+        if (!empty($args['payment_date_to'])) {
+            $to = $args['payment_date_to']; // formato: Y-m-d
+            $query->whereRaw(
+                "JSON_UNQUOTE(JSON_EXTRACT(additional_information, '$.finalized_at')) <= ?",
+                [$to . 'T23:59:59']
+            );
+        }
+
         return $query;
     }
 }

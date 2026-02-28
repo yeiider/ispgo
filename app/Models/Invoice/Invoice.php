@@ -281,6 +281,17 @@ class Invoice extends Model
             $this->status = 'paid';
             $this->outstanding_balance = 0;
             $this->payment_date = now();
+
+            // Registrar fecha de pago en additional_information
+            $now = now();
+            $paymentInfo = [
+                'id'           => $this->increment_id . '-' . $now->timestamp,
+                'created_at'   => $now->toIso8601String(),
+                'finalized_at' => $now->toIso8601String(),
+            ];
+            // Combinar con cualquier dato extra que venga del llamador
+            $additional = array_merge($additional, $paymentInfo);
+
         } else if ($this->due_date < now() && $this->outstanding_balance > 0) {
             $this->status = 'unpaid';
         }
