@@ -58,6 +58,16 @@ class InvoiceQuery
             });
         }
 
+        // Apply payment_date_from filter if provided
+        if (!empty($args['payment_date_from'])) {
+            $query->where('payment_date', '>=', $args['payment_date_from']);
+        }
+
+        // Apply payment_date_to filter if provided
+        if (!empty($args['payment_date_to'])) {
+            $query->where('payment_date', '<=', $args['payment_date_to']);
+        }
+
         return $query;
     }
 }

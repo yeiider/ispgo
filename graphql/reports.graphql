@@ -30,6 +30,8 @@ type InvoiceReport {
     charts: InvoiceChartData!
     date_from: Date!
     date_to: Date!
+    payment_date_from: Date
+    payment_date_to: Date
     filter_status: [String!]
     filter_payment_method: [String!]
     chart_frequency: String!
@@ -39,6 +41,8 @@ extend type Query {
     invoiceReport(
         date_from: Date
         date_to: Date
+        payment_date_from: Date
+        payment_date_to: Date
         status: [String!]
         payment_method: [String!]
         router_id: Int
