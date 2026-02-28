@@ -73,22 +73,15 @@ class InvoiceQuery
             $query->where('payment_method', $args['payment_method']);
         }
 
-        // Apply payment_date_from filter using additional_information->finalized_at (JSON)
-        if (!empty($args['payment_date_from'])) {
-            $from = $args['payment_date_from']; // formato: Y-m-d
-            $query->whereRaw(
-                "JSON_UNQUOTE(JSON_EXTRACT(additional_information, '$.finalized_at')) >= ?",
-                [$from]
-            );
-        }
+        // Apply sorting
+        $sortColumn = $args['sort_column'] ?? 'created_at';
+        $sortDirection = isset($args['sort_direction']) && strtolower($args['sort_direction']) === 'asc' ? 'asc' : 'desc';
 
-        // Apply payment_date_to filter using additional_information->finalized_at (JSON)
-        if (!empty($args['payment_date_to'])) {
-            $to = $args['payment_date_to']; // formato: Y-m-d
-            $query->whereRaw(
-                "JSON_UNQUOTE(JSON_EXTRACT(additional_information, '$.finalized_at')) <= ?",
-                [$to . 'T23:59:59']
-            );
+        $allowedSortColumns = ['created_at', 'issue_date', 'due_date', 'payment_date', 'total', 'increment_id', 'status'];
+        if (in_array($sortColumn, $allowedSortColumns)) {
+            $query->orderBy($sortColumn, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
         }
 
         return $query;
