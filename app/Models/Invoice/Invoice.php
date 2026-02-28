@@ -32,7 +32,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date', 'full_name', 'status', 'invoice_type', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
+        'issue_date', 'due_date', 'payment_date', 'full_name', 'status', 'invoice_type', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
         'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total','router_id',
         // OnePay integration fields
         'onepay_charge_id', 'onepay_payment_link', 'onepay_status', 'onepay_metadata'
@@ -41,6 +41,7 @@ class Invoice extends Model
     protected $casts = [
         "due_date" => 'date',
         "issue_date" => 'date',
+        "payment_date" => 'datetime',
         "expiration_date" => 'date',
         "additional_information" => 'array',
         'quantity' => 'int',
@@ -245,11 +246,11 @@ class Invoice extends Model
     public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null, $dailyBoxId = null, $createPaymentRecord = false): void
     {
         $amount = $amount ?? $this->real_outstanding_balance;
-        
+
         if ($this->status === 'paid') {
             throw new \Exception('La factura ya ha sido pagada');
         }
-        
+
         if ($amount > $this->real_outstanding_balance) {
             throw new \Exception('El monto pagado no puede ser mayor que el saldo pendiente.');
         }
@@ -265,7 +266,7 @@ class Invoice extends Model
                 'notes' => $notes,
                 'additional_information' => $additional,
             ]);
-            
+
             // Update amount from sum of payments
             $this->amount = $this->payments()->sum('amount');
         } else {
@@ -279,18 +280,30 @@ class Invoice extends Model
         if ($this->isFullyPaid()) {
             $this->status = 'paid';
             $this->outstanding_balance = 0;
+            $this->payment_date = now();
+
+            // Registrar fecha de pago en additional_information
+            $now = now();
+            $paymentInfo = [
+                'id'           => $this->increment_id . '-' . $now->timestamp,
+                'created_at'   => $now->toIso8601String(),
+                'finalized_at' => $now->toIso8601String(),
+            ];
+            // Combinar con cualquier dato extra que venga del llamador
+            $additional = array_merge($additional, $paymentInfo);
+
         } else if ($this->due_date < now() && $this->outstanding_balance > 0) {
             $this->status = 'unpaid';
         }
-        
+
         if ($notes) {
             $this->notes = $notes;
         }
-        
+
         $this->daily_box_id = $dailyBoxId;
         $this->additional_information = $additional;
         $this->save();
-        
+
         event(new InvoicePaid($this));
     }
 
@@ -363,7 +376,7 @@ class Invoice extends Model
         static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
-            
+
             // If not authenticated, no filtering
             if (!$user) {
                 return;
@@ -372,7 +385,7 @@ class Invoice extends Model
             // If user has no routers assigned, show all data
             // Role permissions control what actions they can perform
             $routerIds = $user->getRouterIds();
-            
+
             if (empty($routerIds)) {
                 return;
             }

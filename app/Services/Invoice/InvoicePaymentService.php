@@ -76,6 +76,15 @@ class InvoicePaymentService
             if ($invoice->isFullyPaid()) {
                 $invoice->status = 'paid';
                 $invoice->outstanding_balance = 0;
+
+                // Registrar fecha de pago en additional_information
+                $now = now();
+                $existing = is_array($invoice->additional_information) ? $invoice->additional_information : [];
+                $invoice->additional_information = array_merge($existing, [
+                    'id'           => $invoice->increment_id . '-' . $now->timestamp,
+                    'created_at'   => $now->toIso8601String(),
+                    'finalized_at' => $now->toIso8601String(),
+                ]);
             }
             
             $invoice->save();

@@ -13,13 +13,25 @@ class InvoiceReportQuery
     {
         $dateFrom = isset($args['date_from']) ? Carbon::parse($args['date_from']) : Carbon::now()->startOfMonth();
         $dateTo = isset($args['date_to']) ? Carbon::parse($args['date_to']) : Carbon::now();
+        $paymentDateFrom = isset($args['payment_date_from']) ? Carbon::parse($args['payment_date_from']) : null;
+        $paymentDateTo = isset($args['payment_date_to']) ? Carbon::parse($args['payment_date_to']) : null;
         $statuses = $args['status'] ?? null;
         $paymentMethods = $args['payment_method'] ?? null;
         $routerId = $args['router_id'] ?? null;
         $chartFrequency = $args['chart_frequency'] ?? 'daily';
+        $paymentDateFrom = $args['payment_date_from'] ?? null;
+        $paymentDateTo   = $args['payment_date_to'] ?? null;
 
         $query = Invoice::query()
             ->whereBetween('issue_date', [$dateFrom->toDateString(), $dateTo->toDateString()]);
+
+        if ($paymentDateFrom && $paymentDateTo) {
+            $query->whereBetween('payment_date', [$paymentDateFrom->startOfDay(), $paymentDateTo->endOfDay()]);
+        } elseif ($paymentDateFrom) {
+            $query->where('payment_date', '>=', $paymentDateFrom->startOfDay());
+        } elseif ($paymentDateTo) {
+            $query->where('payment_date', '<=', $paymentDateTo->endOfDay());
+        }
 
         if (!empty($statuses)) {
             $query->whereIn('status', $statuses);
@@ -31,6 +43,20 @@ class InvoiceReportQuery
 
         if (!empty($routerId)) {
             $query->where('router_id', $routerId);
+        }
+
+        // Filtrar por rango de fecha de pago (extraída del campo JSON additional_information->finalized_at)
+        if (!empty($paymentDateFrom)) {
+            $query->whereRaw(
+                "DATE(JSON_UNQUOTE(JSON_EXTRACT(additional_information, '$.finalized_at'))) >= ?",
+                [$paymentDateFrom]
+            );
+        }
+        if (!empty($paymentDateTo)) {
+            $query->whereRaw(
+                "DATE(JSON_UNQUOTE(JSON_EXTRACT(additional_information, '$.finalized_at'))) <= ?",
+                [$paymentDateTo]
+            );
         }
 
         // Clone query for different aggregations to avoid mutating the base query state
@@ -162,6 +188,8 @@ class InvoiceReportQuery
             ],
             'date_from' => $dateFrom->toDateString(),
             'date_to' => $dateTo->toDateString(),
+            'payment_date_from' => $paymentDateFrom ? $paymentDateFrom->toDateString() : null,
+            'payment_date_to' => $paymentDateTo ? $paymentDateTo->toDateString() : null,
             'filter_status' => $statuses,
             'filter_payment_method' => $paymentMethods,
             'chart_frequency' => $chartFrequency,
