@@ -123,6 +123,7 @@ class Invoice extends Resource
             // 📆 Fechas y estado
             Date::make(__('invoice.issue_date'), 'issue_date'),
             Date::make(__('invoice.due_date'), 'due_date'),
+            Date::make(__('Fecha de Pago'), 'payment_date')->readonly()->hideFromIndex(),
 
             Select::make(__('attribute.status'), 'status')->options([
                 'paid' => __('attribute.paid'),

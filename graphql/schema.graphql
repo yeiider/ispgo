@@ -651,6 +651,8 @@ type Invoice {
     status: String!
     issue_date: Date
     due_date: Date
+    payment_date: DateTime
+    payment_method: String
     router_id: Int
     notes: String
     additional_information: JSON
