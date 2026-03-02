@@ -263,6 +263,7 @@ class Invoice extends Model
                 'amount' => $amount,
                 'payment_date' => now(),
                 'payment_method' => $paymentMethod,
+                'payment_registered_by' => Auth::check() ? Auth::user()->name : 'API',
                 'notes' => $notes,
                 'additional_information' => $additional,
             ]);

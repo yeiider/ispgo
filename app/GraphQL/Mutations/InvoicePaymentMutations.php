@@ -33,6 +33,7 @@ class InvoicePaymentMutations
             'amount' => $args['amount'],
             'payment_date' => $args['paymentDate'],
             'payment_method' => $args['paymentMethod'] ?? null,
+            'payment_registered_by' => Auth::check() ? Auth::user()->name : 'API',
             'reference_number' => $args['referenceNumber'] ?? null,
             'notes' => $args['notes'] ?? null,
             'payment_support' => $args['paymentSupport'] ?? null,
