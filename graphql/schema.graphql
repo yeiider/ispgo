@@ -652,6 +652,7 @@ type Invoice {
     issue_date: Date
     due_date: Date
     payment_date: DateTime
+    payment_registered_by: String
     payment_method: String
     router_id: Int
     notes: String

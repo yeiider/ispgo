@@ -76,6 +76,8 @@ class InvoicePaymentService
             if ($invoice->isFullyPaid()) {
                 $invoice->status = 'paid';
                 $invoice->outstanding_balance = 0;
+                $invoice->payment_date = now();
+                $invoice->payment_registered_by = \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user()->name : 'API';
 
                 // Registrar fecha de pago en additional_information
                 $now = now();
@@ -118,8 +120,12 @@ class InvoicePaymentService
             
             if ($invoice->isFullyPaid()) {
                 $invoice->status = 'paid';
+                $invoice->payment_date = now();
+                $invoice->payment_registered_by = \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user()->name : 'API';
             } else {
                 $invoice->status = 'unpaid';
+                $invoice->payment_date = null;
+                $invoice->payment_registered_by = null;
             }
             
             $invoice->save();
@@ -154,8 +160,12 @@ class InvoicePaymentService
             
             if ($invoice->isFullyPaid()) {
                 $invoice->status = 'paid';
+                $invoice->payment_date = now();
+                $invoice->payment_registered_by = \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user()->name : 'API';
             } else {
                 $invoice->status = 'unpaid';
+                $invoice->payment_date = null;
+                $invoice->payment_registered_by = null;
             }
             
             $invoice->save();

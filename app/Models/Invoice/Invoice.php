@@ -32,7 +32,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date', 'payment_date', 'full_name', 'status', 'invoice_type', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
+        'issue_date', 'due_date', 'payment_date', 'payment_registered_by', 'full_name', 'status', 'invoice_type', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
         'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total','router_id',
         // OnePay integration fields
         'onepay_charge_id', 'onepay_payment_link', 'onepay_status', 'onepay_metadata'
@@ -281,6 +281,8 @@ class Invoice extends Model
             $this->status = 'paid';
             $this->outstanding_balance = 0;
             $this->payment_date = now();
+
+            $this->payment_registered_by = Auth::check() ? Auth::user()->name : 'API';
 
             // Registrar fecha de pago en additional_information
             $now = now();

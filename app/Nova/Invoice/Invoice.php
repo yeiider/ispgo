@@ -124,6 +124,7 @@ class Invoice extends Resource
             Date::make(__('invoice.issue_date'), 'issue_date'),
             Date::make(__('invoice.due_date'), 'due_date'),
             Date::make(__('Fecha de Pago'), 'payment_date')->readonly()->hideFromIndex(),
+            Text::make(__('Registrado por'), 'payment_registered_by')->readonly()->hideFromIndex(),
 
             Select::make(__('attribute.status'), 'status')->options([
                 'paid' => __('attribute.paid'),
