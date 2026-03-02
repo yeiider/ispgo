@@ -51,6 +51,33 @@ class InvoiceReportQuery
         $statusQuery = clone $query;
         $paymentMethodQuery = clone $query;
 
+        // Calculate total payments explicitly based on InvoicePayment model
+        $paymentQuery = \App\Models\Invoice\InvoicePayment::query();
+        
+        if ($paymentDateFrom && $paymentDateTo) {
+            $paymentQuery->whereBetween('payment_date', [$paymentDateFrom->startOfDay(), $paymentDateTo->endOfDay()]);
+        } elseif ($paymentDateFrom) {
+            $paymentQuery->where('payment_date', '>=', $paymentDateFrom->startOfDay());
+        } elseif ($paymentDateTo) {
+            $paymentQuery->where('payment_date', '<=', $paymentDateTo->endOfDay());
+        } else {
+            $paymentQuery->whereBetween('payment_date', [$dateFrom->startOfDay(), $dateTo->endOfDay()]);
+        }
+
+        if (!empty($routerId)) {
+            $paymentQuery->whereHas('invoice', function ($q) use ($routerId) {
+                $q->where('router_id', $routerId);
+            });
+        }
+
+        if (!empty($statuses)) {
+            $paymentQuery->whereHas('invoice', function ($q) use ($statuses) {
+                $q->whereIn('status', $statuses);
+            });
+        }
+
+        $totalPaymentsAmount = $paymentQuery->sum('amount');
+
         // --- Summary Calculation ---
         $summaryData = $summaryQuery->selectRaw('
             COUNT(*) as total_invoices,
@@ -75,6 +102,7 @@ class InvoiceReportQuery
             'total_invoices' => (int) ($summaryData->total_invoices ?? 0),
             'total_amount' => (float) ($summaryData->total_amount ?? 0),
             'total_paid' => (float) ($summaryData->tota_paid ?? 0),
+            'total_payments' => (float) $totalPaymentsAmount,
             'total_outstanding' => (float) ($summaryData->total_outstanding ?? 0),
             'total_discount' => (float) ($summaryData->total_discount ?? 0),
             'total_tax' => (float) ($summaryData->total_tax ?? 0),

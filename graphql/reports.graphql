@@ -2,6 +2,7 @@ type InvoiceReportSummary {
     total_invoices: Int!
     total_amount: Float!
     total_paid: Float!
+    total_payments: Float!
     total_outstanding: Float!
     total_discount: Float!
     total_tax: Float!
