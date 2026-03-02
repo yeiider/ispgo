@@ -1,169 +1,121 @@
-# MANUAL INVOICES SCHEMA
-# Schema para crear y gestionar facturas manuales
-
-enum InvoiceType {
-    subscription @enum(value: "subscription")
-    manual @enum(value: "manual")
-    adjustment @enum(value: "adjustment")
-}
-
-enum InvoiceStatus {
-    paid @enum(value: "paid")
-    unpaid @enum(value: "unpaid")
-    overdue @enum(value: "overdue")
-    canceled @enum(value: "canceled")
-}
-
-"Input para crear un item de factura manual"
-input ManualInvoiceItemInput {
-    "Descripción del item"
-    description: String! @rules(apply: ["required", "string", "max:255"])
-
-    "Cantidad"
-    quantity: Int! @rules(apply: ["required", "integer", "min:1"])
-
-    "Precio unitario sin impuestos"
-    unit_price: Float! @rules(apply: ["required", "numeric", "min:0"])
-
-    "ID del servicio relacionado (opcional)"
+type Invoice {
+    id: ID!
+    increment_id: String
+    customer_id: ID!
+    customer_name: String
     service_id: ID
-
-    "Metadatos adicionales en formato JSON"
-    metadata: JSON
-}
-
-"Input para crear un ajuste o cargo adicional en la factura"
-input ManualInvoiceAdjustmentInput {
-    "Tipo de ajuste: charge, discount, tax, void"
-    kind: String! @rules(apply: ["required", "in:charge,discount,tax,void"])
-
-    "Monto del ajuste"
-    amount: Float! @rules(apply: ["required", "numeric"])
-
-    "Etiqueta descriptiva del ajuste"
-    label: String! @rules(apply: ["required", "string", "max:255"])
-
-    "Tipo de fuente del ajuste (opcional)"
-    source_type: String
-
-    "ID de la fuente del ajuste (opcional)"
-    source_id: ID
-
-    "Metadatos adicionales"
-    metadata: JSON
-}
-
-"Input para crear una factura manual completa"
-input CreateManualInvoiceInput {
-    "ID del cliente"
-    customer_id: ID! @rules(apply: ["required", "exists:customers,id"])
-
-    "ID del router (opcional, se puede tomar del cliente)"
-    router_id: ID @rules(apply: ["exists:routers,id"])
-
-    "Fecha de emisión (formato: YYYY-MM-DD)"
-    issue_date: Date! @rules(apply: ["required", "date"])
-
-    "Fecha de vencimiento (formato: YYYY-MM-DD)"
-    due_date: Date! @rules(apply: ["required", "date", "after_or_equal:issue_date"])
-
-    "Items de la factura (conceptos a facturar)"
-    items: [ManualInvoiceItemInput!]! @rules(apply: ["required", "array", "min:1"])
-
-    "Ajustes adicionales (cargos, descuentos, impuestos)"
-    adjustments: [ManualInvoiceAdjustmentInput!]
-
-    "Notas adicionales"
+    total: Float!
+    subtotal: Float
+    tax: Float
+    discount: Float
+    amount: Float
+    outstanding_balance: Float
+    status: String!
+    issue_date: Date
+    due_date: Date
+    payment_date: DateTime
+    payment_registered_by: String
+    payment_method: String
+    router_id: Int
     notes: String
-
-    "Información adicional en formato JSON"
     additional_information: JSON
+    created_at: DateTime!
+    updated_at: DateTime!
 
-    "Estado inicial (por defecto: unpaid)"
-    status: InvoiceStatus
+    customer: Customer! @belongsTo
+    service: Service @belongsTo
+    items: [InvoiceItem!]! @hasMany
+    adjustments: [InvoiceAdjustment!]! @hasMany
+    creditNotes: [CreditNote!]! @hasMany
+    paymentPromises: [PaymentPromise!]! @hasMany
+    payments: [InvoicePayment!]! @hasMany
+    router: Router @belongsTo
+
+    totalPaid: Float! @method(name: "getTotalPaidAttribute")
+    realOutstandingBalance: Float! @method(name: "getRealOutstandingBalanceAttribute")
+    isFullyPaid: Boolean! @method(name: "isFullyPaid")
 }
 
-"Input para actualizar una factura manual existente"
-input UpdateManualInvoiceInput {
-    "ID de la factura a actualizar"
-    invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
+type InvoiceItem {
+    id: ID!
+    description: String
+    quantity: Int
+    unit_price: Float
+    subtotal: Float
+    created_at: DateTime!
+    updated_at: DateTime!
 
-    "Nueva fecha de emisión"
-    issue_date: Date @rules(apply: ["date"])
+    invoice: Invoice! @belongsTo
+    service: Service @belongsTo
+}
 
-    "Nueva fecha de vencimiento"
-    due_date: Date @rules(apply: ["date", "after_or_equal:issue_date"])
+type InvoiceAdjustment {
+    id: ID!
+    kind: String!
+    amount: Float!
+    label: String
+    created_at: DateTime!
+    updated_at: DateTime!
 
-    "Nuevos items (reemplaza los existentes)"
-    items: [ManualInvoiceItemInput!]
+    invoice: Invoice! @belongsTo
+}
 
-    "Nuevos ajustes (reemplaza los existentes)"
-    adjustments: [ManualInvoiceAdjustmentInput!]
+type CreditNote {
+    id: ID!
+    amount: Float!
+    issue_date: Date
+    reason: String
+    created_at: DateTime!
+    updated_at: DateTime!
 
-    "Nuevas notas"
+    invoice: Invoice! @belongsTo
+}
+
+type PaymentPromise {
+    id: ID!
+    amount: Float!
+    promise_date: Date
     notes: String
+    status: String
+    created_at: DateTime!
+    updated_at: DateTime!
 
-    "Nueva información adicional"
-    additional_information: JSON
-
-    "Nuevo estado"
-    status: InvoiceStatus
+    invoice: Invoice! @belongsTo
+    customer: Customer! @belongsTo
 }
 
-"Resultado de la operación con factura manual"
-type ManualInvoiceResult {
-    "Indica si la operación fue exitosa"
+type GenerateInvoiceResult {
     success: Boolean!
-
-    "Mensaje descriptivo del resultado"
-    message: String!
-
-    "La factura creada o actualizada"
+    message: String
     invoice: Invoice
-
-    "Errores de validación si existen"
-    errors: [String!]
 }
 
-extend type Invoice {
-    "Tipo de factura"
-    invoice_type: InvoiceType!
+type PaymentPromiseResult {
+    success: Boolean!
+    message: String
+    payment_promise: PaymentPromise
 }
 
-extend type Mutation {
-    "Crear una factura manual para conceptos diferentes a servicios mensuales"
-    createManualInvoice(
-        input: CreateManualInvoiceInput! @spread
-    ): ManualInvoiceResult
-        @field(resolver: "App\\GraphQL\\Mutations\\ManualInvoiceMutation@create")
-        @guard
-
-    "Actualizar una factura manual existente (solo si no ha sido pagada)"
-    updateManualInvoice(
-        input: UpdateManualInvoiceInput! @spread
-    ): ManualInvoiceResult
-        @field(resolver: "App\\GraphQL\\Mutations\\ManualInvoiceMutation@update")
-        @guard
-
-    "Eliminar una factura manual (solo si no ha sido pagada)"
-    deleteManualInvoice(
-        invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
-    ): ManualInvoiceResult
-        @field(resolver: "App\\GraphQL\\Mutations\\ManualInvoiceMutation@delete")
-        @guard
+type CashierDailyReport {
+    date_from: Date
+    date_to: Date
+    total_cash: Float!
+    total_transfer: Float!
+    total_collected: Float!
+    total_invoices: Int!
 }
 
 extend type Query {
-    "Obtener facturas manuales filtradas"
-    manualInvoices(
-        customer_id: ID @eq(key: "customer_id")
-        router_id: ID @eq(key: "router_id")
-        status: InvoiceStatus @eq
-        invoice_type: InvoiceType @eq
-        issue_date_from: Date
-        issue_date_to: Date
-    ): [Invoice!]!
-        @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
-        @where(column: "invoice_type", operator: "IN", value: ["manual", "adjustment"])
-        @guard
+    myCollectedInvoices(
+        date: Date
+        date_from: Date
+        date_to: Date
+        payment_method: String
+    ): [Invoice!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CashierInvoicesQuery@myInvoices")
+
+    myDailyCollectionReport(
+        date: Date
+        date_from: Date
+        date_to: Date
+    ): CashierDailyReport! @field(resolver: "App\\GraphQL\\Queries\\CashierInvoicesQuery@dailyReport")
 }

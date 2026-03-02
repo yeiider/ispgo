@@ -40,6 +40,21 @@ class RegisterPaymentMutation
                 }
             }
 
+            // Verificar si el usuario tiene una caja diaria asignada y abierta antes de permitir registrar pagos
+            if (Auth::check()) {
+                $user = Auth::user();
+                $hasOpenRegister = \App\Models\Finance\CashRegister::where('user_id', $user->id)
+                    ->where('status', \App\Models\Finance\CashRegister::STATUS_OPEN)
+                    ->exists();
+
+                if (!$hasOpenRegister) {
+                    return [
+                        'success' => false,
+                        'message' => __('No puedes registrar pagos. Debes tener una caja diaria asignada y abierta en el sistema.'),
+                    ];
+                }
+            }
+
             $paymentMethod = $args['payment_method'];
             $notes = $args['notes'] ?? null;
             $paymentRegisteredById = $args['payment_registered_by'] ?? null;
