@@ -17,6 +17,7 @@ class InvoiceReportQuery
         $paymentDateTo = isset($args['payment_date_to']) ? Carbon::parse($args['payment_date_to']) : null;
         $statuses = $args['status'] ?? null;
         $paymentMethods = $args['payment_method'] ?? null;
+        $paymentRegisteredBy = $args['payment_registered_by'] ?? null;
         $routerId = $args['router_id'] ?? null;
         $chartFrequency = $args['chart_frequency'] ?? 'daily';
 
@@ -39,6 +40,10 @@ class InvoiceReportQuery
             $query->whereIn('payment_method', $paymentMethods);
         }
 
+        if (!empty($paymentRegisteredBy)) {
+            $query->where('payment_registered_by', $paymentRegisteredBy);
+        }
+
         if (!empty($routerId)) {
             $query->where('router_id', $routerId);
         }
@@ -53,7 +58,7 @@ class InvoiceReportQuery
 
         // Calculate total payments explicitly based on InvoicePayment model
         $paymentQuery = \App\Models\Invoice\InvoicePayment::query();
-        
+
         if ($paymentDateFrom && $paymentDateTo) {
             $paymentQuery->whereBetween('payment_date', [$paymentDateFrom->startOfDay(), $paymentDateTo->endOfDay()]);
         } elseif ($paymentDateFrom) {
@@ -73,6 +78,12 @@ class InvoiceReportQuery
         if (!empty($statuses)) {
             $paymentQuery->whereHas('invoice', function ($q) use ($statuses) {
                 $q->whereIn('status', $statuses);
+            });
+        }
+
+        if (!empty($paymentRegisteredBy)) {
+            $paymentQuery->whereHas('invoice', function ($q) use ($paymentRegisteredBy) {
+                $q->where('payment_registered_by', $paymentRegisteredBy);
             });
         }
 
@@ -206,6 +217,7 @@ class InvoiceReportQuery
             'payment_date_to' => $paymentDateTo ? $paymentDateTo->toDateString() : null,
             'filter_status' => $statuses,
             'filter_payment_method' => $paymentMethods,
+            'filter_payment_registered_by' => $paymentRegisteredBy,
             'chart_frequency' => $chartFrequency,
         ];
     }

@@ -42,8 +42,14 @@ class RegisterPaymentMutation
 
             $paymentMethod = $args['payment_method'];
             $notes = $args['notes'] ?? null;
+            $paymentRegisteredById = $args['payment_registered_by'] ?? null;
 
-            $invoice->applyPayment(null, $paymentMethod, [], $notes, null);
+            $additional = [];
+            if (!empty($args['transfer_reference'])) {
+                $additional['transfer_reference'] = $args['transfer_reference'];
+            }
+
+            $invoice->applyPayment(null, $paymentMethod, $additional, $notes, null, false, $paymentRegisteredById);
 
             return [
                 'success' => true,

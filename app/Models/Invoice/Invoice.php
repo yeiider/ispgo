@@ -243,7 +243,7 @@ class Invoice extends Model
         return $incrementId;
     }
 
-    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null, $dailyBoxId = null, $createPaymentRecord = false): void
+    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null, $dailyBoxId = null, $createPaymentRecord = false, $paymentRegisteredById = null): void
     {
         $amount = $amount ?? $this->real_outstanding_balance;
 
@@ -255,15 +255,19 @@ class Invoice extends Model
             throw new \Exception('El monto pagado no puede ser mayor que el saldo pendiente.');
         }
 
+        $registeredUser = $paymentRegisteredById ? \App\Models\User::find($paymentRegisteredById) : (Auth::check() ? Auth::user() : null);
+        $registeredByName = $registeredUser ? $registeredUser->name : 'API';
+        $registeredById = $registeredUser ? $registeredUser->id : null;
+
         // Only create InvoicePayment record for partial payments (when explicitly requested)
         if ($createPaymentRecord) {
             InvoicePayment::create([
                 'invoice_id' => $this->id,
-                'user_id' => Auth::id(),
+                'user_id' => $registeredById,
                 'amount' => $amount,
                 'payment_date' => now(),
                 'payment_method' => $paymentMethod,
-                'payment_registered_by' => Auth::check() ? Auth::user()->name : 'API',
+                'payment_registered_by' => $registeredById, // Storing ID for filtering as requested
                 'notes' => $notes,
                 'additional_information' => $additional,
             ]);
@@ -283,7 +287,7 @@ class Invoice extends Model
             $this->outstanding_balance = 0;
             $this->payment_date = now();
 
-            $this->payment_registered_by = Auth::check() ? Auth::user()->name : 'API';
+            $this->payment_registered_by = $registeredById; // Storing ID for filtering as requested
 
             // Registrar fecha de pago en additional_information
             $now = now();
