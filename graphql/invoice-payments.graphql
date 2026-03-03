@@ -21,6 +21,9 @@ type InvoicePayment {
     "Número de referencia o transacción"
     referenceNumber: String @rename(attribute: "reference_number")
 
+    "Usuario que registró o sistema a través del API"
+    paymentRegisteredBy: String @rename(attribute: "payment_registered_by")
+
     "Notas adicionales sobre el pago"
     notes: String
 

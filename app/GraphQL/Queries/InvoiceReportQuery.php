@@ -17,10 +17,9 @@ class InvoiceReportQuery
         $paymentDateTo = isset($args['payment_date_to']) ? Carbon::parse($args['payment_date_to']) : null;
         $statuses = $args['status'] ?? null;
         $paymentMethods = $args['payment_method'] ?? null;
+        $paymentRegisteredBy = $args['payment_registered_by'] ?? null;
         $routerId = $args['router_id'] ?? null;
         $chartFrequency = $args['chart_frequency'] ?? 'daily';
-        $paymentDateFrom = $args['payment_date_from'] ?? null;
-        $paymentDateTo   = $args['payment_date_to'] ?? null;
 
         $query = Invoice::query()
             ->whereBetween('issue_date', [$dateFrom->toDateString(), $dateTo->toDateString()]);
@@ -41,29 +40,54 @@ class InvoiceReportQuery
             $query->whereIn('payment_method', $paymentMethods);
         }
 
+        if (!empty($paymentRegisteredBy)) {
+            $query->where('payment_registered_by', $paymentRegisteredBy);
+        }
+
         if (!empty($routerId)) {
             $query->where('router_id', $routerId);
         }
 
-        // Filtrar por rango de fecha de pago (extraída del campo JSON additional_information->finalized_at)
-        if (!empty($paymentDateFrom)) {
-            $query->whereRaw(
-                "DATE(JSON_UNQUOTE(JSON_EXTRACT(additional_information, '$.finalized_at'))) >= ?",
-                [$paymentDateFrom]
-            );
-        }
-        if (!empty($paymentDateTo)) {
-            $query->whereRaw(
-                "DATE(JSON_UNQUOTE(JSON_EXTRACT(additional_information, '$.finalized_at'))) <= ?",
-                [$paymentDateTo]
-            );
-        }
+        // Eliminado filtro JSON additional_information en favor de payment_date
 
         // Clone query for different aggregations to avoid mutating the base query state
         $summaryQuery = clone $query;
         $chartQuery = clone $query;
         $statusQuery = clone $query;
         $paymentMethodQuery = clone $query;
+
+        // Calculate total payments explicitly based on InvoicePayment model
+        $paymentQuery = \App\Models\Invoice\InvoicePayment::query();
+
+        if ($paymentDateFrom && $paymentDateTo) {
+            $paymentQuery->whereBetween('payment_date', [$paymentDateFrom->startOfDay(), $paymentDateTo->endOfDay()]);
+        } elseif ($paymentDateFrom) {
+            $paymentQuery->where('payment_date', '>=', $paymentDateFrom->startOfDay());
+        } elseif ($paymentDateTo) {
+            $paymentQuery->where('payment_date', '<=', $paymentDateTo->endOfDay());
+        } else {
+            $paymentQuery->whereBetween('payment_date', [$dateFrom->startOfDay(), $dateTo->endOfDay()]);
+        }
+
+        if (!empty($routerId)) {
+            $paymentQuery->whereHas('invoice', function ($q) use ($routerId) {
+                $q->where('router_id', $routerId);
+            });
+        }
+
+        if (!empty($statuses)) {
+            $paymentQuery->whereHas('invoice', function ($q) use ($statuses) {
+                $q->whereIn('status', $statuses);
+            });
+        }
+
+        if (!empty($paymentRegisteredBy)) {
+            $paymentQuery->whereHas('invoice', function ($q) use ($paymentRegisteredBy) {
+                $q->where('payment_registered_by', $paymentRegisteredBy);
+            });
+        }
+
+        $totalPaymentsAmount = $paymentQuery->sum('amount');
 
         // --- Summary Calculation ---
         $summaryData = $summaryQuery->selectRaw('
@@ -89,6 +113,7 @@ class InvoiceReportQuery
             'total_invoices' => (int) ($summaryData->total_invoices ?? 0),
             'total_amount' => (float) ($summaryData->total_amount ?? 0),
             'total_paid' => (float) ($summaryData->tota_paid ?? 0),
+            'total_payments' => (float) $totalPaymentsAmount,
             'total_outstanding' => (float) ($summaryData->total_outstanding ?? 0),
             'total_discount' => (float) ($summaryData->total_discount ?? 0),
             'total_tax' => (float) ($summaryData->total_tax ?? 0),
@@ -192,6 +217,7 @@ class InvoiceReportQuery
             'payment_date_to' => $paymentDateTo ? $paymentDateTo->toDateString() : null,
             'filter_status' => $statuses,
             'filter_payment_method' => $paymentMethods,
+            'filter_payment_registered_by' => $paymentRegisteredBy,
             'chart_frequency' => $chartFrequency,
         ];
     }

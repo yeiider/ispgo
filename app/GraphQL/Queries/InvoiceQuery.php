@@ -73,6 +73,11 @@ class InvoiceQuery
             $query->where('payment_method', $args['payment_method']);
         }
 
+        // Apply payment_registered_by filter directly on invoices table
+        if (!empty($args['payment_registered_by'])) {
+            $query->where('payment_registered_by', $args['payment_registered_by']);
+        }
+
         // Apply sorting
         $sortColumn = $args['sort_column'] ?? 'created_at';
         $sortDirection = isset($args['sort_direction']) && strtolower($args['sort_direction']) === 'asc' ? 'asc' : 'desc';

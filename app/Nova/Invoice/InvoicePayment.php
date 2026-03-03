@@ -58,6 +58,10 @@ class InvoicePayment extends Resource
                 ->readonly()
                 ->hideFromIndex(),
 
+            Text::make(__('Registrado por'), 'payment_registered_by')
+                ->readonly()
+                ->hideFromIndex(),
+
             Currency::make(__('Monto'), 'amount')
                 ->step(0.01)
                 ->rules('required', 'numeric', 'min:0.01')
