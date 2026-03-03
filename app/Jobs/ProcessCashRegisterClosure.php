@@ -82,10 +82,11 @@ class ProcessCashRegisterClosure implements ShouldQueue
             $closure->status = CashRegisterClosure::STATUS_PROCESSING;
             $closure->save();
 
-            // Obtener facturas pagadas del día para esta caja
-            $invoices = Invoice::where('daily_box_id', $this->cashRegisterId)
-                ->whereDate('updated_at', $this->closureDate)
+            // Obtener facturas pagadas del día registradas por el usuario de esta caja
+            $invoices = Invoice::where('payment_registered_by', $cashRegister->user_id)
+                ->whereDate('payment_date', $this->closureDate)
                 ->where('status', Invoice::STATUS_PAID)
+                ->whereIn('payment_method', ['cash', 'transfer'])
                 ->with(['adjustments', 'customer'])
                 ->get();
 

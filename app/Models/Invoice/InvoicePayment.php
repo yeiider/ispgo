@@ -32,6 +32,7 @@ class InvoicePayment extends Model
         'reference_number',
         'notes',
         'payment_support',
+        'payment_registered_by',
         'additional_information'
     ];
 

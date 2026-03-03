@@ -28,18 +28,19 @@ class InvoicePaymentMutations
     {
         // Preparar datos
         $data = [
-            'invoice_id' => $args['invoiceId'],
+            'invoice_id' => $args['invoice_id'],
             'user_id' => Auth::id(),
             'amount' => $args['amount'],
-            'payment_date' => $args['paymentDate'],
-            'payment_method' => $args['paymentMethod'] ?? null,
-            'reference_number' => $args['referenceNumber'] ?? null,
+            'payment_date' => $args['payment_date'],
+            'payment_method' => $args['payment_method'] ?? null,
+            'payment_registered_by' => Auth::check() ? Auth::user()->name : 'API',
+            'reference_number' => $args['reference_number'] ?? null,
             'notes' => $args['notes'] ?? null,
-            'payment_support' => $args['paymentSupport'] ?? null,
+            'payment_support' => $args['payment_support'] ?? null,
         ];
 
         // Validar que el monto no exceda el saldo pendiente
-        $invoice = Invoice::findOrFail($args['invoiceId']);
+        $invoice = Invoice::findOrFail($args['invoice_id']);
 
         if ($data['amount'] > $invoice->real_outstanding_balance) {
             throw new InvalidArgumentException(
@@ -64,9 +65,9 @@ class InvoicePaymentMutations
     {
         $data = array_filter([
             'amount' => $args['amount'] ?? null,
-            'payment_date' => $args['paymentDate'] ?? null,
-            'payment_method' => $args['paymentMethod'] ?? null,
-            'reference_number' => $args['referenceNumber'] ?? null,
+            'payment_date' => $args['payment_date'] ?? null,
+            'payment_method' => $args['payment_method'] ?? null,
+            'reference_number' => $args['reference_number'] ?? null,
             'notes' => $args['notes'] ?? null,
         ], fn($value) => $value !== null);
 

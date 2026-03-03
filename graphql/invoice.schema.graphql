@@ -130,6 +130,15 @@ extend type Invoice {
     invoice_type: InvoiceType!
 }
 
+type CashierDailyReport {
+    date_from: Date
+    date_to: Date
+    total_cash: Float!
+    total_transfer: Float!
+    total_collected: Float!
+    total_invoices: Int!
+}
+
 extend type Mutation {
     "Crear una factura manual para conceptos diferentes a servicios mensuales"
     createManualInvoice(
@@ -166,4 +175,17 @@ extend type Query {
         @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
         @where(column: "invoice_type", operator: "IN", value: ["manual", "adjustment"])
         @guard
+
+    myCollectedInvoices(
+        date: Date
+        date_from: Date
+        date_to: Date
+        payment_method: String
+    ): [Invoice!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CashierInvoicesQuery@myInvoices")
+
+    myDailyCollectionReport(
+        date: Date
+        date_from: Date
+        date_to: Date
+    ): CashierDailyReport! @field(resolver: "App\\GraphQL\\Queries\\CashierInvoicesQuery@dailyReport")
 }

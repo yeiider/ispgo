@@ -2,6 +2,7 @@ type InvoiceReportSummary {
     total_invoices: Int!
     total_amount: Float!
     total_paid: Float!
+    total_payments: Float!
     total_outstanding: Float!
     total_discount: Float!
     total_tax: Float!
@@ -34,6 +35,7 @@ type InvoiceReport {
     payment_date_to: Date
     filter_status: [String!]
     filter_payment_method: [String!]
+    filter_payment_registered_by: String
     chart_frequency: String!
 }
 
@@ -45,9 +47,8 @@ extend type Query {
         payment_date_to: Date
         status: [String!]
         payment_method: [String!]
+        payment_registered_by: String
         router_id: Int
         chart_frequency: String = "daily"
-        payment_date_from: Date
-        payment_date_to: Date
     ): InvoiceReport! @field(resolver: "App\\GraphQL\\Queries\\InvoiceReportQuery@resolve")
 }

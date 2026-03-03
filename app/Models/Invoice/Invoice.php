@@ -32,7 +32,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date', 'payment_date', 'full_name', 'status', 'invoice_type', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
+        'issue_date', 'due_date', 'payment_date', 'payment_registered_by', 'full_name', 'status', 'invoice_type', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
         'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total','router_id',
         // OnePay integration fields
         'onepay_charge_id', 'onepay_payment_link', 'onepay_status', 'onepay_metadata'
@@ -243,7 +243,7 @@ class Invoice extends Model
         return $incrementId;
     }
 
-    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null, $dailyBoxId = null, $createPaymentRecord = false): void
+    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null, $dailyBoxId = null, $createPaymentRecord = false, $paymentRegisteredById = null): void
     {
         $amount = $amount ?? $this->real_outstanding_balance;
 
@@ -255,14 +255,19 @@ class Invoice extends Model
             throw new \Exception('El monto pagado no puede ser mayor que el saldo pendiente.');
         }
 
+        $registeredUser = $paymentRegisteredById ? \App\Models\User::find($paymentRegisteredById) : (Auth::check() ? Auth::user() : null);
+        $registeredByName = $registeredUser ? $registeredUser->name : '';
+        $registeredById = $registeredUser ? $registeredUser->id : null;
+
         // Only create InvoicePayment record for partial payments (when explicitly requested)
         if ($createPaymentRecord) {
             InvoicePayment::create([
                 'invoice_id' => $this->id,
-                'user_id' => Auth::id(),
+                'user_id' => $registeredById,
                 'amount' => $amount,
                 'payment_date' => now(),
                 'payment_method' => $paymentMethod,
+                'payment_registered_by' => $registeredById,
                 'notes' => $notes,
                 'additional_information' => $additional,
             ]);
@@ -281,6 +286,8 @@ class Invoice extends Model
             $this->status = 'paid';
             $this->outstanding_balance = 0;
             $this->payment_date = now();
+
+            $this->payment_registered_by = $registeredById;
 
             // Registrar fecha de pago en additional_information
             $now = now();
