@@ -301,7 +301,7 @@ type Mutation @guard {
     registerPayment(
         invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
         payment_method: String! @rules(apply: ["required", "in:cash,transfer,card,online"])
-        payment_registered_by: ID @rules(apply: ["exists:users,id"])
+        payment_registered_by: String
         transfer_reference: String
         notes: String
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentMutation@resolve")

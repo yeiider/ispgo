@@ -267,7 +267,7 @@ class Invoice extends Model
                 'amount' => $amount,
                 'payment_date' => now(),
                 'payment_method' => $paymentMethod,
-                'payment_registered_by' => $registeredById, // Storing ID for filtering as requested
+                'payment_registered_by' => $registeredByName,
                 'notes' => $notes,
                 'additional_information' => $additional,
             ]);
@@ -287,7 +287,7 @@ class Invoice extends Model
             $this->outstanding_balance = 0;
             $this->payment_date = now();
 
-            $this->payment_registered_by = $registeredById; // Storing ID for filtering as requested
+            $this->payment_registered_by = $registeredByName;
 
             // Registrar fecha de pago en additional_information
             $now = now();
