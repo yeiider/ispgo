@@ -256,7 +256,7 @@ class Invoice extends Model
         }
 
         $registeredUser = $paymentRegisteredById ? \App\Models\User::find($paymentRegisteredById) : (Auth::check() ? Auth::user() : null);
-        $registeredByName = $registeredUser ? $registeredUser->name : 'API';
+        $registeredByName = $registeredUser ? $registeredUser->name : '';
         $registeredById = $registeredUser ? $registeredUser->id : null;
 
         // Only create InvoicePayment record for partial payments (when explicitly requested)
@@ -267,7 +267,7 @@ class Invoice extends Model
                 'amount' => $amount,
                 'payment_date' => now(),
                 'payment_method' => $paymentMethod,
-                'payment_registered_by' => $registeredByName,
+                'payment_registered_by' => $registeredById,
                 'notes' => $notes,
                 'additional_information' => $additional,
             ]);
@@ -287,7 +287,7 @@ class Invoice extends Model
             $this->outstanding_balance = 0;
             $this->payment_date = now();
 
-            $this->payment_registered_by = $registeredByName;
+            $this->payment_registered_by = $registeredById;
 
             // Registrar fecha de pago en additional_information
             $now = now();
