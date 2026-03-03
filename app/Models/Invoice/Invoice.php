@@ -195,6 +195,11 @@ class Invoice extends Model
         return $this->belongsTo(Router::class);
     }
 
+    public function paymentRegisteredByUser()
+    {
+        return $this->belongsTo(User::class, 'payment_registered_by');
+    }
+
     public static function findByDniOrInvoiceId($input)
     {
         return self::where(function ($query) use ($input) {

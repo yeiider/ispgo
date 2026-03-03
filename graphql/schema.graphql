@@ -666,6 +666,7 @@ type Invoice {
     customer: Customer! @belongsTo
     service: Service @belongsTo
     items: [InvoiceItem!]! @hasMany
+    paymentRegisteredByUser: User @belongsTo
     adjustments: [InvoiceAdjustment!]! @hasMany
     creditNotes: [CreditNote!]! @hasMany
     paymentPromises: [PaymentPromise!]! @hasMany
