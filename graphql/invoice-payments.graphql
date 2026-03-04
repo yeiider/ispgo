@@ -126,6 +126,22 @@ extend type Query @guard {
         invoiceId: ID!
     ): [InvoicePayment!]!
         @field(resolver: "App\\GraphQL\\Queries\\InvoicePaymentQueries@getByInvoice")
+
+    "Obtener los abonos registrados por el cajero autenticado (para historial de caja)"
+    myInvoicePayments(
+        "Filtrar por fecha exacta"
+        date: Date
+
+        "Filtrar desde fecha"
+        date_from: Date
+
+        "Filtrar hasta fecha"
+        date_to: Date
+
+        "Filtrar por método de pago"
+        payment_method: String
+    ): [InvoicePayment!]!
+        @paginate(defaultCount: 50, builder: "App\\GraphQL\\Queries\\InvoicePaymentQueries@myPayments")
 }
 
 extend type Mutation @guard {
