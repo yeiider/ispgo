@@ -56,7 +56,7 @@ type Query {
         created_at_to: DateTime
         customer_name: String
         payment_method: String
-        payment_registered_by: String
+        payment_registered_by: ID
         payment_date_from: DateTime
         payment_date_to: DateTime
         sort_column: String
@@ -655,7 +655,7 @@ type Invoice {
     issue_date: Date
     due_date: Date
     payment_date: DateTime
-    payment_registered_by: String
+    payment_registered_by: ID
     payment_method: String
     router_id: Int
     notes: String

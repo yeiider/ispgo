@@ -49,7 +49,7 @@ Route::middleware('auth:api')->group(function () {
     });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/v1/invoice/search', [InvoiceApi::class, 'searchInvoices']);
-    Route::post('/v1/invoice/pay', [InvoiceApi::class, 'registerPayment']);
+    Route::post('/v1/invoice/pay', [InvoiceApi::class, 'registerPayment'])->middleware(\App\Http\Middleware\LogApiRequests::class);
     Route::post('/v1/cotizaciones', [CotizacionController::class, 'store']);
     Route::apiResource('tasks', TaskControllerApi::class);
     Route::apiResource('comments', TaskCommentController::class);

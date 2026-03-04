@@ -297,7 +297,7 @@ class Invoice extends Model
             // Registrar fecha de pago en additional_information
             $now = now();
             $paymentInfo = [
-                'id'           => $this->increment_id . '-' . $now->timestamp,
+                //'id'           => $this->increment_id . '-' . $now->timestamp,
                 'created_at'   => $now->toIso8601String(),
                 'finalized_at' => $now->toIso8601String(),
             ];
