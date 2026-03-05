@@ -75,7 +75,11 @@ class CashierInvoicesQuery
         }
 
         // ---- Pagos completos de facturas (invoice.status = paid) ----
+        // Para facturas que tenían abonos previos, `amount` acumula todos los pagos
+        // (abonos + pago final). Para evitar doble conteo, restamos la suma de abonos
+        // (InvoicePayment) de cada factura, obteniendo solo lo cobrado en este día.
         $invoiceQuery = Invoice::query()
+            ->with(['payments'])                                  // eager load abonos
             ->where('payment_registered_by', $userId)
             ->where('status', Invoice::STATUS_PAID)
             ->whereIn('payment_method', ['cash', 'transfer'])
@@ -83,9 +87,18 @@ class CashierInvoicesQuery
 
         $invoices = $invoiceQuery->get();
 
-        $totalCashInvoices     = $invoices->where('payment_method', 'cash')->sum('amount');
-        $totalTransferInvoices = $invoices->where('payment_method', 'transfer')->sum('amount');
-        $totalInvoicesCount    = $invoices->count();
+        // Por cada factura, el monto real del pago final del día es:
+        //   amount (total acumulado) - suma de abonos (InvoicePayment) ya registrados
+        // Los abonos se contabilizan por separado, así que no los sumamos aquí.
+        $totalCashInvoices = $invoices
+            ->where('payment_method', 'cash')
+            ->sum(fn ($inv) => max(0, $inv->amount - $inv->payments->sum('amount')));
+
+        $totalTransferInvoices = $invoices
+            ->where('payment_method', 'transfer')
+            ->sum(fn ($inv) => max(0, $inv->amount - $inv->payments->sum('amount')));
+
+        $totalInvoicesCount = $invoices->count();
 
         // ---- Abonos parciales (InvoicePayment) ----
         $paymentsQuery = InvoicePayment::query()
@@ -100,10 +113,10 @@ class CashierInvoicesQuery
         $totalPaymentsCount    = $payments->count();
 
         // ---- Totales combinados ----
-        $totalCash     = $totalCashInvoices + $totalCashPayments;
-        $totalTransfer = $totalTransferInvoices + $totalTransferPayments;
+        $totalCash      = $totalCashInvoices + $totalCashPayments;
+        $totalTransfer  = $totalTransferInvoices + $totalTransferPayments;
         $totalCollected = $totalCash + $totalTransfer;
-        $totalItems    = $totalInvoicesCount + $totalPaymentsCount;
+        $totalItems     = $totalInvoicesCount + $totalPaymentsCount;
 
         return [
             'date_from'       => $dateFrom ? $dateFrom->toDateString() : null,
