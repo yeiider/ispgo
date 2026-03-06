@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CaptivePortalController;
 use App\Http\Controllers\Api\InvoiceApi;
 use App\Http\Controllers\Api\CotizacionController;
 use App\Http\Controllers\Api\McpController;
@@ -84,6 +85,18 @@ Route::middleware('auth:api')->group(function () {
         // Información de ONU
         Route::get('/onu/{externalId}/details', [SmartOltController::class, 'getOnuDetails']);
         Route::get('/onu/{externalId}/status', [SmartOltController::class, 'getOnuStatus']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Captive Portal API Routes
+    |--------------------------------------------------------------------------
+    | Endpoints autenticados para el portal cautivo WiFi
+    */
+    Route::prefix('captive-portal')->group(function () {
+        Route::post('/request-access', [CaptivePortalController::class, 'requestAccess']);
+        Route::post('/verify-otp', [CaptivePortalController::class, 'verifyOtp']);
+        Route::post('/check-access', [CaptivePortalController::class, 'checkAccess']);
     });
 });
 
