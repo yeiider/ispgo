@@ -1,0 +1,868 @@
+"A datetime string with format 'Y-m-d H:i:s', e.g. '2018-05-23 13:43:32'."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+"A date string with format 'Y-m-d', e.g. '2011-05-23'."
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
+
+type Query {
+    # Users
+    users(
+        name: String @where(operator: "like")
+        email: String @where(operator: "like")
+        role: String
+    ): [User!]! @paginate(defaultCount: 10, model: "App\\Models\\User")
+    user(id: ID! @eq): User @find(model: "App\\Models\\User")
+
+    # Roles and Permissions
+    roles: [Role!]! @all(model: "Spatie\\Permission\\Models\\Role")
+    role(id: ID! @eq): Role @find(model: "Spatie\\Permission\\Models\\Role")
+
+    permissions: [Permission!]! @all(model: "Spatie\\Permission\\Models\\Permission")
+    permission(id: ID! @eq): Permission @find(model: "Spatie\\Permission\\Models\\Permission")
+
+    customers(
+        first_name: String @where(operator: "like")
+        last_name: String @where(operator: "like")
+        identity_document: String @where(operator: "like")
+        email_address: String @where(operator: "like")
+        customer_status: String @eq
+        search: String @scope(name: "search")
+    ): [Customer!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Customer")
+    customer(id: ID! @eq): Customer @find(model: "App\\Models\\Customers\\Customer")
+
+    services(
+        service_ip: String @where(operator: "like")
+        service_status: String @eq
+        customer_id: ID @eq
+        mac_address: String @where(operator: "like")
+        service_type: String @eq
+        sn: String @where(operator: "like")
+    ): [Service!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Service")
+    service(id: ID! @eq): Service @find(model: "App\\Models\\Services\\Service")
+
+    invoices(
+        increment_id: String @where(operator: "like")
+        status: String @eq
+        customer_id: ID @eq
+    ): [Invoice!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
+    invoice(id: ID! @eq): Invoice @find(model: "App\\Models\\Invoice\\Invoice")
+
+    billingNovedades: [BillingNovedad!]! @paginate(defaultCount: 10, model: "App\\Models\\BillingNovedad")
+    creditNotes: [CreditNote!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\CreditNote")
+    paymentPromises: [PaymentPromise!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\PaymentPromise")
+
+    routers: [Router!]! @paginate(defaultCount: 10, model: "App\\Models\\Router")
+    router(id: ID! @eq): Router @find(model: "App\\Models\\Router")
+
+    plans: [Plan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Plan")
+    plan(id: ID! @eq): Plan @find(model: "App\\Models\\Services\\Plan")
+
+    tickets(
+        status: String @eq
+        priority: String @eq
+        customer_id: ID @eq
+        service_id: ID @eq
+        title: String @where(operator: "like")
+    ): [Ticket!]! @paginate(defaultCount: 10, model: "App\\Models\\Ticket")
+    ticket(id: ID! @eq): Ticket @find(model: "App\\Models\\Ticket")
+    myTickets: [Ticket!]! @field(resolver: "App\\GraphQL\\Queries\\TicketQuery@myTickets")
+
+    # Configuration schema and values for external frontend
+    configSchema: [ConfigSection!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@schema")
+    configFields(scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@fields")
+    configValues(paths: [String!]!, scope_id: Int = 0): [ConfigItem!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@values")
+    configSearch(term: String!, scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@search")
+}
+
+type Mutation @guard {
+    createCustomer(
+        first_name: String! @rules(apply: ["required", "max:255"])
+        last_name: String! @rules(apply: ["required", "max:255"])
+        email_address: String @rules(apply: ["email", "max:255"])
+        phone_number: String
+        identity_document: String @rules(apply: ["required", "unique:customers,identity_document"])
+        document_type: String! @rules(apply: ["required", "max:50"])
+        router_id: Int @rules(apply: ["exists:routers,id"])
+    ): Customer @create(model: "App\\Models\\Customers\\Customer")
+
+    updateCustomer(
+        id: ID! @rules(apply: ["required", "exists:customers,id"])
+        first_name: String
+        last_name: String
+        email_address: String @rules(apply: ["email"])
+        phone_number: String
+        document_type: String
+        router_id: Int @rules(apply: ["exists:routers,id"])
+    ): Customer @update(model: "App\\Models\\Customers\\Customer")
+
+    deleteCustomer(
+        id: ID! @rules(apply: ["required", "exists:customers,id"])
+    ): Customer @delete(model: "App\\Models\\Customers\\Customer")
+
+    createAddress(
+        customer_id: Int! @rules(apply: ["required", "exists:customers,id"])
+        address: String! @rules(apply: ["required", "max:255"])
+        city: String
+        state_province: String
+        postal_code: String
+        country: String
+        address_type: String
+    ): Address @create(model: "App\\Models\\Customers\\Address")
+
+    updateAddress(
+        id: ID! @rules(apply: ["required", "exists:addresses,id"])
+        address: String
+        city: String
+        state_province: String
+        postal_code: String
+        country: String
+        address_type: String
+    ): Address @update(model: "App\\Models\\Customers\\Address")
+
+    deleteAddress(
+        id: ID! @rules(apply: ["required", "exists:addresses,id"])
+    ): Address @delete(model: "App\\Models\\Customers\\Address")
+
+    # Upsert configuration values by scope
+    upsertConfigValues(
+        scope_id: Int = 0,
+        items: [ConfigItemInput!]! @rulesForArray(apply: ["required"])
+    ): [ConfigItem!]! @field(resolver: "App\\GraphQL\\Mutations\\ConfigMutation@upsert")
+
+    createService(
+        customer_id: Int! @rules(apply: ["required", "exists:customers,id"])
+        plan_id: Int! @rules(apply: ["required", "exists:plans,id"])
+        router_id: Int! @rules(apply: ["required", "exists:routers,id"])
+        service_ip: String! @rules(apply: ["required", "ip"])
+        service_location: Int! @rules(apply: ["required", "exists:addresses,id"])
+        service_status: String @rules(apply: ["in:active,inactive,suspended,pending,free"])
+        username_router: String
+        password_router: String
+        activation_date: DateTime
+        deactivation_date: DateTime
+        bandwidth: Int
+        mac_address: String
+        installation_date: DateTime
+        service_notes: String
+        support_contact: String
+        service_type: String @rules(apply: ["in:ftth,adsl,satellite"])
+        static_ip: Boolean
+        data_limit: Int
+        last_maintenance: Date
+        billing_cycle: String
+        service_priority: String @rules(apply: ["in:normal,high,critical"])
+        sn: String
+        unu_longitude: String
+        unu_latitude: String
+        assigned_technician: Int
+        service_contract: String
+    ): Service @create(model: "App\\Models\\Services\\Service")
+
+    updateService(
+        id: ID! @rules(apply: ["required", "exists:services,id"])
+        service_ip: String @rules(apply: ["ip"])
+        service_location: Int @rules(apply: ["exists:addresses,id"])
+        service_status: String @rules(apply: ["in:active,inactive,suspended,pending,free"])
+        plan_id: Int @rules(apply: ["exists:plans,id"])
+        router_id: Int @rules(apply: ["exists:routers,id"])
+        username_router: String
+        password_router: String
+        activation_date: DateTime
+        deactivation_date: DateTime
+        bandwidth: Int
+        mac_address: String
+        installation_date: DateTime
+        service_notes: String
+        support_contact: String
+        service_type: String @rules(apply: ["in:ftth,adsl,satellite"])
+        static_ip: Boolean
+        data_limit: Int
+        last_maintenance: Date
+        billing_cycle: String
+        service_priority: String @rules(apply: ["in:normal,high,critical"])
+        sn: String
+        unu_longitude: String
+        unu_latitude: String
+        assigned_technician: Int
+        service_contract: String
+    ): Service @update(model: "App\\Models\\Services\\Service")
+
+    createRouter(
+        name: String! @rules(apply: ["required", "max:255"])
+        ip_address: String! @rules(apply: ["required", "ip"])
+        description: String
+    ): Router @create(model: "App\\Models\\Router")
+
+    updateRouter(
+        id: ID! @rules(apply: ["required", "exists:routers,id"])
+        name: String
+        ip_address: String @rules(apply: ["ip"])
+        description: String
+    ): Router @update(model: "App\\Models\\Router")
+
+    createPlan(
+        name: String! @rules(apply: ["required", "max:255"])
+        monthly_price: Float! @rules(apply: ["required", "numeric", "min:0"])
+        status: String! @rules(apply: ["required", "in:active,inactive"])
+        download_speed: Int! @rules(apply: ["required", "integer", "min:0"])
+        upload_speed: Int! @rules(apply: ["required", "integer", "min:0"])
+        description: String
+        overage_fee: Float
+        data_limit: Int
+        unlimited_data: Boolean
+        contract_period: String
+        promotions: String
+        extras_included: String
+        geographic_availability: String
+        promotion_start_date: DateTime
+        promotion_end_date: DateTime
+        plan_image: String
+        customer_rating: Float
+        customer_reviews: String
+        service_compatibility: String
+        network_priority: String
+        profile_smart_olt: String
+        technical_support: String
+        additional_benefits: String
+        connection_type: String
+        plan_type: String @rules(apply: ["in:internet,television,telephonic"])
+        modality_type: String @rules(apply: ["in:prepaid,postpaid"])
+    ): Plan @create(model: "App\\Models\\Services\\Plan")
+
+    updatePlan(
+        id: ID! @rules(apply: ["required", "exists:plans,id"])
+        name: String
+        monthly_price: Float @rules(apply: ["numeric", "min:0"])
+        status: String @rules(apply: ["in:active,inactive"])
+        description: String
+        download_speed: Int
+        upload_speed: Int
+        overage_fee: Float
+        data_limit: Int
+        unlimited_data: Boolean
+        contract_period: String
+        promotions: String
+        extras_included: String
+        geographic_availability: String
+        promotion_start_date: DateTime
+        promotion_end_date: DateTime
+        plan_image: String
+        customer_rating: Float
+        customer_reviews: String
+        service_compatibility: String
+        network_priority: String
+        profile_smart_olt: String
+        technical_support: String
+        additional_benefits: String
+        connection_type: String
+        plan_type: String @rules(apply: ["in:internet,television,telephonic"])
+        modality_type: String @rules(apply: ["in:prepaid,postpaid"])
+    ): Plan @update(model: "App\\Models\\Services\\Plan")
+
+    deletePlan(
+        id: ID! @rules(apply: ["required", "exists:plans,id"])
+    ): Plan @delete(model: "App\\Models\\Services\\Plan")
+
+    generateInvoice(
+        customer_id: ID! @rules(apply: ["required", "exists:customers,id"])
+        service_id: ID @rules(apply: ["exists:services,id"])
+    ): GenerateInvoiceResult @field(resolver: "App\\GraphQL\\Mutations\\GenerateInvoiceMutation@resolve")
+
+    updateCustomerStatus(
+        customer_id: ID! @rules(apply: ["required", "exists:customers,id"])
+        status: String! @rules(apply: ["required", "in:active,inactive,suspended"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\UpdateCustomerStatusMutation@resolve")
+
+    activateService(
+        service_id: ID! @rules(apply: ["required", "exists:services,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ActivateServiceMutation@resolve")
+
+    suspendService(
+        service_id: ID! @rules(apply: ["required", "exists:services,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SuspendServiceMutation@resolve")
+
+    registerPayment(
+        invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
+        payment_method: String! @rules(apply: ["required", "in:cash,transfer,card,online"])
+        notes: String
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentMutation@resolve")
+
+    applyDiscount(
+        invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
+        discount: Float! @rules(apply: ["required", "numeric", "min:0"])
+        is_percentage: Boolean! @rules(apply: ["required"])
+        include_tax: Boolean! @rules(apply: ["required"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ApplyDiscountMutation@resolve")
+
+    registerPaymentPromise(
+        invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
+        promise_date: Date! @rules(apply: ["required"])
+        notes: String
+    ): PaymentPromiseResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentPromiseMutation@resolve")
+
+    # Ticket Mutations
+    createTicket(
+        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
+        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
+        issue_type: String! @rules(apply: ["required", "max:255"])
+        priority: String! @rules(apply: ["required", "in:low,medium,high,urgent"])
+        status: String @rules(apply: ["in:open,in_progress,resolved,closed"])
+        title: String! @rules(apply: ["required", "max:255"])
+        description: String! @rules(apply: ["required"])
+        contact_method: String
+        user_ids: [ID!]
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@create")
+
+    updateTicket(
+        id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
+        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
+        issue_type: String
+        priority: String @rules(apply: ["in:low,medium,high,urgent"])
+        status: String @rules(apply: ["in:open,in_progress,resolved,closed"])
+        title: String
+        description: String
+        contact_method: String
+        resolution_notes: String
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@update")
+
+    deleteTicket(
+        id: ID! @rules(apply: ["required", "exists:tickets,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@delete")
+
+    assignUsersToTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        user_ids: [ID!]! @rules(apply: ["required"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignUsers")
+
+    removeUserFromTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@removeUser")
+
+    assignCustomerToTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignCustomer")
+
+    assignServiceToTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignService")
+
+    # Ticket Comments
+    addTicketComment(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        comment: String! @rules(apply: ["required"])
+        is_internal: Boolean
+    ): TicketComment @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@add")
+
+    updateTicketComment(
+        id: ID! @rules(apply: ["required", "exists:ticket_comments,id"])
+        comment: String! @rules(apply: ["required"])
+    ): TicketComment @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@update")
+
+    deleteTicketComment(
+        id: ID! @rules(apply: ["required", "exists:ticket_comments,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@delete")
+
+    # Ticket Attachments
+    addTicketAttachment(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        file_name: String! @rules(apply: ["required", "max:255"])
+        file_path: String! @rules(apply: ["required", "max:500"])
+        file_type: String
+        file_size: Int
+    ): TicketAttachment @field(resolver: "App\\GraphQL\\Mutations\\TicketAttachmentMutation@add")
+
+    deleteTicketAttachment(
+        id: ID! @rules(apply: ["required", "exists:ticket_attachments,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketAttachmentMutation@delete")
+
+    # Ticket Labels
+    addTicketLabel(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        name: String! @rules(apply: ["required", "max:50"])
+        color: String @rules(apply: ["max:7"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketLabelMutation@add")
+
+    removeTicketLabel(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        name: String! @rules(apply: ["required"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketLabelMutation@remove")
+
+    # User Mutations
+    createUser(
+        name: String! @rules(apply: ["required", "max:255"])
+        email: String! @rules(apply: ["required", "email", "unique:users,email"])
+        password: String! @rules(apply: ["required", "min:8"])
+        telephone: String
+        router_id: ID @rules(apply: ["nullable", "exists:routers,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@create")
+
+    updateUser(
+        id: ID! @rules(apply: ["required", "exists:users,id"])
+        name: String
+        email: String @rules(apply: ["email"])
+        password: String @rules(apply: ["min:8"])
+        telephone: String
+        router_id: ID @rules(apply: ["nullable", "exists:routers,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@update")
+
+    deleteUser(
+        id: ID! @rules(apply: ["required", "exists:users,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@delete")
+
+    # Role Mutations
+    createRole(
+        name: String! @rules(apply: ["required", "unique:roles,name"])
+        guard_name: String @rules(apply: ["required"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\RoleMutation@create")
+
+    updateRole(
+        id: ID! @rules(apply: ["required", "exists:roles,id"])
+        name: String @rules(apply: ["unique:roles,name"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\RoleMutation@update")
+
+    deleteRole(
+        id: ID! @rules(apply: ["required", "exists:roles,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\RoleMutation@delete")
+
+    # Permission Mutations
+    createPermission(
+        name: String! @rules(apply: ["required", "unique:permissions,name"])
+        guard_name: String @rules(apply: ["required"])
+    ): Permission @field(resolver: "App\\GraphQL\\Mutations\\PermissionMutation@create")
+
+    updatePermission(
+        id: ID! @rules(apply: ["required", "exists:permissions,id"])
+        name: String @rules(apply: ["unique:permissions,name"])
+    ): Permission @field(resolver: "App\\GraphQL\\Mutations\\PermissionMutation@update")
+
+    deletePermission(
+        id: ID! @rules(apply: ["required", "exists:permissions,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\PermissionMutation@delete")
+
+    # Assign Role to User
+    assignRoleToUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserRoleMutation@assignRole")
+
+    removeRoleFromUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserRoleMutation@removeRole")
+
+    syncRolesToUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        role_ids: [ID!]! @rules(apply: ["required"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserRoleMutation@syncRoles")
+
+    # Assign Permission to Role
+    assignPermissionToRole(
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+        permission_id: ID! @rules(apply: ["required", "exists:permissions,id"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\RolePermissionMutation@assignPermission")
+
+    removePermissionFromRole(
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+        permission_id: ID! @rules(apply: ["required", "exists:permissions,id"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\RolePermissionMutation@removePermission")
+
+    syncPermissionsToRole(
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+        permission_ids: [ID!]! @rules(apply: ["required"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\RolePermissionMutation@syncPermissions")
+
+    # Assign Permission directly to User
+    assignPermissionToUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        permission_id: ID! @rules(apply: ["required", "exists:permissions,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserPermissionMutation@assignPermission")
+
+    removePermissionFromUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        permission_id: ID! @rules(apply: ["required", "exists:permissions,id"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserPermissionMutation@removePermission")
+
+    syncPermissionsToUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        permission_ids: [ID!]! @rules(apply: ["required"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\UserPermissionMutation@syncPermissions")
+}
+
+# --------------- Config types ---------------
+
+type ConfigSection {
+    key: String!
+    label: String
+    path: String
+    groups: [ConfigGroup!]!
+}
+
+type ConfigGroup {
+    key: String!
+    label: String
+    path: String
+    fields: [ConfigField!]!
+}
+
+type ConfigOption {
+    label: String!
+    value: String!
+}
+
+type ConfigField {
+    section: String!
+    group: String!
+    key: String!
+    label: String
+    description: String
+    path: String!
+    type: String!
+    required: Boolean
+    default: String
+    options: [ConfigOption!]
+    value: String
+}
+
+input ConfigItemInput {
+    path: String!
+    value: String
+}
+
+type ConfigItem {
+    path: String!
+    value: String
+    type: String
+    label: String
+}
+
+type Customer {
+    id: ID!
+    first_name: String!
+    last_name: String!
+    email_address: String
+    phone_number: String
+    identity_document: String
+    document_type: String!
+    customer_status: String
+    router_id: Int
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    addresses: [Address!]! @hasMany
+    services: [Service!]! @hasMany
+    invoices: [Invoice!]! @hasMany
+    router: Router @belongsTo
+}
+
+type Address {
+    id: ID!
+    address: String!
+    city: String
+    state_province: String
+    postal_code: String
+    country: String
+    address_type: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    customer: Customer! @belongsTo
+}
+
+type Service {
+    id: ID!
+    router_id: Int!
+    customer_id: Int!
+    plan_id: Int!
+    service_ip: String!
+    username_router: String
+    password_router: String
+    service_status: String
+    activation_date: DateTime
+    deactivation_date: DateTime
+    bandwidth: Int
+    mac_address: String
+    installation_date: DateTime
+    service_notes: String
+    contract_id: Int
+    support_contact: String
+    service_location: Int!
+    service_type: String
+    static_ip: Boolean
+    data_limit: Int
+    last_maintenance: Date
+    billing_cycle: String
+    service_priority: String
+    sn: String
+    unu_longitude: String
+    unu_latitude: String
+    assigned_technician: Int
+    service_contract: String
+    created_by: Int
+    updated_by: Int
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    customer: Customer! @belongsTo
+    invoices: [Invoice!]! @hasMany
+    plan: Plan! @belongsTo
+    router: Router! @belongsTo
+    address: Address @belongsTo(relation: "address")
+}
+
+type Invoice {
+    id: ID!
+    increment_id: String
+    total: Float!
+    status: String!
+    issue_date: Date
+    due_date: Date
+    router_id: Int
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    customer: Customer! @belongsTo
+    service: Service @belongsTo
+    items: [InvoiceItem!]! @hasMany
+    adjustments: [InvoiceAdjustment!]! @hasMany
+    creditNotes: [CreditNote!]! @hasMany
+    paymentPromises: [PaymentPromise!]! @hasMany
+    router: Router @belongsTo
+}
+
+type Plan {
+    id: ID!
+    name: String!
+    description: String
+    is_synchronized: Boolean
+    download_speed: Int!
+    upload_speed: Int!
+    monthly_price: Float!
+    overage_fee: Float
+    data_limit: Int
+    unlimited_data: Boolean
+    contract_period: String
+    promotions: String
+    extras_included: String
+    geographic_availability: String
+    promotion_start_date: DateTime
+    promotion_end_date: DateTime
+    plan_image: String
+    customer_rating: Float
+    customer_reviews: String
+    service_compatibility: String
+    network_priority: String
+    profile_smart_olt: String
+    technical_support: String
+    additional_benefits: String
+    connection_type: String
+    status: String!
+    plan_type: String
+    modality_type: String
+    created_by: Int
+    updated_by: Int
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    services: [Service!]! @hasMany
+}
+
+type InvoiceItem {
+    id: ID!
+    description: String
+    quantity: Int
+    unit_price: Float
+    subtotal: Float
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    invoice: Invoice! @belongsTo
+    service: Service @belongsTo
+}
+
+type BillingNovedad {
+    id: ID!
+    type: String!
+    amount: Float!
+    description: String
+    applied: Boolean!
+    effective_period: Date
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    service: Service @belongsTo
+    customer: Customer @belongsTo
+    invoice: Invoice @belongsTo
+}
+
+type InvoiceAdjustment {
+    id: ID!
+    kind: String!
+    amount: Float!
+    label: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    invoice: Invoice! @belongsTo
+}
+
+type CreditNote {
+    id: ID!
+    amount: Float!
+    issue_date: Date
+    reason: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    invoice: Invoice! @belongsTo
+}
+
+type PaymentPromise {
+    id: ID!
+    amount: Float!
+    promise_date: Date
+    notes: String
+    status: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    invoice: Invoice! @belongsTo
+    customer: Customer! @belongsTo
+}
+
+type Router {
+    id: ID!
+    name: String!
+    ip_address: String!
+    description: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    customers: [Customer!]! @hasMany
+    services: [Service!]! @hasMany
+    invoices: [Invoice!]! @hasMany
+}
+
+type GenerateInvoiceResult {
+    success: Boolean!
+    message: String
+    invoice: Invoice
+}
+
+type ActionResult {
+    success: Boolean!
+    message: String
+}
+
+type PaymentPromiseResult {
+    success: Boolean!
+    message: String
+    payment_promise: PaymentPromise
+}
+
+# --------------- Ticket types ---------------
+
+type Ticket {
+    id: ID!
+    customer_id: ID
+    service_id: ID
+    issue_type: String!
+    priority: String!
+    status: String!
+    title: String!
+    description: String!
+    resolution_notes: String
+    contact_method: String
+    closed_at: DateTime
+    labels: [TicketLabel!]
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    customer: Customer @belongsTo
+    service: Service @belongsTo
+    users: [User!]! @belongsToMany
+    comments: [TicketComment!]! @hasMany
+    attachments: [TicketAttachment!]! @hasMany
+}
+
+type TicketLabel {
+    name: String!
+    color: String!
+}
+
+type TicketComment {
+    id: ID!
+    ticket_id: ID!
+    user_id: ID!
+    comment: String!
+    is_internal: Boolean!
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    ticket: Ticket! @belongsTo
+    user: User! @belongsTo
+}
+
+type TicketAttachment {
+    id: ID!
+    ticket_id: ID!
+    user_id: ID!
+    file_name: String!
+    file_path: String!
+    file_type: String
+    file_size: Int
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    ticket: Ticket! @belongsTo
+    user: User! @belongsTo
+}
+
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    telephone: String
+    router_id: ID
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    router: Router @belongsTo
+    tickets: [Ticket!]! @belongsToMany
+    roles: [Role!]! @belongsToMany(relation: "roles")
+    permissions: [Permission!]! @belongsToMany(relation: "permissions")
+    allPermissions: [Permission!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@allPermissions")
+}
+
+type Role {
+    id: ID!
+    name: String!
+    guard_name: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    permissions: [Permission!]! @belongsToMany(relation: "permissions")
+    users: [User!]! @belongsToMany(relation: "users")
+}
+
+# Import extended schemas
+# Ensure external modules are included in the executable schema
+# (SmartOLT already imported; add NAP schema too)
+#import smartolt.graphql
+#import nap.graphql
+
+type Permission {
+    id: ID!
+    name: String!
+    guard_name: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    roles: [Role!]! @belongsToMany(relation: "roles")
+    users: [User!]! @belongsToMany(relation: "users")
+}
+
+#import smartolt.graphql

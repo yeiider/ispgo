@@ -57,4 +57,24 @@ class InvoiceProviderConfig
     {
         return ConfigHelper::getConfigValue(self::PATH_INVOICE . 'attach_invoice');
     }
+
+    public static function skipInvoiceIfSuspendedAndUnpaid()
+    {
+        return ConfigHelper::getConfigValue(self::PATH_INVOICE . 'skip_invoice_if_suspended_and_unpaid');
+    }
+
+    public static function enableRouterRental()
+    {
+        return ConfigHelper::getConfigValue(self::PATH_INVOICE . 'enable_router_rental');
+    }
+
+    public static function routerRentalAmount()
+    {
+        return ConfigHelper::getConfigValue(self::PATH_INVOICE . 'router_rental_amount');
+    }
+
+    public static function routerRentalName()
+    {
+        return ConfigHelper::getConfigValue(self::PATH_INVOICE . 'router_rental_name');
+    }
 }

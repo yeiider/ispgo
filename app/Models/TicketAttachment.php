@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\HasSignedUrls;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TicketAttachment extends Model
 {
-    use HasFactory;
+    use HasFactory, HasSignedUrls;
 
     /**
      * The attributes that are mass assignable.
@@ -17,11 +19,19 @@ class TicketAttachment extends Model
      */
     protected $fillable = [
         'ticket_id',
-        'filename',
+        'file_name',
         'file_path',
-        'uploaded_by',
+        'file_type',
+        'file_size',
+        'user_id',
     ];
 
+    protected $appends = ['image_url'];
+
+    protected function imageUrl(): Attribute
+    {
+        return $this->signedUrlAttribute('file_path', 's3', 60);
+    }
     /**
      * Get the ticket that owns the attachment.
      */
@@ -30,13 +40,20 @@ class TicketAttachment extends Model
         return $this->belongsTo(Ticket::class);
     }
 
-
     /**
      * Get the user who uploaded the attachment.
      */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the user who uploaded the attachment (alias for backward compatibility).
+     */
     public function uploader(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'uploaded_by');
+        return $this->user();
     }
 
     /**

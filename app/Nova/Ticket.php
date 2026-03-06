@@ -156,7 +156,7 @@ class Ticket extends Resource
                     'technical' => __('attribute.technical'),
                     'installation' => __('attribute.installation'),
                     'other' => __('attribute.other'),
-                ]),
+                ])->required(),
 
 
             DateTime::make('Created At')->filterable()->onlyOnIndex(),

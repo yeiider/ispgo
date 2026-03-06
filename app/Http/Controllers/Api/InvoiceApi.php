@@ -19,7 +19,6 @@ class InvoiceApi extends Controller
         try {
             $query = $request->input('q');
             $invoices = Invoice::searchInvoice($query);
-
             if ($invoices->isNotEmpty()) {
                 $parsed = $invoices->map(fn (Invoice $invoice) => $this->parseData($invoice))->values();
                 return response()->json(['invoices' => $parsed]);

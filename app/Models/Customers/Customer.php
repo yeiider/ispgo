@@ -13,9 +13,11 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Validation\ValidationException;
 
 class Customer extends Authenticatable implements MustVerifyEmail
 {
@@ -41,7 +43,8 @@ class Customer extends Authenticatable implements MustVerifyEmail
         'created_by',
         'updated_by',
         'password',
-        'onepay_customer_id'
+        'onepay_customer_id',
+        'router_id',
     ];
 
     /**
@@ -77,6 +80,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
                 'state' => 'draft',
                 'subtotal' => 0,
                 'customer_id' => $this->id,
+                'router_id' => $this->router_id,
                 'tax' => 0,
                 'amount' => 0,
                 'outstanding_balance' => 0,
@@ -91,7 +95,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
     public function activeServices()
     {
-        return $this->services()->whereNotIn('service_status', ['free', 'inactive']);
+        return $this->services()->whereNotIn('service_status', ['free', 'inactive','pending']);
     }
 
     public function addresses()
@@ -134,16 +138,69 @@ class Customer extends Authenticatable implements MustVerifyEmail
         $this->attributes['last_name'] = strtolower($value);
     }
 
-    protected static function booted()
+    protected static function boot()
     {
+        parent::boot();
+
+        // Global Scope: Filter by user's router(s)
+        static::addGlobalScope('router_filter', function (Builder $builder) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+
+            // If not authenticated, no filtering
+            if (!$user) {
+                return;
+            }
+
+            // If user has no routers assigned, show all data
+            // Role permissions control what actions they can perform
+            $routerIds = $user->getRouterIds();
+
+            if (empty($routerIds)) {
+                return;
+            }
+
+            // Filter by user's assigned router(s)
+            $builder->whereIn('router_id', $routerIds);
+        });
+
+        static::creating(function ($customer) {
+            // Validar que el cliente sea mayor de edad si se proporciona fecha de nacimiento
+            if ($customer->date_of_birth) {
+                $birthDate = Carbon::parse($customer->date_of_birth);
+                $today = Carbon::now();
+                $age = $birthDate->diffInYears($today);
+
+                // Verificar que tenga al menos 18 años completos
+                if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
+                    $validator = \Illuminate\Support\Facades\Validator::make([], []);
+                    $validator->errors()->add('date_of_birth', 'El cliente debe ser mayor de edad (18 años o más).');
+                    throw new ValidationException($validator);
+                }
+            }
+        });
 
         static::created(function ($customer) {
-
             $customer->created_by = Auth::id();
             $customer->updated_by = Auth::id();
             event(new CustomerCreated($customer));
         });
+
         static::updating(function ($customer) {
+            // Validar que el cliente sea mayor de edad si se actualiza la fecha de nacimiento
+            if ($customer->isDirty('date_of_birth') && $customer->date_of_birth) {
+                $birthDate = Carbon::parse($customer->date_of_birth);
+                $today = Carbon::now();
+                $age = $birthDate->diffInYears($today);
+
+                // Verificar que tenga al menos 18 años completos
+                if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
+                    $validator = \Illuminate\Support\Facades\Validator::make([], []);
+                    $validator->errors()->add('date_of_birth', 'El cliente debe ser mayor de edad (18 años o más).');
+                    throw new ValidationException($validator);
+                }
+            }
+
             if ($customer->isDirty('customer_status')) {
                 $customer->updated_by = Auth::id();
                 event(new CustomerStatusUpdated($customer));
@@ -155,6 +212,20 @@ class Customer extends Authenticatable implements MustVerifyEmail
     {
         return $query->where('customer_status', 'active');
         //how use $activeCustomers = Customer::active()->get();
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        if (!$search) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($search) {
+            $q->where('first_name', 'LIKE', "%{$search}%")
+              ->orWhere('last_name', 'LIKE', "%{$search}%")
+              ->orWhere('identity_document', 'LIKE', "%{$search}%")
+              ->orWhere('email_address', 'LIKE', "%{$search}%");
+        });
     }
 
     public static function findByIdentityDocument($identityDocument)

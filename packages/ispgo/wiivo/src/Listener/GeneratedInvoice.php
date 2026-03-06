@@ -77,8 +77,7 @@ class GeneratedInvoice implements ShouldQueue
 
     private function notifyError(int $invoiceId, string $errorMessage): void
     {
-        $admin = \App\Models\User::where('role', 'super-admin')->first();
-
+        $admin = \App\Models\User::role('role', 'super-admin')->first();
         if ($admin) {
             $notification = NovaNotification::make()
                 ->message("Ocurrió un error al enviar la notificación de la factura ID: {$invoiceId}. Error: {$errorMessage}")

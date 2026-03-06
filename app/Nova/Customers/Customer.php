@@ -51,7 +51,24 @@ class Customer extends Resource
                     ID::make()->sortable(),
                     Text::make(__('customer.first_name'), 'first_name')->sortable()->rules('required', 'max:100'),
                     Text::make(__('customer.last_name'), 'last_name')->sortable()->rules('required', 'max:100'),
-                    Date::make(__('customer.date_of_birth'), 'date_of_birth')->nullable(),
+                    Date::make(__('customer.date_of_birth'), 'date_of_birth')
+                        ->nullable()
+                        ->rules([
+                            'nullable',
+                            'date',
+                            function ($attribute, $value, $fail) {
+                                if ($value) {
+                                    $birthDate = \Carbon\Carbon::parse($value);
+                                    $today = \Carbon\Carbon::now();
+                                    $age = $birthDate->diffInYears($today);
+                                    
+                                    // Verificar que tenga al menos 18 años completos
+                                    if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
+                                        $fail('El cliente debe ser mayor de edad (18 años o más).');
+                                    }
+                                }
+                            }
+                        ]),
                     Text::make(__('customer.phone_number'), 'phone_number')->rules('required', 'max:12'),
                     Text::make(__('customer.email_address'), 'email_address')->sortable()->rules('required', 'email', 'max:100'),
                     Select::make(__('customer.document_type'), 'document_type')

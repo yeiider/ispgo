@@ -35,6 +35,22 @@ class CustomerController extends Controller
                 'max:255',
                 Rule::unique('customers')->ignore($id),
             ],
+            'date_of_birth' => [
+                'nullable',
+                'date',
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $birthDate = \Carbon\Carbon::parse($value);
+                        $today = \Carbon\Carbon::now();
+                        $age = $birthDate->diffInYears($today);
+                        
+                        // Verificar que tenga al menos 18 años completos
+                        if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
+                            $fail('El cliente debe ser mayor de edad (18 años o más).');
+                        }
+                    }
+                }
+            ],
         ]);
 
         $customer = Customer::findOrFail($id);

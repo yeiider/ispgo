@@ -158,7 +158,7 @@ class OnePayHandler
             'allows' => [
                 'cards' => true,
                 'accounts' => true,
-                'card_extra' => true,
+                'card_extra' => false,
                 'realtime' => true,
                 'pse' => true,
                 'transfiya' => true

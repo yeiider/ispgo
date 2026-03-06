@@ -1,0 +1,271 @@
+version: '3.8'
+
+services:
+  # Servicio principal de la aplicación Laravel
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ispgo-app
+    restart: unless-stopped
+    environment:
+      # Configuración de Laravel
+      APP_NAME: ${APP_NAME:-Laravel}
+      APP_ENV: ${APP_ENV:-production}
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_TIMEZONE: ${APP_TIMEZONE:-UTC}
+      APP_URL: ${APP_URL}
+      APP_LOCALE: ${APP_LOCALE:-en}
+
+      # Base de datos
+      DB_CONNECTION: ${DB_CONNECTION:-mysql}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      # Redis
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_CLIENT: ${REDIS_CLIENT:-phpredis}
+
+      # Cache y Queue
+      CACHE_STORE: ${CACHE_STORE:-redis}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
+      SESSION_DRIVER: ${SESSION_DRIVER:-redis}
+
+      # Broadcast
+      BROADCAST_CONNECTION: ${BROADCAST_CONNECTION:-log}
+
+      # Sistema de archivos
+      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-local}
+
+      # Mail
+      MAIL_MAILER: ${MAIL_MAILER:-smtp}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-tls}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+
+      # AWS (si se usa S3)
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_USE_PATH_STYLE_ENDPOINT: ${AWS_USE_PATH_STYLE_ENDPOINT:-false}
+
+      # Laravel Nova
+      NOVA_LICENSE_KEY: ${NOVA_LICENSE_KEY}
+
+      # Google Maps (para NAP Manager)
+      MIX_GOOGLE_MAPS_API_KEY: ${MIX_GOOGLE_MAPS_API_KEY}
+
+      # Vite
+      VITE_APP_NAME: ${VITE_APP_NAME}
+
+      # Log
+      LOG_CHANNEL: ${LOG_CHANNEL:-stack}
+      LOG_LEVEL: ${LOG_LEVEL:-error}
+
+    ports:
+      - "${APP_PORT:-80}:80"
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    networks:
+      - ispgo-network
+    depends_on:
+      - redis
+    command: >
+      bash -c "
+      service nginx start &&
+      php-fpm -D &&
+      /usr/local/bin/run-start.sh &&
+      tail -f /var/log/nginx/access.log
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Servicio Worker para colas
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ispgo-worker
+    restart: unless-stopped
+    environment:
+      # Mismas variables de entorno que el servicio app
+      APP_NAME: ${APP_NAME:-Laravel}
+      APP_ENV: ${APP_ENV:-production}
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_TIMEZONE: ${APP_TIMEZONE:-UTC}
+      APP_URL: ${APP_URL}
+      APP_LOCALE: ${APP_LOCALE:-en}
+
+      DB_CONNECTION: ${DB_CONNECTION:-mysql}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_CLIENT: ${REDIS_CLIENT:-phpredis}
+
+      CACHE_STORE: ${CACHE_STORE:-redis}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
+      SESSION_DRIVER: ${SESSION_DRIVER:-redis}
+
+      BROADCAST_CONNECTION: ${BROADCAST_CONNECTION:-log}
+      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-local}
+
+      MAIL_MAILER: ${MAIL_MAILER:-smtp}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-tls}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_USE_PATH_STYLE_ENDPOINT: ${AWS_USE_PATH_STYLE_ENDPOINT:-false}
+
+      NOVA_LICENSE_KEY: ${NOVA_LICENSE_KEY}
+      MIX_GOOGLE_MAPS_API_KEY: ${MIX_GOOGLE_MAPS_API_KEY}
+      VITE_APP_NAME: ${VITE_APP_NAME}
+
+      LOG_CHANNEL: ${LOG_CHANNEL:-stack}
+      LOG_LEVEL: ${LOG_LEVEL:-error}
+
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    networks:
+      - ispgo-network
+    depends_on:
+      - redis
+      - app
+    command: ["/usr/local/bin/run-worker.sh"]
+    healthcheck:
+      test: ["CMD", "php", "artisan", "queue:work", "--once"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
+
+  # Servicio Cron para tareas programadas
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ispgo-cron
+    restart: unless-stopped
+    environment:
+      # Mismas variables de entorno que el servicio app
+      APP_NAME: ${APP_NAME:-Laravel}
+      APP_ENV: ${APP_ENV:-production}
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_TIMEZONE: ${APP_TIMEZONE:-UTC}
+      APP_URL: ${APP_URL}
+      APP_LOCALE: ${APP_LOCALE:-en}
+
+      DB_CONNECTION: ${DB_CONNECTION:-mysql}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_CLIENT: ${REDIS_CLIENT:-phpredis}
+
+      CACHE_STORE: ${CACHE_STORE:-redis}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
+      SESSION_DRIVER: ${SESSION_DRIVER:-redis}
+
+      BROADCAST_CONNECTION: ${BROADCAST_CONNECTION:-log}
+      FILESYSTEM_DISK: ${FILESYSTEM_DISK:-local}
+
+      MAIL_MAILER: ${MAIL_MAILER:-smtp}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-tls}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      AWS_BUCKET: ${AWS_BUCKET}
+      AWS_USE_PATH_STYLE_ENDPOINT: ${AWS_USE_PATH_STYLE_ENDPOINT:-false}
+
+      NOVA_LICENSE_KEY: ${NOVA_LICENSE_KEY}
+      MIX_GOOGLE_MAPS_API_KEY: ${MIX_GOOGLE_MAPS_API_KEY}
+      VITE_APP_NAME: ${VITE_APP_NAME}
+
+      LOG_CHANNEL: ${LOG_CHANNEL:-stack}
+      LOG_LEVEL: ${LOG_LEVEL:-error}
+
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    networks:
+      - ispgo-network
+    depends_on:
+      - redis
+      - app
+    command: ["/usr/local/bin/run-cron.sh"]
+    healthcheck:
+      test: ["CMD", "php", "artisan", "schedule:list"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Servicio Redis
+  redis:
+    image: redis:7-alpine
+    container_name: ispgo-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ispgo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    command: redis-server --appendonly yes
+
+networks:
+  ispgo-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

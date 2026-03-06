@@ -16,6 +16,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Ispgo\NapManager\Models\NapPort;
+use Ispgo\NapManager\Models\NapBox;
 
 /**
  * Service is an Eloquent model that represents a service entity in the application.
@@ -36,8 +38,8 @@ class Service extends Model
     ];
 
     protected $casts = [
-        'deactivation_date' => 'date',
-        'activation_date' => 'date',
+        'deactivation_date' => 'datetime',
+        'activation_date' => 'datetime',
         'installation_date' => 'date',
         'last_maintenance' => 'date',
     ];
@@ -47,12 +49,21 @@ class Service extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function getFullNameAttribute()
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
     public function router()
     {
         return $this->belongsTo(Router::class);
     }
     public function rules() { return $this->hasMany(ServiceRule::class); }
 
+    public function billingNovedades()
+    {
+        return $this->hasMany(\App\Models\BillingNovedad::class);
+    }
 
     public function address()
     {
@@ -61,7 +72,8 @@ class Service extends Model
 
     public function getFullServiceNameAttribute()
     {
-        return "{$this->service_ip} - {$this->customer->full_name}";
+        $full_name = $this->customer->full_name ? $this->customer->full_name : $this->getFullNameAttribute();
+        return "{$this->service_ip} - {$full_name}";
     }
 
     public function getServiceNameAttribute()
@@ -81,9 +93,52 @@ class Service extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    public function napPort()
+    {
+        return $this->hasOne(NapPort::class, 'service_id');
+    }
+
+    public function napBox()
+    {
+        return $this->hasOneThrough(
+            NapBox::class,
+            NapPort::class,
+            'service_id',   // Foreign key on NapPort table...
+            'id',           // Foreign key on NapBox table (NapBox primary key referenced by NapPort.nap_box_id)
+            'id',           // Local key on Service table
+            'nap_box_id'    // Local key on NapPort table pointing to NapBox
+        );
+    }
+
     protected static function boot()
     {
         parent::boot();
+
+        // Global Scope: Filter by user's router(s) through customer
+        static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
+            /** @var \App\Models\User|null $user */
+            $user = \Illuminate\Support\Facades\Auth::user();
+
+            // If not authenticated, no filtering
+            if (!$user) {
+                return;
+            }
+
+            // If user has no routers assigned, show all data
+            // Role permissions control what actions they can perform
+            $routerIds = $user->getRouterIds();
+
+            if (empty($routerIds)) {
+                return;
+            }
+
+            // Filter by user's assigned router(s) (through customer or direct)
+            $builder->where(function ($query) use ($routerIds) {
+                $query->whereHas('customer', function ($q) use ($routerIds) {
+                    $q->whereIn('router_id', $routerIds);
+                })->orWhereIn('router_id', $routerIds);
+            });
+        });
 
         static::creating(function ($model) {
             $model->created_by = Auth::id();
@@ -95,11 +150,10 @@ class Service extends Model
 
         });
         static::updating(function ($service) {
+            $service->updated_by = Auth::id();
             if ($service->isDirty('service_status')) {
-                $service->updated_by = Auth::id();
                 event(new ServiceUpdateStatus($service));
             }
-            event(new ServiceUpdateStatus($service));
         });
     }
 
@@ -185,7 +239,7 @@ class Service extends Model
     {
         $this->service_status = 'suspended';
         $this->save();
-        event(new ServiceSuspend($this));
+        //event(new ServiceSuspend($this));
     }
 
     public function activate()

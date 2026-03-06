@@ -3,17 +3,25 @@
 namespace App\Listeners;
 
 use App\Events\InvoiceItemsCreated;
+use App\Events\InvoicePaid;
 use App\Models\BillingNovedad;
 use App\Models\Inventory\Product;
 use App\Models\Services\Service;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ApplyBillingNovedades
 {
     public function handle(InvoiceItemsCreated $event): void
     {
         $invoice = $event->invoice;
+
+        // No aplicar novedades a facturas manuales
+        if ($invoice->invoice_type === 'manual' || $invoice->invoice_type === 'adjustment') {
+            return;
+        }
+
         $period  = $invoice->billing_period_start;
 
         // 1) Encontrar los servicios vinculados mediante charge-adjustments
@@ -32,8 +40,7 @@ class ApplyBillingNovedades
 
             foreach ($services as $service) {
 
-                // 2) Novedades pendientes para este servicio
-                $novedades = BillingNovedad::query()
+                $novedades = BillingNovedad::withoutGlobalScope('router_filter')
                     ->pending()
                     ->forService($service->id)
                     ->forPeriod($period)
@@ -96,6 +103,21 @@ class ApplyBillingNovedades
 
             // 4) Recalcular totales
             $invoice->recalcTotals();
+
+            // 5) Si el saldo pendiente quedó en 0 (ej: cubierto por saldo a favor),
+            //    marcar la factura como pagada automáticamente.
+            $invoice->refresh();
+
+            if ($invoice->status !== 'paid' && $invoice->outstanding_balance <= 0) {
+                $invoice->status         = 'paid';
+                $invoice->payment_method = 'credit';   // saldo a favor / novedad
+                $invoice->outstanding_balance = 0;
+                $invoice->save();
+
+                Log::info("Factura #{$invoice->increment_id} marcada como pagada automáticamente por saldo a favor.");
+
+                event(new InvoicePaid($invoice));
+            }
         });
     }
 

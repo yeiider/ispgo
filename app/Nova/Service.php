@@ -10,13 +10,12 @@ use App\Nova\Actions\Service\CreateActionsServiceUninstall;
 use App\Nova\Actions\Service\GenerateInvoice;
 use App\Nova\Actions\Service\SuspendService;
 use App\Nova\Customers\Address;
+use App\Nova\Filters\RouterFilter;
 use App\Nova\Filters\ServiceStatus;
 use App\Nova\Filters\ServiceType;
 use App\Nova\Lenses\TelephonicServiceLens;
 use App\Nova\Lenses\TelevisionServiceLens;
 use Illuminate\Http\Request;
-use Ispgo\Mikrotik\Nova\Actions\MikrotikAction;
-use Ispgo\Mikrotik\Settings\MikrotikConfigProvider;
 use Ispgo\Smartolt\Nova\Actions\LoadPlanSmartOlt;
 use Ispgo\Smartolt\Nova\OnuManager;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
@@ -164,13 +163,12 @@ class Service extends Resource
     public function actions(NovaRequest $request): array
     {
         return [
+            new GenerateInvoice(),
             new ActivateService(),
             new SuspendService(),
             new CreateActionsServiceInstall(),
             new CreateActionsServiceUninstall(),
-            (new MikrotikAction())->canSee(function () {
-                return MikrotikConfigProvider::getEnabled();
-            }),
+
             (new LoadPlanSmartOlt())->canSee(function () {
                 return ProviderSmartOlt::getEnabled();
             }),
@@ -204,7 +202,8 @@ class Service extends Resource
     {
         return [
             new ServiceStatus(),
-            new ServiceType()
+            new ServiceType(),
+            new RouterFilter()
         ];
     }
 

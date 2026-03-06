@@ -110,6 +110,8 @@
           @reset="resetOnu"
           @enable="enableOnu"
           @disable="disableOnu"
+          @enable-catv="enableCatv"
+          @disable-catv="disableCatv"
         />
       </div>
     </Card>
@@ -147,6 +149,7 @@ export default {
       onuStatus: null,
       onuConfig: null,
       onuFullStatus: null,
+      catvStatus: null,
       activeTab: 'signal',
       loadingSignal: false,
       loadingTraffic: false,
@@ -231,6 +234,9 @@ export default {
         this.onuFullStatus = response.data
 
         // Extract details from the full status
+        const catvInfo = this.onuFullStatus.catv || {}
+        this.catvStatus = catvInfo.value || catvInfo.message || 'N/A'
+
         if (this.onuFullStatus.details) {
           this.onuDetails = {
             sn: this.onuFullStatus.details['Serial number'] || '',
@@ -240,6 +246,21 @@ export default {
             port: '', // This might be available in a different format
             onu: '' // This might be available in a different format
           }
+        } else {
+          this.onuDetails = this.onuDetails || {
+            sn: '',
+            status: 'offline',
+            type: '',
+            board: '',
+            port: '',
+            onu: ''
+          }
+        }
+
+        if (this.onuDetails) {
+          this.onuDetails.catv = this.catvStatus
+          this.onuDetails.catvStatus = catvInfo.status ?? null
+          this.onuDetails.catvError = catvInfo.error ?? null
         }
 
         // Extract status information
@@ -321,8 +342,8 @@ export default {
       this.actionInProgress = true
 
       try {
-        await Nova.request().post(`/nova-vendor/smartolt/onu/${this.resourceId}/enable`)
-        this.$toasted.show('ONU enabled successfully', {type: 'success'})
+        const { data } = await Nova.request().post(`/nova-vendor/smartolt/onu/${this.resourceId}/enable`)
+        this.handleCatvToast(data, 'ONU enabled successfully')
 
         // Refresh data after action
         setTimeout(() => {
@@ -345,8 +366,8 @@ export default {
       this.actionInProgress = true
 
       try {
-        await Nova.request().post(`/nova-vendor/smartolt/onu/${this.resourceId}/disable`)
-        this.$toasted.show('ONU disabled successfully', {type: 'success'})
+        const { data } = await Nova.request().post(`/nova-vendor/smartolt/onu/${this.resourceId}/disable`)
+        this.handleCatvToast(data, 'ONU disabled successfully')
 
         // Refresh data after action
         setTimeout(() => {
@@ -357,6 +378,70 @@ export default {
       } finally {
         this.actionInProgress = false
       }
+    },
+
+    async enableCatv() {
+      if (this.actionInProgress) return
+
+      this.actionInProgress = true
+
+      try {
+        const { data } = await Nova.request().post(`/nova-vendor/smartolt/onu/${this.resourceId}/enable-catv`)
+        this.handleCatvToast(data, 'CATV enabled successfully')
+
+        // Refresh data after action
+        setTimeout(() => {
+          this.fetchOnuDetails()
+        }, 3000)
+      } catch (error) {
+        this.$toasted.show(error.response?.data?.message || 'Failed to enable CATV', {type: 'error'})
+      } finally {
+        this.actionInProgress = false
+      }
+    },
+
+    async disableCatv() {
+      if (this.actionInProgress) return
+
+      if (!confirm('Are you sure you want to disable CATV?')) {
+        return
+      }
+
+      this.actionInProgress = true
+
+      try {
+        const { data } = await Nova.request().post(`/nova-vendor/smartolt/onu/${this.resourceId}/disable-catv`)
+        this.handleCatvToast(data, 'CATV disabled successfully')
+
+        // Refresh data after action
+        setTimeout(() => {
+          this.fetchOnuDetails()
+        }, 3000)
+      } catch (error) {
+        this.$toasted.show(error.response?.data?.message || 'Failed to disable CATV', {type: 'error'})
+      } finally {
+        this.actionInProgress = false
+      }
+    },
+
+    handleCatvToast(data, fallback = 'Operation completed successfully') {
+      const baseMessage = data?.message || fallback
+      const catvInfo = data?.catv || {}
+      let toastType = 'success'
+      let message = baseMessage
+
+      if (catvInfo) {
+        if (catvInfo.message || catvInfo.value) {
+          message += ` | CATV: ${catvInfo.message || catvInfo.value}`
+        }
+
+        if (catvInfo.status === false && catvInfo.error) {
+          toastType = 'warning'
+          this.$toasted.show(`CATV: ${catvInfo.error}`, {type: 'error'})
+        }
+      }
+
+      this.$toasted.show(message, {type: toastType})
     },
 
     /**

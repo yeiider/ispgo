@@ -1,0 +1,224 @@
+<?php
+
+namespace App\GraphQL\Queries;
+
+use App\Models\Invoice\Invoice;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+
+class InvoiceReportQuery
+{
+    public function resolve($root, array $args)
+    {
+        $dateFrom = isset($args['date_from']) ? Carbon::parse($args['date_from']) : Carbon::now()->startOfMonth();
+        $dateTo = isset($args['date_to']) ? Carbon::parse($args['date_to']) : Carbon::now();
+        $paymentDateFrom = isset($args['payment_date_from']) ? Carbon::parse($args['payment_date_from']) : null;
+        $paymentDateTo = isset($args['payment_date_to']) ? Carbon::parse($args['payment_date_to']) : null;
+        $statuses = $args['status'] ?? null;
+        $paymentMethods = $args['payment_method'] ?? null;
+        $paymentRegisteredBy = $args['payment_registered_by'] ?? null;
+        $routerId = $args['router_id'] ?? null;
+        $chartFrequency = $args['chart_frequency'] ?? 'daily';
+
+        $query = Invoice::query()
+            ->whereBetween('issue_date', [$dateFrom->toDateString(), $dateTo->toDateString()]);
+
+        if ($paymentDateFrom && $paymentDateTo) {
+            $query->whereBetween('payment_date', [$paymentDateFrom->startOfDay(), $paymentDateTo->endOfDay()]);
+        } elseif ($paymentDateFrom) {
+            $query->where('payment_date', '>=', $paymentDateFrom->startOfDay());
+        } elseif ($paymentDateTo) {
+            $query->where('payment_date', '<=', $paymentDateTo->endOfDay());
+        }
+
+        if (!empty($statuses)) {
+            $query->whereIn('status', $statuses);
+        }
+
+        if (!empty($paymentMethods)) {
+            $query->whereIn('payment_method', $paymentMethods);
+        }
+
+        if (!empty($paymentRegisteredBy)) {
+            $query->where('payment_registered_by', $paymentRegisteredBy);
+        }
+
+        if (!empty($routerId)) {
+            $query->where('router_id', $routerId);
+        }
+
+        // Eliminado filtro JSON additional_information en favor de payment_date
+
+        // Clone query for different aggregations to avoid mutating the base query state
+        $summaryQuery = clone $query;
+        $chartQuery = clone $query;
+        $statusQuery = clone $query;
+        $paymentMethodQuery = clone $query;
+
+        // Calculate total payments explicitly based on InvoicePayment model
+        $paymentQuery = \App\Models\Invoice\InvoicePayment::query();
+
+        if ($paymentDateFrom && $paymentDateTo) {
+            $paymentQuery->whereBetween('payment_date', [$paymentDateFrom->startOfDay(), $paymentDateTo->endOfDay()]);
+        } elseif ($paymentDateFrom) {
+            $paymentQuery->where('payment_date', '>=', $paymentDateFrom->startOfDay());
+        } elseif ($paymentDateTo) {
+            $paymentQuery->where('payment_date', '<=', $paymentDateTo->endOfDay());
+        } else {
+            $paymentQuery->whereBetween('payment_date', [$dateFrom->startOfDay(), $dateTo->endOfDay()]);
+        }
+
+        if (!empty($routerId)) {
+            $paymentQuery->whereHas('invoice', function ($q) use ($routerId) {
+                $q->where('router_id', $routerId);
+            });
+        }
+
+        if (!empty($statuses)) {
+            $paymentQuery->whereHas('invoice', function ($q) use ($statuses) {
+                $q->whereIn('status', $statuses);
+            });
+        }
+
+        if (!empty($paymentRegisteredBy)) {
+            $paymentQuery->whereHas('invoice', function ($q) use ($paymentRegisteredBy) {
+                $q->where('payment_registered_by', $paymentRegisteredBy);
+            });
+        }
+
+        $totalPaymentsAmount = $paymentQuery->sum('amount');
+
+        // --- Summary Calculation ---
+        $summaryData = $summaryQuery->selectRaw('
+            COUNT(*) as total_invoices,
+            SUM(total) as total_amount,
+            SUM(CASE WHEN status = "paid" THEN total ELSE 0 END) as total_paid,
+            SUM(outstanding_balance) as total_outstanding,
+            SUM(discount) as total_discount,
+            SUM(tax) as total_tax,
+            SUM(amount) as tota_paid,
+            SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid_count,
+            SUM(CASE WHEN status = "unpaid" THEN 1 ELSE 0 END) as unpaid_count,
+            SUM(CASE WHEN status = "overdue" THEN 1 ELSE 0 END) as overdue_count,
+            SUM(CASE WHEN status = "canceled" THEN 1 ELSE 0 END) as canceled_count
+        ')->first();
+
+         // Note: canceled_count check above might be wrong if status is 'canceled', adjusting below if needed,
+         // assuming status 'canceled' exists based on typical invoice logic, though model analysis showed 'canceled' method.
+         // Let's re-verify status for canceled. The model has a canceled() method setting status to 'canceled'.
+         // So I will use 'canceled' string.
+
+        $summary = [
+            'total_invoices' => (int) ($summaryData->total_invoices ?? 0),
+            'total_amount' => (float) ($summaryData->total_amount ?? 0),
+            'total_paid' => (float) ($summaryData->tota_paid ?? 0),
+            'total_payments' => (float) $totalPaymentsAmount,
+            'total_outstanding' => (float) ($summaryData->total_outstanding ?? 0),
+            'total_discount' => (float) ($summaryData->total_discount ?? 0),
+            'total_tax' => (float) ($summaryData->total_tax ?? 0),
+            'paid_count' => (int) ($summaryData->paid_count ?? 0),
+            'unpaid_count' => (int) ($summaryData->unpaid_count ?? 0),
+            'overdue_count' => (int) ($summaryData->overdue_count ?? 0),
+            'canceled_count' => (int) ($summaryData->canceled_count ?? 0),
+        ];
+
+        // --- Charts Data ---
+
+        // 1. Revenue/Trends Over Time
+        $dateFormat = match ($chartFrequency) {
+            'monthly' => '%Y-%m',
+            'yearly' => '%Y',
+            default => '%Y-%m-%d',
+        };
+
+        $revenueData = $chartQuery
+             ->select(DB::raw("DATE_FORMAT(issue_date, '$dateFormat') as label"), DB::raw('SUM(total) as value'), DB::raw('COUNT(*) as count'))
+             ->groupBy('label')
+             ->orderBy('label')
+             ->get()
+             ->map(function ($item) {
+                 return [
+                     'label' => $item->label,
+                     'value' => (float) $item->value,
+                     'count' => (int) $item->count,
+                 ];
+             });
+
+        // 2. Status Distribution
+        $statusData = $statusQuery
+            ->select('status as label', DB::raw('SUM(total) as value'), DB::raw('COUNT(*) as count'))
+            ->groupBy('status')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'label' => ucfirst($item->label),
+                    'value' => (float) $item->value,
+                    'count' => (int) $item->count,
+                ];
+            });
+
+        // 3. Payment Method Distribution
+        $paymentMethodData = $paymentMethodQuery
+            ->whereNotNull('payment_method') // Only count where payment method is set
+            ->select('payment_method as label', DB::raw('SUM(amount) as value'), DB::raw('COUNT(*) as count'))
+            ->groupBy('payment_method')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'label' => ucfirst($item->label),
+                    'value' => (float) $item->value,
+                    'count' => (int) $item->count,
+                ];
+            });
+        // 4. Paid vs Unpaid Over Time
+        // Paid
+        $paidOverTimeData = $chartQuery->clone()
+             ->where('status', 'paid')
+             ->select(DB::raw("DATE_FORMAT(issue_date, '$dateFormat') as label"), DB::raw('SUM(total) as value'), DB::raw('COUNT(*) as count'))
+             ->groupBy('label')
+             ->orderBy('label')
+             ->get()
+             ->map(function ($item) {
+                 return [
+                     'label' => $item->label,
+                     'value' => (float) $item->value,
+                     'count' => (int) $item->count,
+                 ];
+             });
+
+        // Unpaid (Everything not paid, e.g. unpaid, overdue)
+        $unpaidOverTimeData = $chartQuery->clone()
+             ->where('status', '!=', 'paid')
+             ->select(DB::raw("DATE_FORMAT(issue_date, '$dateFormat') as label"), DB::raw('SUM(total) as value'), DB::raw('COUNT(*) as count'))
+             ->groupBy('label')
+             ->orderBy('label')
+             ->get()
+             ->map(function ($item) {
+                 return [
+                     'label' => $item->label,
+                     'value' => (float) $item->value,
+                     'count' => (int) $item->count,
+                 ];
+             });
+
+        return [
+            'summary' => $summary,
+            'charts' => [
+                'revenue_over_time' => $revenueData,
+                'paid_over_time' => $paidOverTimeData,
+                'unpaid_over_time' => $unpaidOverTimeData,
+                'status_distribution' => $statusData,
+                'payment_method_distribution' => $paymentMethodData,
+            ],
+            'date_from' => $dateFrom->toDateString(),
+            'date_to' => $dateTo->toDateString(),
+            'payment_date_from' => $paymentDateFrom ? $paymentDateFrom->toDateString() : null,
+            'payment_date_to' => $paymentDateTo ? $paymentDateTo->toDateString() : null,
+            'filter_status' => $statuses,
+            'filter_payment_method' => $paymentMethods,
+            'filter_payment_registered_by' => $paymentRegisteredBy,
+            'chart_frequency' => $chartFrequency,
+        ];
+    }
+}

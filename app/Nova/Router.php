@@ -45,32 +45,36 @@ class Router extends Resource
         return [
             ID::make(__('ID'), 'id')->sortable(),
 
-            Select::make(__('attribute.status'), 'status')
-                ->options([
-                    'enabled' => __('attribute.enabled'),
-                    'disabled' => __('attribute.disabled'),
-                ])
-                ->default("enabled")
-                ->displayUsingLabels()
-                ->hideFromDetail()
-                ->hideFromIndex(),
-
-            Badge::make(__('attribute.status'), 'status')->map([
-                'enabled' => 'success',
-                'disabled' => 'danger',
-            ])->icons([
-                'danger' => 'exclamation-circle',
-                'success' => 'check-circle',
-            ])->label(function ($value) {
-                return __('attribute.' . $value);
-            }),
-            Text::make(__('router.code'), 'code')
-                ->rules('required', 'max:255')
-                ->sortable(),
-
             Text::make(__('router.name'), 'name')
-                ->rules('required', 'max:255')
-                ->sortable(),
+                ->sortable()
+                ->rules('required', 'max:255'),
+
+            Text::make(__('router.code'), 'code')
+                ->sortable()
+                ->rules('required', 'max:255'),
+
+            Select::make(__('router.status'), 'status')
+                ->options([
+                    'enabled' => __('router.enabled'),
+                    'disabled' => __('router.disabled'),
+                ])
+                ->displayUsingLabels()
+                ->default('enabled')
+                ->rules('required'),
+
+            Badge::make(__('router.status'), 'status')
+                ->map([
+                    'enabled' => 'success',
+                    'disabled' => 'danger',
+                ])
+                ->icons([
+                    'success' => 'check-circle',
+                    'danger' => 'x-circle',
+                ])
+                ->label(fn($value) => __('router.' . $value)),
+
+            \Laravel\Nova\Fields\HasMany::make(__('Users'), 'users', User::class),
+            \Laravel\Nova\Fields\HasMany::make(__('Customers'), 'customers', \App\Nova\Customers\Customer::class),
         ];
     }
 

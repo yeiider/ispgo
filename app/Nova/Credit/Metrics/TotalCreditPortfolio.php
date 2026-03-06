@@ -16,15 +16,16 @@ class TotalCreditPortfolio extends Value
      */
     public function calculate(NovaRequest $request)
     {
-        // Calculate total principal minus total paid
-        $totalPrincipal = CreditAccount::where('status', '!=', 'closed')
-            ->sum('principal');
+        // Use model query builder to respect global scopes (including router filter)
+        $creditAccounts = CreditAccount::where('status', '!=', 'closed')->get();
+        
+        // Calculate total principal
+        $totalPrincipal = $creditAccounts->sum('principal');
 
         // Get total paid from payments
-        $totalPaid = CreditAccount::where('status', '!=', 'closed')
-            ->withSum('payments', 'amount')
-            ->get()
-            ->sum('payments_sum_amount') ?? 0;
+        $totalPaid = $creditAccounts->sum(function ($account) {
+            return $account->payments->sum('amount') ?? 0;
+        });
 
         $totalPortfolio = $totalPrincipal - $totalPaid;
 

@@ -159,10 +159,12 @@ class BillingNovedad extends Model
         return $query->where('applied', false);
     }
 
-    /** Novedades para un periodo (YYYY-MM-01) */
-    public function scopeForPeriod(Builder $query, DateTimeInterface $period = null)   // <- aquí
+    /** Novedades para un periodo (compara por año y mes, ignorando el día exacto) */
+    public function scopeForPeriod(Builder $query, DateTimeInterface $period = null): Builder
     {
-        return $query->whereDate('effective_period', $period->format('Y-m-d'));
+        return $query
+            ->whereYear('effective_period', $period->format('Y'))
+            ->whereMonth('effective_period', $period->format('m'));
     }
     /** Novedades asociadas a un servicio específico */
     public function scopeForService(Builder $q, int $serviceId): Builder
@@ -176,6 +178,30 @@ class BillingNovedad extends Model
 
     protected static function booted(): void
     {
+        // Global Scope: Filter novedades by service's router(s)
+        static::addGlobalScope('router_filter', function (Builder $builder) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+
+            // If not authenticated, no filtering
+            if (!$user) {
+                return;
+            }
+
+            // If user has no routers assigned, show all data
+            // Role permissions control what actions they can perform
+            $routerIds = $user->getRouterIds();
+
+            if (empty($routerIds)) {
+                return;
+            }
+
+            // Filter novedades by service's router_id
+            $builder->whereHas('service', function ($query) use ($routerIds) {
+                $query->whereIn('router_id', $routerIds);
+            });
+        });
+
         // Para entregas de producto: calcular automáticamente el monto
         static::creating(function (self $nov) {
             $nov->customer_id = $nov->service->customer->id;

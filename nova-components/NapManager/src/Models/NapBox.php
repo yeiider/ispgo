@@ -4,6 +4,8 @@ namespace Ispgo\NapManager\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Router;
 
 class NapBox extends Model
 {
@@ -21,6 +23,8 @@ class NapBox extends Model
         'model',
         'distribution_order',
         'parent_nap_id', // Para jerarquía de distribución
+        'router_id',
+        'fiber_color',
     ];
 
     protected $casts = [
@@ -29,6 +33,18 @@ class NapBox extends Model
         'longitude' => 'decimal:8',
         'distribution_order' => 'integer'
     ];
+
+    protected $appends = ['available_ports_count'];
+
+    /**
+     * Get the count of available ports for this NAP box.
+     * This is a calculated attribute that queries the ports relationship.
+     */
+    public function getAvailablePortsCountAttribute()
+    {
+        return $this->ports()->where('status', NapPort::STATUS_AVAILABLE)->count();
+    }
+
     // Relaciones
     public function ports(): HasMany
     {
@@ -48,6 +64,11 @@ class NapBox extends Model
     public function distributionFlow()
     {
         return $this->hasOne(NapDistribution::class, 'nap_box_id');
+    }
+
+    public function router(): BelongsTo
+    {
+        return $this->belongsTo(Router::class, 'router_id');
     }
 
     // Scopes

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', 's3'),
 
     /*
     |--------------------------------------------------------------------------
@@ -53,7 +53,11 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
+            'throw' => true,
+            // Si es true, genera URLs firmadas (presigned) con expiración
+            // Si es false, genera URLs públicas simples (requiere bucket público)
+            // Default: true para mayor seguridad
+            'use_signed_urls' => env('AWS_USE_SIGNED_URLS', true),
         ],
 
     ],

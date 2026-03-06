@@ -44,4 +44,12 @@ Route::prefix('onu')->group(function () {
     Route::post('{serviceId}/update-speed-profile', [OnuController::class, 'updateSpeedProfile']);
     Route::post('{serviceId}/update-vlan', [OnuController::class, 'updateVlan']);
     Route::post('{serviceId}/update-wan-mode', [OnuController::class, 'updateWanMode']);
+    Route::post('{serviceId}/enable-catv', [OnuController::class, 'enableCatv']);
+    Route::post('{serviceId}/disable-catv', [OnuController::class, 'disableCatv']);
+});
+
+// Direct ONU API Routes (by external_id)
+Route::prefix('api/onu')->group(function () {
+    Route::get('traffic-graph/{externalId}/{graphType?}', [OnuController::class, 'getTrafficGraphByExternalId']);
+    Route::get('signal-graph/{externalId}', [OnuController::class, 'getSignalGraphByExternalId']);
 });

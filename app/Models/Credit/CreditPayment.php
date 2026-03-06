@@ -4,6 +4,8 @@ namespace App\Models\Credit;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class CreditPayment extends Model
 {
@@ -34,6 +36,38 @@ class CreditPayment extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Global Scope: Filter by user's router(s) through credit account -> customer
+        static::addGlobalScope('router_filter', function (Builder $builder) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+            
+            // If not authenticated, no filtering
+            if (!$user) {
+                return;
+            }
+
+            // If user has no routers assigned, show all data
+            // Role permissions control what actions they can perform
+            $routerIds = $user->getRouterIds();
+            
+            if (empty($routerIds)) {
+                return;
+            }
+
+            // Filter by user's assigned router(s) through credit account -> customer relationship
+            $builder->whereHas('creditAccount.customer', function ($query) use ($routerIds) {
+                $query->whereIn('router_id', $routerIds);
+            });
+        });
+    }
 
     /**
      * Get the credit account that owns the payment.

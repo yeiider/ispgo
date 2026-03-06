@@ -52,9 +52,65 @@ class User extends Authenticatable
         ];
     }
 
+
+
+    /**
+     * Get all routers assigned to this user (many-to-many relationship).
+     */
+    public function routers()
+    {
+        return $this->belongsToMany(Router::class, 'user_router')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the invoice payments registered by this user.
+     */
+    public function invoicePayments()
+    {
+        return $this->hasMany(\App\Models\Invoice\InvoicePayment::class);
+    }
+
+    /**
+     * Check if user can see all data (no routers assigned).
+     * If user has no routers, they see all data.
+     * Role permissions control what actions they can perform.
+     */
+    public function canSeeAllData(): bool
+    {
+        return $this->routers()->count() === 0;
+    }
+
+    /**
+     * Check if user should filter by router.
+     * Returns true if user has one or more routers assigned.
+     */
+    public function shouldFilterByRouter(): bool
+    {
+        return $this->routers()->count() > 0;
+    }
+
+    /**
+     * Get all router IDs assigned to this user.
+     * 
+     * @return array
+     */
+    public function getRouterIds(): array
+    {
+        return $this->routers()->pluck('routers.id')->toArray();
+    }
+
     public function isSuperAdmin()
     {
         return $this->hasRole('super-admin');
+    }
+
+    /**
+     * Check if user has admin role (not super-admin).
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin') && !$this->isSuperAdmin();
     }
 
     /**

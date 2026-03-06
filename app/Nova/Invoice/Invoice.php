@@ -13,6 +13,10 @@ use App\Nova\Actions\Invoice\DeleteOnePayCharge;
 use App\Nova\Actions\Invoice\NotifyAllInvoices;
 use App\Nova\Customers;
 use App\Nova\Filters\Invoice\InvoiceStatusFilter;
+use App\Nova\Filters\Invoice\InvoiceDateRangeFilter;
+use App\Nova\Filters\Invoice\InvoiceDateToFilter;
+use App\Nova\Filters\Invoice\InvoicePaymentDateFromFilter;
+use App\Nova\Filters\Invoice\InvoicePaymentDateToFilter;
 use App\Nova\Filters\RouterFilter;
 use App\Nova\Metrics\Invoice\InvoicesStatus;
 use App\Nova\Metrics\Invoice\OutstandingBalance;
@@ -45,6 +49,13 @@ class Invoice extends Resource
     public static $search = [
         'id', 'amount', 'issue_date', 'status', 'customer_name'
     ];
+
+    /**
+     * Disable action events to avoid conflicts with actionable_id column type.
+     * The action_events table uses CHAR for actionable_id (to support UUIDs),
+     * but Invoice uses INT primary keys, causing SQL errors.
+     */
+    public static bool $withoutActionEvents = true;
 
     public function fields(NovaRequest $request): array
     {
@@ -88,13 +99,32 @@ class Invoice extends Resource
                 ->step(0.01)
                 ->readonly(),
 
-            Currency::make(__('invoice.amount'), 'amount')  // ¿Este es un campo manual de abono o pago?
-            ->step(0.01)
-                ->readonly(),
+            Currency::make(__('invoice.amount'), 'amount')  // Total pagado (legacy field)
+                ->step(0.01)
+                ->readonly()
+                ->hideFromIndex(),
+
+            Currency::make(__('Total Pagado'), 'total_paid')
+                ->step(0.01)
+                ->readonly()
+                ->help('Suma de todos los pagos realizados'),
+
+            Currency::make(__('Notas de Crédito'), 'credit_notes_total')
+                ->step(0.01)
+                ->readonly()
+                ->hideFromIndex()
+                ->help('Total de notas de crédito aplicadas'),
+
+            Currency::make(__('Saldo Real'), 'real_outstanding_balance')
+                ->step(0.01)
+                ->readonly()
+                ->help('Saldo pendiente = Total - Pagos - Notas de Crédito'),
 
             // 📆 Fechas y estado
             Date::make(__('invoice.issue_date'), 'issue_date'),
             Date::make(__('invoice.due_date'), 'due_date'),
+            Date::make(__('Fecha de Pago'), 'payment_date')->readonly()->hideFromIndex(),
+            Text::make(__('Registrado por'), 'payment_registered_by')->readonly()->hideFromIndex(),
 
             Select::make(__('attribute.status'), 'status')->options([
                 'paid' => __('attribute.paid'),
@@ -183,6 +213,10 @@ class Invoice extends Resource
     {
         return [
             new InvoiceStatusFilter(),
+            new InvoiceDateRangeFilter(),
+            new InvoiceDateToFilter(),
+            new InvoicePaymentDateFromFilter(),
+            new InvoicePaymentDateToFilter(),
             new RouterFilter(),
         ];
     }

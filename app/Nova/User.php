@@ -7,6 +7,7 @@ use Illuminate\Validation\Rules;
 use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphToMany;
+use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -62,11 +63,26 @@ class User extends Resource
                 ->sortable()
                 ->rules('required', 'max:10'),
 
+            // Campo para múltiples routers
+            BelongsToMany::make('Routers', 'routers', Router::class)
+                ->searchable()
+                ->help('Routers asignados al usuario. Si no tiene ningún router asignado, verá todos los datos. Si tiene uno o más routers, solo verá datos de esos routers.')
+                ->fields(function () {
+                    return [
+                        Text::make('Asignado el', 'created_at')
+                            ->readonly()
+                            ->hideWhenCreating()
+                            ->displayUsing(function ($value) {
+                                return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                            }),
+                    ];
+                }),
+
             Password::make('Password')
                 ->onlyOnForms()
                 ->creationRules('required', Rules\Password::defaults())
                 ->updateRules('nullable', Rules\Password::defaults()),
-            MorphToMany::make('Roles', 'roles', \Sereny\NovaPermissions\Nova\Role::class),
+            MorphToMany::make('Roles', 'roles', \App\Nova\Role::class),
             MorphToMany::make('Permissions', 'permissions', \Sereny\NovaPermissions\Nova\Permission::class),
         ];
     }

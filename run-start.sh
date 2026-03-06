@@ -10,12 +10,12 @@ php artisan optimize:clear && php artisan storage:link
 echo "Ejecutando migraciones..."
 php artisan migrate --force
 
-
+echo "Validacion del schema graphql"
+php artisan lighthouse:validate-schema
 
 echo "Verificando la licencia de Laravel Nova..."
 php artisan nova:check-license
 
 php artisan route:clear
-
 
 echo "¡Script completado con éxito!"

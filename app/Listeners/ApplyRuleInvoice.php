@@ -13,6 +13,11 @@ class ApplyRuleInvoice
     {
         $invoice = $event->invoice;
 
+        // No aplicar reglas a facturas manuales
+        if ($invoice->invoice_type === 'manual' || $invoice->invoice_type === 'adjustment') {
+            return;
+        }
+
         // Obtenemos todos los adjustments de tipo 'charge'
         $chargeAdjustments = $invoice->adjustments()
             ->where('kind', 'charge')

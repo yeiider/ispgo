@@ -33,8 +33,17 @@ class RegisterPaymentPromise extends Action
             }
             $promise = $model->createPromisePayment($fields->date_to_make_payment, $fields->notes);
             if ($promise) {
-                if (InvoiceProviderConfig::enableServiceByPaymentPromise()) {
-                    $model->service->activate();
+                $configValue = InvoiceProviderConfig::enableServiceByPaymentPromise();
+                $shouldActivate = true;
+
+                if ($configValue !== null) {
+                    $configBoolean = filter_var($configValue, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                    $shouldActivate = $configBoolean !== false;
+                }
+
+                if ($shouldActivate) {
+                    $model->loadMissing('service');
+                    optional($model->service)->activate();
                 }
             }
         }

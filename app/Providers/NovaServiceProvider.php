@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Nova\BillingNovedad;
 use App\Nova\Box;
 use App\Nova\Contract;
+use App\Nova\Cotizacion;
 use App\Nova\Customers\Address;
 use App\Nova\Customers\Customer;
 use App\Nova\Customers\TaxDetail;
@@ -28,6 +29,7 @@ use App\Nova\Credit\CreditAccount;
 use App\Nova\Invoice\CreditNote;
 use App\Nova\Invoice\DailyInvoiceBalance;
 use App\Nova\Invoice\Invoice;
+use App\Nova\Invoice\InvoicePayment;
 use App\Nova\Invoice\PaymentPromise;
 use App\Nova\Lenses\InstallationsLens;
 use App\Nova\Lenses\TelephonicServiceLens;
@@ -89,6 +91,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                         MenuItem::resource(Customer::class)->name(__('panel.customers')),
                         MenuItem::resource(Address::class)->name(__('panel.addresses')),
                         MenuItem::resource(TaxDetail::class)->name(__('panel.tax_details')),
+                        MenuItem::resource(Cotizacion::class)->name(__('Cotizaciones')),
                     ]),
                     MenuGroup::make(__('panel.all_services'), [
                         MenuItem::resource(Service::class),
@@ -105,6 +108,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('panel.invoices'), [
                     MenuItem::resource(Invoice::class)->name(__('panel.invoices')),
                     MenuItem::resource(CreditNote::class)->name(__('panel.credit_notes')),
+                    MenuItem::resource(InvoicePayment::class)->name(__('Abonos a Facturas')),
                     MenuItem::resource(PaymentPromise::class)->name(__('panel.payment_promises')),
                     MenuItem::resource(DailyInvoiceBalance::class)->name(__('panel.daily_invoice_balances')),
                     MenuItem::resource(BillingNovedad::class)->name(__('panel.billing_novedad')),
@@ -163,12 +167,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     ->icon('cog')->canSee(function ($request) {
                         return ProviderSmartOlt::getEnabled();
                     }),
-                MenuSection::make(__('panel.mikrotik_manager'), [
-                    MenuItem::link(__('panel.plans_PPPoe'), 'mikrotik/planes-ppp'),
-                    MenuItem::link(__('panel.ip_pools'), 'mikrotik/ip-pool'),
-                    MenuItem::link(__('panel.ipv6_pools'), 'mikrotik/ipv6-pool'),
-                    MenuItem::link(__('panel.DHCP_server_Ipv6'), 'mikrotik/dhcp-serve'),
-                ])->icon('cog')->collapsable(),
+               
 
                 $this->getNovaPermissionsMenu($request),
             ];
@@ -226,7 +225,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         return [
             new SettingsManager,
             new NovaPermissions,
-            new Mikrotik,
             new Smartolt,
             new NapManager
         ];

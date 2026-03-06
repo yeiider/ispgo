@@ -3,151 +3,174 @@
 namespace Ispgo\Mikrotik\Settings;
 
 use App\Helpers\ConfigHelper;
-use function Symfony\Component\String\b;
 
+/**
+ * Proveedor de configuración para el módulo Mikrotik
+ * Obtiene valores de configuración usando el router_id como scope_id
+ */
 class MikrotikConfigProvider
 {
-    const GENERAL_PATH = "mikrotik/general/";
-    const PPP_PATH = "mikrotik/ppp/";
-    const SIMPLE_QUEUE_PATH = "mikrotik/simple_queue/";
-    const DHCP_PATH = "mikrotik/dhcp/";
-    const IP_POOL_PATH = "mikrotik/ip_pool/";
-    const STATIC_IP_PATH = "mikrotik/static_ip/";
-    const QOS_PATH = "mikrotik/qos/";
+    private const CONFIG_PREFIX = 'mikrotik/';
 
-    // General MikroTik settings
-    public static function getEnabled(): ?bool
+    /**
+     * Obtener un valor de configuración para un router específico
+     */
+    public static function getValue(string $key, int $routerId = 0, ?string $default = null): ?string
     {
-        return (bool)ConfigHelper::getConfigValue(self::GENERAL_PATH . 'enabled');
+        $value = ConfigHelper::getConfigValue(self::CONFIG_PREFIX . $key, $routerId);
+        return $value ?? $default;
     }
 
-    public static function getHost(): ?string
+    /**
+     * Verificar si el módulo está habilitado
+     */
+    public static function isEnabled(int $routerId = 0): bool
     {
-        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'host');
+        return self::getValue('general/enabled', $routerId, '0') === '1';
     }
 
-    public static function getPort(): ?int
+    /**
+     * Obtener la URL base del microservicio
+     * Nota: Usa host.docker.internal para acceder desde Docker al host
+     */
+    public static function getApiBaseUrl(int $routerId = 0): string
     {
-        return (int)ConfigHelper::getConfigValue(self::GENERAL_PATH . 'port');
+        return self::getValue('general/api_base_url', $routerId, 'http://host.docker.internal:8000/api/v1');
     }
 
-    public static function getUsername(): ?string
+    /**
+     * Obtener el timeout de la API
+     */
+    public static function getApiTimeout(int $routerId = 0): int
     {
-        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'username');
+        return (int) self::getValue('general/api_timeout', $routerId, '30');
     }
 
-    public static function getPassword(): ?string
+    /**
+     * Obtener las credenciales de conexión al router
+     */
+    public static function getRouterCredentials(int $routerId = 0): array
     {
-        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'password');
+        return [
+            'host' => self::getValue('router_connection/host', $routerId, '192.168.88.1'),
+            'port' => (int) self::getValue('router_connection/port', $routerId, '8728'),
+            'username' => self::getValue('router_connection/username', $routerId, 'admin'),
+            'password' => self::getValue('router_connection/password', $routerId, ''),
+            'use_ssl' => self::getValue('router_connection/use_ssl', $routerId, '0') === '1',
+        ];
     }
 
-    public static function getSsl(): ?string
+    /**
+     * Verificar si DHCP binding está habilitado
+     */
+    public static function isDhcpEnabled(int $routerId = 0): bool
     {
-        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'ssl');
+        return self::getValue('dhcp/dhcp_enabled', $routerId, '1') === '1';
     }
 
-    public static function getTimeout(): ?string
+    /**
+     * Obtener el nombre del servidor DHCP
+     */
+    public static function getDhcpServer(int $routerId = 0): string
     {
-        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'timeout');
+        return self::getValue('dhcp/dhcp_server', $routerId, 'dhcp1');
     }
 
-    // PPP settings
-    public static function getPppEnabled(): ?bool
+    /**
+     * Verificar si auto-bind está habilitado
+     */
+    public static function isAutoBindEnabled(int $routerId = 0): bool
     {
-        return (bool)ConfigHelper::getConfigValue(self::PPP_PATH . 'ppp_enabled');
+        return self::getValue('dhcp/auto_bind_on_provision', $routerId, '1') === '1';
     }
 
-    public static function getServiceType(): ?string
+    /**
+     * Verificar si Simple Queue está habilitado
+     */
+    public static function isQueueEnabled(int $routerId = 0): bool
     {
-        return ConfigHelper::getConfigValue(self::PPP_PATH . 'service_type');
+        return self::getValue('simple_queue/queue_enabled', $routerId, '1') === '1';
     }
 
-    public static function getIpPoolEnabled(): bool
+    /**
+     * Obtener el prefijo para nombres de queue
+     */
+    public static function getQueueNamePrefix(int $routerId = 0): string
     {
-        return (bool)ConfigHelper::getConfigValue(self::PPP_PATH . 'ip_pool_enabled');
+        return self::getValue('simple_queue/queue_name_prefix', $routerId, '');
     }
 
-    public static function getClientIdentifier(): string
+    /**
+     * Verificar si burst está habilitado
+     */
+    public static function isBurstEnabled(int $routerId = 0): bool
     {
-        return (string)ConfigHelper::getConfigValue(self::PPP_PATH . 'client_identifier');
+        return self::getValue('simple_queue/burst_enabled', $routerId, '0') === '1';
     }
 
-    public static function getStaticIpEnabled(): string
+    /**
+     * Obtener configuración de burst
+     */
+    public static function getBurstConfig(int $routerId = 0): array
     {
-        return (string)ConfigHelper::getConfigValue(self::PPP_PATH . 'static_ip_enabled');
+        return [
+            'limit_percentage' => (int) self::getValue('simple_queue/burst_limit_percentage', $routerId, '150'),
+            'threshold_percentage' => (int) self::getValue('simple_queue/burst_threshold_percentage', $routerId, '75'),
+            'time' => self::getValue('simple_queue/burst_time', $routerId, '8s/8s'),
+        ];
     }
 
-    public static function getPasswordPPPSecret():string
+    /**
+     * Obtener acción al suspender servicio
+     */
+    public static function getSuspendAction(int $routerId = 0): string
     {
-        return (string)ConfigHelper::getConfigValue(self::PPP_PATH . 'password_ppp_secret');
-
+        return self::getValue('service_actions/suspend_action', $routerId, 'disable_queue');
     }
 
-    // Simple Queue settings
-    public static function getSimpleQueueEnabled(): bool
+    /**
+     * Obtener límites de velocidad para servicio suspendido
+     */
+    public static function getSuspendLimits(int $routerId = 0): array
     {
-        return (bool)ConfigHelper::getConfigValue(self::SIMPLE_QUEUE_PATH . 'simple_queue_enabled');
+        return [
+            'upload' => self::getValue('service_actions/suspend_limit_upload', $routerId, '64k'),
+            'download' => self::getValue('service_actions/suspend_limit_download', $routerId, '128k'),
+        ];
     }
 
-    public static function getSimpleQueueLimitUpload(): ?string
+    /**
+     * Obtener acción al activar servicio
+     */
+    public static function getActivateAction(int $routerId = 0): string
     {
-        return ConfigHelper::getConfigValue(self::SIMPLE_QUEUE_PATH . 'default_limit_upload');
+        return self::getValue('service_actions/activate_action', $routerId, 'enable_queue');
     }
 
-    public static function getSimpleQueueLimitDownload(): ?string
+    /**
+     * Verificar si modo debug está habilitado
+     */
+    public static function isDebugMode(int $routerId = 0): bool
     {
-        return ConfigHelper::getConfigValue(self::SIMPLE_QUEUE_PATH . 'default_limit_download');
+        return self::getValue('advanced/debug_mode', $routerId, '0') === '1';
     }
 
-    public static function getSimpleQueueType(): ?string
+    /**
+     * Obtener configuración de reintentos
+     */
+    public static function getRetryConfig(int $routerId = 0): array
     {
-        return ConfigHelper::getConfigValue(self::SIMPLE_QUEUE_PATH . 'queue_type');
+        return [
+            'attempts' => (int) self::getValue('advanced/retry_attempts', $routerId, '3'),
+            'delay' => (int) self::getValue('advanced/retry_delay', $routerId, '5'),
+        ];
     }
 
-    // DHCP settings
-    public static function getDhcpEnabled(): ?string
+    /**
+     * Obtener template de comentario para queues
+     */
+    public static function getQueueCommentTemplate(int $routerId = 0): string
     {
-        return ConfigHelper::getConfigValue(self::DHCP_PATH . 'dhcp_enabled');
+        return self::getValue('advanced/queue_comment_template', $routerId, 'Servicio #{service_id}');
     }
-
-    public static function getDhcpPool(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::DHCP_PATH . 'dhcp_pool');
-    }
-
-    public static function getDhcpLeaseTime(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::DHCP_PATH . 'lease_time');
-    }
-
-    public static function getDhcpDnsServers(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::DHCP_PATH . 'dns_servers');
-    }
-
-
-    // Static IP settings
-    public static function getStaticIPAddress(string $identifier): ?string
-    {
-        return ConfigHelper::getConfigValue(self::STATIC_IP_PATH . $identifier . '/ip_address');
-    }
-
-    // QoS settings
-    public static function getQoSEnabled(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::QOS_PATH . 'qos_enabled');
-    }
-
-    public static function getQoSPriority(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::QOS_PATH . 'priority');
-    }
-
-    public static function getQoSMaxLimit(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::QOS_PATH . 'max_limit');
-    }
-
-
-
 }

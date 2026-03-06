@@ -52,6 +52,17 @@ class ApiManager
     }
 
     /**
+     * Habilitar CATV de ONUs en lote.
+     *
+     * @throws ConnectionException
+     */
+    public function enableCatvBulk(array $payload): Response
+    {
+        $this->validatePayload($payload);
+        return $this->request('api/onu/bulk_enable_catv', $payload, true);
+    }
+
+    /**
      * Deshabilitar ONUs en lote.
      *
      * @throws ConnectionException
@@ -60,6 +71,17 @@ class ApiManager
     {
         $this->validatePayload($payload);
         return $this->request('api/onu/bulk_disable', $payload, true);
+    }
+
+    /**
+     * Deshabilitar CATV de ONUs en lote.
+     *
+     * @throws ConnectionException
+     */
+    public function disableCatvBulk(array $payload): Response
+    {
+        $this->validatePayload($payload);
+        return $this->request('api/onu/bulk_disable_catv', $payload, true);
     }
 
     /**
@@ -74,6 +96,17 @@ class ApiManager
     }
 
     /**
+     * Habilitar CATV por external_id.
+     *
+     * @throws \Exception
+     */
+    public function enableOnuCatvByExternalId(string $externalId): Response
+    {
+        $this->validateExternalId($externalId);
+        return $this->request('api/onu/enable_catv/' . $externalId);
+    }
+
+    /**
      * Deshabilitar una ONU por su número de serie.
      *
      * @throws \Exception
@@ -82,6 +115,17 @@ class ApiManager
     {
         $this->validateSerialNumber($sn);
         return $this->request('api/onu/disable/' . $sn);
+    }
+
+    /**
+     * Deshabilitar CATV por external_id.
+     *
+     * @throws \Exception
+     */
+    public function disableOnuCatvByExternalId(string $externalId): Response
+    {
+        $this->validateExternalId($externalId);
+        return $this->request('api/onu/disable_catv/' . $externalId);
     }
 
     /**
@@ -220,7 +264,20 @@ class ApiManager
     public function getOnuSignalGraphByExternalId(string $externalId): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/get_onu_signal_graph/' . $externalId, [], false, 'get');
+
+        // Para imágenes, necesitamos manejar la respuesta binaria directamente
+        try {
+            $response = Http::withHeaders(['X-Token' => $this->token])
+                ->withOptions([
+                    'stream' => false, // No usar stream
+                    'decode_content' => true, // Decodificar contenido
+                ])
+                ->get($this->baseUrl . 'api/onu/get_onu_signal_graph/' . $externalId);
+
+            return $response;
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -234,7 +291,33 @@ class ApiManager
     public function getOnuTrafficGraphByExternalId(string $externalId, string $graphType = 'hourly'): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/get_onu_traffic_graph/' . $externalId . '/' . $graphType, [], false, 'get');
+
+        // Para imágenes, necesitamos manejar la respuesta binaria directamente
+        try {
+            $response = Http::withHeaders(['X-Token' => $this->token])
+                ->withOptions([
+                    'stream' => false, // No usar stream
+                    'decode_content' => true, // Decodificar contenido
+                ])
+                ->get($this->baseUrl . 'api/onu/get_onu_traffic_graph/' . $externalId . '/' . $graphType);
+
+            return $response;
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Obtener el estado de CATV por external_id.
+     *
+     * @param string $externalId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOnuCatvStatusByExternalId(string $externalId): Response
+    {
+        $this->validateExternalId($externalId);
+        return $this->request('api/onu/get_onu_catv_status/' . $externalId, [], false, 'get');
     }
 
     /**
@@ -388,7 +471,7 @@ class ApiManager
     public function setOnuManagementIpDhcpByExternalId(string $externalId, int $vlan): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/set_onu_mgmt_ip_dhcp/' . $externalId, ['vlan' => $vlan], true);
+        return $this->request('api/onu/set_onu_wan_mode_dhcp/' . $externalId, ['vlan' => $vlan], true);
     }
 
     /**
@@ -403,5 +486,161 @@ class ApiManager
         return $this->request('api/onu/authorize_onu', $payload, true);
     }
 
+    /**
+     * Get OLT PON ports details.
+     *
+     * @param int $oltId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOltPonPortsDetails(int $oltId): Response
+    {
+        try {
+            return $this->request('api/system/get_olt_pon_ports_details/' . $oltId, [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error getting OLT PON ports details: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Get ODBs by Zone ID.
+     *
+     * @param int $zoneId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOdbs(int $zoneId): Response
+    {
+        try {
+            return $this->request('api/system/get_odbs/' . $zoneId, [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error getting ODBs: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Get Speed Profiles.
+     *
+     * @return Response
+     * @throws \Exception
+     */
+    public function getSpeedProfiles(): Response
+    {
+        try {
+            return $this->request('api/system/get_speed_profiles', [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error getting speed profiles: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Get OLTs Uptime and Environment Temperature.
+     *
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOltsUptimeAndEnvTemperature(): Response
+    {
+        try {
+            return $this->request('api/olt/get_olts_uptime_and_env_temperature', [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error getting OLTs uptime and temperature: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Obtener detalles de ONU por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOnuDetailsBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/get_onus_details_by_sn/' . $sn, [], false, 'get');
+    }
+
+    /**
+     * Obtener imagen del tipo de ONU por ID.
+     *
+     * @param int $onuTypeId
+     * @return Response
+     * @throws \Exception
+     */
+    public function getOnuTypeImage(int $onuTypeId): Response
+    {
+        try {
+            return $this->request('api/system/get_onu_type_image/' . $onuTypeId, [], false, 'get');
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error getting ONU type image: " . $e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Habilitar ONU por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function enableOnuBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/enable/' . $sn);
+    }
+
+    /**
+     * Deshabilitar ONU por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function disableOnuBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/disable/' . $sn);
+    }
+
+    /**
+     * Reiniciar ONU por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function rebootOnuBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/reboot', ['sn' => $sn]);
+    }
+
+    /**
+     * Eliminar ONU del SmartOLT por external_id.
+     *
+     * @param string $externalId
+     * @return Response
+     * @throws \Exception
+     */
+    public function deleteOnuByExternalId(string $externalId): Response
+    {
+        $this->validateExternalId($externalId);
+        return $this->request('api/onu/delete/' . $externalId, [], false, 'post');
+    }
+
+    /**
+     * Habilitar TR069 para una ONU por número de serie.
+     *
+     * @param string $sn
+     * @param string $tr069Profile
+     * @return Response
+     * @throws \Exception
+     */
+    public function enableTr069(string $sn, string $tr069Profile): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/enable_tr069/' . $sn, ['tr069_profile' => $tr069Profile], true);
+    }
 
 }
