@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CaptivePortalController;
 use App\Http\Controllers\Api\InvoiceApi;
 use App\Http\Controllers\Api\McpController;
 use App\Http\Controllers\Api\TaskAttachmentController;
@@ -26,6 +27,48 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('tasks', TaskControllerApi::class);
     Route::apiResource('comments', TaskCommentController::class);
     Route::apiResource('attachments', TaskAttachmentController::class);
+    /*
+    |--------------------------------------------------------------------------
+    | File Upload Routes - Two-Step Upload Pattern
+    |--------------------------------------------------------------------------
+    | Endpoints para carga de archivos con el patrón de dos pasos:
+    | 1. POST /upload/temp - Carga temporal para previsualización
+    | 2. POST /upload/confirm - Confirmar y mover a ubicación permanente
+    | 3. DELETE /upload/temp - Eliminar archivo temporal (opcional)
+    */
+    Route::prefix('upload')->group(function () {
+        Route::post('/temp', [FileUploadController::class, 'uploadTemp']);
+        Route::post('/confirm', [FileUploadController::class, 'confirmUpload']);
+        Route::delete('/temp', [FileUploadController::class, 'deleteTempFile']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | SmartOLT API Routes
+    |--------------------------------------------------------------------------
+    | Endpoints para consultar información de ONUs desde SmartOLT
+    */
+    Route::prefix('smartolt')->group(function () {
+        // Gráficos de ONU
+        Route::get('/onu/{externalId}/traffic-graph/{graphType?}', [SmartOltController::class, 'getTrafficGraph']);
+        Route::get('/onu/{externalId}/signal-graph', [SmartOltController::class, 'getSignalGraph']);
+
+        // Información de ONU
+        Route::get('/onu/{externalId}/details', [SmartOltController::class, 'getOnuDetails']);
+        Route::get('/onu/{externalId}/status', [SmartOltController::class, 'getOnuStatus']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Captive Portal API Routes
+    |--------------------------------------------------------------------------
+    | Endpoints autenticados para el portal cautivo WiFi
+    */
+    Route::prefix('captive-portal')->group(function () {
+        Route::post('/request-access', [CaptivePortalController::class, 'requestAccess']);
+        Route::post('/verify-otp', [CaptivePortalController::class, 'verifyOtp']);
+        Route::post('/check-access', [CaptivePortalController::class, 'checkAccess']);
+    });
 });
 
 /*
