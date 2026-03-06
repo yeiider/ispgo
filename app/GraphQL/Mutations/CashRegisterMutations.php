@@ -133,8 +133,8 @@ class CashRegisterMutations
                 ->whereDate('closure_date', $closureDate)
                 ->first();
 
-            if ($existingClosure && $existingClosure->status === CashRegisterClosure::STATUS_COMPLETED) {
-                throw new Error('Ya existe un cierre completado para esta fecha.');
+            if ($existingClosure && $existingClosure->status === CashRegisterClosure::STATUS_PROCESSING) {
+                throw new Error('El cierre de caja para esta fecha ya se encuentra en procesamiento.');
             }
 
             // Despachar el job para procesar el cierre de forma asíncrona

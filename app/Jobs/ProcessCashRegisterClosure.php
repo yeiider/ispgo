@@ -64,21 +64,12 @@ class ProcessCashRegisterClosure implements ShouldQueue
                 ->whereDate('closure_date', $this->closureDate)
                 ->first();
 
-            if ($existingClosure && $existingClosure->status === CashRegisterClosure::STATUS_COMPLETED) {
-                Log::warning('Ya existe un cierre completado para esta fecha', [
-                    'cash_register_id' => $this->cashRegisterId,
-                    'closure_date' => $this->closureDate,
-                ]);
-                DB::commit();
-                return;
-            }
-
             // Crear o actualizar el cierre
             $closure = $existingClosure ?? new CashRegisterClosure();
             $closure->cash_register_id = $this->cashRegisterId;
             $closure->user_id = $this->userId;
             $closure->closure_date = $this->closureDate;
-            $closure->opening_balance = $cashRegister->initial_balance;
+            $closure->opening_balance = $existingClosure ? $existingClosure->opening_balance : $cashRegister->initial_balance;
             $closure->status = CashRegisterClosure::STATUS_PROCESSING;
             $closure->save();
 
