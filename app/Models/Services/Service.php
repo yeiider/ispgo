@@ -114,7 +114,8 @@ class Service extends Model
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router(s) through customer
+        // Global Scope: Filter services by their own router_id
+        // Services belong directly to a router, so we filter by router_id directly.
         static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = \Illuminate\Support\Facades\Auth::user();
@@ -132,12 +133,9 @@ class Service extends Model
                 return;
             }
 
-            // Filter by user's assigned router(s) (through customer or direct)
-            $builder->where(function ($query) use ($routerIds) {
-                $query->whereHas('customer', function ($q) use ($routerIds) {
-                    $q->whereIn('router_id', $routerIds);
-                })->orWhereIn('router_id', $routerIds);
-            });
+            // Filter services directly by their router_id.
+            // Correct logic: router → services (direct relationship)
+            $builder->whereIn('router_id', $routerIds);
         });
 
         static::creating(function ($model) {

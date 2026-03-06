@@ -142,7 +142,9 @@ class Customer extends Authenticatable implements MustVerifyEmail
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router(s)
+        // Global Scope: Filter customers by the routers of their SERVICES
+        // A customer is visible in a zone if they have at least one service in that zone.
+        // This allows a customer registered in zone A to appear in zone B if they have a service there.
         static::addGlobalScope('router_filter', function (Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
@@ -160,8 +162,11 @@ class Customer extends Authenticatable implements MustVerifyEmail
                 return;
             }
 
-            // Filter by user's assigned router(s)
-            $builder->whereIn('router_id', $routerIds);
+            // Filter customers that have at least one SERVICE in the user's router(s).
+            // This is the correct logic: router → services → customers
+            $builder->whereHas('services', function ($query) use ($routerIds) {
+                $query->whereIn('router_id', $routerIds);
+            });
         });
 
         static::creating(function ($customer) {

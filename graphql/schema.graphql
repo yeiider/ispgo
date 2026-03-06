@@ -37,6 +37,14 @@ type Query {
     ): [Customer!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Customer")
     customer(id: ID! @eq): Customer @find(model: "App\\Models\\Customers\\Customer")
 
+    # Search ALL customers in the system regardless of router/zone assignment.
+    # Used when creating a service, so the operator can find any customer including
+    # those originally registered in a different zone.
+    allCustomers(
+        search: String
+        customer_status: String
+    ): [Customer!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\AllCustomersQuery")
+
     services(
         service_ip: String @where(operator: "like")
         service_status: String @eq

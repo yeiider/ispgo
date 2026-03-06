@@ -384,7 +384,10 @@ class Invoice extends Model
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router(s)
+        // Global Scope: Filter invoices by the routers of the customer's SERVICES
+        // An invoice is visible if its customer has at least one service in the user's router(s).
+        // This is more correct than filtering by invoice.router_id directly, since manual invoices
+        // may not have a router_id set.
         static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
@@ -402,12 +405,12 @@ class Invoice extends Model
                 return;
             }
 
-            // Filter by user's assigned router(s) (direct or through customer)
-            $builder->where(function ($query) use ($routerIds) {
-                $query->whereIn('router_id', $routerIds)
-                    ->orWhereHas('customer', function ($q) use ($routerIds) {
-                        $q->whereIn('router_id', $routerIds);
-                    });
+            // Filter invoices whose customer has at least one SERVICE in the user's router(s).
+            // Correct logic: router → services → customers → invoices
+            $builder->whereHas('customer', function ($q) use ($routerIds) {
+                $q->whereHas('services', function ($sq) use ($routerIds) {
+                    $sq->whereIn('router_id', $routerIds);
+                });
             });
         });
 
