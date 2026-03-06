@@ -233,6 +233,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
         return $query->where(function ($q) use ($search) {
             $q->where('first_name', 'LIKE', "%{$search}%")
               ->orWhere('last_name', 'LIKE', "%{$search}%")
+              ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"])
               ->orWhere('identity_document', 'LIKE', "%{$search}%")
               ->orWhere('email_address', 'LIKE', "%{$search}%");
         });
@@ -247,7 +248,9 @@ class Customer extends Authenticatable implements MustVerifyEmail
     {
         return self::where(function ($query) use ($input) {
             $query->where('identity_document', 'LIKE', "%{$input}%")
-                ->orWhere('first_name', 'LIKE', "%{$input}%");
+                ->orWhere('first_name', 'LIKE', "%{$input}%")
+                ->orWhere('last_name', 'LIKE', "%{$input}%")
+                ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$input}%"]);
         })
             ->with(['invoices' => function ($query) {
                 $query->where('status', 'unpaid'); // Filtrar solo facturas no pagadas
