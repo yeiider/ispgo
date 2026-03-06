@@ -304,6 +304,9 @@ class Invoice extends Model
             // Combinar con cualquier dato extra que venga del llamador
             $additional = array_merge($additional, $paymentInfo);
 
+            // Update any pending payment promise to fulfilled
+            $this->paymentPromises()->where('status', 'pending')->update(['status' => 'fulfilled']);
+
         } else if ($this->due_date < now() && $this->outstanding_balance > 0) {
             $this->status = 'unpaid';
         }

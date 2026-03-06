@@ -59,13 +59,21 @@ class PaymentPromise extends Resource
             Badge::make(__('Status'), 'status')->map([
                 'pending' => 'warning',
                 'fulfilled' => 'success',
+                'expired' => 'danger',
                 'cancelled' => 'danger'
             ])->icons([
                 'danger' => 'exclamation-triangle',
                 'success' => 'check-circle',
                 'warning' => 'clock',
             ])->label(function ($value) {
-                return __('attribute.' . $value);
+                // Translation mapping for display
+                $labels = [
+                    'pending' => 'Pendiente',
+                    'fulfilled' => 'Cumplida',
+                    'expired' => 'Vencida',
+                    'cancelled' => 'Cancelada',
+                ];
+                return $labels[$value] ?? __('attribute.' . $value);
             }),
             Date::make(__('payment_promise.promise_date'), 'promise_date')->rules('required', 'date'),
             Text::make(__('payment_promise.notes'), 'notes')->rules('nullable', 'string', 'max:255'),

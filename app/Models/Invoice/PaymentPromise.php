@@ -53,7 +53,7 @@ class PaymentPromise extends Model
         });
     
         static::addGlobalScope('orderByStatus', function (Builder $builder) {
-            $builder->orderByRaw("FIELD(status, 'pending', 'fulfilled', 'cancelled')");
+            $builder->orderByRaw("FIELD(status, 'pending', 'fulfilled', 'expired', 'cancelled')");
         });
     }
 
