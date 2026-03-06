@@ -45,6 +45,19 @@ type Query {
         customer_status: String
     ): [Customer!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\AllCustomersQuery")
 
+    # Get a specific customer bypassing the router filter. Used when selecting 
+    # a customer from the allCustomers list to fetch their details and addresses.
+    globalCustomer(id: ID! @eq): Customer @field(resolver: "App\\GraphQL\\Queries\\GlobalCustomerQuery")
+
+    # Get a specific customer's addresses bypassing the router filter.
+    globalCustomerAddresses(customer_id: ID!): [Address!]! @field(resolver: "App\\GraphQL\\Queries\\GlobalCustomerAddressesQuery")
+
+    addresses(
+        address: String @where(operator: "like")
+        city: String @where(operator: "like")
+        customer_id: ID @eq
+    ): [Address!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Address")
+
     services(
         service_ip: String @where(operator: "like")
         service_status: String @eq
@@ -580,6 +593,7 @@ type Customer {
     updated_at: DateTime!
 
     addresses: [Address!]! @hasMany
+    global_addresses: [Address!]! @method(name: "getGlobalAddressesAttribute")
     services: [Service!]! @hasMany
     invoices: [Invoice!]! @hasMany
     router: Router @belongsTo

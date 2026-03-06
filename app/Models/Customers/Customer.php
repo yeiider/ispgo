@@ -128,6 +128,11 @@ class Customer extends Authenticatable implements MustVerifyEmail
         return ucwords("{$this->first_name} {$this->last_name}");
     }
 
+    public function getGlobalAddressesAttribute()
+    {
+        return $this->addresses()->withoutGlobalScope('router_filter')->get();
+    }
+
     public function setFirstNameAttribute($value)
     {
         $this->attributes['first_name'] = strtolower($value);
