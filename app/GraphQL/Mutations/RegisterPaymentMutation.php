@@ -64,7 +64,15 @@ class RegisterPaymentMutation
                 $additional['transfer_reference'] = $args['transfer_reference'];
             }
 
-            $invoice->applyPayment(null, $paymentMethod, $additional, $notes, null, false, $paymentRegisteredById);
+            $dailyBoxId = null;
+            if (Auth::check()) {
+                $openRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())
+                    ->where('status', \App\Models\Finance\CashRegister::STATUS_OPEN)
+                    ->first();
+                $dailyBoxId = $openRegister ? $openRegister->id : null;
+            }
+
+            $invoice->applyPayment(null, $paymentMethod, $additional, $notes, $dailyBoxId, false, $paymentRegisteredById);
 
             return [
                 'success' => true,

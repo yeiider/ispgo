@@ -181,11 +181,13 @@ extend type Query {
         date_from: Date
         date_to: Date
         payment_method: String
+        cash_register_id: ID
     ): [Invoice!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CashierInvoicesQuery@myInvoices")
 
     myDailyCollectionReport(
         date: Date
         date_from: Date
         date_to: Date
+        cash_register_id: ID
     ): CashierDailyReport! @field(resolver: "App\\GraphQL\\Queries\\CashierInvoicesQuery@dailyReport")
 }

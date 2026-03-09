@@ -158,7 +158,9 @@ class CashRegister extends Model
     public function open(): void
     {
         $this->status = self::STATUS_OPEN;
-        $this->opened_at = now();
+        if (!$this->opened_at) {
+            $this->opened_at = now();
+        }
         $this->closed_at = null;
         $this->save();
     }

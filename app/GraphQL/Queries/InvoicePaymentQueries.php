@@ -38,24 +38,45 @@ class InvoicePaymentQueries
      */
     public function myPayments($root, array $args): Builder
     {
-        $userId = Auth::id();
-        $query = InvoicePayment::query()->where('user_id', $userId);
+        $user = Auth::user();
+        $userId = $user->id;
+        $userName = $user->name;
 
-        // Filtrar por fecha exacta
-        if (!empty($args['date'])) {
-            $date = Carbon::parse($args['date'])->toDateString();
-            $query->whereDate('payment_date', $date);
+        $query = InvoicePayment::query()->where(function($q) use ($userId, $userName) {
+            $q->where('user_id', $userId)
+              ->orWhere('payment_registered_by', $userName);
+        });
+
+        $cashRegister = null;
+
+        if (!empty($args['cash_register_id'])) {
+            $cashRegister = \App\Models\Finance\CashRegister::find($args['cash_register_id']);
+        } else {
+            // Auto-detect currently open cash register for the POS
+            $cashRegister = \App\Models\Finance\CashRegister::where('user_id', $userId)
+                ->where('status', \App\Models\Finance\CashRegister::STATUS_OPEN)
+                ->first();
         }
 
-        // Filtrar por rango de fechas
-        if (!empty($args['date_from'])) {
-            $dateFrom = Carbon::parse($args['date_from'])->startOfDay();
-            $query->where('payment_date', '>=', $dateFrom);
-        }
+        if ($cashRegister) {
+            $query->where('daily_box_id', $cashRegister->id);
+        } else {
+            // Filtrar por fecha exacta
+            if (!empty($args['date'])) {
+                $date = Carbon::parse($args['date'])->toDateString();
+                $query->whereDate('payment_date', $date);
+            }
 
-        if (!empty($args['date_to'])) {
-            $dateTo = Carbon::parse($args['date_to'])->endOfDay();
-            $query->where('payment_date', '<=', $dateTo);
+            // Filtrar por rango de fechas
+            if (!empty($args['date_from'])) {
+                $dateFrom = Carbon::parse($args['date_from'])->startOfDay();
+                $query->where('payment_date', '>=', $dateFrom);
+            }
+
+            if (!empty($args['date_to'])) {
+                $dateTo = Carbon::parse($args['date_to'])->endOfDay();
+                $query->where('payment_date', '<=', $dateTo);
+            }
         }
 
         // Filtrar por método de pago

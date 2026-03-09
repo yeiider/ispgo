@@ -195,6 +195,16 @@ class CashRegisterMutations
                 throw new Error('La caja ya está abierta.');
             }
 
+            // RESTRICCION: No puede reabrir una caja si el usuario en el momento tiene otra caja abierta.
+            $anyOtherOpen = CashRegister::where('user_id', $user->id)
+                ->where('status', CashRegister::STATUS_OPEN)
+                ->where('id', '!=', $cashRegister->id)
+                ->exists();
+
+            if ($anyOtherOpen) {
+                throw new Error('No puedes abrir esta caja porque ya tienes otra caja abierta actualmente. Debes cerrar la caja activa primero.');
+            }
+
             // Abrir la caja
             $cashRegister->open();
 

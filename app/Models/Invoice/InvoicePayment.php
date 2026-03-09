@@ -33,11 +33,12 @@ class InvoicePayment extends Model
         'notes',
         'payment_support',
         'payment_registered_by',
-        'additional_information'
+        'additional_information',
+        'daily_box_id'
     ];
 
     protected $casts = [
-        'payment_date' => 'date',
+        'payment_date' => 'datetime',
         'additional_information' => 'array',
         'amount' => 'float',
     ];

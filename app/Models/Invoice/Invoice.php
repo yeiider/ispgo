@@ -48,7 +48,7 @@ class Invoice extends Model
         'onepay_metadata' => 'array',
 
     ];
-    protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay', 'total_paid', 'credit_notes_total', 'real_outstanding_balance'];
+    protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay', 'total_paid', 'credit_notes_total', 'real_outstanding_balance', 'collection_amount'];
 
     public function getFullNameAttribute()
     {
@@ -148,7 +148,18 @@ class Invoice extends Model
      */
     public function getRealOutstandingBalanceAttribute(): float
     {
-        return max(0, $this->total - $this->amount - $this->credit_notes_total);
+        return max(0, $this->total - ($this->amount ?? 0) - $this->getCreditNotesTotalAttribute());
+    }
+
+    /**
+     * Get the amount collected in the final transaction (total paid - sum of partial payments)
+     */
+    public function getCollectionAmountAttribute(): float
+    {
+        // When an invoice is paid, 'amount' is the total sum of all payments.
+        // We subtract the InvoicePayment records (abonos) to get what was received in the final full payment.
+        $totalAbonos = $this->payments()->sum('amount');
+        return max(0, ($this->amount ?? 0) - $totalAbonos);
     }
 
     /**
@@ -275,6 +286,7 @@ class Invoice extends Model
                 'payment_registered_by' => $registeredById,
                 'notes' => $notes,
                 'additional_information' => $additional,
+                'daily_box_id' => $dailyBoxId,
             ]);
 
             // Update amount from sum of payments
@@ -286,6 +298,9 @@ class Invoice extends Model
 
         $this->outstanding_balance = $this->real_outstanding_balance;
         $this->payment_method = $paymentMethod;
+        if ($dailyBoxId) {
+            $this->daily_box_id = $dailyBoxId;
+        }
 
         if ($this->isFullyPaid()) {
             $this->status = 'paid';

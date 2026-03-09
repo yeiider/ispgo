@@ -26,6 +26,14 @@ class InvoicePaymentMutations
      */
     public function create($root, array $args)
     {
+        $dailyBoxId = $args['daily_box_id'] ?? null;
+        if (!$dailyBoxId && Auth::check()) {
+            $openRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())
+                ->where('status', \App\Models\Finance\CashRegister::STATUS_OPEN)
+                ->first();
+            $dailyBoxId = $openRegister ? $openRegister->id : null;
+        }
+
         // Preparar datos
         $data = [
             'invoice_id' => $args['invoice_id'],
@@ -33,10 +41,11 @@ class InvoicePaymentMutations
             'amount' => $args['amount'],
             'payment_date' => $args['payment_date'],
             'payment_method' => $args['payment_method'] ?? null,
-            'payment_registered_by' => Auth::check() ? Auth::user()->name : 'API',
+            'payment_registered_by' => Auth::id(),
             'reference_number' => $args['reference_number'] ?? null,
             'notes' => $args['notes'] ?? null,
             'payment_support' => $args['payment_support'] ?? null,
+            'daily_box_id' => $dailyBoxId,
         ];
 
         // Validar que el monto no exceda el saldo pendiente

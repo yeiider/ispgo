@@ -73,33 +73,78 @@ class ProcessCashRegisterClosure implements ShouldQueue
             $closure->status = CashRegisterClosure::STATUS_PROCESSING;
             $closure->save();
 
-            // Obtener facturas pagadas del día registradas por el usuario de esta caja
-            $invoices = Invoice::where('payment_registered_by', $cashRegister->user_id)
-                ->whereDate('payment_date', $this->closureDate)
+            $dateFrom = $cashRegister->opened_at;
+            $dateTo = $cashRegister->closed_at ?? Carbon::now();
+
+            $userId = $cashRegister->user_id;
+            $userName = $cashRegister->user ? $cashRegister->user->name : null;
+
+            // Obtener facturas pagadas asociadas a esta caja
+            $invoices = Invoice::where('daily_box_id', $this->cashRegisterId)
                 ->where('status', Invoice::STATUS_PAID)
-                ->whereIn('payment_method', ['cash', 'transfer'])
-                ->with(['adjustments', 'customer'])
+                ->with(['adjustments', 'customer', 'payments'])
                 ->get();
 
-            // Calcular totales por método de pago
-            $totalCash = $invoices->where('payment_method', 'cash')->sum('amount');
-            $totalTransfer = $invoices->where('payment_method', 'transfer')->sum('amount');
-            $totalCard = $invoices->where('payment_method', 'card')->sum('amount');
-            $totalOnline = $invoices->where('payment_method', 'online')->sum('amount');
-            $totalOther = $invoices->whereIn('payment_method', ['other', 'check', 'cryptocurrency'])->sum('amount');
+            // Alternativa por si hay facturas sin daily_box_id pero con fecha dentro del rango (compatibilidad)
+            if ($invoices->isEmpty()) {
+                $invoices = Invoice::where(function($q) use ($userId, $userName) {
+                        $q->where('payment_registered_by', (string) $userId);
+                        if ($userName) $q->orWhere('payment_registered_by', $userName);
+                    })
+                    ->whereBetween('payment_date', [$dateFrom, $dateTo])
+                    ->where('status', Invoice::STATUS_PAID)
+                    ->whereNull('daily_box_id')
+                    ->with(['adjustments', 'customer', 'payments'])
+                    ->get();
+            }
 
-            // Calcular totales generales
-            $totalCollected = $invoices->sum('amount');
+            // Obtener abonos parciales asociados a esta caja
+            $invoicePayments = \App\Models\Invoice\InvoicePayment::where('daily_box_id', $this->cashRegisterId)
+                ->with(['invoice'])
+                ->get();
+
+            if ($invoicePayments->isEmpty()) {
+                $invoicePayments = \App\Models\Invoice\InvoicePayment::where('user_id', $cashRegister->user_id)
+                    ->whereBetween('payment_date', [$dateFrom, $dateTo])
+                    ->whereNull('daily_box_id')
+                    ->with(['invoice'])
+                    ->get();
+            }
+
+            $paymentMethods = ['cash', 'transfer', 'card', 'online', 'other', 'check', 'cryptocurrency'];
+            
+            $totalsByMethod = [];
+            $totalCollected = 0;
+            
+            foreach ($paymentMethods as $method) {
+                $methodInvoices = $invoices->where('payment_method', $method);
+                $invAmount = $methodInvoices->sum(fn ($inv) => max(0, $inv->amount - $inv->payments->sum('amount')));
+                
+                $methodAbonos = $invoicePayments->where('payment_method', $method);
+                $abonoAmount = $methodAbonos->sum('amount');
+                
+                $methodTotal = $invAmount + $abonoAmount;
+                
+                $totalsByMethod[$method] = $methodTotal;
+                $totalCollected += $methodTotal;
+            }
+
+            $totalCash = $totalsByMethod['cash'];
+            $totalTransfer = $totalsByMethod['transfer'];
+            $totalCard = $totalsByMethod['card'];
+            $totalOnline = $totalsByMethod['online'];
+            $totalOther = $totalsByMethod['other'] + $totalsByMethod['check'] + $totalsByMethod['cryptocurrency'];
+
             $totalDiscounts = $invoices->sum('discount');
             $totalAdjustments = $invoices->sum(function ($invoice) {
                 return $invoice->adjustments->sum('amount');
             });
 
             // Generar detalles de pago
-            $paymentDetails = $this->generatePaymentDetails($invoices);
+            $paymentDetails = $this->generatePaymentDetails($invoices, $invoicePayments, $totalsByMethod);
 
             // Generar resumen de facturas
-            $invoiceSummary = $this->generateInvoiceSummary($invoices);
+            $invoiceSummary = $this->generateInvoiceSummary($invoices, $invoicePayments, $totalCollected);
 
             // Calcular balance esperado
             $expectedBalance = $closure->opening_balance + $totalCollected;
@@ -116,8 +161,8 @@ class ProcessCashRegisterClosure implements ShouldQueue
                 'total_card' => $totalCard,
                 'total_online' => $totalOnline,
                 'total_other' => $totalOther,
-                'total_invoices' => $invoices->count(),
-                'paid_invoices' => $invoices->where('status', Invoice::STATUS_PAID)->count(),
+                'total_invoices' => $invoices->count() + $invoicePayments->count(),
+                'paid_invoices' => $invoices->count(),
                 'total_collected' => $totalCollected,
                 'total_discounts' => $totalDiscounts,
                 'total_adjustments' => $totalAdjustments,
@@ -161,17 +206,24 @@ class ProcessCashRegisterClosure implements ShouldQueue
     /**
      * Generar detalles de pago por método
      */
-    protected function generatePaymentDetails($invoices): array
+    protected function generatePaymentDetails($invoices, $invoicePayments, $totalsByMethod): array
     {
         $paymentMethods = ['cash', 'transfer', 'card', 'online', 'other', 'check', 'cryptocurrency'];
         $details = [];
 
         foreach ($paymentMethods as $method) {
             $methodInvoices = $invoices->where('payment_method', $method);
+            $methodAbonos = $invoicePayments->where('payment_method', $method);
+            
+            $invIds = $methodInvoices->pluck('increment_id')->toArray();
+            $abonoInvIds = $methodAbonos->map(function($abono) {
+                return $abono->invoice ? $abono->invoice->increment_id : null;
+            })->filter()->toArray();
+            
             $details[$method] = [
-                'count' => $methodInvoices->count(),
-                'total' => $methodInvoices->sum('amount'),
-                'invoices' => $methodInvoices->pluck('increment_id')->toArray(),
+                'count' => $methodInvoices->count() + $methodAbonos->count(),
+                'total' => $totalsByMethod[$method],
+                'invoices' => array_values(array_unique(array_merge($invIds, $abonoInvIds))),
             ];
         }
 
@@ -181,16 +233,18 @@ class ProcessCashRegisterClosure implements ShouldQueue
     /**
      * Generar resumen de facturas
      */
-    protected function generateInvoiceSummary($invoices): array
+    protected function generateInvoiceSummary($invoices, $invoicePayments, $totalCollected): array
     {
+        $totalTransactions = $invoices->count() + $invoicePayments->count();
         return [
-            'total_invoices' => $invoices->count(),
+            'total_invoices' => $totalTransactions,
             'paid_invoices' => $invoices->where('status', Invoice::STATUS_PAID)->count(),
-            'total_amount' => $invoices->sum('total'),
-            'total_paid' => $invoices->sum('amount'),
+            'partial_payments' => $invoicePayments->count(),
+            'total_amount' => $invoices->sum('total') + $invoicePayments->sum('amount'),
+            'total_paid' => $totalCollected,
             'total_discounts' => $invoices->sum('discount'),
-            'average_ticket' => $invoices->count() > 0 ? $invoices->sum('amount') / $invoices->count() : 0,
-            'customers' => $invoices->pluck('customer.first_name')->unique()->count(),
+            'average_ticket' => $totalTransactions > 0 ? $totalCollected / $totalTransactions : 0,
+            'customers' => $invoices->pluck('customer.first_name')->merge($invoicePayments->map(fn($p) => $p->invoice?->customer?->first_name))->unique()->count(),
             'invoices_with_discount' => $invoices->where('discount', '>', 0)->count(),
             'invoices_with_adjustments' => $invoices->filter(function ($invoice) {
                 return $invoice->adjustments->count() > 0;
