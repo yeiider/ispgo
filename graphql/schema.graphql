@@ -11,6 +11,16 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 "Arbitrary JSON object."
 scalar JSON @scalar(class: "App\\GraphQL\\Scalars\\JSON")
 
+input OrderByClause {
+    column: String!
+    order: SortOrder!
+}
+
+enum SortOrder {
+    ASC @enum(value: "asc")
+    DESC @enum(value: "desc")
+}
+
 type Query {
     # Users
     users(
@@ -28,13 +38,15 @@ type Query {
     permission(id: ID! @eq): Permission @find(model: "Spatie\\Permission\\Models\\Permission")
 
     customers(
-        first_name: String @where(operator: "like")
-        last_name: String @where(operator: "like")
-        identity_document: String @where(operator: "like")
-        email_address: String @where(operator: "like")
-        customer_status: String @eq
-        search: String @scope(name: "search")
-    ): [Customer!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Customer")
+        first_name: String
+        last_name: String
+        identity_document: String
+        email_address: String
+        customer_status: String
+        search: String
+        sort_column: String
+        sort_direction: String
+    ): [Customer!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CustomerQuery")
     customer(id: ID! @eq): Customer @find(model: "App\\Models\\Customers\\Customer")
 
     # Search ALL customers in the system regardless of router/zone assignment.
@@ -53,19 +65,23 @@ type Query {
     globalCustomerAddresses(customer_id: ID!): [Address!]! @field(resolver: "App\\GraphQL\\Queries\\GlobalCustomerAddressesQuery")
 
     addresses(
-        address: String @where(operator: "like")
-        city: String @where(operator: "like")
-        customer_id: ID @eq
-    ): [Address!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Address")
+        address: String
+        city: String
+        customer_id: ID
+        sort_column: String
+        sort_direction: String
+    ): [Address!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\AddressQuery")
 
     services(
-        service_ip: String @where(operator: "like")
-        service_status: String @eq
-        customer_id: ID @eq
-        mac_address: String @where(operator: "like")
-        service_type: String @eq
-        sn: String @where(operator: "like")
-    ): [Service!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Service")
+        service_ip: String
+        service_status: String
+        customer_id: ID
+        mac_address: String
+        service_type: String
+        sn: String
+        sort_column: String
+        sort_direction: String
+    ): [Service!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\ServiceQuery")
     service(id: ID! @eq): Service @find(model: "App\\Models\\Services\\Service")
 
     invoices(
