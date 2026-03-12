@@ -125,6 +125,13 @@ class ConfigService
                 }
                 $value = (string)$value;
                 break;
+            case 'time':
+                if ($value === null || $value === '') { $value = null; break; }
+                if (!preg_match('/^\d{2}:\d{2}$/', $value)) {
+                    throw new \InvalidArgumentException('Invalid time format (HH:mm)');
+                }
+                $value = (string)$value;
+                break;
             case 'string':
             default:
                 $value = $value === null ? null : (string)$value;
@@ -142,6 +149,8 @@ class ConfigService
                 return in_array((string)$raw, ['1','true','yes','on'], true);
             case 'integer':
                 return (int)$raw;
+            case 'time':
+                return (string)$raw;
             default:
                 return $raw;
         }

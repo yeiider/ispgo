@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Finance\CashRegister;
 use App\Models\Finance\CashRegisterClosure;
+use App\Models\Finance\Expense;
 use App\Models\Invoice\Invoice;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -79,9 +80,10 @@ class ProcessCashRegisterClosure implements ShouldQueue
             $userId = $cashRegister->user_id;
             $userName = $cashRegister->user ? $cashRegister->user->name : null;
 
-            // Obtener facturas pagadas asociadas a esta caja
+            // Obtener facturas pagadas asociadas a esta caja para esta fecha específica
             $invoices = Invoice::where('daily_box_id', $this->cashRegisterId)
                 ->where('status', Invoice::STATUS_PAID)
+                ->whereDate('payment_date', $this->closureDate)
                 ->with(['adjustments', 'customer', 'payments'])
                 ->get();
 
@@ -98,8 +100,9 @@ class ProcessCashRegisterClosure implements ShouldQueue
                     ->get();
             }
 
-            // Obtener abonos parciales asociados a esta caja
+            // Obtener abonos parciales asociados a esta caja para esta fecha específica
             $invoicePayments = \App\Models\Invoice\InvoicePayment::where('daily_box_id', $this->cashRegisterId)
+                ->whereDate('payment_date', $this->closureDate)
                 ->with(['invoice'])
                 ->get();
 
@@ -110,6 +113,11 @@ class ProcessCashRegisterClosure implements ShouldQueue
                     ->with(['invoice'])
                     ->get();
             }
+
+            // Obtener gastos asociados a esta caja para esta fecha específica
+            $expenses = Expense::where('daily_box_id', $this->cashRegisterId)
+                ->whereDate('date', $this->closureDate)
+                ->get();
 
             $paymentMethods = ['cash', 'transfer', 'card', 'online', 'other', 'check', 'cryptocurrency'];
             
@@ -144,10 +152,14 @@ class ProcessCashRegisterClosure implements ShouldQueue
             $paymentDetails = $this->generatePaymentDetails($invoices, $invoicePayments, $totalsByMethod);
 
             // Generar resumen de facturas
+            $totalCashExpenses = $expenses->where('payment_method', 'cash')->sum('amount');
+            $totalExpenses = $expenses->sum('amount');
             $invoiceSummary = $this->generateInvoiceSummary($invoices, $invoicePayments, $totalCollected);
+            $invoiceSummary['total_expenses'] = $totalExpenses;
+            $invoiceSummary['total_cash_expenses'] = $totalCashExpenses;
 
-            // Calcular balance esperado
-            $expectedBalance = $closure->opening_balance + $totalCollected;
+            // Calcular balance esperado (SOLO EFECTIVO): Apertura + Recaudado Efectivo - Gastos Efectivo
+            $expectedBalance = $closure->opening_balance + $totalCash - $totalCashExpenses;
             $closingBalance = $this->closingBalance ?? $expectedBalance;
             $difference = $closingBalance - $expectedBalance;
 

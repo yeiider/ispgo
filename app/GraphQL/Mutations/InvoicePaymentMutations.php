@@ -28,7 +28,7 @@ class InvoicePaymentMutations
     {
         $dailyBoxId = $args['daily_box_id'] ?? null;
         if (!$dailyBoxId && Auth::check()) {
-            $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())->first();
+            $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())->latest()->first();
 
             if (!$assignedRegister || $assignedRegister->status !== \App\Models\Finance\CashRegister::STATUS_OPEN) {
                 throw new InvalidArgumentException(

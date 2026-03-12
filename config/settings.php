@@ -616,6 +616,26 @@ return [
                 "options" => \App\Settings\Config\Sources\DaysOfMonth::class
             ],
         ],
-    ]
-
+    ],
+    "finance" => [
+        "setting" => [
+            "label" => "Finanzas",
+            "class" => "form-control",
+        ],
+        "cash_register" => [
+            "setting" => [
+                "label" => "Cierre Automático de Caja",
+                "code" => "cash_register"
+            ],
+            "auto_close_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Habilitar Cierre Automático",
+            ],
+            "auto_close_time" => [
+                "field" => "time-field",
+                "label" => "Hora de Cierre",
+                "placeholder" => "23:59",
+            ],
+        ],
+    ],
 ];

@@ -20,7 +20,9 @@ class ExpenseMutations
             ];
         }
 
-        $assignedRegister = CashRegister::where('user_id', $user->id)->first();
+        $assignedRegister = CashRegister::where('user_id', $user->id)
+            ->latest()
+            ->first();
 
         if (!$assignedRegister || $assignedRegister->status !== CashRegister::STATUS_OPEN) {
             return [
@@ -40,15 +42,6 @@ class ExpenseMutations
         $expenseFields['daily_box_id'] = $assignedRegister->id;
 
         $expense = Expense::create($expenseFields);
-
-        // Deduct from end_balance? The balance is: current_balance = initial_balance + recaudos - gastos.
-        // If we want it to apply automatically:
-        // Wait, CashRegister doesn't have an updater for current_balance on every transaction, or does it?
-        // Let's assume current_balance can just be recalculated or modified here.
-        // For now let's just create the expense, current_balance logic may rely on `CashRegisterClosure`.
-        // Actually, if it reduces balance, we should probably update `current_balance` directly:
-        $assignedRegister->current_balance -= $expense->amount;
-        $assignedRegister->save();
 
         return [
             'success' => true,

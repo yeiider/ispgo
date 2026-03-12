@@ -34,28 +34,29 @@ class CashierInvoicesQuery
             // Auto-detect currently open cash register for the POS
             $cashRegister = \App\Models\Finance\CashRegister::where('user_id', $userId)
                 ->where('status', \App\Models\Finance\CashRegister::STATUS_OPEN)
+                ->latest()
                 ->first();
         }
 
         if ($cashRegister) {
             $query->where('daily_box_id', $cashRegister->id);
-        } else {
-            // Filter by exact date
-            if (!empty($args['date'])) {
-                $date = Carbon::parse($args['date'])->toDateString();
-                $query->whereDate('payment_date', $date);
-            }
+        }
 
-            // Filter by date range
-            if (!empty($args['date_from'])) {
-                $dateFrom = Carbon::parse($args['date_from'])->startOfDay();
-                $query->where('payment_date', '>=', $dateFrom);
-            }
+        // Filter by exact date
+        if (!empty($args['date'])) {
+            $date = Carbon::parse($args['date'])->toDateString();
+            $query->whereDate('payment_date', $date);
+        }
 
-            if (!empty($args['date_to'])) {
-                $dateTo = Carbon::parse($args['date_to'])->endOfDay();
-                $query->where('payment_date', '<=', $dateTo);
-            }
+        // Filter by date range
+        if (!empty($args['date_from'])) {
+            $dateFrom = Carbon::parse($args['date_from'])->startOfDay();
+            $query->where('payment_date', '>=', $dateFrom);
+        }
+
+        if (!empty($args['date_to'])) {
+            $dateTo = Carbon::parse($args['date_to'])->endOfDay();
+            $query->where('payment_date', '<=', $dateTo);
         }
 
         // Filter by specific payment method (cash/transfer usually)
@@ -85,6 +86,7 @@ class CashierInvoicesQuery
         } else {
             $cashRegister = \App\Models\Finance\CashRegister::where('user_id', $userId)
                 ->where('status', \App\Models\Finance\CashRegister::STATUS_OPEN)
+                ->latest()
                 ->first();
         }
 
@@ -173,9 +175,15 @@ class CashierInvoicesQuery
         if ($dailyBoxId) {
             $expensesQuery->where('daily_box_id', $dailyBoxId);
         } else {
-            $expensesQuery->whereBetween('date', [$dateFrom, $dateTo]);
+            // Si no hay caja abierta, filtrar por los gastos de las cajas del usuario para el rango de fechas
+            $expensesQuery->whereHas('dailyBox', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })->whereBetween('date', [$dateFrom, $dateTo]);
         }
-        $totalExpenses = $expensesQuery->sum('amount');
+        $expenses = $expensesQuery->get();
+        $totalExpenses = $expenses->sum('amount');
+        $totalCashExpenses = $expenses->where('payment_method', 'cash')->sum('amount');
+        $totalTransferExpenses = $expenses->where('payment_method', 'transfer')->sum('amount');
 
         // ---- Totales combinados ----
         $totalCash      = $totalCashInvoices + $totalCashPayments;
@@ -189,9 +197,35 @@ class CashierInvoicesQuery
             'total_cash'      => $totalCash,
             'total_transfer'  => $totalTransfer,
             'total_collected' => $totalCollected,
-            'total_invoices'  => $totalItems,
-            'total_expenses'  => $totalExpenses,
-            'total_abonos'    => $totalAbonos,
+            'total_invoices'      => $totalItems,
+            'total_expenses'      => $totalExpenses,
+            'total_cash_expenses'  => $totalCashExpenses,
+            'total_transfer_expenses' => $totalTransferExpenses,
+            'total_abonos'        => $totalAbonos,
         ];
+    }
+
+    /**
+     * Resolve myExpenses query
+     */
+    public function myExpenses($root, array $args)
+    {
+        $userId = Auth::id();
+        $query = Expense::query()->with(['expenseCategory', 'supplier']);
+
+        if (!empty($args['daily_box_id'])) {
+            $query->where('daily_box_id', $args['daily_box_id']);
+        } else {
+            // Filter by the user's boxes (current user)
+            $query->whereHas('dailyBox', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+        }
+
+        if (!empty($args['date'])) {
+            $query->whereDate('date', $args['date']);
+        }
+
+        return $query->orderBy('created_at', 'desc')->get();
     }
 }

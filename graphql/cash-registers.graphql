@@ -487,7 +487,10 @@ type ExpensePayload {
 
 extend type Query @guard {
     expenseCategories: [ExpenseCategory!]! @all(model: "App\\Models\\Finance\\ExpenseCategory")
-    expenses(daily_box_id: ID @where(operator: "=")): [Expense!]! @all(model: "App\\Models\\Finance\\Expense")
+    expenses(
+        daily_box_id: ID
+        date: Date
+    ): [Expense!]! @field(resolver: "App\\GraphQL\\Queries\\CashierInvoicesQuery@myExpenses")
     suppliers: [Supplier!]! @all(model: "App\\Models\\Inventory\\Supplier")
     suppliersPaginator(
         name: String @where(operator: "like")

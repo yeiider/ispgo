@@ -25,6 +25,9 @@ Schedule::command('payment-promises:handle-expired')->dailyAt('00:30');
 Schedule::command('onepay:auto-create-charges')->daily();
 Schedule::command('backup:run')->dailyAt('01:00');
 Schedule::command('backup:clean')->dailyAt('01:30');
+
+// Cierre automático de cajas
+Schedule::command('ispgo:auto-close-cash-registers')->dailyAt(\App\Settings\FinanceProviderConfig::getAutoCloseTime());
 //Schedule::call(function () {
 //    $cutoffTime = Carbon::now()->subMinutes(\Ispgo\Wiivo\WiivoConfigProvider::getSessionLife());
 //    SessionChatBot::where('updated_at', '<', $cutoffTime)->delete();

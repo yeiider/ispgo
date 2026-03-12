@@ -158,9 +158,13 @@ class CashRegister extends Model
     public function open(): void
     {
         $this->status = self::STATUS_OPEN;
-        if (!$this->opened_at) {
+        
+        // Si no tiene fecha de apertura, o si la fecha de apertura es de un día distinto a hoy,
+        // actualizamos la fecha de apertura a hoy. Si ya fue abierta hoy (reapertura), la conservamos.
+        if (!$this->opened_at || !$this->opened_at->isToday()) {
             $this->opened_at = now();
         }
+        
         $this->closed_at = null;
         $this->save();
     }

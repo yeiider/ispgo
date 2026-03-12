@@ -79,6 +79,7 @@ class ConfigSchema
             'boolean-field' => 'boolean',
             'select-field' => 'select',
             'image-field' => 'image',
+            'time-field' => 'time',
             'text-field', 'textarea-field', 'password-field' => 'string',
             default => 'string',
         };

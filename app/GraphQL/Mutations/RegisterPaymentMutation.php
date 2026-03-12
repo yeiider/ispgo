@@ -44,7 +44,9 @@ class RegisterPaymentMutation
             if (Auth::check()) {
                 $user = Auth::user();
 
-                $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', $user->id)->first();
+                $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', $user->id)
+                    ->latest()
+                    ->first();
 
                 if (!$assignedRegister) {
                     return [
@@ -72,7 +74,9 @@ class RegisterPaymentMutation
 
             $dailyBoxId = null;
             if (Auth::check()) {
-                $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())->first();
+                $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())
+                    ->latest()
+                    ->first();
                 $dailyBoxId = $assignedRegister ? $assignedRegister->id : null;
             }
 

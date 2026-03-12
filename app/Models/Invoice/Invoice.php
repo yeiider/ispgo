@@ -300,6 +300,11 @@ class Invoice extends Model
         $this->payment_method = $paymentMethod;
         if ($dailyBoxId) {
             $this->daily_box_id = $dailyBoxId;
+            
+            // Si el pago es en efectivo, incrementar el balance actual de la caja
+            if ($paymentMethod === 'cash') {
+                \App\Models\Finance\CashRegister::where('id', $dailyBoxId)->increment('current_balance', $amount);
+            }
         }
 
         if ($this->isFullyPaid()) {
