@@ -40,17 +40,23 @@ class RegisterPaymentMutation
                 }
             }
 
-            // Verificar si el usuario tiene una caja diaria asignada y abierta antes de permitir registrar pagos
+            // Verificar estado de la caja del usuario antes de permitir el cobro
             if (Auth::check()) {
                 $user = Auth::user();
-                $hasOpenRegister = \App\Models\Finance\CashRegister::where('user_id', $user->id)
-                    ->where('status', \App\Models\Finance\CashRegister::STATUS_OPEN)
-                    ->exists();
 
-                if (!$hasOpenRegister) {
+                $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', $user->id)->first();
+
+                if (!$assignedRegister) {
                     return [
                         'success' => false,
-                        'message' => __('No puedes registrar pagos. Debes tener una caja diaria asignada y abierta en el sistema.'),
+                        'message' => __('No puedes registrar pagos. Debes tener una caja asignada en el sistema para poder recibir dinero.'),
+                    ];
+                }
+
+                if ($assignedRegister->status !== \App\Models\Finance\CashRegister::STATUS_OPEN) {
+                    return [
+                        'success' => false,
+                        'message' => __('No puedes registrar pagos en este momento. La caja que tienes asignada se encuentra CERRADA. Por favor, dirígete al administrador@ para abrir tu caja y continuar.'),
                     ];
                 }
             }
@@ -66,10 +72,8 @@ class RegisterPaymentMutation
 
             $dailyBoxId = null;
             if (Auth::check()) {
-                $openRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())
-                    ->where('status', \App\Models\Finance\CashRegister::STATUS_OPEN)
-                    ->first();
-                $dailyBoxId = $openRegister ? $openRegister->id : null;
+                $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())->first();
+                $dailyBoxId = $assignedRegister ? $assignedRegister->id : null;
             }
 
             $invoice->applyPayment(null, $paymentMethod, $additional, $notes, $dailyBoxId, false, $paymentRegisteredById);

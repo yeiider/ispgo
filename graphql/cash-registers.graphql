@@ -407,4 +407,110 @@ extend type Mutation @guard {
         id: ID!
     ): DeleteCashRegisterPayload!
         @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@delete")
+
+
+}
+
+"Categoría de un gasto"
+type ExpenseCategory {
+    id: ID!
+    name: String!
+    description: String
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+"Proveedor"
+type Supplier {
+    id: ID!
+    name: String!
+    contact: String
+    document: String
+    description: String
+    email: String
+    phone: String
+    country: String
+    city: String
+    postal_code: String
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+
+
+input CreateSupplierInput {
+    name: String! @rules(apply: ["required", "string", "max:255"])
+    contact: String
+    document: String
+    description: String
+    email: String @rules(apply: ["nullable", "email"])
+    phone: String
+    country: String
+    city: String
+    postal_code: String
+}
+
+type SupplierPayload {
+    success: Boolean!
+    message: String!
+    supplier: Supplier
+}
+
+"Gasto asociado a una caja registradora"
+type Expense {
+    id: ID!
+    description: String
+    amount: Float!
+    date: Date!
+    payment_method: String!
+    expense_category_id: ID
+    supplier_id: ID
+    daily_box_id: ID
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    expenseCategory: ExpenseCategory @belongsTo
+    supplier: Supplier @belongsTo
+    dailyBox: CashRegister @belongsTo
+}
+
+"Payload de respuesta para crear gasto"
+type ExpensePayload {
+    success: Boolean!
+    message: String!
+    expense: Expense
+}
+
+
+
+
+
+extend type Query @guard {
+    expenseCategories: [ExpenseCategory!]! @all(model: "App\\Models\\Finance\\ExpenseCategory")
+    expenses(daily_box_id: ID @where(operator: "=")): [Expense!]! @all(model: "App\\Models\\Finance\\Expense")
+    suppliers: [Supplier!]! @all(model: "App\\Models\\Inventory\\Supplier")
+    suppliersPaginator(
+        name: String @where(operator: "like")
+    ): Supplier! @paginate(defaultCount: 15, model: "App\\Models\\Inventory\\Supplier")
+}
+
+extend type Mutation @guard {
+    createExpense(
+        description: String
+        amount: Float!
+        date: Date!
+        payment_method: String!
+        expense_category_id: ID!
+        supplier_id: ID
+        daily_box_id: ID
+    ): ExpensePayload @field(resolver: "App\\GraphQL\\Mutations\\ExpenseMutations@create")
+
+    createExpenseCategory(
+        name: String!
+        description: String
+    ): ExpenseCategory @create(model: "App\\Models\\Finance\\ExpenseCategory")
+
+    createSupplier(
+        input: CreateSupplierInput!
+    ): SupplierPayload @field(resolver: "App\\GraphQL\\Mutations\\SupplierMutations@create")
 }

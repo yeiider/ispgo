@@ -39,6 +39,7 @@ return [
     'cash_registers' => 'Cajas Registradoras',
     'incomes' => 'Ingresos',
     'expenses' => 'Gastos',
+    'expense_categories' => 'Categorías de Gastos',
     'transactions' => 'Transacciones',
     'boxes' => 'Cajas',
     'daily_boxes' => 'Cajas Diarias',

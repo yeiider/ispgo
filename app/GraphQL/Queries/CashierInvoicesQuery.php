@@ -2,6 +2,7 @@
 
 namespace App\GraphQL\Queries;
 
+use App\Models\Finance\Expense;
 use App\Models\Invoice\Invoice;
 use App\Models\Invoice\InvoicePayment;
 use Carbon\Carbon;
@@ -165,6 +166,16 @@ class CashierInvoicesQuery
         $totalCashPayments     = $payments->where('payment_method', 'cash')->sum('amount');
         $totalTransferPayments = $payments->where('payment_method', 'transfer')->sum('amount');
         $totalPaymentsCount    = $payments->count();
+        $totalAbonos           = $totalCashPayments + $totalTransferPayments;
+
+        // ---- Gastos (Expense) ----
+        $expensesQuery = Expense::query();
+        if ($dailyBoxId) {
+            $expensesQuery->where('daily_box_id', $dailyBoxId);
+        } else {
+            $expensesQuery->whereBetween('date', [$dateFrom, $dateTo]);
+        }
+        $totalExpenses = $expensesQuery->sum('amount');
 
         // ---- Totales combinados ----
         $totalCash      = $totalCashInvoices + $totalCashPayments;
@@ -179,6 +190,8 @@ class CashierInvoicesQuery
             'total_transfer'  => $totalTransfer,
             'total_collected' => $totalCollected,
             'total_invoices'  => $totalItems,
+            'total_expenses'  => $totalExpenses,
+            'total_abonos'    => $totalAbonos,
         ];
     }
 }

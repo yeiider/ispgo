@@ -28,10 +28,14 @@ class InvoicePaymentMutations
     {
         $dailyBoxId = $args['daily_box_id'] ?? null;
         if (!$dailyBoxId && Auth::check()) {
-            $openRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())
-                ->where('status', \App\Models\Finance\CashRegister::STATUS_OPEN)
-                ->first();
-            $dailyBoxId = $openRegister ? $openRegister->id : null;
+            $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())->first();
+
+            if (!$assignedRegister || $assignedRegister->status !== \App\Models\Finance\CashRegister::STATUS_OPEN) {
+                throw new InvalidArgumentException(
+                    'No puedes registrar pagos en este momento. La caja que tienes asignada se encuentra CERRADA o no tienes ninguna caja asignada. Por favor, abre tu caja para continuar.'
+                );
+            }
+            $dailyBoxId = $assignedRegister->id;
         }
 
         // Preparar datos
