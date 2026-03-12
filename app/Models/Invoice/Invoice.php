@@ -253,7 +253,9 @@ class Invoice extends Model
 
     protected static function generateIncrementId()
     {
-        $lastInvoice = self::orderBy('id', 'desc')->first();
+        // Use withoutGlobalScopes to ensure we find the absolute last ID in the database,
+        // ignoring any router/user filters that might hide newer invoices.
+        $lastInvoice = self::withoutGlobalScopes()->orderBy('id', 'desc')->first();
         $lastId = $lastInvoice ? intval($lastInvoice->id) : 0;
         $incrementId = str_pad($lastId + 1, 10, '0', STR_PAD_LEFT);
         return $incrementId;
