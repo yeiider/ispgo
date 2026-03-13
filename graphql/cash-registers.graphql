@@ -398,6 +398,9 @@ extend type Mutation @guard {
     openCashRegister(
         "ID de la caja"
         id: ID!
+
+        "Balance inicial opcional"
+        initial_balance: Float
     ): CashRegister!
         @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@open")
 

@@ -208,8 +208,16 @@ class CashRegisterMutations
             // Abrir la caja
             $cashRegister->open();
 
-            // Actualizar el balance inicial con el balance actual
-            $cashRegister->initial_balance = $cashRegister->current_balance;
+            // Si se proporciona un balance inicial (soportando camelCase y snake_case)
+            if (isset($args['initial_balance']) || isset($args['initialBalance'])) {
+                $newBalance = $args['initial_balance'] ?? $args['initialBalance'];
+                $cashRegister->initial_balance = $newBalance;
+                $cashRegister->current_balance = $newBalance;
+            } else {
+                // Comportamiento por defecto: el balance actual se convierte en el inicial del nuevo periodo
+                $cashRegister->initial_balance = $cashRegister->current_balance;
+            }
+
             $cashRegister->save();
 
             DB::commit();
