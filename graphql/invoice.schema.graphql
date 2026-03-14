@@ -138,7 +138,10 @@ type CashierDailyReport {
     total_collected: Float!
     total_invoices: Int!
     total_expenses: Float!
+    total_cash_expenses: Float!
+    total_transfer_expenses: Float!
     total_abonos: Float!
+    total_neto: Float!
 }
 
 extend type Mutation {

@@ -133,9 +133,8 @@ class CashierInvoicesQuery
 
         if ($dailyBoxId) {
             $invoiceQuery->where('daily_box_id', $dailyBoxId);
-        } else {
-            $invoiceQuery->whereBetween('payment_date', [$dateFrom, $dateTo]);
         }
+        $invoiceQuery->whereBetween('payment_date', [$dateFrom, $dateTo]);
 
         $invoices = $invoiceQuery->get();
 
@@ -159,9 +158,8 @@ class CashierInvoicesQuery
 
         if ($dailyBoxId) {
             $paymentsQuery->where('daily_box_id', $dailyBoxId);
-        } else {
-            $paymentsQuery->whereBetween('payment_date', [$dateFrom, $dateTo]);
         }
+        $paymentsQuery->whereBetween('payment_date', [$dateFrom, $dateTo]);
 
         $payments = $paymentsQuery->get();
 
@@ -178,8 +176,9 @@ class CashierInvoicesQuery
             // Si no hay caja abierta, filtrar por los gastos de las cajas del usuario para el rango de fechas
             $expensesQuery->whereHas('dailyBox', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
-            })->whereBetween('date', [$dateFrom, $dateTo]);
+            });
         }
+        $expensesQuery->whereBetween('date', [$dateFrom, $dateTo]);
         $expenses = $expensesQuery->get();
         $totalExpenses = $expenses->sum('amount');
         $totalCashExpenses = $expenses->where('payment_method', 'cash')->sum('amount');
@@ -202,6 +201,7 @@ class CashierInvoicesQuery
             'total_cash_expenses'  => $totalCashExpenses,
             'total_transfer_expenses' => $totalTransferExpenses,
             'total_abonos'        => $totalAbonos,
+            'total_neto'          => $totalCollected - $totalExpenses,
         ];
     }
 
