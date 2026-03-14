@@ -464,7 +464,7 @@ type Expense {
     id: ID!
     description: String
     amount: Float!
-    date: Date!
+    date: DateTime!
     payment_method: String!
     expense_category_id: ID
     supplier_id: ID
@@ -504,7 +504,7 @@ extend type Mutation @guard {
     createExpense(
         description: String
         amount: Float!
-        date: Date!
+        date: DateTime!
         payment_method: String!
         expense_category_id: ID!
         supplier_id: ID

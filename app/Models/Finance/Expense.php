@@ -15,7 +15,7 @@ class Expense extends Model
     ];
 
     protected $casts = [
-        'date' => 'date',
+        'date' => 'datetime',
     ];
 
     public function supplier()

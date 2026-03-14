@@ -94,29 +94,36 @@ class CashierInvoicesQuery
         $userId = $currentUser->id;
         $registerUserFilter = $currentUser->name;
 
-        if ($cashRegister) {
-            $dateFrom = Carbon::parse($cashRegister->opened_at);
-            $dateTo = $cashRegister->closed_at ? Carbon::parse($cashRegister->closed_at) : Carbon::now();
-            $dailyBoxId = $cashRegister->id;
+        // Detectar caja si se proporciona ID o si hay una abierta para el usuario
+        if (!empty($args['cash_register_id'])) {
+            $cashRegister = \App\Models\Finance\CashRegister::find($args['cash_register_id']);
         } else {
-            $dailyBoxId = null;
-            if (!empty($args['date'])) {
-                $dateFrom = Carbon::parse($args['date'])->startOfDay();
-                $dateTo   = Carbon::parse($args['date'])->endOfDay();
-            } else {
-                if (!empty($args['date_from'])) {
-                    $dateFrom = Carbon::parse($args['date_from'])->startOfDay();
-                } else {
-                    $dateFrom = Carbon::now()->startOfDay();
-                }
+            $cashRegister = \App\Models\Finance\CashRegister::where('user_id', $userId)
+                ->where('status', \App\Models\Finance\CashRegister::STATUS_OPEN)
+                ->latest()
+                ->first();
+        }
 
-                if (!empty($args['date_to'])) {
-                    $dateTo = Carbon::parse($args['date_to'])->endOfDay();
-                } else {
-                    $dateTo = Carbon::now()->endOfDay();
-                }
+        $dailyBoxId = $cashRegister ? $cashRegister->id : null;
+
+        // Determinar el rango de fechas (Siempre respetar el día actual o el solicitado)
+        if (!empty($args['date'])) {
+            $dateFrom = Carbon::parse($args['date'])->startOfDay();
+            $dateTo   = Carbon::parse($args['date'])->endOfDay();
+        } else {
+            if (!empty($args['date_from'])) {
+                $dateFrom = Carbon::parse($args['date_from'])->startOfDay();
+            } else {
+                $dateFrom = Carbon::now()->startOfDay();
+            }
+
+            if (!empty($args['date_to'])) {
+                $dateTo = Carbon::parse($args['date_to'])->endOfDay();
+            } else {
+                $dateTo = Carbon::now()->endOfDay();
             }
         }
+
 
         // ---- Pagos completos de facturas (invoice.status = paid) ----
         // Para facturas que tenían abonos previos, `amount` acumula todos los pagos
@@ -173,13 +180,16 @@ class CashierInvoicesQuery
         if ($dailyBoxId) {
             $expensesQuery->where('daily_box_id', $dailyBoxId);
         } else {
-            // Si no hay caja abierta, filtrar por los gastos de las cajas del usuario para el rango de fechas
+            // Si no hay caja abierta, filtrar por los gastos de las cajas del usuario
             $expensesQuery->whereHas('dailyBox', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             });
         }
+        
         $expensesQuery->whereBetween('date', [$dateFrom, $dateTo]);
+        
         $expenses = $expensesQuery->get();
+
         $totalExpenses = $expenses->sum('amount');
         $totalCashExpenses = $expenses->where('payment_method', 'cash')->sum('amount');
         $totalTransferExpenses = $expenses->where('payment_method', 'transfer')->sum('amount');

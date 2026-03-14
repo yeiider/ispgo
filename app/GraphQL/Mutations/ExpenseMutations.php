@@ -36,7 +36,7 @@ class ExpenseMutations
         $expenseFields = $args['input'] ?? $args;
 
         if (empty($expenseFields['date'])) {
-            $expenseFields['date'] = now()->format('Y-m-d');
+            $expenseFields['date'] = now()->toDateTimeString();
         }
 
         $expenseFields['daily_box_id'] = $assignedRegister->id;
