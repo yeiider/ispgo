@@ -67,6 +67,7 @@ class SmartOltMutation
                 // Guardar el SN en el servicio
                 try {
                     $service->sn = $args['sn'];
+                    $service->service_status = 'active';
                     $service->save();
                     $this->apiManager->setOnuManagementIpDhcpByExternalId($args['sn'], $args['vlan']);
 

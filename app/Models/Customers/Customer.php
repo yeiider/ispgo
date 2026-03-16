@@ -128,6 +128,11 @@ class Customer extends Authenticatable implements MustVerifyEmail
         return ucwords("{$this->first_name} {$this->last_name}");
     }
 
+    public function getGlobalAddressesAttribute()
+    {
+        return $this->addresses()->withoutGlobalScope('router_filter')->get();
+    }
+
     public function setFirstNameAttribute($value)
     {
         $this->attributes['first_name'] = strtolower($value);
@@ -142,7 +147,9 @@ class Customer extends Authenticatable implements MustVerifyEmail
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router(s)
+        // Global Scope: Filter customers by the routers of their SERVICES
+        // A customer is visible in a zone if they have at least one service in that zone.
+        // This allows a customer registered in zone A to appear in zone B if they have a service there.
         static::addGlobalScope('router_filter', function (Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
@@ -160,8 +167,11 @@ class Customer extends Authenticatable implements MustVerifyEmail
                 return;
             }
 
-            // Filter by user's assigned router(s)
-            $builder->whereIn('router_id', $routerIds);
+            // Filter customers that have at least one SERVICE in the user's router(s).
+            // This is the correct logic: router → services → customers
+            $builder->whereHas('services', function ($query) use ($routerIds) {
+                $query->whereIn('router_id', $routerIds);
+            });
         });
 
         static::creating(function ($customer) {
@@ -223,6 +233,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
         return $query->where(function ($q) use ($search) {
             $q->where('first_name', 'LIKE', "%{$search}%")
               ->orWhere('last_name', 'LIKE', "%{$search}%")
+              ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"])
               ->orWhere('identity_document', 'LIKE', "%{$search}%")
               ->orWhere('email_address', 'LIKE', "%{$search}%");
         });
@@ -237,7 +248,9 @@ class Customer extends Authenticatable implements MustVerifyEmail
     {
         return self::where(function ($query) use ($input) {
             $query->where('identity_document', 'LIKE', "%{$input}%")
-                ->orWhere('first_name', 'LIKE', "%{$input}%");
+                ->orWhere('first_name', 'LIKE', "%{$input}%")
+                ->orWhere('last_name', 'LIKE', "%{$input}%")
+                ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$input}%"]);
         })
             ->with(['invoices' => function ($query) {
                 $query->where('status', 'unpaid'); // Filtrar solo facturas no pagadas

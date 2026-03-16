@@ -137,6 +137,11 @@ type CashierDailyReport {
     total_transfer: Float!
     total_collected: Float!
     total_invoices: Int!
+    total_expenses: Float!
+    total_cash_expenses: Float!
+    total_transfer_expenses: Float!
+    total_abonos: Float!
+    total_neto: Float!
 }
 
 extend type Mutation {
@@ -181,11 +186,13 @@ extend type Query {
         date_from: Date
         date_to: Date
         payment_method: String
+        cash_register_id: ID
     ): [Invoice!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CashierInvoicesQuery@myInvoices")
 
     myDailyCollectionReport(
         date: Date
         date_from: Date
         date_to: Date
+        cash_register_id: ID
     ): CashierDailyReport! @field(resolver: "App\\GraphQL\\Queries\\CashierInvoicesQuery@dailyReport")
 }

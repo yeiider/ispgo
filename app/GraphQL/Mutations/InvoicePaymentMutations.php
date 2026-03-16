@@ -26,6 +26,18 @@ class InvoicePaymentMutations
      */
     public function create($root, array $args)
     {
+        $dailyBoxId = $args['daily_box_id'] ?? null;
+        if (!$dailyBoxId && Auth::check()) {
+            $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())->latest()->first();
+
+            if (!$assignedRegister || $assignedRegister->status !== \App\Models\Finance\CashRegister::STATUS_OPEN) {
+                throw new InvalidArgumentException(
+                    'No puedes registrar pagos en este momento. La caja que tienes asignada se encuentra CERRADA o no tienes ninguna caja asignada. Por favor, abre tu caja para continuar.'
+                );
+            }
+            $dailyBoxId = $assignedRegister->id;
+        }
+
         // Preparar datos
         $data = [
             'invoice_id' => $args['invoice_id'],
@@ -33,10 +45,11 @@ class InvoicePaymentMutations
             'amount' => $args['amount'],
             'payment_date' => $args['payment_date'],
             'payment_method' => $args['payment_method'] ?? null,
-            'payment_registered_by' => Auth::check() ? Auth::user()->name : 'API',
+            'payment_registered_by' => Auth::id(),
             'reference_number' => $args['reference_number'] ?? null,
             'notes' => $args['notes'] ?? null,
             'payment_support' => $args['payment_support'] ?? null,
+            'daily_box_id' => $dailyBoxId,
         ];
 
         // Validar que el monto no exceda el saldo pendiente

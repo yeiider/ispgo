@@ -33,11 +33,12 @@ class InvoicePayment extends Model
         'notes',
         'payment_support',
         'payment_registered_by',
-        'additional_information'
+        'additional_information',
+        'daily_box_id'
     ];
 
     protected $casts = [
-        'payment_date' => 'date',
+        'payment_date' => 'datetime',
         'additional_information' => 'array',
         'amount' => 'float',
     ];
@@ -68,16 +69,39 @@ class InvoicePayment extends Model
         // When a payment is created, update the invoice
         static::created(function ($payment) {
             $payment->updateInvoiceTotals();
+            if ($payment->daily_box_id && $payment->payment_method === 'cash') {
+                \App\Models\Finance\CashRegister::where('id', $payment->daily_box_id)->increment('current_balance', $payment->amount);
+            }
         });
 
         // When a payment is updated, recalculate the invoice
         static::updated(function ($payment) {
             $payment->updateInvoiceTotals();
+            
+            // Si cambian el monto, el método o la caja, debemos ajustar el balance
+            if ($payment->wasChanged(['amount', 'payment_method', 'daily_box_id'])) {
+                $originalAmount = $payment->getOriginal('amount');
+                $originalMethod = $payment->getOriginal('payment_method');
+                $originalBoxId = $payment->getOriginal('daily_box_id');
+
+                // Revertir el original si era efectivo
+                if ($originalBoxId && $originalMethod === 'cash') {
+                    \App\Models\Finance\CashRegister::where('id', $originalBoxId)->decrement('current_balance', $originalAmount);
+                }
+
+                // Aplicar el nuevo si es efectivo
+                if ($payment->daily_box_id && $payment->payment_method === 'cash') {
+                    \App\Models\Finance\CashRegister::where('id', $payment->daily_box_id)->increment('current_balance', $payment->amount);
+                }
+            }
         });
 
         // When a payment is deleted, recalculate the invoice
         static::deleted(function ($payment) {
             $payment->updateInvoiceTotals();
+            if ($payment->daily_box_id && $payment->payment_method === 'cash') {
+                \App\Models\Finance\CashRegister::where('id', $payment->daily_box_id)->decrement('current_balance', $payment->amount);
+            }
         });
     }
 

@@ -133,8 +133,8 @@ class CashRegisterMutations
                 ->whereDate('closure_date', $closureDate)
                 ->first();
 
-            if ($existingClosure && $existingClosure->status === CashRegisterClosure::STATUS_COMPLETED) {
-                throw new Error('Ya existe un cierre completado para esta fecha.');
+            if ($existingClosure && $existingClosure->status === CashRegisterClosure::STATUS_PROCESSING) {
+                throw new Error('El cierre de caja para esta fecha ya se encuentra en procesamiento.');
             }
 
             // Despachar el job para procesar el cierre de forma asíncrona
@@ -195,11 +195,29 @@ class CashRegisterMutations
                 throw new Error('La caja ya está abierta.');
             }
 
+            // RESTRICCION: No puede reabrir una caja si el usuario en el momento tiene otra caja abierta.
+            $anyOtherOpen = CashRegister::where('user_id', $user->id)
+                ->where('status', CashRegister::STATUS_OPEN)
+                ->where('id', '!=', $cashRegister->id)
+                ->exists();
+
+            if ($anyOtherOpen) {
+                throw new Error('No puedes abrir esta caja porque ya tienes otra caja abierta actualmente. Debes cerrar la caja activa primero.');
+            }
+
             // Abrir la caja
             $cashRegister->open();
 
-            // Actualizar el balance inicial con el balance actual
-            $cashRegister->initial_balance = $cashRegister->current_balance;
+            // Si se proporciona un balance inicial (soportando camelCase y snake_case)
+            if (isset($args['initial_balance']) || isset($args['initialBalance'])) {
+                $newBalance = $args['initial_balance'] ?? $args['initialBalance'];
+                $cashRegister->initial_balance = $newBalance;
+                $cashRegister->current_balance = $newBalance;
+            } else {
+                // Comportamiento por defecto: el balance actual se convierte en el inicial del nuevo periodo
+                $cashRegister->initial_balance = $cashRegister->current_balance;
+            }
+
             $cashRegister->save();
 
             DB::commit();

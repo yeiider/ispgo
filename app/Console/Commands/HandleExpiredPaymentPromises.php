@@ -47,7 +47,7 @@ class HandleExpiredPaymentPromises extends Command
                 $service->suspend();
             }
 
-            $promise->status = 'cancelled';
+            $promise->status = 'expired';
             $promise->save();
 
             $processed++;

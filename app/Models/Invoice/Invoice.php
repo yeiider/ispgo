@@ -48,7 +48,7 @@ class Invoice extends Model
         'onepay_metadata' => 'array',
 
     ];
-    protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay', 'total_paid', 'credit_notes_total', 'real_outstanding_balance'];
+    protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay', 'total_paid', 'credit_notes_total', 'real_outstanding_balance', 'collection_amount'];
 
     public function getFullNameAttribute()
     {
@@ -148,7 +148,18 @@ class Invoice extends Model
      */
     public function getRealOutstandingBalanceAttribute(): float
     {
-        return max(0, $this->total - $this->amount - $this->credit_notes_total);
+        return max(0, $this->total - ($this->amount ?? 0) - $this->getCreditNotesTotalAttribute());
+    }
+
+    /**
+     * Get the amount collected in the final transaction (total paid - sum of partial payments)
+     */
+    public function getCollectionAmountAttribute(): float
+    {
+        // When an invoice is paid, 'amount' is the total sum of all payments.
+        // We subtract the InvoicePayment records (abonos) to get what was received in the final full payment.
+        $totalAbonos = $this->payments()->sum('amount');
+        return max(0, ($this->amount ?? 0) - $totalAbonos);
     }
 
     /**
@@ -195,6 +206,11 @@ class Invoice extends Model
         return $this->belongsTo(Router::class);
     }
 
+    public function paymentRegisteredByUser()
+    {
+        return $this->belongsTo(User::class, 'payment_registered_by');
+    }
+
     public static function findByDniOrInvoiceId($input)
     {
         return self::where(function ($query) use ($input) {
@@ -237,7 +253,9 @@ class Invoice extends Model
 
     protected static function generateIncrementId()
     {
-        $lastInvoice = self::orderBy('id', 'desc')->first();
+        // Use withoutGlobalScopes to ensure we find the absolute last ID in the database,
+        // ignoring any router/user filters that might hide newer invoices.
+        $lastInvoice = self::withoutGlobalScopes()->orderBy('id', 'desc')->first();
         $lastId = $lastInvoice ? intval($lastInvoice->id) : 0;
         $incrementId = str_pad($lastId + 1, 10, '0', STR_PAD_LEFT);
         return $incrementId;
@@ -270,6 +288,7 @@ class Invoice extends Model
                 'payment_registered_by' => $registeredById,
                 'notes' => $notes,
                 'additional_information' => $additional,
+                'daily_box_id' => $dailyBoxId,
             ]);
 
             // Update amount from sum of payments
@@ -281,6 +300,14 @@ class Invoice extends Model
 
         $this->outstanding_balance = $this->real_outstanding_balance;
         $this->payment_method = $paymentMethod;
+        if ($dailyBoxId) {
+            $this->daily_box_id = $dailyBoxId;
+            
+            // Si el pago es en efectivo, incrementar el balance actual de la caja
+            if ($paymentMethod === 'cash') {
+                \App\Models\Finance\CashRegister::where('id', $dailyBoxId)->increment('current_balance', $amount);
+            }
+        }
 
         if ($this->isFullyPaid()) {
             $this->status = 'paid';
@@ -298,6 +325,9 @@ class Invoice extends Model
             ];
             // Combinar con cualquier dato extra que venga del llamador
             $additional = array_merge($additional, $paymentInfo);
+
+            // Update any pending payment promise to fulfilled
+            $this->paymentPromises()->where('status', 'pending')->update(['status' => 'fulfilled']);
 
         } else if ($this->due_date < now() && $this->outstanding_balance > 0) {
             $this->status = 'unpaid';
@@ -379,7 +409,10 @@ class Invoice extends Model
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router(s)
+        // Global Scope: Filter invoices by the routers of the customer's SERVICES
+        // An invoice is visible if its customer has at least one service in the user's router(s).
+        // This is more correct than filtering by invoice.router_id directly, since manual invoices
+        // may not have a router_id set.
         static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
@@ -397,12 +430,12 @@ class Invoice extends Model
                 return;
             }
 
-            // Filter by user's assigned router(s) (direct or through customer)
-            $builder->where(function ($query) use ($routerIds) {
-                $query->whereIn('router_id', $routerIds)
-                    ->orWhereHas('customer', function ($q) use ($routerIds) {
-                        $q->whereIn('router_id', $routerIds);
-                    });
+            // Filter invoices whose customer has at least one SERVICE in the user's router(s).
+            // Correct logic: router → services → customers → invoices
+            $builder->whereHas('customer', function ($q) use ($routerIds) {
+                $q->whereHas('services', function ($sq) use ($routerIds) {
+                    $sq->whereIn('router_id', $routerIds);
+                });
             });
         });
 

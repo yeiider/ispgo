@@ -13,7 +13,7 @@ type InvoicePayment {
     amount: Float!
 
     "Fecha en que se realizó el pago"
-    paymentDate: Date! @rename(attribute: "payment_date")
+    paymentDate: DateTime! @rename(attribute: "payment_date")
 
     "Método de pago utilizado"
     paymentMethod: PaymentMethod @rename(attribute: "payment_method")
@@ -32,6 +32,7 @@ type InvoicePayment {
 
     "Información adicional en formato JSON"
     additionalInformation: JSON @rename(attribute: "additional_information")
+    dailyBoxId: ID @rename(attribute: "daily_box_id")
 
     "Fecha de creación del registro"
     createdAt: DateTime! @rename(attribute: "created_at")
@@ -57,7 +58,7 @@ input CreateInvoicePaymentInput {
     amount: Float! @rules(apply: ["required", "numeric", "min:0.01"])
 
     "Fecha del pago"
-    paymentDate: Date! @rename(attribute: "payment_date") @rules(apply: ["required", "date"])
+    paymentDate: DateTime! @rename(attribute: "payment_date")
 
     "Método de pago"
     paymentMethod: PaymentMethod @rename(attribute: "payment_method")
@@ -70,6 +71,7 @@ input CreateInvoicePaymentInput {
 
     "Comprobante de pago"
     paymentSupport: String @rename(attribute: "payment_support")
+    dailyBoxId: ID @rename(attribute: "daily_box_id") @rules(apply: ["exists:cash_registers,id"])
 }
 
 "Input para actualizar un abono existente"
@@ -78,7 +80,7 @@ input UpdateInvoicePaymentInput {
     amount: Float @rules(apply: ["numeric", "min:0.01"])
 
     "Nueva fecha (opcional)"
-    paymentDate: Date @rename(attribute: "payment_date") @rules(apply: ["date"])
+    paymentDate: DateTime @rename(attribute: "payment_date")
 
     "Nuevo método de pago (opcional)"
     paymentMethod: PaymentMethod @rename(attribute: "payment_method")
@@ -126,6 +128,25 @@ extend type Query @guard {
         invoiceId: ID!
     ): [InvoicePayment!]!
         @field(resolver: "App\\GraphQL\\Queries\\InvoicePaymentQueries@getByInvoice")
+
+    "Obtener los abonos registrados por el cajero autenticado (para historial de caja)"
+    myInvoicePayments(
+        "Filtrar por fecha exacta"
+        date: Date
+
+        "Filtrar desde fecha"
+        date_from: Date
+
+        "Filtrar hasta fecha"
+        date_to: Date
+
+        "Filtrar por método de pago"
+        payment_method: String
+
+        "Filtrar por ID de caja registradora"
+        cash_register_id: ID
+    ): [InvoicePayment!]!
+        @paginate(defaultCount: 50, builder: "App\\GraphQL\\Queries\\InvoicePaymentQueries@myPayments")
 }
 
 extend type Mutation @guard {

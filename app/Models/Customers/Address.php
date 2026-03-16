@@ -45,7 +45,8 @@ class Address extends Model
     {
         parent::boot();
 
-        // Global Scope: Filter addresses by customer's router(s)
+        // Global Scope: Filter addresses by the routers of the customer's SERVICES
+        // An address is visible if its customer has at least one service in the user's router(s).
         static::addGlobalScope('router_filter', function (Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
@@ -63,9 +64,12 @@ class Address extends Model
                 return;
             }
 
-            // Filter addresses by customer's router_id
+            // Filter addresses by whether their customer has at least one SERVICE in the user's routers.
+            // Correct logic: router → services → customers → addresses
             $builder->whereHas('customer', function ($query) use ($routerIds) {
-                $query->whereIn('router_id', $routerIds);
+                $query->whereHas('services', function ($q) use ($routerIds) {
+                    $q->whereIn('router_id', $routerIds);
+                });
             });
         });
 
