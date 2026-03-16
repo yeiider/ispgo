@@ -169,8 +169,10 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
             // Filter customers that have at least one SERVICE in the user's router(s).
             // This is the correct logic: router → services → customers
-            $builder->whereHas('services', function ($query) use ($routerIds) {
-                $query->whereIn('router_id', $routerIds);
+            $builder->where(function (Builder $query) use ($routerIds) {
+                $query->whereHas('services', function ($q) use ($routerIds) {
+                    $q->whereIn('router_id', $routerIds);
+                })->orWhereIn('router_id', $routerIds);
             });
         });
 
