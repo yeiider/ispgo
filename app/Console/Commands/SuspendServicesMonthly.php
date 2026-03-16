@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class SuspendServicesMonthly extends Command
 {
-    protected $signature = 'services:suspend_everyday'; // Cambiar el signature
+    protected $signature = 'services:suspend_everyday {router_id?}'; // Cambiar el signature
     protected $description = 'Suspend services everyday if it matches the cut-off day'; // Actualizar descripción
 
     public function __construct()
@@ -23,11 +23,21 @@ class SuspendServicesMonthly extends Command
         $currentDate = Carbon::now();
         $today = Carbon::now()->startOfDay();
 
+        $routerId = $this->argument('router_id');
+
         $this->info("[EVERYDAY] Iniciando suspensión de servicios con facturas vencidas e impagas sin promesa vigente...");
         $this->info("[EVERYDAY] Fecha actual: {$today->toDateString()}");
+        if ($routerId) {
+            $this->info("[EVERYDAY] Filtrando por Router ID: {$routerId}");
+        }
 
-        // Recorrer todos los routers
-        \App\Models\Router::all()->each(function ($router) use ($currentDate, $today) {
+        $routers = \App\Models\Router::query();
+        if ($routerId) {
+            $routers->where('id', $routerId);
+        }
+
+        // Recorrer los routers
+        $routers->get()->each(function ($router) use ($currentDate, $today) {
             // Obtener la fecha de corte configurada para este router
             $cutOffDate = GeneralProviderConfig::getCutOffDate($router->id);
 
