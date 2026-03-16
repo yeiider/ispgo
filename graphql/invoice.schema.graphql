@@ -133,6 +133,7 @@ extend type Invoice {
 type CashierDailyReport {
     date_from: Date
     date_to: Date
+    initial_balance: Float!
     total_cash: Float!
     total_transfer: Float!
     total_collected: Float!

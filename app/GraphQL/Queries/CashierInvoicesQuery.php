@@ -200,9 +200,12 @@ class CashierInvoicesQuery
         $totalCollected = $totalCash + $totalTransfer;
         $totalItems     = $totalInvoicesCount + $totalPaymentsCount;
 
+        $initialBalance = $cashRegister ? (float) $cashRegister->initial_balance : 0;
+
         return [
             'date_from'       => $dateFrom ? $dateFrom->toDateString() : null,
             'date_to'         => $dateTo   ? $dateTo->toDateString()   : null,
+            'initial_balance' => $initialBalance,
             'total_cash'      => $totalCash,
             'total_transfer'  => $totalTransfer,
             'total_collected' => $totalCollected,
@@ -211,7 +214,7 @@ class CashierInvoicesQuery
             'total_cash_expenses'  => $totalCashExpenses,
             'total_transfer_expenses' => $totalTransferExpenses,
             'total_abonos'        => $totalAbonos,
-            'total_neto'          => $totalCollected - $totalExpenses,
+            'total_neto'          => $initialBalance + $totalCollected - $totalExpenses,
         ];
     }
 
