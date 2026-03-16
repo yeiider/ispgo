@@ -33,16 +33,24 @@ class ProrrateoFinalCalculator implements NovedadCalculator
             throw new \InvalidArgumentException("La fecha de fin ('end_day') no puede ser anterior a la fecha de inicio ('start_day').");
         }
 
-        /* 4️⃣  Calcular días efectivos de servicio --------------------- */
-        $daysOfService = $startDate->diffInDays($endDate) + 1;
+        /* 4️⃣  Días efectivos de servicio (Base 30 días) -------------- */
+        $startDay = (int) ($rule['start_day'] ?? 1);
+        $endDay = (int) ($rule['end_day'] ?? 30);
+        
+        if ($startDay > 30) $startDay = 30;
+        if ($endDay > 30) $endDay = 30;
 
-        /* 5️⃣  Calcular el precio diario ------------------------------- */
-        $totalDaysInMonth = $periodStart->daysInMonth; // Días totales del mes
-        $dailyPrice = $service->plan->monthly_price / $totalDaysInMonth;
+        $daysOfService = max(0, $endDay - $startDay + 1);
 
-        /* 6️⃣  Calcular el valor proporcional -------------------------- */
-        $proratedValue = $service->plan->monthly_price-($dailyPrice * $daysOfService);
-        /* 7️⃣  Devolver el resultado como carga positiva --------------- */
-        return -abs(round($proratedValue)); // Redondear a 2 decimales
+        /* 5️⃣  Precio por día (Base 30 días) -------------------------- */
+        $dailyPrice = $service->plan->monthly_price / 30;
+
+        /* 6️⃣  Calcular el valor proporcional (Descuento) ------------- */
+        // El monto a cobrar es (dailyPrice * daysOfService)
+        // El descuento es (Cobro - PrecioTotal)
+        $discount = ($dailyPrice * $daysOfService) - $service->plan->monthly_price;
+
+        /* 7️⃣  Devolver el resultado como carga negativa --------------- */
+        return -abs(round($discount)); 
     }
 }
