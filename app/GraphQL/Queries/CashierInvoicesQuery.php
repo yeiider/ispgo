@@ -19,8 +19,17 @@ class CashierInvoicesQuery
         $user = Auth::user();
         $userId = $user->id;
         $userName = $user->name;
-        $query = Invoice::query()
-            ->where(function($q) use ($userId, $userName) {
+
+        // Cuando se consulta una caja específica, omitir el filtro global de router.
+        // La caja registradora ya actúa como filtro suficiente y debe mostrar
+        // todos los recaudos de ese cajero independientemente del router asignado.
+        $hasExplicitCashRegister = !empty($args['cash_register_id']);
+
+        $query = $hasExplicitCashRegister
+            ? Invoice::withoutGlobalScope('router_filter')->newQuery()
+            : Invoice::query();
+
+        $query->where(function($q) use ($userId, $userName) {
                 $q->where('payment_registered_by', (string) $userId)
                   ->orWhere('payment_registered_by', $userName);
             })
@@ -28,7 +37,7 @@ class CashierInvoicesQuery
 
         $cashRegister = null;
 
-        if (!empty($args['cash_register_id'])) {
+        if ($hasExplicitCashRegister) {
             $cashRegister = \App\Models\Finance\CashRegister::find($args['cash_register_id']);
         } else {
             // Auto-detect currently open cash register for the POS

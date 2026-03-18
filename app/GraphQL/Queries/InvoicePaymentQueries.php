@@ -42,14 +42,23 @@ class InvoicePaymentQueries
         $userId = $user->id;
         $userName = $user->name;
 
-        $query = InvoicePayment::query()->where(function($q) use ($userId, $userName) {
-            $q->where('user_id', $userId)
-              ->orWhere('payment_registered_by', $userName);
-        });
+        $hasExplicitCashRegister = !empty($args['cash_register_id']);
+
+        // Cuando se consulta una caja específica (export de cierre), mostrar todos
+        // los abonos de esa caja sin restringir por usuario autenticado.
+        // Cuando es el POS activo (sin cash_register_id), filtrar por el cajero.
+        if ($hasExplicitCashRegister) {
+            $query = InvoicePayment::query();
+        } else {
+            $query = InvoicePayment::query()->where(function($q) use ($userId, $userName) {
+                $q->where('user_id', $userId)
+                  ->orWhere('payment_registered_by', $userName);
+            });
+        }
 
         $cashRegister = null;
 
-        if (!empty($args['cash_register_id'])) {
+        if ($hasExplicitCashRegister) {
             $cashRegister = \App\Models\Finance\CashRegister::find($args['cash_register_id']);
         } else {
             // Auto-detect currently open cash register for the POS
