@@ -53,7 +53,8 @@ class CancelOnePayChargeOnExternalPayment implements ShouldQueue
 
         // If payment did come from OnePay, do nothing
         if (($invoice->payment_method ?? null) === 'onepay') {
-            return;
+            $invoice->update(['onepay_status' => 'paid']);
+            $invoice->save();
         }
 
         // If there is a pending OnePay charge, cancel it
