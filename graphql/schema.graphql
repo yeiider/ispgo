@@ -57,7 +57,7 @@ type Query {
         customer_status: String
     ): [Customer!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\AllCustomersQuery")
 
-    # Get a specific customer bypassing the router filter. Used when selecting 
+    # Get a specific customer bypassing the router filter. Used when selecting
     # a customer from the allCustomers list to fetch their details and addresses.
     globalCustomer(id: ID! @eq): Customer @field(resolver: "App\\GraphQL\\Queries\\GlobalCustomerQuery")
 
@@ -698,6 +698,8 @@ type Invoice {
     router_id: Int
     notes: String
     additional_information: JSON
+    onepay_charge_id: String
+    onepay_payment_link: String
     created_at: DateTime!
     updated_at: DateTime!
 
@@ -1172,3 +1174,4 @@ extend type Mutation {
 #import mikrotik.graphql
 #import inventory.graphql
 #import cash-registers.graphql
+#import onepay.graphql

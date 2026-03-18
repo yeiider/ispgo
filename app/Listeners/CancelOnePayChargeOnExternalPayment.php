@@ -50,6 +50,7 @@ class CancelOnePayChargeOnExternalPayment implements ShouldQueue
     {
         $invoice = $event->invoice;
 
+
         // If payment did come from OnePay, do nothing
         if (($invoice->payment_method ?? null) === 'onepay') {
             return;
@@ -75,13 +76,6 @@ class CancelOnePayChargeOnExternalPayment implements ShouldQueue
             } catch (\Throwable $e) {
                 Log::error('Error cancelling OnePay charge after external payment: ' . $e->getMessage());
             }
-
-            // Clear local fields regardless to avoid dangling links
-            $invoice->onepay_charge_id = null;
-            $invoice->onepay_payment_link = null;
-            $invoice->onepay_status = null;
-            $invoice->onepay_metadata = null;
-            $invoice->save();
         }
     }
 }
