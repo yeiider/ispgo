@@ -24,7 +24,13 @@ class OnePayMutation
 
             // Actualizar la factura con el ID del cobro si se generó correctamente
             if (isset($payment['data']) && isset($payment['data']['id'])) {
-                $invoice->forceFill(['onepay_charge_id' => $payment['data']['id']])->save();
+                $invoice->forceFill(
+                    [
+                        'onepay_charge_id' => $payment['data']['id'],
+                        'onepay_payment_link' => $payment['data']['payment_link'],
+                        'onepay_status' => $payment['data']['status'],
+                    ]
+                )->save();
             } elseif (isset($payment['id'])) {
                 $invoice->forceFill(['onepay_charge_id' => $payment['id']])->save();
             }
