@@ -2,16 +2,17 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Router;
 use App\Models\Services\Service;
 use App\Settings\GeneralProviderConfig;
-use Illuminate\Console\Command;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class SuspendServicesMonthly extends Command
 {
-    protected $signature = 'services:suspend_everyday {router_id?}'; // Cambiar el signature
-    protected $description = 'Suspend services everyday if it matches the cut-off day'; // Actualizar descripción
+    protected $signature = 'services:suspend_everyday {router_id?}';
+    protected $description = 'Suspend services everyday if it matches the cut-off day (supports per-service billing mode)';
 
     public function __construct()
     {
@@ -21,61 +22,109 @@ class SuspendServicesMonthly extends Command
     public function handle()
     {
         $currentDate = Carbon::now();
-        $today = Carbon::now()->startOfDay();
-
-        $routerId = $this->argument('router_id');
+        $today       = Carbon::now()->startOfDay();
+        $routerId    = $this->argument('router_id');
 
         $this->info("[EVERYDAY] Iniciando suspensión de servicios con facturas vencidas e impagas sin promesa vigente...");
         $this->info("[EVERYDAY] Fecha actual: {$today->toDateString()}");
+
         if ($routerId) {
             $this->info("[EVERYDAY] Filtrando por Router ID: {$routerId}");
         }
 
-        $routers = \App\Models\Router::query();
+        $routersQuery = Router::query();
         if ($routerId) {
-            $routers->where('id', $routerId);
+            $routersQuery->where('id', $routerId);
         }
 
-        // Recorrer los routers
-        $routers->get()->each(function ($router) use ($currentDate, $today) {
-            // Obtener la fecha de corte configurada para este router
+        $routersQuery->get()->each(function ($router) use ($currentDate, $today) {
             $cutOffDate = GeneralProviderConfig::getCutOffDate($router->id);
 
-            // Solo procesar si hoy es el día de corte de este router
             if ($currentDate->day != $cutOffDate) {
                 return;
             }
 
             $this->info("[EVERYDAY] Procesando router {$router->name} (ID: {$router->id}) - Día de corte: {$cutOffDate}");
 
-            // Suspender servicios activos de clientes asignados a este router
-            Service::where('service_status', 'active')
-                ->whereHas('customer', function ($query) use ($router) {
-                    $query->where('router_id', $router->id);
-                })
-                ->whereHas('customer.invoices', function ($query) use ($today) {
-                    $query->where('status', 'unpaid')
-                        ->where('outstanding_balance', '>', 0)
-                        ->whereDate('due_date', '<', $today)
-                        ->whereDoesntHave('paymentPromises', function ($promiseQuery) use ($today) {
-                            $promiseQuery->where('status', 'pending')
-                                ->whereDate('promise_date', '>=', $today);
-                        });
-                })
-                ->chunk(50, function ($services) use ($router) {
-                    foreach ($services as $service) {
-                        try {
-                            $service->suspend();
-                            Log::info("[EVERYDAY] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido por facturas vencidas sin promesa vigente del cliente ID: {$service->customer_id} del router {$router->id}");
-                            $this->info("[EVERYDAY] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido.");
-                        } catch (\Exception $e) {
-                            Log::error("[EVERYDAY] Error al suspender servicio ID: {$service->id} del router {$router->id} - {$e->getMessage()}");
-                            $this->error("[EVERYDAY] Error al suspender servicio ID: {$service->id}");
-                        }
+            // Obtener servicios activos del router con su customer cargado
+            $services = Service::withoutGlobalScope('router_filter')
+                ->where('service_status', 'active')
+                ->where('router_id', $router->id)
+                ->with('customer')
+                ->get();
+
+            foreach ($services as $service) {
+                try {
+                    $customer = $service->customer;
+
+                    if (!$customer) {
+                        continue;
                     }
-                });
+
+                    if ($customer->usesPerServiceBilling()) {
+                        // ── Modo per_service: verificar facturas propias del servicio ──
+                        $this->suspendIfServiceHasUnpaidInvoices($service, $customer, $today, $router);
+                    } else {
+                        // ── Modo total (default): verificar facturas del cliente completo ──
+                        $this->suspendIfCustomerHasUnpaidInvoices($service, $customer, $today, $router);
+                    }
+                } catch (\Exception $e) {
+                    Log::error("[EVERYDAY] Error al procesar servicio ID: {$service->id} del router {$router->id} - {$e->getMessage()}");
+                    $this->error("[EVERYDAY] Error al procesar servicio ID: {$service->id}");
+                }
+            }
         });
 
         $this->info("[EVERYDAY] Proceso de suspensión completado.");
+    }
+
+    /**
+     * Modo total (default).
+     * Suspende el servicio si el CLIENTE tiene alguna factura general (sin service_id
+     * obligatorio) vencida, unpaid y sin promesa de pago vigente.
+     */
+    protected function suspendIfCustomerHasUnpaidInvoices(Service $service, $customer, Carbon $today, $router): void
+    {
+        $hasUnpaid = $customer->invoices()
+            ->where('status', 'unpaid')
+            ->where('outstanding_balance', '>', 0)
+            ->whereDate('due_date', '<', $today)
+            ->whereDoesntHave('paymentPromises', function ($q) use ($today) {
+                $q->where('status', 'pending')
+                  ->whereDate('promise_date', '>=', $today);
+            })
+            ->exists();
+
+        if ($hasUnpaid) {
+            $service->suspend();
+            Log::info("[EVERYDAY] [MODO TOTAL] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido - Cliente ID: {$customer->id} - Router: {$router->id}");
+            $this->info("[EVERYDAY] [MODO TOTAL] Servicio ID: {$service->id} suspendido (cliente {$customer->id} con facturas vencidas).");
+        }
+    }
+
+    /**
+     * Modo per_service.
+     * Suspende el servicio ÚNICAMENTE si ese servicio tiene su propia factura
+     * (con service_id vinculado) vencida, unpaid y sin promesa de pago vigente.
+     * Si el servicio no tiene factura vencida, aunque otros servicios del cliente
+     * sí la tengan, este servicio NO se suspende.
+     */
+    protected function suspendIfServiceHasUnpaidInvoices(Service $service, $customer, Carbon $today, $router): void
+    {
+        $hasUnpaid = $service->invoices()
+            ->where('status', 'unpaid')
+            ->where('outstanding_balance', '>', 0)
+            ->whereDate('due_date', '<', $today)
+            ->whereDoesntHave('paymentPromises', function ($q) use ($today) {
+                $q->where('status', 'pending')
+                  ->whereDate('promise_date', '>=', $today);
+            })
+            ->exists();
+
+        if ($hasUnpaid) {
+            $service->suspend();
+            Log::info("[EVERYDAY] [MODO PER-SERVICE] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido - Cliente ID: {$customer->id} - Router: {$router->id}");
+            $this->info("[EVERYDAY] [MODO PER-SERVICE] Servicio ID: {$service->id} suspendido (factura vencida propia del servicio).");
+        }
     }
 }
