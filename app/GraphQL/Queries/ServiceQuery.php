@@ -15,6 +15,19 @@ class ServiceQuery
     {
         $query = Service::query();
 
+        // Generic search: SN or customer name (first_name + last_name)
+        if (!empty($args['search'])) {
+            $search = $args['search'];
+            $query->where(function (Builder $q) use ($search) {
+                $q->where('sn', 'like', '%' . $search . '%')
+                  ->orWhereHas('customer', function (Builder $cq) use ($search) {
+                      $cq->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%'])
+                         ->orWhere('first_name', 'like', '%' . $search . '%')
+                         ->orWhere('last_name', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
         if (!empty($args['service_ip'])) {
             $query->where('service_ip', 'like', '%' . $args['service_ip'] . '%');
         }

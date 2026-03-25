@@ -73,6 +73,7 @@ type Query {
     ): [Address!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\AddressQuery")
 
     services(
+        search: String
         service_ip: String
         service_status: String
         customer_id: ID
