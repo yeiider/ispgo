@@ -12,11 +12,18 @@ use Exception;
 
 class CustomerBillingService
 {
-    public function generateForPeriod(Customer $customer, Carbon $period): ?Invoice
+    public function generateForPeriod(Customer $customer, Carbon $period, ?int $serviceId = null): ?Invoice
     {
         try {
             // 1. Validar que tenga al menos un servicio facturable
-            $services = $customer->activeServices()->get();
+            $servicesQuery = $customer->activeServices();
+
+            // Si se especifica un servicio en particular, filtrar solo ese
+            if ($serviceId) {
+                $servicesQuery->where('id', $serviceId);
+            }
+
+            $services = $servicesQuery->get();
 
             if ($services->isEmpty()) {
                 return null;
@@ -169,6 +176,21 @@ class CustomerBillingService
             });
 
             event(new \App\Events\InvoiceItemsCreated($invoice));
+
+            // Si se facturó un servicio específico, asociarlo a la cabecera de la factura
+            if ($serviceId && $services->isNotEmpty()) {
+                $specificService = $services->first();
+                $update = [];
+                if (empty($invoice->service_id)) {
+                    $update['service_id'] = $specificService->id;
+                }
+                if ($specificService->router_id && empty($invoice->router_id)) {
+                    $update['router_id'] = $specificService->router_id;
+                }
+                if (!empty($update)) {
+                    $invoice->update($update);
+                }
+            }
 
             return $invoice;
 
