@@ -154,6 +154,7 @@ class ProcessCashRegisterClosure implements ShouldQueue
             // Generar resumen de facturas
             $totalCashExpenses = $expenses->where('payment_method', 'cash')->sum('amount');
             $totalExpenses = $expenses->sum('amount');
+            $totalAbonos   = $invoicePayments->sum('amount');
             $invoiceSummary = $this->generateInvoiceSummary($invoices, $invoicePayments, $totalCollected);
             $invoiceSummary['total_expenses'] = $totalExpenses;
             $invoiceSummary['total_cash_expenses'] = $totalCashExpenses;
@@ -165,22 +166,24 @@ class ProcessCashRegisterClosure implements ShouldQueue
 
             // Actualizar el cierre con todos los datos
             $closure->update([
-                'closing_balance' => $closingBalance,
-                'expected_balance' => $expectedBalance,
-                'difference' => $difference,
-                'total_cash' => $totalCash,
-                'total_transfer' => $totalTransfer,
-                'total_card' => $totalCard,
-                'total_online' => $totalOnline,
-                'total_other' => $totalOther,
-                'total_invoices' => $invoices->count() + $invoicePayments->count(),
-                'paid_invoices' => $invoices->count(),
-                'total_collected' => $totalCollected,
-                'total_discounts' => $totalDiscounts,
+                'closing_balance'   => $closingBalance,
+                'expected_balance'  => $expectedBalance,
+                'difference'        => $difference,
+                'total_cash'        => $totalCash,
+                'total_transfer'    => $totalTransfer,
+                'total_card'        => $totalCard,
+                'total_online'      => $totalOnline,
+                'total_other'       => $totalOther,
+                'total_abonos'      => $totalAbonos,
+                'total_expenses'    => $totalExpenses,
+                'total_invoices'    => $invoices->count() + $invoicePayments->count(),
+                'paid_invoices'     => $invoices->count(),
+                'total_collected'   => $totalCollected,
+                'total_discounts'   => $totalDiscounts,
                 'total_adjustments' => $totalAdjustments,
-                'payment_details' => $paymentDetails,
-                'invoice_summary' => $invoiceSummary,
-                'notes' => $this->notes,
+                'payment_details'   => $paymentDetails,
+                'invoice_summary'   => $invoiceSummary,
+                'notes'             => $this->notes,
             ]);
 
             // Marcar como completado

@@ -108,6 +108,12 @@ type CashRegisterClosure {
     "Total cobrado por otros métodos"
     totalOther: Float! @rename(attribute: "total_other")
 
+    "Total de abonos parciales (InvoicePayment) del cierre"
+    totalAbonos: Float! @rename(attribute: "total_abonos")
+
+    "Total de gastos (Expense) del cierre"
+    totalExpenses: Float! @rename(attribute: "total_expenses")
+
     "Total de facturas procesadas"
     totalInvoices: Int! @rename(attribute: "total_invoices")
 
@@ -469,12 +475,14 @@ type Expense {
     expense_category_id: ID
     supplier_id: ID
     daily_box_id: ID
+    user_id: ID
     created_at: DateTime!
     updated_at: DateTime!
 
     expenseCategory: ExpenseCategory @belongsTo
     supplier: Supplier @belongsTo
     dailyBox: CashRegister @belongsTo
+    user: User @belongsTo
 }
 
 "Payload de respuesta para crear gasto"
@@ -493,6 +501,8 @@ extend type Query @guard {
     expenses(
         daily_box_id: ID
         date: Date
+        expense_category_id: ID
+        user_id: ID
     ): [Expense!]! @field(resolver: "App\\GraphQL\\Queries\\CashierInvoicesQuery@myExpenses")
     suppliers: [Supplier!]! @all(model: "App\\Models\\Inventory\\Supplier")
     suppliersPaginator(

@@ -232,16 +232,32 @@ class CashierInvoicesQuery
      */
     public function myExpenses($root, array $args)
     {
-        $userId = Auth::id();
-        $query = Expense::query()->with(['expenseCategory', 'supplier']);
+        $user = Auth::user();
+        $userId = $user->id;
+
+        $query = Expense::query()->with(['expenseCategory', 'supplier', 'user']);
 
         if (!empty($args['daily_box_id'])) {
+            // Si se filtra por caja específica, no aplicar ningún otro filtro de usuario
             $query->where('daily_box_id', $args['daily_box_id']);
         } else {
-            // Filter by the user's boxes (current user)
-            $query->whereHas('dailyBox', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            });
+            // Regla de visibilidad por zona:
+            // - Usuario SIN zona asignada → ve todos los gastos
+            // - Usuario CON zona asignada → solo ve los gastos que él mismo registró
+            if ($user->shouldFilterByRouter()) {
+                $query->where('user_id', $userId);
+            }
+            // Si canSeeAllData() → no se aplica ningún filtro de usuario/caja
+        }
+
+        // Filtro por categoría
+        if (!empty($args['expense_category_id'])) {
+            $query->where('expense_category_id', $args['expense_category_id']);
+        }
+
+        // Filtro por usuario que registró el gasto
+        if (!empty($args['user_id'])) {
+            $query->where('user_id', $args['user_id']);
         }
 
         if (!empty($args['date'])) {
