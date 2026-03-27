@@ -153,13 +153,12 @@ class CashRegister extends Model
             return $query;
         }
 
-        $routerIds = $user->getRouterIds();
-
-        if (empty($routerIds)) {
-            return $query;
+        /** @var \App\Models\User|null $user */
+        if ($user && method_exists($user, 'shouldFilterByRouter') && $user->shouldFilterByRouter()) {
+            return $query->where('user_id', $user->id);
         }
 
-        return $query->whereIn('router_id', $routerIds);
+        return $query;
     }
 
     /**

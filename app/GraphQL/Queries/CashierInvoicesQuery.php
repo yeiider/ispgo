@@ -29,11 +29,14 @@ class CashierInvoicesQuery
             ? Invoice::withoutGlobalScope('router_filter')->newQuery()
             : Invoice::query();
 
-        $query->where(function($q) use ($userId, $userName) {
-                $q->where('payment_registered_by', (string) $userId)
-                  ->orWhere('payment_registered_by', $userName);
-            })
-            ->where('status', Invoice::STATUS_PAID);
+        if (!$hasExplicitCashRegister) {
+            $query->where(function($q) use ($userId, $userName) {
+                    $q->where('payment_registered_by', (string) $userId)
+                      ->orWhere('payment_registered_by', $userName);
+                });
+        }
+        
+        $query->where('status', Invoice::STATUS_PAID);
 
         $cashRegister = null;
 

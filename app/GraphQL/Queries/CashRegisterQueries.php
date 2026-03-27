@@ -16,6 +16,14 @@ class CashRegisterQueries
     {
         $query = CashRegisterClosure::query()->with(['cashRegister', 'user']);
 
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user && method_exists($user, 'shouldFilterByRouter') && $user->shouldFilterByRouter()) {
+            $query->whereHas('cashRegister', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
         // Filtrar por caja
         if (isset($args['cashRegisterId'])) {
             $query->where('cash_register_id', $args['cashRegisterId']);
@@ -62,6 +70,14 @@ class CashRegisterQueries
         $query = CashRegisterClosure::query()
             ->completed()
             ->dateRange($dateFrom, $dateTo);
+
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user && method_exists($user, 'shouldFilterByRouter') && $user->shouldFilterByRouter()) {
+            $query->whereHas('cashRegister', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
 
         // Filtrar por caja si se especifica
         if (isset($args['cashRegisterId'])) {
