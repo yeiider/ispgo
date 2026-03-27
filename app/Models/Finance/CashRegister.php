@@ -135,6 +135,16 @@ class CashRegister extends Model
     /**
      * Scope: Filtrar por routers del usuario autenticado
      */
+    public function scopeAdminRegisters(Builder $query): Builder
+    {
+        return $query->whereHas('user', function ($q) {
+            $q->doesntHave('routers');
+        });
+    }
+
+    /**
+     * Scope: Filtrar por routers del usuario autenticado
+     */
     public function scopeByUserRouters(Builder $query): Builder
     {
         $user = Auth::user();

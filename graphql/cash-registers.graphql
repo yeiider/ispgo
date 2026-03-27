@@ -114,6 +114,12 @@ type CashRegisterClosure {
     "Total de gastos (Expense) del cierre"
     totalExpenses: Float! @rename(attribute: "total_expenses")
 
+    "Total de entregas al administrador (salidas)"
+    totalTransfersOut: Float! @rename(attribute: "total_transfers_out")
+
+    "Total de recepciones de cajeros (entradas)"
+    totalTransfersIn: Float! @rename(attribute: "total_transfers_in")
+
     "Total de facturas procesadas"
     totalInvoices: Int! @rename(attribute: "total_invoices")
 
@@ -325,6 +331,9 @@ extend type Query @guard {
         "Solo cajas del usuario autenticado"
         onlyMyRouters: Boolean @scope(name: "byUserRouters")
 
+        "Filtrar cajas de administradores (usuarios sin zona)"
+        adminRegisters: Boolean @scope(name: "adminRegisters")
+
         "Ordenar por campo"
         orderBy: [OrderByClause!] @orderBy
     ): [CashRegister!]!
@@ -485,6 +494,30 @@ type Expense {
     user: User @belongsTo
 }
 
+"Entrega de dinero a otra caja (ej. administrador)"
+type CashTransfer {
+    id: ID!
+    sender_cash_register_id: ID!
+    receiver_cash_register_id: ID!
+    amount: Float!
+    status: String!
+    notes: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    senderCashRegister: CashRegister @belongsTo
+    receiverCashRegister: CashRegister @belongsTo
+    creator: User @belongsTo
+    updater: User @belongsTo
+}
+
+"Payload de respuesta para entregas de caja"
+type CashTransferPayload {
+    success: Boolean!
+    message: String!
+    cashTransfer: CashTransfer
+}
+
 "Payload de respuesta para crear gasto"
 type ExpensePayload {
     success: Boolean!
@@ -497,6 +530,12 @@ type ExpensePayload {
 
 
 extend type Query @guard {
+    cashTransfers(
+        sender_cash_register_id: ID @eq
+        receiver_cash_register_id: ID @eq
+        status: String @eq
+    ): [CashTransfer!]! @paginate(defaultCount: 20, model: "App\\Models\\Finance\\CashTransfer")
+
     expenseCategories: [ExpenseCategory!]! @all(model: "App\\Models\\Finance\\ExpenseCategory")
     expenses(
         daily_box_id: ID
@@ -520,6 +559,17 @@ extend type Mutation @guard {
         supplier_id: ID
         daily_box_id: ID
     ): ExpensePayload @field(resolver: "App\\GraphQL\\Mutations\\ExpenseMutations@create")
+
+    createCashTransfer(
+        sender_cash_register_id: ID!
+        receiver_cash_register_id: ID!
+        amount: Float!
+        notes: String
+    ): CashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@create")
+
+    acceptCashTransfer(id: ID!): CashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@accept")
+    
+    rejectCashTransfer(id: ID!): CashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@reject")
 
     createExpenseCategory(
         name: String!

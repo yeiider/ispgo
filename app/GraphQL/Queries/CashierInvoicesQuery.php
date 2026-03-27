@@ -203,6 +203,39 @@ class CashierInvoicesQuery
         $totalCashExpenses = $expenses->where('payment_method', 'cash')->sum('amount');
         $totalTransferExpenses = $expenses->where('payment_method', 'transfer')->sum('amount');
 
+        // ---- Entregas a Administrador (Transfers Out) ----
+        $transfersOutQuery = \App\Models\Finance\CashTransfer::query()
+            ->where('status', '!=', 'rejected'); // Only pending or accepted
+
+        if ($dailyBoxId) {
+            $transfersOutQuery->where('sender_cash_register_id', $dailyBoxId);
+        } else {
+            $transfersOutQuery->whereHas('senderCashRegister', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+        }
+        $transfersOutQuery->whereBetween('created_at', [$dateFrom, $dateTo]);
+
+        $transfersOut = $transfersOutQuery->get();
+        $totalTransfersOut = $transfersOut->sum('amount');
+
+        // ---- Recepciones del Administrador (Transfers In) ----
+        $transfersInQuery = \App\Models\Finance\CashTransfer::query()
+            ->where('status', 'accepted'); // Only accepted
+
+        if ($dailyBoxId) {
+            $transfersInQuery->where('receiver_cash_register_id', $dailyBoxId);
+        } else {
+            $transfersInQuery->whereHas('receiverCashRegister', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+        }
+        $transfersInQuery->whereBetween('updated_at', [$dateFrom, $dateTo]);
+
+        $transfersIn = $transfersInQuery->get();
+        // sumamos amount de las transferencias entrantes aceptadas
+        $totalTransfersIn = $transfersIn->sum('amount');
+
         // ---- Totales combinados ----
         $totalCash      = $totalCashInvoices + $totalCashPayments;
         $totalTransfer  = $totalTransferInvoices + $totalTransferPayments;
@@ -218,12 +251,15 @@ class CashierInvoicesQuery
             'total_cash'      => $totalCash,
             'total_transfer'  => $totalTransfer,
             'total_collected' => $totalCollected,
-            'total_invoices'      => $totalItems,
-            'total_expenses'      => $totalExpenses,
-            'total_cash_expenses'  => $totalCashExpenses,
+            'total_invoices'          => $totalItems,
+            'total_expenses'          => $totalExpenses,
+            'total_cash_expenses'     => $totalCashExpenses,
             'total_transfer_expenses' => $totalTransferExpenses,
-            'total_abonos'        => $totalAbonos,
-            'total_neto'          => $initialBalance + $totalCollected - $totalExpenses,
+            'total_transfers_out'     => $totalTransfersOut,
+            'total_transfers_in'      => $totalTransfersIn,
+            'total_abonos'            => $totalAbonos,
+            // Total Neto modificado para restar entregas a admin y sumar entregas recibidas (Recaudos admin)
+            'total_neto'              => $initialBalance + $totalCollected - $totalExpenses - $totalTransfersOut + $totalTransfersIn,
         ];
     }
 
