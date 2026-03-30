@@ -16,6 +16,14 @@ class CashRegisterQueries
     {
         $query = CashRegisterClosure::query()->with(['cashRegister', 'user']);
 
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user && method_exists($user, 'shouldFilterByRouter') && $user->shouldFilterByRouter()) {
+            $query->whereHas('cashRegister', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
         // Filtrar por caja
         if (isset($args['cashRegisterId'])) {
             $query->where('cash_register_id', $args['cashRegisterId']);
@@ -63,6 +71,14 @@ class CashRegisterQueries
             ->completed()
             ->dateRange($dateFrom, $dateTo);
 
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user && method_exists($user, 'shouldFilterByRouter') && $user->shouldFilterByRouter()) {
+            $query->whereHas('cashRegister', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
         // Filtrar por caja si se especifica
         if (isset($args['cashRegisterId'])) {
             $query->where('cash_register_id', $args['cashRegisterId']);
@@ -108,6 +124,10 @@ class CashRegisterQueries
                 'online' => $closures->sum('total_online'),
                 'other' => $closures->sum('total_other'),
             ],
+            'totalAbonos' => $closures->sum('total_abonos'),
+            'totalExpenses' => $closures->sum('total_expenses'),
+            'totalTransfersOut' => $closures->sum('total_transfers_out'),
+            'totalTransfersIn' => $closures->sum('total_transfers_in'),
             'totalInvoices' => $totalInvoices,
             'averagePerClosure' => $totalClosures > 0 ? $totalCollected / $totalClosures : 0,
             'closuresWithDifferences' => $closuresWithDifferences,

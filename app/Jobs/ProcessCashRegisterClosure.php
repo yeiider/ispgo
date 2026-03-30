@@ -119,6 +119,17 @@ class ProcessCashRegisterClosure implements ShouldQueue
                 ->whereDate('date', $this->closureDate)
                 ->get();
 
+            // Obtener entregas a administradores (salidas)
+            $transfersOut = \App\Models\Finance\CashTransfer::where('sender_cash_register_id', $this->cashRegisterId)
+                ->whereDate('created_at', $this->closureDate)
+                ->get();
+
+            // Obtener entregas recibidas de cajeros (entradas)
+            $transfersIn = \App\Models\Finance\CashTransfer::where('receiver_cash_register_id', $this->cashRegisterId)
+                ->where('status', 'accepted')
+                ->whereDate('updated_at', $this->closureDate)
+                ->get();
+
             $paymentMethods = ['cash', 'transfer', 'card', 'online', 'other', 'check', 'cryptocurrency'];
             
             $totalsByMethod = [];
@@ -154,33 +165,42 @@ class ProcessCashRegisterClosure implements ShouldQueue
             // Generar resumen de facturas
             $totalCashExpenses = $expenses->where('payment_method', 'cash')->sum('amount');
             $totalExpenses = $expenses->sum('amount');
+            $totalTransfersOut = $transfersOut->sum('amount');
+            $totalTransfersIn = $transfersIn->sum('amount');
+            $totalAbonos   = $invoicePayments->sum('amount');
             $invoiceSummary = $this->generateInvoiceSummary($invoices, $invoicePayments, $totalCollected);
             $invoiceSummary['total_expenses'] = $totalExpenses;
             $invoiceSummary['total_cash_expenses'] = $totalCashExpenses;
+            $invoiceSummary['total_transfers_out'] = $totalTransfersOut;
+            $invoiceSummary['total_transfers_in'] = $totalTransfersIn;
 
-            // Calcular balance esperado (SOLO EFECTIVO): Apertura + Recaudado Efectivo - Gastos Efectivo
-            $expectedBalance = $closure->opening_balance + $totalCash - $totalCashExpenses;
+            // Calcular balance esperado (SOLO EFECTIVO): Apertura + Recaudado Efectivo - Gastos Efectivo - Entregas a Admin + Recepciones Acepatadas
+            $expectedBalance = $closure->opening_balance + $totalCash - $totalCashExpenses - $totalTransfersOut + $totalTransfersIn;
             $closingBalance = $this->closingBalance ?? $expectedBalance;
             $difference = $closingBalance - $expectedBalance;
 
             // Actualizar el cierre con todos los datos
             $closure->update([
-                'closing_balance' => $closingBalance,
-                'expected_balance' => $expectedBalance,
-                'difference' => $difference,
-                'total_cash' => $totalCash,
-                'total_transfer' => $totalTransfer,
-                'total_card' => $totalCard,
-                'total_online' => $totalOnline,
-                'total_other' => $totalOther,
-                'total_invoices' => $invoices->count() + $invoicePayments->count(),
-                'paid_invoices' => $invoices->count(),
-                'total_collected' => $totalCollected,
-                'total_discounts' => $totalDiscounts,
+                'closing_balance'   => $closingBalance,
+                'expected_balance'  => $expectedBalance,
+                'difference'        => $difference,
+                'total_cash'        => $totalCash,
+                'total_transfer'    => $totalTransfer,
+                'total_card'        => $totalCard,
+                'total_online'      => $totalOnline,
+                'total_other'       => $totalOther,
+                'total_abonos'      => $totalAbonos,
+                'total_expenses'    => $totalExpenses,
+                'total_transfers_out' => $totalTransfersOut,
+                'total_transfers_in' => $totalTransfersIn,
+                'total_invoices'    => $invoices->count() + $invoicePayments->count(),
+                'paid_invoices'     => $invoices->count(),
+                'total_collected'   => $totalCollected,
+                'total_discounts'   => $totalDiscounts,
                 'total_adjustments' => $totalAdjustments,
-                'payment_details' => $paymentDetails,
-                'invoice_summary' => $invoiceSummary,
-                'notes' => $this->notes,
+                'payment_details'   => $paymentDetails,
+                'invoice_summary'   => $invoiceSummary,
+                'notes'             => $this->notes,
             ]);
 
             // Marcar como completado

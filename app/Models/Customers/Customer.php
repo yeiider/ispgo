@@ -45,7 +45,18 @@ class Customer extends Authenticatable implements MustVerifyEmail
         'password',
         'onepay_customer_id',
         'router_id',
+        'billing_mode',
     ];
+
+    /**
+     * Indica si el cliente tiene habilitada la facturación por servicio.
+     * null / 'total' => modo por defecto (una factura total)
+     * 'per_service'  => una factura individual por servicio
+     */
+    public function usesPerServiceBilling(): bool
+    {
+        return $this->billing_mode === 'per_service';
+    }
 
     /**
      * The attributes that should be hidden for serialization.

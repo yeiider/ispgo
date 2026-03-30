@@ -141,6 +141,8 @@ type CashierDailyReport {
     total_expenses: Float!
     total_cash_expenses: Float!
     total_transfer_expenses: Float!
+    total_transfers_out: Float!
+    total_transfers_in: Float!
     total_abonos: Float!
     total_neto: Float!
 }

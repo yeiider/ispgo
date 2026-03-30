@@ -40,6 +40,7 @@ class ExpenseMutations
         }
 
         $expenseFields['daily_box_id'] = $assignedRegister->id;
+        $expenseFields['user_id'] = $user->id;
 
         $expense = Expense::create($expenseFields);
 
