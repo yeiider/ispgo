@@ -288,6 +288,18 @@ type ClosureReport {
     "Total por método de pago"
     paymentMethodTotals: PaymentMethodTotals!
 
+    "Total de abonos"
+    totalAbonos: Float!
+
+    "Total de gastos"
+    totalExpenses: Float!
+
+    "Total de entregas a administrador"
+    totalTransfersOut: Float!
+
+    "Total de ingresos de otras cajas"
+    totalTransfersIn: Float!
+
     "Total de facturas procesadas"
     totalInvoices: Int!
 
