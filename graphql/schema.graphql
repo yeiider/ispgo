@@ -147,6 +147,7 @@ type Mutation @guard {
         last_name: String
         email_address: String @rules(apply: ["email"])
         phone_number: String
+        identity_document: String
         document_type: String
         router_id: Int @rules(apply: ["exists:routers,id"])
         billing_mode: String @rules(apply: ["nullable", "in:total,per_service"])
