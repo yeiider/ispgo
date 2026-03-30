@@ -46,6 +46,18 @@ class GenerateInvoiceMutation
                 ];
             }
 
+            // Si se seleccionó un servicio específico, validar que exista y pertenezca al cliente
+            if ($serviceId) {
+                $service = Service::find($serviceId);
+                if (!$service || (string)$service->customer_id !== (string)$customerId) {
+                    return [
+                        'success' => false,
+                        'message' => __('El servicio seleccionado no existe o no pertenece al cliente.'),
+                        'invoice' => null,
+                    ];
+                }
+            }
+
             // Asegurar que hay un usuario autenticado
             // El middleware AttemptAuthentication de Lighthouse ya maneja la autenticación via Bearer token
             // Si no hay usuario autenticado, usar el usuario por defecto como fallback
@@ -59,13 +71,14 @@ class GenerateInvoiceMutation
                 }
             }
 
-            // Generar la factura
+            // Generar la factura, filtrando por servicio específico si se indicó
             $serviceBuildInvoice = new CustomerBillingService();
-            $invoice = $serviceBuildInvoice->generateForPeriod($customer, now());
+            $invoice = $serviceBuildInvoice->generateForPeriod($customer, now(), $serviceId ?: null);
 
             if (!$invoice) {
                 Log::warning('No se generó factura para el cliente', [
                     'customer_id' => $customerId,
+                    'service_id'  => $serviceId,
                     'active_services_count' => $activeServices,
                     'customer_status' => $customer->customer_status,
                 ]);
@@ -75,18 +88,6 @@ class GenerateInvoiceMutation
                     'message' => __('No se pudo generar la factura para el cliente. Puede que ya exista una factura para este período o que no haya servicios facturables.'),
                     'invoice' => null,
                 ];
-            }
-
-            // Si se especificó un servicio, asociarlo a la factura
-            if ($serviceId) {
-                $service = Service::find($serviceId);
-                if ($service && empty($invoice->service_id)) {
-                    $invoice->service()->associate($service);
-                    if ($service->router_id && empty($invoice->router_id)) {
-                        $invoice->router_id = $service->router_id;
-                    }
-                    $invoice->save();
-                }
             }
 
             // Disparar evento de finalización

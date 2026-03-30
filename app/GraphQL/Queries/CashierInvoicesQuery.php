@@ -29,11 +29,14 @@ class CashierInvoicesQuery
             ? Invoice::withoutGlobalScope('router_filter')->newQuery()
             : Invoice::query();
 
-        $query->where(function($q) use ($userId, $userName) {
-                $q->where('payment_registered_by', (string) $userId)
-                  ->orWhere('payment_registered_by', $userName);
-            })
-            ->where('status', Invoice::STATUS_PAID);
+        if (!$hasExplicitCashRegister) {
+            $query->where(function($q) use ($userId, $userName) {
+                    $q->where('payment_registered_by', (string) $userId)
+                      ->orWhere('payment_registered_by', $userName);
+                });
+        }
+        
+        $query->where('status', Invoice::STATUS_PAID);
 
         $cashRegister = null;
 
@@ -203,6 +206,39 @@ class CashierInvoicesQuery
         $totalCashExpenses = $expenses->where('payment_method', 'cash')->sum('amount');
         $totalTransferExpenses = $expenses->where('payment_method', 'transfer')->sum('amount');
 
+        // ---- Entregas a Administrador (Transfers Out) ----
+        $transfersOutQuery = \App\Models\Finance\CashTransfer::query()
+            ->where('status', '!=', 'rejected'); // Only pending or accepted
+
+        if ($dailyBoxId) {
+            $transfersOutQuery->where('sender_cash_register_id', $dailyBoxId);
+        } else {
+            $transfersOutQuery->whereHas('senderCashRegister', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+        }
+        $transfersOutQuery->whereBetween('created_at', [$dateFrom, $dateTo]);
+
+        $transfersOut = $transfersOutQuery->get();
+        $totalTransfersOut = $transfersOut->sum('amount');
+
+        // ---- Recepciones del Administrador (Transfers In) ----
+        $transfersInQuery = \App\Models\Finance\CashTransfer::query()
+            ->where('status', 'accepted'); // Only accepted
+
+        if ($dailyBoxId) {
+            $transfersInQuery->where('receiver_cash_register_id', $dailyBoxId);
+        } else {
+            $transfersInQuery->whereHas('receiverCashRegister', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+        }
+        $transfersInQuery->whereBetween('updated_at', [$dateFrom, $dateTo]);
+
+        $transfersIn = $transfersInQuery->get();
+        // sumamos amount de las transferencias entrantes aceptadas
+        $totalTransfersIn = $transfersIn->sum('amount');
+
         // ---- Totales combinados ----
         $totalCash      = $totalCashInvoices + $totalCashPayments;
         $totalTransfer  = $totalTransferInvoices + $totalTransferPayments;
@@ -218,12 +254,15 @@ class CashierInvoicesQuery
             'total_cash'      => $totalCash,
             'total_transfer'  => $totalTransfer,
             'total_collected' => $totalCollected,
-            'total_invoices'      => $totalItems,
-            'total_expenses'      => $totalExpenses,
-            'total_cash_expenses'  => $totalCashExpenses,
+            'total_invoices'          => $totalItems,
+            'total_expenses'          => $totalExpenses,
+            'total_cash_expenses'     => $totalCashExpenses,
             'total_transfer_expenses' => $totalTransferExpenses,
-            'total_abonos'        => $totalAbonos,
-            'total_neto'          => $initialBalance + $totalCollected - $totalExpenses,
+            'total_transfers_out'     => $totalTransfersOut,
+            'total_transfers_in'      => $totalTransfersIn,
+            'total_abonos'            => $totalAbonos,
+            // Total Neto modificado para restar entregas a admin y sumar entregas recibidas (Recaudos admin)
+            'total_neto'              => $initialBalance + $totalCollected - $totalExpenses - $totalTransfersOut + $totalTransfersIn,
         ];
     }
 
@@ -232,16 +271,32 @@ class CashierInvoicesQuery
      */
     public function myExpenses($root, array $args)
     {
-        $userId = Auth::id();
-        $query = Expense::query()->with(['expenseCategory', 'supplier']);
+        $user = Auth::user();
+        $userId = $user->id;
+
+        $query = Expense::query()->with(['expenseCategory', 'supplier', 'user']);
 
         if (!empty($args['daily_box_id'])) {
+            // Si se filtra por caja específica, no aplicar ningún otro filtro de usuario
             $query->where('daily_box_id', $args['daily_box_id']);
         } else {
-            // Filter by the user's boxes (current user)
-            $query->whereHas('dailyBox', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            });
+            // Regla de visibilidad por zona:
+            // - Usuario SIN zona asignada → ve todos los gastos
+            // - Usuario CON zona asignada → solo ve los gastos que él mismo registró
+            if ($user->shouldFilterByRouter()) {
+                $query->where('user_id', $userId);
+            }
+            // Si canSeeAllData() → no se aplica ningún filtro de usuario/caja
+        }
+
+        // Filtro por categoría
+        if (!empty($args['expense_category_id'])) {
+            $query->where('expense_category_id', $args['expense_category_id']);
+        }
+
+        // Filtro por usuario que registró el gasto
+        if (!empty($args['user_id'])) {
+            $query->where('user_id', $args['user_id']);
         }
 
         if (!empty($args['date'])) {

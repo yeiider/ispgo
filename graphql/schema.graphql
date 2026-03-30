@@ -73,6 +73,7 @@ type Query {
     ): [Address!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\AddressQuery")
 
     services(
+        search: String
         service_ip: String
         service_status: String
         customer_id: ID
@@ -137,6 +138,7 @@ type Mutation @guard {
         identity_document: String @rules(apply: ["required", "unique:customers,identity_document"])
         document_type: String! @rules(apply: ["required", "max:50"])
         router_id: Int @rules(apply: ["exists:routers,id"])
+        billing_mode: String @rules(apply: ["nullable", "in:total,per_service"])
     ): Customer @create(model: "App\\Models\\Customers\\Customer")
 
     updateCustomer(
@@ -145,8 +147,10 @@ type Mutation @guard {
         last_name: String
         email_address: String @rules(apply: ["email"])
         phone_number: String
+        identity_document: String
         document_type: String
         router_id: Int @rules(apply: ["exists:routers,id"])
+        billing_mode: String @rules(apply: ["nullable", "in:total,per_service"])
     ): Customer @update(model: "App\\Models\\Customers\\Customer")
 
     deleteCustomer(
@@ -605,6 +609,8 @@ type Customer {
     document_type: String!
     customer_status: String
     router_id: Int
+    "Modo de facturación: null|'total' = una factura total por cliente (default); 'per_service' = una factura por servicio"
+    billing_mode: String
     created_at: DateTime!
     updated_at: DateTime!
 

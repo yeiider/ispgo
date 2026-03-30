@@ -135,6 +135,16 @@ class CashRegister extends Model
     /**
      * Scope: Filtrar por routers del usuario autenticado
      */
+    public function scopeAdminRegisters(Builder $query): Builder
+    {
+        return $query->whereHas('user', function ($q) {
+            $q->doesntHave('routers');
+        });
+    }
+
+    /**
+     * Scope: Filtrar por routers del usuario autenticado
+     */
     public function scopeByUserRouters(Builder $query): Builder
     {
         $user = Auth::user();
@@ -143,13 +153,12 @@ class CashRegister extends Model
             return $query;
         }
 
-        $routerIds = $user->getRouterIds();
-
-        if (empty($routerIds)) {
-            return $query;
+        /** @var \App\Models\User|null $user */
+        if ($user && method_exists($user, 'shouldFilterByRouter') && $user->shouldFilterByRouter()) {
+            return $query->where('user_id', $user->id);
         }
 
-        return $query->whereIn('router_id', $routerIds);
+        return $query;
     }
 
     /**
