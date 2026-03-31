@@ -104,7 +104,18 @@ type Query {
 
     # billingNovedades movido a billing.graphql con más opciones de filtrado
     creditNotes: [CreditNote!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\CreditNote")
-    paymentPromises: [PaymentPromise!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\PaymentPromise")
+    paymentPromises(
+        id: ID
+        invoice_id: ID
+        status: String
+        customer_id: ID
+        user_id: ID
+        customer_name: String
+        promise_date_from: Date
+        promise_date_to: Date
+        sort_column: String
+        sort_direction: String
+    ): [PaymentPromise!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\PaymentPromiseQuery")
 
     routers: [Router!]! @paginate(defaultCount: 10, model: "App\\Models\\Router")
     router(id: ID! @eq): Router @find(model: "App\\Models\\Router")
@@ -810,6 +821,7 @@ type PaymentPromise {
 
     invoice: Invoice! @belongsTo
     customer: Customer! @belongsTo
+    user: User @belongsTo
 }
 
 type Router {
