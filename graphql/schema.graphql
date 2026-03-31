@@ -123,6 +123,9 @@ type Query {
     plans: [Plan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Plan")
     plan(id: ID! @eq): Plan @find(model: "App\\Models\\Services\\Plan")
 
+    additionalPlans: [AdditionalPlan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\AdditionalPlan")
+    additionalPlan(id: ID! @eq): AdditionalPlan @find(model: "App\\Models\\Services\\AdditionalPlan")
+
     tickets(
         status: String @eq
         priority: String @eq
@@ -225,7 +228,8 @@ type Mutation @guard {
         unu_latitude: String
         assigned_technician: Int
         service_contract: String
-    ): Service @create(model: "App\\Models\\Services\\Service")
+        additional_plans: [ID!]
+    ): Service @field(resolver: "App\\GraphQL\\Mutations\\ServiceMutation@create")
 
     updateService(
         id: ID! @rules(apply: ["required", "exists:services,id"])
@@ -254,7 +258,8 @@ type Mutation @guard {
         unu_latitude: String
         assigned_technician: Int
         service_contract: String
-    ): Service @update(model: "App\\Models\\Services\\Service")
+        additional_plans: [ID!]
+    ): Service @field(resolver: "App\\GraphQL\\Mutations\\ServiceMutation@update")
 
     createRouter(
         name: String! @rules(apply: ["required", "max:255"])
@@ -349,6 +354,25 @@ type Mutation @guard {
     suspendService(
         service_id: ID! @rules(apply: ["required", "exists:services,id"])
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SuspendServiceMutation@resolve")
+
+    createAdditionalPlan(
+        name: String! @rules(apply: ["required", "max:255"])
+        monthly_price: Float! @rules(apply: ["required", "numeric", "min:0"])
+        status: String! @rules(apply: ["required", "in:active,inactive"])
+        description: String
+    ): AdditionalPlan @create(model: "App\\Models\\Services\\AdditionalPlan")
+
+    updateAdditionalPlan(
+        id: ID! @rules(apply: ["required", "exists:additional_plans,id"])
+        name: String
+        monthly_price: Float @rules(apply: ["numeric", "min:0"])
+        status: String @rules(apply: ["in:active,inactive"])
+        description: String
+    ): AdditionalPlan @update(model: "App\\Models\\Services\\AdditionalPlan")
+
+    deleteAdditionalPlan(
+        id: ID! @rules(apply: ["required", "exists:additional_plans,id"]) @eq
+    ): AdditionalPlan @delete(model: "App\\Models\\Services\\AdditionalPlan")
 
     registerPayment(
         invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
@@ -686,6 +710,7 @@ type Service {
     router: Router! @belongsTo
     address: Address @belongsTo(relation: "address")
     napPort: NapPort @hasOne(relation: "napPort")
+    additionalPlans: [AdditionalPlan!]! @belongsToMany(relation: "additionalPlans")
 
     # Relaciones de facturación
     "Reglas de descuento/beneficio aplicables al servicio"
@@ -822,6 +847,18 @@ type PaymentPromise {
     invoice: Invoice! @belongsTo
     customer: Customer! @belongsTo
     user: User @belongsTo
+}
+
+type AdditionalPlan {
+    id: ID!
+    name: String!
+    monthly_price: Float!
+    status: String!
+    description: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    services: [Service!]! @belongsToMany
 }
 
 type Router {

@@ -109,14 +109,15 @@ class CustomerBillingService
 
                     // Si no debemos omitir el servicio, crear el item
                     if (!$shouldSkipService) {
-                        $servicePrice = $service->plan->monthly_price;
+                        $planPrice = $service->plan->monthly_price;
+                        $servicePrice = $planPrice;
 
                         // Si el arrendamiento está activo y el cliente está al día, descontar el arrendo del servicio
                         if ($enableRouterRental && $routerRentalAmount > 0 && $isCustomerUpToDate) {
                             $servicePrice = max(0, $servicePrice - $routerRentalAmount);
                         }
 
-                        // Solo crear el item si el precio es mayor a 0
+                        // 1. Crear el ítem del plan base
                         if ($servicePrice > 0) {
                             $item = $invoice->items()->create([
                                 'description' => "Suscripción {$service->plan->name}",
@@ -141,6 +142,35 @@ class CustomerBillingService
                                 'created_by' => auth()->id(),
                             ]);
 
+                            $hasServiceItems = true;
+                        }
+
+                        // 2. Crear ítems para cada plan adicional ACTIVO
+                        $activeAdditionals = $service->additionalPlans()->where('status', 'active')->get();
+                        foreach ($activeAdditionals as $ap) {
+                            $apItem = $invoice->items()->create([
+                                'description' => $ap->name,
+                                'invoice_id' => $invoice->id,
+                                'unit_price' => $ap->monthly_price,
+                                'service_id' => $service->id,
+                                'quantity' => 1,
+                                'subtotal' => $ap->monthly_price,
+                            ]);
+
+                            $invoice->adjustments()->create([
+                                'kind' => 'charge',
+                                'amount' => $apItem->subtotal,
+                                'source_type' => get_class($ap),
+                                'source_id' => $ap->id,
+                                'label' => "Ajuste: {$ap->name}",
+                                'metadata' => [
+                                    'service_id' => $service->id,
+                                    'additional_plan_id' => $ap->id,
+                                    'invoice_item_id' => $apItem->id,
+                                ],
+                                'created_by' => auth()->id(),
+                            ]);
+                            
                             $hasServiceItems = true;
                         }
                     }

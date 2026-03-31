@@ -78,7 +78,7 @@ class GenerateInvoicesMonthly extends Command
             return;
         }
 
-        $totalPrice = $services->sum(fn($s) => $s->plan?->monthly_price ?? 0);
+        $totalPrice = $services->sum(fn($s) => $s->total_price);
 
         if ($totalPrice <= 0) {
             return;
@@ -128,7 +128,7 @@ class GenerateInvoicesMonthly extends Command
 
         foreach ($services as $service) {
             try {
-                $price = $service->plan?->monthly_price ?? 0;
+                $price = $service->total_price;
 
                 if ($price <= 0) {
                     continue;
