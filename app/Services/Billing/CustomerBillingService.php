@@ -19,8 +19,10 @@ class CustomerBillingService
             $servicesQuery = $customer->activeServices();
 
             // Si se especifica un servicio en particular, filtrar solo ese
+            // y asegurar explícitamente que pertenece al cliente (doble verificación)
             if ($serviceId) {
-                $servicesQuery->where('id', $serviceId);
+                $servicesQuery->where('customer_id', $customer->id)
+                    ->where('id', $serviceId);
             }
 
             $services = $servicesQuery->get();
@@ -91,6 +93,17 @@ class CustomerBillingService
                 $hasServiceItems = false;
 
                 foreach ($services as $service) {
+                    // SEGURIDAD: Siempre verificar que el servicio pertenezca al cliente
+                    // Esto evita que se facturen accidentalmente servicios de terceros
+                    if ((int) $service->customer_id !== (int) $customer->id) {
+                        Log::error("Servicio {$service->id} no pertenece al cliente {$customer->id}. Omitiendo de la facturación.", [
+                            'service_id' => $service->id,
+                            'customer_id' => $customer->id,
+                            'service_customer_id' => $service->customer_id
+                        ]);
+                        continue;
+                    }
+
                     // Verificar si debemos omitir el item del servicio
                     $shouldSkipService = false;
 
@@ -208,17 +221,21 @@ class CustomerBillingService
             event(new \App\Events\InvoiceItemsCreated($invoice));
 
             // Si se facturó un servicio específico, asociarlo a la cabecera de la factura
+            // Verificando una vez más la pertenencia al cliente
             if ($serviceId && $services->isNotEmpty()) {
                 $specificService = $services->first();
-                $update = [];
-                if (empty($invoice->service_id)) {
-                    $update['service_id'] = $specificService->id;
-                }
-                if ($specificService->router_id && empty($invoice->router_id)) {
-                    $update['router_id'] = $specificService->router_id;
-                }
-                if (!empty($update)) {
-                    $invoice->update($update);
+
+                if ($specificService && (int) $specificService->customer_id === (int) $customer->id) {
+                    $update = [];
+                    if (empty($invoice->service_id)) {
+                        $update['service_id'] = $specificService->id;
+                    }
+                    if ($specificService->router_id && empty($invoice->router_id)) {
+                        $update['router_id'] = $specificService->router_id;
+                    }
+                    if (!empty($update)) {
+                        $invoice->update($update);
+                    }
                 }
             }
 
