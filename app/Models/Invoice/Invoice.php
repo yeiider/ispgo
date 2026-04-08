@@ -244,9 +244,7 @@ class Invoice extends Model
     public function scopeSearchByCustomerName($query, $name)
     {
         return $query->whereHas('customer', function ($q) use ($name) {
-            $q->where('first_name', 'LIKE', "%{$name}%")
-                ->orWhere('last_name', 'LIKE', "%{$name}%")
-                ->orWhere(\Illuminate\Support\Facades\DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%{$name}%");
+            $q->search($name);
         });
     }
 

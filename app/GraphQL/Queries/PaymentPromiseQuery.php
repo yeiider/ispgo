@@ -45,10 +45,7 @@ class PaymentPromiseQuery
         // Filter by customer name
         if (!empty($args['customer_name'])) {
             $query->whereHas('customer', function ($q) use ($args) {
-                $name = $args['customer_name'];
-                $q->where('first_name', 'LIKE', "%{$name}%")
-                    ->orWhere('last_name', 'LIKE', "%{$name}%")
-                    ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%{$name}%");
+                $q->search($args['customer_name']);
             });
         }
 

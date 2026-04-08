@@ -21,9 +21,7 @@ class ServiceQuery
             $query->where(function (Builder $q) use ($search) {
                 $q->where('sn', 'like', '%' . $search . '%')
                   ->orWhereHas('customer', function (Builder $cq) use ($search) {
-                      $cq->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $search . '%'])
-                         ->orWhere('first_name', 'like', '%' . $search . '%')
-                         ->orWhere('last_name', 'like', '%' . $search . '%');
+                      $cq->search($search);
                   });
             });
         }

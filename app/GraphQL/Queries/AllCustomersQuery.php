@@ -29,13 +29,7 @@ class AllCustomersQuery
 
         // Search by name, identity document or email
         if (!empty($args['search'])) {
-            $search = $args['search'];
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'LIKE', "%{$search}%")
-                  ->orWhere('last_name', 'LIKE', "%{$search}%")
-                  ->orWhere('identity_document', 'LIKE', "%{$search}%")
-                  ->orWhere('email_address', 'LIKE', "%{$search}%");
-            });
+            $query->search($args['search']);
         }
 
         // Optional: filter by status
