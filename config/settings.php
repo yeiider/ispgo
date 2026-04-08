@@ -638,4 +638,36 @@ return [
             ],
         ],
     ],
+    "tables" => [
+        "setting" => [
+            "label" => "Configuración de Tablas",
+            "class" => "form-control",
+        ],
+        "columns" => [
+            "setting" => [
+                "label" => "Visibilidad de Columnas",
+                "code" => "columns"
+            ],
+            "clients" => [
+                "field" => "text-field",
+                "label" => "Columnas Clientes",
+                "default" => "id,name,document,services,service_states,billing_status,status,created_at,actions",
+            ],
+            "services" => [
+                "field" => "text-field",
+                "label" => "Columnas Servicios",
+                "default" => "id,name,status,created_at,actions",
+            ],
+            "invoices" => [
+                "field" => "text-field",
+                "label" => "Columnas Facturas",
+                "default" => "id,increment_id,customer,total,outstanding_balance,status,created_at,due_date,actions",
+            ],
+            "cotizaciones" => [
+                "field" => "text-field",
+                "label" => "Columnas Cotizaciones",
+                "default" => "id,name,email,phone,plan,status,created_at,actions",
+            ],
+        ],
+    ],
 ];
