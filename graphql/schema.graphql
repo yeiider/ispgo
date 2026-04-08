@@ -136,14 +136,51 @@ type Query {
     ticket(id: ID! @eq): Ticket @find(model: "App\\Models\\Ticket")
     myTickets: [Ticket!]! @field(resolver: "App\\GraphQL\\Queries\\TicketQuery@myTickets")
 
+
     # Configuration schema and values for external frontend
     configSchema: [ConfigSection!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@schema")
     configFields(scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@fields")
     configValues(paths: [String!]!, scope_id: Int = 0): [ConfigItem!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@values")
     configSearch(term: String!, scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@search")
+
+    # Cotizaciones
+    cotizaciones(
+        search: String
+        estado: String
+        sort_column: String
+        sort_direction: String
+    ): [Cotizacion!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CotizacionQuery")
+    cotizacion(id: ID! @eq): Cotizacion @find(model: "App\\Models\\Cotizacion")
 }
 
 type Mutation @guard {
+    # Cotizaciones
+    createCotizacion(
+        nombre: String!
+        apellido: String!
+        email: String!
+        telefono: String!
+        direccion: String
+        ciudad: String
+        plan: String
+        canal: String
+        estado: String
+        notas: String
+        metadata: JSON
+    ): Cotizacion @create(model: "App\\Models\\Cotizacion")
+
+    updateCotizacion(
+        id: ID!
+        estado: String
+        notas: String
+        metadata: JSON
+    ): Cotizacion @update(model: "App\\Models\\Cotizacion")
+
+    updateCotizacionesStatus(
+        ids: [ID!]!
+        estado: String!
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\UpdateCotizacionesStatus")
+
     createCustomer(
         first_name: String! @rules(apply: ["required", "max:255"])
         last_name: String! @rules(apply: ["required", "max:255"])
@@ -796,6 +833,23 @@ type Plan {
     updated_at: DateTime!
 
     services: [Service!]! @hasMany
+}
+
+type Cotizacion {
+    id: ID!
+    nombre: String!
+    apellido: String!
+    email: String!
+    telefono: String!
+    direccion: String
+    ciudad: String
+    plan: String
+    canal: String
+    estado: String!
+    notas: String
+    metadata: JSON
+    created_at: DateTime!
+    updated_at: DateTime!
 }
 
 type InvoiceItem {
