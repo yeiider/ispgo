@@ -4,6 +4,7 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 #import reports.graphql
 #import invoice-payments.graphql
 #import invoice.schema.graphql
+#import frontend_permissions.graphql
 
 "A date string with format 'Y-m-d', e.g. '2011-05-23'."
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
@@ -31,8 +32,8 @@ type Query {
     user(id: ID! @eq): User @find(model: "App\\Models\\User")
 
     # Roles and Permissions
-    roles: [Role!]! @all(model: "Spatie\\Permission\\Models\\Role")
-    role(id: ID! @eq): Role @find(model: "Spatie\\Permission\\Models\\Role")
+    roles: [Role!]! @all(model: "App\\Models\\Role")
+    role(id: ID! @eq): Role @find(model: "App\\Models\\Role")
 
     permissions: [Permission!]! @all(model: "Spatie\\Permission\\Models\\Permission")
     permission(id: ID! @eq): Permission @find(model: "Spatie\\Permission\\Models\\Permission")
@@ -1017,6 +1018,7 @@ type User {
     tickets: [Ticket!]! @belongsToMany
     roles: [Role!]! @belongsToMany(relation: "roles")
     permissions: [Permission!]! @belongsToMany(relation: "permissions")
+    frontendPermissions: [FrontendPermission!]! @belongsToMany(relation: "frontendPermissions")
     allPermissions: [Permission!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@allPermissions")
     registeredPayments: [InvoicePayment!]! @hasMany(relation: "invoicePayments")
 }
@@ -1029,6 +1031,7 @@ type Role {
     updated_at: DateTime!
 
     permissions: [Permission!]! @belongsToMany(relation: "permissions")
+    frontendPermissions: [FrontendPermission!]! @belongsToMany(relation: "frontendPermissions")
     users: [User!]! @belongsToMany(relation: "users")
 }
 

@@ -72,6 +72,28 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the frontend permissions assigned directly to this user.
+     */
+    public function frontendPermissions()
+    {
+        return $this->belongsToMany(FrontendPermission::class, 'user_frontend_permission');
+    }
+
+    /**
+     * Get all frontend permissions for the user (direct + from roles).
+     */
+    public function getAllFrontendPermissions()
+    {
+        $this->loadMissing(['roles.frontendPermissions', 'frontendPermissions']);
+        
+        $rolePermissions = $this->roles->flatMap(function ($role) {
+            return $role->frontendPermissions;
+        });
+
+        return $this->frontendPermissions->concat($rolePermissions)->unique('id');
+    }
+
+    /**
      * Check if user can see all data (no routers assigned).
      * If user has no routers, they see all data.
      * Role permissions control what actions they can perform.
