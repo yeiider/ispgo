@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'telephone',
+        'router_id',
         'created_by',
         'updated_by',
     ];
@@ -53,6 +54,14 @@ class User extends Authenticatable
     }
 
 
+
+    /**
+     * Get the router assigned to this user (single router).
+     */
+    public function router()
+    {
+        return $this->belongsTo(Router::class);
+    }
 
     /**
      * Get all routers assigned to this user (many-to-many relationship).
