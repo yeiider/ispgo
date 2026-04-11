@@ -546,6 +546,8 @@ extend type Query @guard {
         sender_cash_register_id: ID @eq
         receiver_cash_register_id: ID @eq
         status: String @eq
+        created_at: Date @where(clause: "whereDate")
+        updated_at: Date @where(clause: "whereDate")
     ): [CashTransfer!]! @paginate(defaultCount: 20, model: "App\\Models\\Finance\\CashTransfer")
 
     expenseCategories: [ExpenseCategory!]! @all(model: "App\\Models\\Finance\\ExpenseCategory")
