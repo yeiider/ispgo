@@ -22,7 +22,25 @@ use App\Http\Controllers\Webhooks\OnePayWebhookController;
 */
 Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
-        return $request->user()->load(['roles', 'permissions'])->withoutRelations();
+        $user = $request->user();
+        $user->load(['roles.frontendPermissions', 'frontendPermissions']);
+        
+        $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : collect();
+        
+        $frontendPermissions = $user->getAllFrontendPermissions()->map(function($perm) {
+            return $perm->name;
+        })->unique()->values();
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'telephone' => $user->telephone,
+            'role' => $roles->first() ?: 'Sin rol',
+            'roles' => $user->roles,
+            'frontendPermissions' => $frontendPermissions,
+            'user' => $user->withoutRelations()
+        ]);
     });
 
     // Returns the currently authenticated user including role information
@@ -30,11 +48,16 @@ Route::middleware('auth:api')->group(function () {
         $user = $request->user();
 
         // Eager load roles for efficiency
-        $user->load('roles');
+        $user->load(['roles.frontendPermissions', 'frontendPermissions']);
 
         // Using Spatie\Permission helpers provided by HasRoles trait
         $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : collect();
         $permissions = method_exists($user, 'getPermissionNames') ? $user->getPermissionNames() : collect();
+        
+        // Get all frontend permissions (direct + from roles)
+        $frontendPermissions = $user->getAllFrontendPermissions()->map(function($perm) {
+            return $perm->name;
+        })->unique()->values();
 
         return response()->json([
             'id' => $user->id,
@@ -44,6 +67,7 @@ Route::middleware('auth:api')->group(function () {
             // convenience single role (first role if multiple)
             'role' => $roles->first() ?: null,
             'permissions' => $permissions,
+            'frontendPermissions' => $frontendPermissions,
             // raw user (without relations) for clients that need extra attributes
             'user' => $user->withoutRelations(),
         ]);

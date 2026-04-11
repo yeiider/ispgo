@@ -115,6 +115,22 @@ class BillingQuery
             $query->whereDate('effective_period', $args['effective_period']);
         }
 
+        if (!empty($args['search'])) {
+            $search = $args['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                    ->orWhere('id', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($q) use ($search) {
+                        $q->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('identity_document', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('service', function ($q) use ($search) {
+                        $q->where('service_ip', 'like', "%{$search}%");
+                    });
+            });
+        }
+
         $first = $args['first'] ?? 15;
         $page = $args['page'] ?? 1;
 

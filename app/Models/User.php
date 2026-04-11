@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'telephone',
+        'router_id',
         'created_by',
         'updated_by',
     ];
@@ -55,6 +56,14 @@ class User extends Authenticatable
 
 
     /**
+     * Get the router assigned to this user (single router).
+     */
+    public function router()
+    {
+        return $this->belongsTo(Router::class);
+    }
+
+    /**
      * Get all routers assigned to this user (many-to-many relationship).
      */
     public function routers()
@@ -69,6 +78,28 @@ class User extends Authenticatable
     public function invoicePayments()
     {
         return $this->hasMany(\App\Models\Invoice\InvoicePayment::class);
+    }
+
+    /**
+     * Get the frontend permissions assigned directly to this user.
+     */
+    public function frontendPermissions()
+    {
+        return $this->belongsToMany(FrontendPermission::class, 'user_frontend_permission');
+    }
+
+    /**
+     * Get all frontend permissions for the user (direct + from roles).
+     */
+    public function getAllFrontendPermissions()
+    {
+        $this->loadMissing(['roles.frontendPermissions', 'frontendPermissions']);
+        
+        $rolePermissions = $this->roles->flatMap(function ($role) {
+            return $role->frontendPermissions;
+        });
+
+        return $this->frontendPermissions->concat($rolePermissions)->unique('id');
     }
 
     /**

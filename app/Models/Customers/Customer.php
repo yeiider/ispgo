@@ -239,15 +239,29 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
     public function scopeSearch($query, $search)
     {
-        if (!$search) {
+        if (empty($search)) {
             return $query;
         }
 
         return $query->where(function ($q) use ($search) {
-            $q->where('first_name', 'LIKE', "%{$search}%")
-              ->orWhere('last_name', 'LIKE', "%{$search}%")
-              ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"])
-              ->orWhere('identity_document', 'LIKE', "%{$search}%")
+            // Split the search string into individual words/tokens
+            // Filter out empty tokens from multiple spaces
+            $tokens = array_filter(explode(' ', $search));
+
+            if (!empty($tokens)) {
+                // Name matching: all words must exist in either first_name or last_name
+                $q->where(function ($nameQuery) use ($tokens) {
+                    foreach ($tokens as $token) {
+                        $nameQuery->where(function ($tokenQuery) use ($token) {
+                            $tokenQuery->where('first_name', 'LIKE', "%{$token}%")
+                                       ->orWhere('last_name', 'LIKE', "%{$token}%");
+                        });
+                    }
+                });
+            }
+
+            // Identification or Email matching: the full search string
+            $q->orWhere('identity_document', 'LIKE', "%{$search}%")
               ->orWhere('email_address', 'LIKE', "%{$search}%");
         });
     }
@@ -259,12 +273,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
     public static function searchCustomersWithInvoices($input)
     {
-        return self::where(function ($query) use ($input) {
-            $query->where('identity_document', 'LIKE', "%{$input}%")
-                ->orWhere('first_name', 'LIKE', "%{$input}%")
-                ->orWhere('last_name', 'LIKE', "%{$input}%")
-                ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$input}%"]);
-        })
+        return self::search($input)
             ->with(['invoices' => function ($query) {
                 $query->where('status', 'unpaid'); // Filtrar solo facturas no pagadas
             }])

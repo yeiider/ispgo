@@ -168,6 +168,13 @@ extend type Mutation {
     ): ManualInvoiceResult
         @field(resolver: "App\\GraphQL\\Mutations\\ManualInvoiceMutation@delete")
         @guard
+
+    "Cancelar una factura de cualquier tipo (solo si no ha sido pagada)"
+    cancelInvoice(
+        invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
+    ): ManualInvoiceResult
+        @field(resolver: "App\\GraphQL\\Mutations\\CancelInvoiceMutation@resolve")
+        @guard
 }
 
 extend type Query {

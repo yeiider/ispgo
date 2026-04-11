@@ -93,6 +93,22 @@ class Service extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    public function additionalPlans()
+    {
+        return $this->belongsToMany(AdditionalPlan::class, 'service_additional_plan');
+    }
+
+    /**
+     * Get the total monthly price of the service (Plan + Additional Plans).
+     */
+    public function getTotalPriceAttribute(): float
+    {
+        $planPrice = $this->plan?->monthly_price ?? 0;
+        $additionalPrice = $this->additionalPlans()->where('status', 'active')->sum('monthly_price');
+
+        return (float) ($planPrice + $additionalPrice);
+    }
+
     public function napPort()
     {
         return $this->hasOne(NapPort::class, 'service_id');
@@ -161,7 +177,7 @@ class Service extends Model
             // No generar factura para servicios con estado 'free'
             return null;
         }
-        $price = $this->plan->monthly_price;
+        $price = $this->total_price;
 
         $invoice = new Invoice();
         $invoice->service_id = $this->id;

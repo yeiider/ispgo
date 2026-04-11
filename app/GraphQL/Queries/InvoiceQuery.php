@@ -50,12 +50,7 @@ class InvoiceQuery
 
         // Apply customer_name filter if provided
         if (!empty($args['customer_name'])) {
-            $query->whereHas('customer', function ($q) use ($args) {
-                $name = $args['customer_name'];
-                $q->where('first_name', 'LIKE', "%{$name}%")
-                    ->orWhere('last_name', 'LIKE', "%{$name}%")
-                    ->orWhere(\Illuminate\Support\Facades\DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%{$name}%");
-            });
+            $query->searchByCustomerName($args['customer_name']);
         }
 
         // Apply payment_date_from filter if provided

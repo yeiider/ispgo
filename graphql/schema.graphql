@@ -4,6 +4,7 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 #import reports.graphql
 #import invoice-payments.graphql
 #import invoice.schema.graphql
+#import frontend_permissions.graphql
 
 "A date string with format 'Y-m-d', e.g. '2011-05-23'."
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
@@ -31,8 +32,8 @@ type Query {
     user(id: ID! @eq): User @find(model: "App\\Models\\User")
 
     # Roles and Permissions
-    roles: [Role!]! @all(model: "Spatie\\Permission\\Models\\Role")
-    role(id: ID! @eq): Role @find(model: "Spatie\\Permission\\Models\\Role")
+    roles: [Role!]! @all(model: "App\\Models\\Role")
+    role(id: ID! @eq): Role @find(model: "App\\Models\\Role")
 
     permissions: [Permission!]! @all(model: "Spatie\\Permission\\Models\\Permission")
     permission(id: ID! @eq): Permission @find(model: "Spatie\\Permission\\Models\\Permission")
@@ -104,13 +105,27 @@ type Query {
 
     # billingNovedades movido a billing.graphql con más opciones de filtrado
     creditNotes: [CreditNote!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\CreditNote")
-    paymentPromises: [PaymentPromise!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\PaymentPromise")
+    paymentPromises(
+        id: ID
+        invoice_id: ID
+        status: String
+        customer_id: ID
+        user_id: ID
+        customer_name: String
+        promise_date_from: Date
+        promise_date_to: Date
+        sort_column: String
+        sort_direction: String
+    ): [PaymentPromise!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\PaymentPromiseQuery")
 
     routers: [Router!]! @paginate(defaultCount: 10, model: "App\\Models\\Router")
     router(id: ID! @eq): Router @find(model: "App\\Models\\Router")
 
     plans: [Plan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Plan")
     plan(id: ID! @eq): Plan @find(model: "App\\Models\\Services\\Plan")
+
+    additionalPlans: [AdditionalPlan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\AdditionalPlan")
+    additionalPlan(id: ID! @eq): AdditionalPlan @find(model: "App\\Models\\Services\\AdditionalPlan")
 
     tickets(
         status: String @eq
@@ -122,14 +137,51 @@ type Query {
     ticket(id: ID! @eq): Ticket @find(model: "App\\Models\\Ticket")
     myTickets: [Ticket!]! @field(resolver: "App\\GraphQL\\Queries\\TicketQuery@myTickets")
 
+
     # Configuration schema and values for external frontend
     configSchema: [ConfigSection!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@schema")
     configFields(scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@fields")
     configValues(paths: [String!]!, scope_id: Int = 0): [ConfigItem!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@values")
     configSearch(term: String!, scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@search")
+
+    # Cotizaciones
+    cotizaciones(
+        search: String
+        estado: String
+        sort_column: String
+        sort_direction: String
+    ): [Cotizacion!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CotizacionQuery")
+    cotizacion(id: ID! @eq): Cotizacion @find(model: "App\\Models\\Cotizacion")
 }
 
 type Mutation @guard {
+    # Cotizaciones
+    createCotizacion(
+        nombre: String!
+        apellido: String!
+        email: String!
+        telefono: String!
+        direccion: String
+        ciudad: String
+        plan: String
+        canal: String
+        estado: String
+        notas: String
+        metadata: JSON
+    ): Cotizacion @create(model: "App\\Models\\Cotizacion")
+
+    updateCotizacion(
+        id: ID!
+        estado: String
+        notas: String
+        metadata: JSON
+    ): Cotizacion @update(model: "App\\Models\\Cotizacion")
+
+    updateCotizacionesStatus(
+        ids: [ID!]!
+        estado: String!
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\UpdateCotizacionesStatus")
+
     createCustomer(
         first_name: String! @rules(apply: ["required", "max:255"])
         last_name: String! @rules(apply: ["required", "max:255"])
@@ -214,7 +266,8 @@ type Mutation @guard {
         unu_latitude: String
         assigned_technician: Int
         service_contract: String
-    ): Service @create(model: "App\\Models\\Services\\Service")
+        additional_plans: [ID!]
+    ): Service @field(resolver: "App\\GraphQL\\Mutations\\ServiceMutation@create")
 
     updateService(
         id: ID! @rules(apply: ["required", "exists:services,id"])
@@ -243,7 +296,8 @@ type Mutation @guard {
         unu_latitude: String
         assigned_technician: Int
         service_contract: String
-    ): Service @update(model: "App\\Models\\Services\\Service")
+        additional_plans: [ID!]
+    ): Service @field(resolver: "App\\GraphQL\\Mutations\\ServiceMutation@update")
 
     createRouter(
         name: String! @rules(apply: ["required", "max:255"])
@@ -338,6 +392,25 @@ type Mutation @guard {
     suspendService(
         service_id: ID! @rules(apply: ["required", "exists:services,id"])
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SuspendServiceMutation@resolve")
+
+    createAdditionalPlan(
+        name: String! @rules(apply: ["required", "max:255"])
+        monthly_price: Float! @rules(apply: ["required", "numeric", "min:0"])
+        status: String! @rules(apply: ["required", "in:active,inactive"])
+        description: String
+    ): AdditionalPlan @create(model: "App\\Models\\Services\\AdditionalPlan")
+
+    updateAdditionalPlan(
+        id: ID! @rules(apply: ["required", "exists:additional_plans,id"])
+        name: String
+        monthly_price: Float @rules(apply: ["numeric", "min:0"])
+        status: String @rules(apply: ["in:active,inactive"])
+        description: String
+    ): AdditionalPlan @update(model: "App\\Models\\Services\\AdditionalPlan")
+
+    deleteAdditionalPlan(
+        id: ID! @rules(apply: ["required", "exists:additional_plans,id"]) @eq
+    ): AdditionalPlan @delete(model: "App\\Models\\Services\\AdditionalPlan")
 
     registerPayment(
         invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
@@ -675,6 +748,7 @@ type Service {
     router: Router! @belongsTo
     address: Address @belongsTo(relation: "address")
     napPort: NapPort @hasOne(relation: "napPort")
+    additionalPlans: [AdditionalPlan!]! @belongsToMany(relation: "additionalPlans")
 
     # Relaciones de facturación
     "Reglas de descuento/beneficio aplicables al servicio"
@@ -762,6 +836,23 @@ type Plan {
     services: [Service!]! @hasMany
 }
 
+type Cotizacion {
+    id: ID!
+    nombre: String!
+    apellido: String!
+    email: String!
+    telefono: String!
+    direccion: String
+    ciudad: String
+    plan: String
+    canal: String
+    estado: String!
+    notas: String
+    metadata: JSON
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
 type InvoiceItem {
     id: ID!
     description: String
@@ -810,6 +901,19 @@ type PaymentPromise {
 
     invoice: Invoice! @belongsTo
     customer: Customer! @belongsTo
+    user: User @belongsTo
+}
+
+type AdditionalPlan {
+    id: ID!
+    name: String!
+    monthly_price: Float!
+    status: String!
+    description: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    services: [Service!]! @belongsToMany
 }
 
 type Router {
@@ -914,6 +1018,7 @@ type User {
     tickets: [Ticket!]! @belongsToMany
     roles: [Role!]! @belongsToMany(relation: "roles")
     permissions: [Permission!]! @belongsToMany(relation: "permissions")
+    frontendPermissions: [FrontendPermission!]! @belongsToMany(relation: "frontendPermissions")
     allPermissions: [Permission!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@allPermissions")
     registeredPayments: [InvoicePayment!]! @hasMany(relation: "invoicePayments")
 }
@@ -926,6 +1031,7 @@ type Role {
     updated_at: DateTime!
 
     permissions: [Permission!]! @belongsToMany(relation: "permissions")
+    frontendPermissions: [FrontendPermission!]! @belongsToMany(relation: "frontendPermissions")
     users: [User!]! @belongsToMany(relation: "users")
 }
 

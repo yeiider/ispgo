@@ -224,6 +224,7 @@ extend type Query {
         type: String
         applied: Boolean
         effective_period: Date
+        search: String
         first: Int = 15
         page: Int
     ): BillingNovedadPaginator @field(resolver: "App\\GraphQL\\Queries\\BillingQuery@billingNovedades")
