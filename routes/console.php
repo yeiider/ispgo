@@ -33,7 +33,7 @@ Schedule::command('payment-promises:handle-expired')->dailyAt('04:30');
 Schedule::command('onepay:auto-create-charges')->daily();
 
 // Cierre automático de cajas
-Schedule::command('ispgo:auto-close-cash-registers')->dailyAt(\App\Settings\FinanceProviderConfig::getAutoCloseTime());
+//Schedule::command('ispgo:auto-close-cash-registers')->dailyAt(\App\Settings\FinanceProviderConfig::getAutoCloseTime());
 Schedule::command('backup:run')->dailyAt('23:00');
 Schedule::command('backup:clean')->dailyAt('23:30');
 //Schedule::call(function () {
