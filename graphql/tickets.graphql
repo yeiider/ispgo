@@ -1,0 +1,183 @@
+# --------------- Ticket Types ---------------
+
+type Ticket {
+    id: ID!
+    customer_id: ID
+    service_id: ID
+    issue_type: String!
+    priority: String!
+    status: String!
+    title: String!
+    description: String!
+    resolution_notes: String
+    contact_method: String
+    closed_at: DateTime
+    labels: [TicketLabel!]
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    customer: Customer @belongsTo
+    service: Service @belongsTo
+    users: [User!]! @belongsToMany
+    comments: [TicketComment!]! @hasMany
+    attachments: [TicketAttachment!]! @hasMany
+}
+
+type TicketLabel {
+    name: String!
+    color: String!
+}
+
+type TicketComment {
+    id: ID!
+    ticket_id: ID!
+    user_id: ID!
+    comment: String!
+    is_internal: Boolean!
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    ticket: Ticket! @belongsTo
+    user: User! @belongsTo
+}
+
+type TicketAttachment {
+    id: ID!
+    ticket_id: ID!
+    user_id: ID!
+    file_name: String!
+    file_path: String!
+    image_url: String
+    file_type: String
+    file_size: Int
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    ticket: Ticket! @belongsTo
+    user: User! @belongsTo
+}
+
+# --------------- Ticket Queries ---------------
+
+extend type Query {
+    tickets(
+        status: String @eq
+        priority: String @eq
+        customer_id: ID @eq
+        service_id: ID @eq
+        title: String @where(operator: "like")
+    ): [Ticket!]! @paginate(defaultCount: 10, model: "App\\Models\\Ticket")
+    ticket(id: ID! @eq): Ticket @find(model: "App\\Models\\Ticket")
+    myTickets: [Ticket!]! @field(resolver: "App\\GraphQL\\Queries\\TicketQuery@myTickets")
+}
+
+# --------------- Ticket Mutations ---------------
+
+extend type Mutation {
+    createTicket(
+        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
+        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
+        issue_type: String! @rules(apply: ["required", "max:255"])
+        priority: String! @rules(apply: ["required", "in:low,medium,high,urgent"])
+        status: String @rules(apply: ["in:open,in_progress,resolved,closed"])
+        title: String! @rules(apply: ["required", "max:255"])
+        description: String! @rules(apply: ["required"])
+        contact_method: String
+        user_ids: [ID!]
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@create") @guard
+
+    updateTicket(
+        id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
+        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
+        issue_type: String
+        priority: String @rules(apply: ["in:low,medium,high,urgent"])
+        status: String @rules(apply: ["in:open,in_progress,resolved,closed"])
+        title: String
+        description: String
+        contact_method: String
+        resolution_notes: String
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@update") @guard
+
+    deleteTicket(
+        id: ID! @rules(apply: ["required", "exists:tickets,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@delete") @guard
+
+    assignUsersToTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        user_ids: [ID!]! @rules(apply: ["required"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignUsers") @guard
+
+    removeUserFromTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@removeUser") @guard
+
+    assignCustomerToTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignCustomer") @guard
+
+    assignServiceToTicket(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignService") @guard
+
+    # Comments
+    addTicketComment(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        comment: String! @rules(apply: ["required"])
+        is_internal: Boolean
+    ): TicketComment @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@add") @guard
+
+    updateTicketComment(
+        id: ID! @rules(apply: ["required", "exists:ticket_comments,id"])
+        comment: String! @rules(apply: ["required"])
+    ): TicketComment @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@update") @guard
+
+    deleteTicketComment(
+        id: ID! @rules(apply: ["required", "exists:ticket_comments,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@delete") @guard
+
+    # Attachments
+    addTicketAttachment(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        file_name: String! @rules(apply: ["required", "max:255"])
+        file_path: String! @rules(apply: ["required", "max:500"])
+        file_type: String
+        file_size: Int
+    ): TicketAttachment @field(resolver: "App\\GraphQL\\Mutations\\TicketAttachmentMutation@add") @guard
+
+    deleteTicketAttachment(
+        id: ID! @rules(apply: ["required", "exists:ticket_attachments,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketAttachmentMutation@delete") @guard
+
+    # Labels
+    addTicketLabel(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        name: String! @rules(apply: ["required", "max:50"])
+        color: String @rules(apply: ["max:7"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketLabelMutation@add") @guard
+
+    removeTicketLabel(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        name: String! @rules(apply: ["required"])
+    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketLabelMutation@remove") @guard
+
+    # Completa un ticket de instalación y activa la ONU en SmartOLT
+    completeInstallation(
+        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
+        olt_id: Int! @rules(apply: ["required"])
+        pon_type: String! @rules(apply: ["required"])
+        board: Int! @rules(apply: ["required"])
+        port: Int! @rules(apply: ["required"])
+        sn: String! @rules(apply: ["required"])
+        vlan: Int! @rules(apply: ["required"])
+        onu_type: String! @rules(apply: ["required"])
+        zone: Int! @rules(apply: ["required"])
+        onu_mode: String! @rules(apply: ["required"])
+        name: String
+        odb: String
+        resolution_notes: String
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\CompleteInstallationMutation@handle") @guard
+}

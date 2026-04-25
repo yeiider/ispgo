@@ -471,7 +471,30 @@ class ApiManager
     public function setOnuManagementIpDhcpByExternalId(string $externalId, int $vlan): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/set_onu_wan_mode_dhcp/' . $externalId, ['vlan' => $vlan], true);
+        return $this->request('api/onu/set_onu_mgmt_ip_dhcp/' . $externalId, ['vlan' => $vlan], true);
+    }
+
+    /**
+     * Configurar modo WAN DHCP con TR069 para ONU por external_id.
+     *
+     * @param string $externalId
+     * @param array $params Parámetros adicionales para sobrescribir los valores por defecto
+     * @return Response
+     * @throws \Exception
+     */
+    public function setOnuWanModeDhcp(string $externalId, array $params = []): Response
+    {
+        $this->validateExternalId($externalId);
+        $payload = array_merge([
+            'configuration_method'         => 'TR069',
+            'ip_protocol'                  => 'ipv4ipv6',
+            'ipv6_address_mode'            => 'Auto',
+            'ipv6_address'                 => '',
+            'ipv6_gateway'                 => '',
+            'ipv6_prefix_delegation_mode'  => 'DHCPv6-PD',
+            'ipv6_prefix_address'          => '',
+        ], $params);
+        return $this->request('api/onu/set_onu_wan_mode_dhcp/' . $externalId, $payload, true);
     }
 
     /**
