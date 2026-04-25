@@ -28,7 +28,7 @@ class CompleteOnuActivationJob implements ShouldQueue
 
         // Paso 1: Configurar IP de gestión DHCP
         try {
-            $response = $apiManager->setOnuManagementIpDhcpByExternalId($this->sn, $this->vlan);
+            $response = $apiManager->setOnuManagementIpDhcpByExternalId($this->sn, 700);
             $data = $response->json();
             if (($data['status'] ?? false) !== true) {
                 Log::warning('CompleteOnuActivationJob: set_onu_mgmt_ip_dhcp falló', [
