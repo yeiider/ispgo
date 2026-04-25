@@ -572,6 +572,19 @@ class ApiManager
     }
 
     /**
+     * Obtener ONUs no configuradas filtrando por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function getUnconfiguredOnusBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/unconfigured_onus', ['sn' => $sn], false, 'get');
+    }
+
+    /**
      * Obtener detalles de ONU por número de serie.
      *
      * @param string $sn

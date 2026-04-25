@@ -82,6 +82,39 @@ class SmartOltQuery
         return null;
     }
 
+    public function getVlans($root, array $args)
+    {
+        $response = $this->apiManager->getVlansByOltId((int) $args['olt_id']);
+        $data = $response->json();
+        return $data['response'] ?? [];
+    }
+
+    public function getInstallationFormData($root, array $args)
+    {
+        $sn = $args['sn'];
+
+        $onuResponse = $this->apiManager->getUnconfiguredOnusBySn($sn);
+        $onuData = $onuResponse->json();
+        $onu = !empty($onuData['response']) ? $onuData['response'][0] : null;
+
+        if (!$onu) {
+            return null;
+        }
+
+        $oltId = (int) $onu['olt_id'];
+
+        $vlanData     = $this->apiManager->getVlansByOltId($oltId)->json();
+        $zonesData    = $this->apiManager->getZones()->json();
+        $profilesData = $this->apiManager->getSpeedProfiles()->json();
+
+        return [
+            'onu'           => $onu,
+            'vlans'         => $vlanData['response'] ?? [],
+            'zones'         => $zonesData['response'] ?? [],
+            'speed_profiles' => $profilesData['response'] ?? [],
+        ];
+    }
+
     public function getOnuTypeImage($root, array $args)
     {
         $response = $this->apiManager->getOnuTypeImage($args['onu_type_id']);
