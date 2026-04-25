@@ -34,4 +34,44 @@ class SettingSmartolt
             ],
         ];
     }
+
+    public static function getActivationSettings(): array
+    {
+        return [
+            "setting" => [
+                "label" => "Configuración de Activación ONU",
+                "code" => "activation"
+            ],
+            "default_vlan" => [
+                "field" => "number-field",
+                "label" => "VLAN por defecto",
+                "placeholder" => "700",
+            ],
+            "tr069_profile" => [
+                "field" => "text-field",
+                "label" => "Perfil TR069",
+                "placeholder" => "SmartOLT",
+            ],
+            "wan_configuration_method" => [
+                "field" => "text-field",
+                "label" => "Método de configuración WAN",
+                "placeholder" => "TR069",
+            ],
+            "ip_protocol" => [
+                "field" => "text-field",
+                "label" => "Protocolo IP",
+                "placeholder" => "ipv4ipv6",
+            ],
+            "ipv6_address_mode" => [
+                "field" => "text-field",
+                "label" => "Modo de dirección IPv6",
+                "placeholder" => "Auto",
+            ],
+            "ipv6_prefix_delegation_mode" => [
+                "field" => "text-field",
+                "label" => "Modo de delegación de prefijo IPv6",
+                "placeholder" => "DHCPv6-PD",
+            ],
+        ];
+    }
 }

@@ -486,12 +486,12 @@ class ApiManager
     {
         $this->validateExternalId($externalId);
         $payload = array_merge([
-            'configuration_method'         => 'TR069',
-            'ip_protocol'                  => 'ipv4ipv6',
-            'ipv6_address_mode'            => 'Auto',
+            'configuration_method'         => ProviderSmartOlt::getWanConfigurationMethod(),
+            'ip_protocol'                  => ProviderSmartOlt::getIpProtocol(),
+            'ipv6_address_mode'            => ProviderSmartOlt::getIpv6AddressMode(),
             'ipv6_address'                 => '',
             'ipv6_gateway'                 => '',
-            'ipv6_prefix_delegation_mode'  => 'DHCPv6-PD',
+            'ipv6_prefix_delegation_mode'  => ProviderSmartOlt::getIpv6PrefixDelegationMode(),
             'ipv6_prefix_address'          => '',
         ], $params);
         return $this->request('api/onu/set_onu_wan_mode_dhcp/' . $externalId, $payload, true);

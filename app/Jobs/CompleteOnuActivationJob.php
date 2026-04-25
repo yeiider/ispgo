@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Ispgo\Smartolt\Services\ApiManager;
+use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 
 class CompleteOnuActivationJob implements ShouldQueue
 {
@@ -28,7 +29,8 @@ class CompleteOnuActivationJob implements ShouldQueue
 
         // Paso 1: Configurar IP de gestión DHCP
         try {
-            $response = $apiManager->setOnuManagementIpDhcpByExternalId($this->sn, 700);
+            $vlan = $this->vlan ?: ProviderSmartOlt::getDefaultVlan();
+            $response = $apiManager->setOnuManagementIpDhcpByExternalId($this->sn, $vlan);
             $data = $response->json();
             if (($data['status'] ?? false) !== true) {
                 Log::warning('CompleteOnuActivationJob: set_onu_mgmt_ip_dhcp falló', [
@@ -47,7 +49,7 @@ class CompleteOnuActivationJob implements ShouldQueue
 
         // Paso 2: Habilitar TR069
         try {
-            $response = $apiManager->enableTr069($this->sn, 'SmartOLT');
+            $response = $apiManager->enableTr069($this->sn, ProviderSmartOlt::getTr069Profile());
             $data = $response->json();
             if (($data['status'] ?? false) !== true) {
                 Log::warning('CompleteOnuActivationJob: enable_tr069 falló', [
