@@ -15,8 +15,8 @@ class ApiManager
 
     public function __construct()
     {
-        $this->baseUrl = ProviderSmartOlt::getUrl();
-        $this->token = ProviderSmartOlt::getToken();
+        $this->baseUrl = ProviderSmartOlt::getUrl() ?? '';
+        $this->token = ProviderSmartOlt::getToken() ?? '';
     }
 
     private function request(string $endpoint, array $payload = [], bool $asForm = false, string $method = 'post'): Response
