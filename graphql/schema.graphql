@@ -124,9 +124,6 @@ type Query {
     plans: [Plan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Plan")
     plan(id: ID! @eq): Plan @find(model: "App\\Models\\Services\\Plan")
 
-    additionalPlans: [AdditionalPlan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\AdditionalPlan")
-    additionalPlan(id: ID! @eq): AdditionalPlan @find(model: "App\\Models\\Services\\AdditionalPlan")
-
     tickets(
         status: String @eq
         priority: String @eq
@@ -137,7 +134,8 @@ type Query {
     ticket(id: ID! @eq): Ticket @find(model: "App\\Models\\Ticket")
     myTickets: [Ticket!]! @field(resolver: "App\\GraphQL\\Queries\\TicketQuery@myTickets")
 
-
+    additionalPlans: [AdditionalPlan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\AdditionalPlan")
+    additionalPlan(id: ID! @eq): AdditionalPlan @find(model: "App\\Models\\Services\\AdditionalPlan")
     # Configuration schema and values for external frontend
     configSchema: [ConfigSection!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@schema")
     configFields(scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@fields")
@@ -1287,3 +1285,5 @@ extend type Mutation {
 #import inventory.graphql
 #import cash-registers.graphql
 #import onepay.graphql
+#import frontend_permissions.graphql
+#import tickets.graphql
