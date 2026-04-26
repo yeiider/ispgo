@@ -89,7 +89,7 @@ class CompleteInstallationMutation
                 ->onQueue('redis');
 
             // Cerrar el ticket
-            $ticket->status = 'closed';
+            $ticket->status = 'resolved';
             $ticket->resolution_notes = $args['resolution_notes'] ?? 'Instalación completada y ONU activada correctamente.';
             $ticket->save();
 
