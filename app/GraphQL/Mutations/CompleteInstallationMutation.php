@@ -79,7 +79,7 @@ class CompleteInstallationMutation
             $service->save();
 
             // Pasos 2-4: mgmt IP DHCP → TR069 → WAN mode DHCP (30 segundos)
-            CompleteOnuActivationJob::dispatch($args['sn'], $args['vlan'])
+            CompleteOnuActivationJob::dispatch($args['sn'])
                 ->delay(now()->addSeconds(30))
                 ->onQueue('redis');
 

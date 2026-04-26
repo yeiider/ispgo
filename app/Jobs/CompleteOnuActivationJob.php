@@ -20,7 +20,6 @@ class CompleteOnuActivationJob implements ShouldQueue
 
     public function __construct(
         protected string $sn,
-        protected int $vlan
     ) {}
 
     public function handle(ApiManager $apiManager): void
@@ -29,7 +28,7 @@ class CompleteOnuActivationJob implements ShouldQueue
 
         // Paso 1: Configurar IP de gestión DHCP
         try {
-            $vlan = $this->vlan ?: ProviderSmartOlt::getDefaultVlan();
+            $vlan = ProviderSmartOlt::getDefaultVlan();
             $response = $apiManager->setOnuManagementIpDhcpByExternalId($this->sn, $vlan);
             $data = $response->json();
             if (($data['status'] ?? false) !== true) {
