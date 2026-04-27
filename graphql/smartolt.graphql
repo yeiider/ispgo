@@ -203,6 +203,36 @@ type SmartOltVoipPort {
     allowed_vlans: String
 }
 
+type SmartOltVlan {
+    id: ID!
+    vlan: String
+    description: String
+    olt_id: String
+    scope: String
+    default_for_pon_ports: String
+}
+
+type SmartOltUnconfiguredOnu {
+    id: Int
+    pon_type: String
+    board: String
+    port: String
+    pon_description: String
+    onu: String
+    sn: String
+    onu_type_name: String
+    onu_type_id: String
+    olt_id: String
+    is_disabled: Int
+}
+
+type InstallationFormData {
+    onu: SmartOltUnconfiguredOnu
+    vlans: [SmartOltVlan!]!
+    zones: [SmartOltZone!]!
+    speed_profiles: [SmartOltSpeedProfile!]!
+}
+
 type SmartOltOnuTypeImage {
     image_base64: String!
     content_type: String!
@@ -225,6 +255,8 @@ extend type Query {
     smartOltOnuDetails(sn: String!): SmartOltOnuDetails @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuDetails")
     smartOltOnuTypeImage(onu_type_id: ID!): SmartOltOnuTypeImage @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuTypeImage")
     smartOltOnuTrafficGraph(external_id: String!, graph_type: String = "hourly"): SmartOltOnuTrafficGraph @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuTrafficGraph")
+    smartOltVlans(olt_id: ID!): [SmartOltVlan!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getVlans")
+    smartOltInstallationFormData(sn: String!): InstallationFormData @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getInstallationFormData")
 }
 
 extend type Mutation {

@@ -15,8 +15,8 @@ class ApiManager
 
     public function __construct()
     {
-        $this->baseUrl = ProviderSmartOlt::getUrl();
-        $this->token = ProviderSmartOlt::getToken();
+        $this->baseUrl = ProviderSmartOlt::getUrl() ?? '';
+        $this->token = ProviderSmartOlt::getToken() ?? '';
     }
 
     private function request(string $endpoint, array $payload = [], bool $asForm = false, string $method = 'post'): Response
@@ -471,7 +471,30 @@ class ApiManager
     public function setOnuManagementIpDhcpByExternalId(string $externalId, int $vlan): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/set_onu_wan_mode_dhcp/' . $externalId, ['vlan' => $vlan], true);
+        return $this->request('api/onu/set_onu_mgmt_ip_dhcp/' . $externalId, ['vlan' => $vlan], true);
+    }
+
+    /**
+     * Configurar modo WAN DHCP con TR069 para ONU por external_id.
+     *
+     * @param string $externalId
+     * @param array $params Parámetros adicionales para sobrescribir los valores por defecto
+     * @return Response
+     * @throws \Exception
+     */
+    public function setOnuWanModeDhcp(string $externalId, array $params = []): Response
+    {
+        $this->validateExternalId($externalId);
+        $payload = array_merge([
+            'configuration_method'         => ProviderSmartOlt::getWanConfigurationMethod(),
+            'ip_protocol'                  => ProviderSmartOlt::getIpProtocol(),
+            'ipv6_address_mode'            => ProviderSmartOlt::getIpv6AddressMode(),
+            'ipv6_address'                 => '',
+            'ipv6_gateway'                 => '',
+            'ipv6_prefix_delegation_mode'  => ProviderSmartOlt::getIpv6PrefixDelegationMode(),
+            'ipv6_prefix_address'          => '',
+        ], $params);
+        return $this->request('api/onu/set_onu_wan_mode_dhcp/' . $externalId, $payload, true);
     }
 
     /**
@@ -546,6 +569,19 @@ class ApiManager
         } catch (ConnectionException $e) {
             throw new \Exception("Error getting OLTs uptime and temperature: " . $e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    /**
+     * Obtener ONUs no configuradas filtrando por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function getUnconfiguredOnusBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/unconfigured_onus', ['sn' => $sn], false, 'get');
     }
 
     /**

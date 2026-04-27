@@ -9,6 +9,7 @@ Route::apiResource('/customers', \App\Http\Controllers\API\Customers\CustomerCon
 Route::apiResource('/addresses', \App\Http\Controllers\API\Customers\AddressController::class);
 
 Route::apiResource('/tax-details', \App\Http\Controllers\API\Customers\TaxDetailController::class);
+Route::get('/customers/{customerId}/tax-detail', [\App\Http\Controllers\API\Customers\TaxDetailController::class, 'byCustomer']);
 
 Route::apiResource('/document-types', \App\Http\Controllers\API\Customers\DocumentTypeController::class);
 

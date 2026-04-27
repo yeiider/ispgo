@@ -14,6 +14,7 @@ use App\Listeners\AfterPayingInvoice;
 use App\Events\InvoiceItemsCreated;
 use App\Listeners\ApplyBillingNovedades;
 use App\Listeners\ApplyRuleInvoice;
+use App\Listeners\ApplyTaxByFiscalRegime;
 use App\Listeners\FinalizeBuildInvoiceToSchedule;
 use App\Listeners\SendInvoiceNotification;
 use App\Listeners\UpdateStateToIssued;
@@ -89,6 +90,11 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             InvoiceItemsCreated::class,
             [ApplyRuleInvoice::class, 'handle']
+        );
+        // Automatically apply IVA (19%) for customers in Régimen Común
+        Event::listen(
+            InvoiceItemsCreated::class,
+            [ApplyTaxByFiscalRegime::class, 'handle']
         );
     }
 }

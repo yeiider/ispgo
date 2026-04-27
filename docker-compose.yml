@@ -30,7 +30,7 @@ services:
     mysql:
         # CAMBIO: 'mysql/mysql-server:8.0' no es compatible con ARM64 (Raspberry Pi).
         # 'mariadb:10.8' es un reemplazo directo y compatible.
-        image: 'mariadb:10.8'
+        image: 'mysql:8.0'
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:

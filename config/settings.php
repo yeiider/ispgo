@@ -568,8 +568,8 @@ return [
             "label" => "Smart Olt",
             "class" => "form-control",
         ],
-        "general" => SettingSmartolt::getGeneralSettings(),
-
+        "general"    => SettingSmartolt::getGeneralSettings(),
+        "activation" => SettingSmartolt::getActivationSettings(),
     ],
 
     "siigo" => [
