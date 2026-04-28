@@ -61,14 +61,16 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
 WORKDIR /var/www/html
 
 # Copiar archivos de configuración para dependencias
-COPY composer.json composer.lock package.json package-lock.json auth.json ./
+COPY composer.json composer.lock package.json package-lock.json ./
+COPY auth.json* ./
 
 # Copiar componentes locales requeridos por composer.json (path repositories)
 COPY nova-components/ ./nova-components/
 COPY packages/ ./packages/
 
 # Instalar dependencias de Composer (sin dev en producción)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+# Usamos --no-scripts para evitar errores si la app no está configurada aún
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
 
 # Instalar dependencias de Node.js
 RUN npm ci
