@@ -2,21 +2,24 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build: 
+      context: .
+      args:
+        - COMPOSER_AUTH=${COMPOSER_AUTH}
     container_name: ispgo-app
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-8191}:80"
+      - "8191:80"
     environment:
       - APP_KEY=${APP_KEY}
       - APP_ENV=production
       - RUN_SETUP=true
+      - COMPOSER_AUTH=${COMPOSER_AUTH}
       - DB_HOST=${DB_HOST}
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      # Quitamos el '.' y dejamos solo lo persistente
       - storage-data:/var/www/html/storage
       - cache-data:/var/www/html/bootstrap/cache
     networks:

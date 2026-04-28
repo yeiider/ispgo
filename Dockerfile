@@ -1,16 +1,12 @@
 FROM php:8.3-fpm
 
-# Argumentos para Nova y Composer
-ARG COMPOSER_AUTH
-ENV COMPOSER_AUTH=$COMPOSER_AUTH
-
-# Instalar dependencias del sistema
+# Instalar dependencias del sistema esenciales
 RUN apt-get update && apt-get install -y \
     git unzip zip libpng-dev libzip-dev libonig-dev libicu-dev \
-    libjpeg62-turbo-dev libfreetype6-dev nginx supervisor \
+    libjpeg62-turbo-dev libfreetype6-dev nginx supervisor curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Extensiones de PHP (incluyendo sockets)
+# Extensiones de PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql gd zip bcmath sockets intl pcntl
 
@@ -22,21 +18,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install
 
 WORKDIR /var/www/html
 
-# 1. Copiar archivos de dependencias
-COPY composer.json composer.lock package.json package-lock.json auth.json* ./
-COPY nova-components/ ./nova-components/
-COPY packages/ ./packages/
-
-# 2. Instalar dependencias de Composer
-RUN composer install --no-interaction --no-scripts --prefer-dist --no-dev --optimize-autoloader
-
-# 3. Instalar dependencias de NPM y compilar
-RUN npm install && npm run build
-
-# 4. Copiar el resto del proyecto
+# Copiamos el código (esto se usará si no hay volúmenes montados)
 COPY . .
 
-# Permisos
+# Permisos iniciales
 RUN chown -R www-data:www-data /var/www/html
 
 COPY ./docker/nginx.conf /etc/nginx/sites-available/default
