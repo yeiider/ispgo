@@ -3,10 +3,12 @@ FROM php:8.3-fpm
 # Argumentos
 ARG WWWGROUP=1000
 ARG NODE_VERSION=20
+ARG COMPOSER_AUTH
 
 # Variables de entorno
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
+ENV COMPOSER_AUTH=$COMPOSER_AUTH
 
 # Establecer zona horaria
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
