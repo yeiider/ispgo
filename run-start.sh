@@ -1,9 +1,6 @@
 #!/bin/bash
 
 # Ejecutar las demás tareas
-echo "Ejecutando el build de la aplicación..."
-npm run build
-
 echo "Limpiando la caché y optimizando..."
 php artisan optimize:clear && php artisan storage:link
 

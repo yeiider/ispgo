@@ -1,61 +1,110 @@
-FROM php:8.2-fpm
+FROM php:8.3-fpm
+
+# Argumentos
+ARG WWWGROUP=1000
+ARG NODE_VERSION=20
+
+# Variables de entorno
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+
+# Establecer zona horaria
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    nginx \
-    supervisor \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    libzip-dev \
-    libonig-dev \
-    libicu-dev \
+    gnupg \
+    gosu \
+    curl \
+    ca-certificates \
+    zip \
     unzip \
     git \
-    curl \
+    supervisor \
+    libcap2-bin \
+    libpng-dev \
+    libzip-dev \
+    libonig-dev \
+    libxml2-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libicu-dev \
+    nginx \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar extensiones PHP
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
     zip \
-    gnupg
+    fileinfo \
+    intl
 
-# Limpiar caché
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Extensiones de PHP
-RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl gd bcmath intl
+# Instalar Redis
 RUN pecl install redis && docker-php-ext-enable redis
 
-# Composer
+# Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
+# Instalar Node.js y npm
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm
 
+# Configurar directorio de trabajo
 WORKDIR /var/www/html
 
-# Copiar archivos de configuración primero para aprovechar la caché de Docker
-COPY composer.json composer.lock ./
-COPY package.json package-lock.json ./
-COPY auth.json ./
+# Copiar archivos de configuración para dependencias
+COPY composer.json composer.lock package.json package-lock.json auth.json ./
 
-# Copiar el resto del proyecto
+# Copiar componentes locales requeridos por composer.json (path repositories)
+COPY nova-components/ ./nova-components/
+COPY packages/ ./packages/
+
+# Instalar dependencias de Composer (sin dev en producción)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+# Instalar dependencias de Node.js
+RUN npm ci
+
+# Copiar el resto de la aplicación
 COPY . .
+
+# Compilar assets de Vite
+RUN npm run build
 
 # Configurar Nginx y Supervisor
 COPY ./docker/nginx.conf /etc/nginx/sites-available/default
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Preparar scripts
+# Preparar scripts de ejecución
 COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN cp run-start.sh /usr/local/bin/run-start.sh && \
     cp run-worker.sh /usr/local/bin/run-worker.sh && \
     cp run-cron.sh /usr/local/bin/run-cron.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh /usr/local/bin/run-start.sh /usr/local/bin/run-worker.sh /usr/local/bin/run-cron.sh
 
-# Permisos
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Crear directorios necesarios y establecer permisos
+RUN mkdir -p /var/www/html/storage/logs \
+    && mkdir -p /var/www/html/storage/framework/sessions \
+    && mkdir -p /var/www/html/storage/framework/views \
+    && mkdir -p /var/www/html/storage/framework/cache \
+    && mkdir -p /var/www/html/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html/storage \
+    && chown -R www-data:www-data /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
+
+# Exponer puerto
+EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-EXPOSE 80
-
-# El comando por defecto será iniciar supervisord (que arranca nginx y php-fpm)
+# El comando por defecto inicia supervisord para correr Nginx y PHP-FPM
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
