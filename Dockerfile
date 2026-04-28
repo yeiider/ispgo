@@ -3,24 +3,14 @@ FROM php:8.3-fpm-alpine
 # Permitir que Composer se ejecute como superusuario
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Instalar dependencias esenciales
-RUN apk add --no-cache \
-    nginx \
-    libpng-dev \
-    libzip-dev \
-    icu-dev \
-    oniguruma-dev \
-    freetype-dev \
-    libjpeg-turbo-dev \
-    bash \
-    nodejs \
-    npm \
-    git \
-    mysql-client
+# Instalar herramientas básicas
+RUN apk add --no-cache bash nodejs npm git mysql-client nginx
 
-# Extensiones PHP (Incluyendo sockets para Mikrotik)
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
+# Instalar el script para instalar extensiones de PHP de forma rápida y segura
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/install-php-extensions && \
+    install-php-extensions \
     pdo_mysql \
     mbstring \
     exif \
@@ -29,14 +19,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     gd \
     zip \
     intl \
-    sockets
+    sockets \
+    redis
 
-# Redis
-RUN apk add --no-cache $PHPIZE_DEPS \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && apk del $PHPIZE_DEPS
-
+# Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
@@ -44,14 +30,12 @@ WORKDIR /var/www/html
 # Copiar archivos
 COPY . .
 
-# Configuración Nginx (para el contenedor Web)
+# Configuración de red (Railway)
 COPY docker/railway/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/railway/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Instalación de dependencias
-# Nota: Usamos --ignore-platform-reqs solo si el lock fue generado en un entorno distinto,
-# pero al haber instalado 'sockets' arriba, ya no debería ser necesario.
+# Instalación de dependencias de PHP
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Instalación de dependencias de JS y build de Vite
