@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        COMPOSER_AUTH: ${COMPOSER_AUTH}
     container_name: ispgo-app
     restart: unless-stopped
     environment:
