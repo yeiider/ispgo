@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Servicio App: Se encarga de Nginx, PHP-FPM y del SETUP inicial
   app:
     build: .
     container_name: ispgo-app
@@ -10,6 +11,7 @@ services:
     environment:
       - APP_KEY=${APP_KEY}
       - APP_ENV=production
+      - RUN_SETUP=true # Este será el encargado de correr composer/npm/migrate
       - DB_HOST=${DB_HOST}
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
@@ -21,6 +23,46 @@ services:
     depends_on:
       - redis
       - mysql
+
+  # Servicio Worker: Procesa colas
+  worker:
+    build: .
+    container_name: ispgo-worker
+    restart: unless-stopped
+    environment:
+      - APP_KEY=${APP_KEY}
+      - RUN_SETUP=false
+      - DB_HOST=${DB_HOST}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - .:/var/www/html
+    networks:
+      - ispgo-network
+    depends_on:
+      - app
+    command: ["/usr/local/bin/run-worker.sh"]
+
+  # Servicio Cron: Tareas programadas
+  cron:
+    build: .
+    container_name: ispgo-cron
+    restart: unless-stopped
+    environment:
+      - APP_KEY=${APP_KEY}
+      - RUN_SETUP=false
+      - DB_HOST=${DB_HOST}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - .:/var/www/html
+    networks:
+      - ispgo-network
+    depends_on:
+      - app
+    command: ["/usr/local/bin/run-cron.sh"]
 
   mysql:
     image: mysql:8.0

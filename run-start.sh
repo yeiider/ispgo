@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Ejecutar las demás tareas
 echo "Limpiando la caché y optimizando..."
 php artisan optimize:clear && php artisan storage:link
 
