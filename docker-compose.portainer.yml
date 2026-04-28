@@ -20,8 +20,7 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      - storage-data:/var/www/html/storage
-      - cache-data:/var/www/html/bootstrap/cache
+      - code-data:/var/www/html
     networks:
       - ispgo-network
     depends_on:
@@ -40,8 +39,7 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      - storage-data:/var/www/html/storage
-      - cache-data:/var/www/html/bootstrap/cache
+      - code-data:/var/www/html
     networks:
       - ispgo-network
     depends_on:
@@ -60,8 +58,7 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      - storage-data:/var/www/html/storage
-      - cache-data:/var/www/html/bootstrap/cache
+      - code-data:/var/www/html
     networks:
       - ispgo-network
     depends_on:
@@ -91,5 +88,4 @@ networks:
 
 volumes:
   mysql-data:
-  storage-data:
-  cache-data:
+  code-data:

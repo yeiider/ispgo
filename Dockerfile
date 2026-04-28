@@ -18,7 +18,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install
 
 WORKDIR /var/www/html
 
-# Copiamos el código (esto se usará si no hay volúmenes montados)
+# Copiamos el código
 COPY . .
 
 # Permisos iniciales
@@ -27,7 +27,15 @@ RUN chown -R www-data:www-data /var/www/html
 COPY ./docker/nginx.conf /etc/nginx/sites-available/default
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Copiar scripts de ejecución y dar permisos
+RUN cp run-start.sh /usr/local/bin/run-start.sh && \
+    cp run-worker.sh /usr/local/bin/run-worker.sh && \
+    cp run-cron.sh /usr/local/bin/run-cron.sh && \
+    chmod +x /usr/local/bin/docker-entrypoint.sh \
+             /usr/local/bin/run-start.sh \
+             /usr/local/bin/run-worker.sh \
+             /usr/local/bin/run-cron.sh
 
 EXPOSE 80
 

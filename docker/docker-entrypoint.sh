@@ -29,9 +29,20 @@ if [ "$RUN_SETUP" = "true" ]; then
         echo ">>> SETUP finalizado con éxito."
     else
         echo "!!! ERROR CRÍTICO: Composer falló. Revisa tus credenciales en COMPOSER_AUTH."
-        echo "!!! Valor actual de COMPOSER_AUTH: $COMPOSER_AUTH"
         exit 1
     fi
+else
+    echo ">>> Modo ejecutor (Worker/Cron). Esperando a que las dependencias estén listas..."
+    timeout=300
+    while [ ! -f "/var/www/html/vendor/autoload.php" ]; do
+        if [ "$timeout" -le 0 ]; then
+            echo "!!! ERROR: Tiempo de espera agotado para las dependencias."
+            exit 1
+        fi
+        sleep 5
+        timeout=$((timeout - 5))
+    done
+    echo ">>> Dependencias detectadas. Iniciando comando..."
 fi
 
 exec "$@"
