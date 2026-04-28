@@ -1,30 +1,30 @@
 version: '3.8'
 
 services:
-  # Servicio App: Se encarga de Nginx, PHP-FPM y del SETUP inicial
   app:
     build: .
     container_name: ispgo-app
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-8191}:80"
+      - "8191:80"
     environment:
       - APP_KEY=${APP_KEY}
       - APP_ENV=production
-      - RUN_SETUP=true # Este será el encargado de correr composer/npm/migrate
+      - RUN_SETUP=true
       - DB_HOST=${DB_HOST}
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      - .:/var/www/html
+      # Quitamos el '.' y dejamos solo lo persistente
+      - storage-data:/var/www/html/storage
+      - cache-data:/var/www/html/bootstrap/cache
     networks:
       - ispgo-network
     depends_on:
       - redis
       - mysql
 
-  # Servicio Worker: Procesa colas
   worker:
     build: .
     container_name: ispgo-worker
@@ -37,14 +37,14 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      - .:/var/www/html
+      - storage-data:/var/www/html/storage
+      - cache-data:/var/www/html/bootstrap/cache
     networks:
       - ispgo-network
     depends_on:
       - app
     command: ["/usr/local/bin/run-worker.sh"]
 
-  # Servicio Cron: Tareas programadas
   cron:
     build: .
     container_name: ispgo-cron
@@ -57,7 +57,8 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      - .:/var/www/html
+      - storage-data:/var/www/html/storage
+      - cache-data:/var/www/html/bootstrap/cache
     networks:
       - ispgo-network
     depends_on:
@@ -87,3 +88,5 @@ networks:
 
 volumes:
   mysql-data:
+  storage-data:
+  cache-data:
