@@ -3,7 +3,7 @@ set -e
 
 if [ "$RUN_SETUP" = "true" ]; then
     echo ">>> Iniciando proceso de SETUP..."
-    
+
     if [ ! -z "$COMPOSER_AUTH" ]; then
         echo ">>> Configurando COMPOSER_AUTH..."
         export COMPOSER_AUTH="$COMPOSER_AUTH"
@@ -12,20 +12,14 @@ if [ "$RUN_SETUP" = "true" ]; then
     echo ">>> Instalando dependencias de PHP (Composer)..."
     if composer install --no-interaction --no-scripts --prefer-dist --no-dev --optimize-autoloader; then
         echo ">>> Composer instalado correctamente."
-        
-        echo ">>> Instalando dependencias de JS (NPM)..."
-        npm install --no-audit --no-fund
-        
-        echo ">>> Compilando assets (Vite)..."
-        npm run build
 
         echo ">>> Ejecutando migraciones..."
         php artisan migrate --force
-        
+
         echo ">>> Optimizando Laravel..."
         php artisan optimize:clear
         php artisan storage:link || true
-        
+
         echo ">>> SETUP finalizado con éxito."
     else
         echo "!!! ERROR CRÍTICO: Composer falló. Revisa tus credenciales en COMPOSER_AUTH."
