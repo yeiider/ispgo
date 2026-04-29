@@ -24,9 +24,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
         $user = $request->user();
         $user->load(['roles.frontendPermissions', 'frontendPermissions']);
-        
+
         $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : collect();
-        
+
         $frontendPermissions = $user->getAllFrontendPermissions()->map(function($perm) {
             return $perm->name;
         })->unique()->values();
@@ -53,7 +53,7 @@ Route::middleware('auth:api')->group(function () {
         // Using Spatie\Permission helpers provided by HasRoles trait
         $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : collect();
         $permissions = method_exists($user, 'getPermissionNames') ? $user->getPermissionNames() : collect();
-        
+
         // Get all frontend permissions (direct + from roles)
         $frontendPermissions = $user->getAllFrontendPermissions()->map(function($perm) {
             return $perm->name;
@@ -131,6 +131,7 @@ Route::middleware('auth:api')->group(function () {
 
 Route::post('/login', [\App\Http\Controllers\API\AuthController::class, 'login']);
 Route::prefix('v1')
+    ->as('v1.')
     ->middleware('auth:api')
     ->group(base_path('routes/api_v1.php'));
 
