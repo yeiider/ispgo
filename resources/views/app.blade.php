@@ -7,13 +7,8 @@
 
     <title>{{\App\Settings\GeneralProviderConfig::getCompanyName()??"Ispgo"}}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @viteReactRefresh
-    @vite('resources/css/app.css')
-    @vite('resources/js/app.tsx')
-    @inertiaHead
 </head>
 <body>
-@inertia
-<script type="text/javascript" src="https://checkout.wompi.co/widget.js"></script>
+
 </body>
 </html>
