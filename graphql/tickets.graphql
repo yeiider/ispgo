@@ -173,6 +173,7 @@ extend type Mutation {
         port: Int! @rules(apply: ["required"])
         sn: String! @rules(apply: ["required"])
         vlan: Int! @rules(apply: ["required"])
+        vlan_mgmt: Int! @rules(apply: ["required"])
         onu_type: String! @rules(apply: ["required"])
         zone: Int! @rules(apply: ["required"])
         onu_mode: String! @rules(apply: ["required"])
