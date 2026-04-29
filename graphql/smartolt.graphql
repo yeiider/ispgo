@@ -267,6 +267,7 @@ extend type Mutation {
         port: String!
         sn: String!
         vlan: Int!
+        vlan_mgmt: Int!
         onu_mode: String!
         onu_type: String!
         zone: String!
