@@ -33,7 +33,7 @@ COPY . .
 # Configuración de red (Railway)
 COPY docker/railway/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/railway/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh run-start.sh run-worker.sh run-cron.sh
 
 # Instalación de dependencias de PHP
 RUN composer install --no-dev --optimize-autoloader --no-interaction
@@ -46,6 +46,7 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 ENV APP_ENV=production
 ENV APP_DEBUG=false
+ENV LOG_CHANNEL=stderr
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
