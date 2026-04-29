@@ -40,7 +40,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh run-start.sh run-worker.sh run-cron.sh
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Instalación de dependencias de JS y build de Vite
-RUN npm install && npm run build
+#RUN npm install && npm run build
 
 # Permisos
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
