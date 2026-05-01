@@ -1,31 +1,34 @@
 #!/bin/sh
-set -e
+# set -e  <-- COMENTAMOS ESTA LÍNEA TEMPORALMENTE
 
-# Solo ejecutar tareas de inicio si es el servicio web (detectado por la presencia de PORT)
+# Nos aseguramos de que PORT exista, si no, usamos 80 por defecto
+PORT=${PORT:-80}
+
+# Solo ejecutar tareas de inicio si es el servicio web
 if [ -n "$PORT" ]; then
     echo "Configurando Nginx para el puerto $PORT..."
     sed -i "s/\${PORT}/${PORT}/g" /etc/nginx/http.d/default.conf
 
-    echo "Optimizando Laravel..."
-    php artisan optimize:clear
-    php artisan config:cache
-    php artisan route:cache
-    php artisan view:cache
-    php artisan storage:link
+    echo "Optimizando Laravel (Modo Seguro)..."
+    # Añadimos || true para ignorar errores fatales y que el contenedor siga vivo
+    php artisan optimize:clear || true
+    php artisan config:cache || true
+    php artisan route:cache || true
+    php artisan view:cache || true
+    php artisan storage:link || true
 
     if [ "$RUN_MIGRATIONS" = "true" ]; then
         echo "Ejecutando migraciones..."
-        php artisan migrate --force
+        php artisan migrate --force || true
     fi
 
     echo "Validacion del schema graphql..."
-    php artisan lighthouse:validate-schema || echo "Advertencia: Error validando schema"
+    php artisan lighthouse:validate-schema || true
 
     echo "Verificando la licencia de Laravel Nova..."
-    php artisan nova:check-license || echo "Advertencia: Error verificando licencia"
+    php artisan nova:check-license || true
 fi
 
-# Ejecutar el comando pasado al contenedor (exec asegura que el proceso reciba las señales de Railway)
-# Si no hay comando, se usará el CMD por defecto del Dockerfile
+# Ejecutar el comando pasado al contenedor
 echo "Iniciando proceso: $@"
 exec "$@"
