@@ -5,6 +5,8 @@ namespace Ispgo\Smartolt\Listeners;
 use App\Events\ServiceUpdateStatus;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
+use Ispgo\Smartolt\Jobs\ActivateCatvJob;
+use Ispgo\Smartolt\Jobs\RebootOnuJob;
 use Ispgo\Smartolt\Services\ApiManager;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 
@@ -64,9 +66,26 @@ class ServiceOltManagerListener
         $apiManager = new ApiManager();
         try {
             if ($action === 'enable') {
+                // Paso 1: Activar ONU inmediatamente
                 $response = $apiManager->enableOnu($sn);
-                $this->triggerCatv($apiManager, $externalId, 'enable');
+
+                Log::info("ServiceOltManagerListener: ONU {$sn} activada. Programando CATV y reboot.", [
+                    'service_id'  => $service->id,
+                    'external_id' => $externalId,
+                ]);
+
+                // Paso 2: Activar CATV tras 2 segundos
+                ActivateCatvJob::dispatch($externalId, $service->id)
+                    ->onQueue('redis')
+                    ->delay(now()->addSeconds(2));
+
+                // Paso 3: Reboot de la ONU 5 segundos después (3s después de CATV)
+                RebootOnuJob::dispatch($externalId, $service->id)
+                    ->onQueue('redis')
+                    ->delay(now()->addSeconds(5));
+
             } else {
+                // Desactivación inmediata
                 $response = $apiManager->disableOnu($sn);
                 $this->triggerCatv($apiManager, $externalId, 'disable');
             }
