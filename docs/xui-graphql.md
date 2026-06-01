@@ -35,6 +35,7 @@ type IptvLineUser {
     max_connections: Int!
     expire_date: DateTime
     bouquets: [String!]
+    allowed_outputs: [String!] # Formatos de salida permitidos (ej. ["hls", "mpegts", "rtmp"])
     status: String!          # active, disabled, banned
     created_at: DateTime!
     updated_at: DateTime!
@@ -122,6 +123,7 @@ mutation CreateIptvLineUser(
   $max_connections: Int
   $expire_date: String
   $bouquets: [String!]!
+  $allowed_outputs: [String!]
 ) {
   createIptvLineUser(
     service_id: $service_id
@@ -130,6 +132,7 @@ mutation CreateIptvLineUser(
     max_connections: $max_connections
     expire_date: $expire_date
     bouquets: $bouquets
+    allowed_outputs: $allowed_outputs
   ) {
     id
     line_id
@@ -138,6 +141,7 @@ mutation CreateIptvLineUser(
     max_connections
     expire_date
     bouquets
+    allowed_outputs
   }
 }
 ```
@@ -153,6 +157,7 @@ mutation UpdateIptvLineUser(
   $max_connections: Int
   $expire_date: String
   $bouquets: [String!]
+  $allowed_outputs: [String!]
 ) {
   updateIptvLineUser(
     id: $id
@@ -160,12 +165,14 @@ mutation UpdateIptvLineUser(
     max_connections: $max_connections
     expire_date: $expire_date
     bouquets: $bouquets
+    allowed_outputs: $allowed_outputs
   ) {
     id
     username
     max_connections
     expire_date
     bouquets
+    allowed_outputs
   }
 }
 ```

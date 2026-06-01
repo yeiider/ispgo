@@ -19,12 +19,14 @@ class IptvLineUser extends Model
         'max_connections',
         'expire_date',
         'bouquets',
+        'allowed_outputs',
         'status',
     ];
 
     protected $casts = [
         'expire_date' => 'datetime',
         'bouquets' => 'array',
+        'allowed_outputs' => 'array',
     ];
 
     /**

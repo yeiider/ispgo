@@ -9,6 +9,7 @@ type IptvLineUser {
     max_connections: Int!
     expire_date: DateTime
     bouquets: [String!]
+    allowed_outputs: [String!]
     status: String!
     created_at: DateTime!
     updated_at: DateTime!
@@ -41,6 +42,7 @@ extend type Mutation @guard {
         max_connections: Int
         expire_date: String
         bouquets: [String!]!
+        allowed_outputs: [String!]
     ): IptvLineUser @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@createLineUser")
 
     updateIptvLineUser(
@@ -49,6 +51,7 @@ extend type Mutation @guard {
         max_connections: Int
         expire_date: String
         bouquets: [String!]
+        allowed_outputs: [String!]
     ): IptvLineUser @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@updateLineUser")
 
     deleteIptvLineUser(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@deleteLineUser")

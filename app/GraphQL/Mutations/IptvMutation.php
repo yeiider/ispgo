@@ -41,6 +41,7 @@ class IptvMutation
 
             $maxConnections = $args['max_connections'] ?? ProviderIptv::getDefaultMaxConnections();
             $bouquets = $args['bouquets'] ?? explode(',', ProviderIptv::getDefaultBouquets());
+            $allowedOutputs = $args['allowed_outputs'] ?? ['hls', 'mpegts', 'rtmp'];
             $memberId = ProviderIptv::getDefaultMemberId();
 
             $apiData = [
@@ -48,6 +49,7 @@ class IptvMutation
                 'pass' => $args['password'],
                 'max_connections' => $maxConnections,
                 'bouquets' => $bouquets,
+                'allowed_outputs' => $allowedOutputs,
             ];
 
             if ($expireTimestamp) {
@@ -83,6 +85,7 @@ class IptvMutation
                 'max_connections' => $maxConnections,
                 'expire_date' => $expireTimestamp ? date('Y-m-d H:i:s', $expireTimestamp) : null,
                 'bouquets' => $bouquets,
+                'allowed_outputs' => $allowedOutputs,
                 'status' => 'active',
             ]);
 
@@ -123,6 +126,11 @@ class IptvMutation
             if (isset($args['bouquets'])) {
                 $apiData['bouquets'] = $args['bouquets'];
                 $dbData['bouquets'] = $args['bouquets'];
+            }
+
+            if (isset($args['allowed_outputs'])) {
+                $apiData['allowed_outputs'] = $args['allowed_outputs'];
+                $dbData['allowed_outputs'] = $args['allowed_outputs'];
             }
 
             if (!empty($apiData) && !empty($lineUser->line_id)) {
@@ -359,6 +367,17 @@ class IptvMutation
                         $dbData['bouquets'] = is_array($decoded) ? $decoded : array_filter(explode(',', $bouquets));
                     } elseif (is_array($bouquets)) {
                         $dbData['bouquets'] = $bouquets;
+                    }
+                }
+
+                // Sync allowed_outputs
+                if (isset($apiData['allowed_outputs'])) {
+                    $outputs = $apiData['allowed_outputs'];
+                    if (is_string($outputs)) {
+                        $decoded = json_decode($outputs, true);
+                        $dbData['allowed_outputs'] = is_array($decoded) ? $decoded : array_filter(explode(',', $outputs));
+                    } elseif (is_array($outputs)) {
+                        $dbData['allowed_outputs'] = $outputs;
                     }
                 }
 
