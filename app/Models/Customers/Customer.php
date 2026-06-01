@@ -124,6 +124,18 @@ class Customer extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Service::class);
     }
 
+    public function iptvLineUsers()
+    {
+        return $this->hasManyThrough(
+            \App\Models\Services\IptvLineUser::class,
+            \App\Models\Services\Service::class,
+            'customer_id',
+            'service_id',
+            'id',
+            'id'
+        );
+    }
+
     public function contracts()
     {
         return $this->hasMany(Contract::class);

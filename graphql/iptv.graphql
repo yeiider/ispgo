@@ -1,0 +1,60 @@
+# --------------- IPTV XUI.one types ---------------
+
+type IptvLineUser {
+    id: ID!
+    service_id: ID!
+    line_id: Int
+    username: String!
+    password: String!
+    max_connections: Int!
+    expire_date: DateTime
+    bouquets: [String!]
+    status: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+    service: Service @belongsTo(relation: "service")
+}
+
+type IptvBouquet {
+    id: ID!
+    name: String!
+}
+
+type IptvPackage {
+    id: ID!
+    name: String!
+}
+
+extend type Query {
+    iptvLineUser(id: ID! @eq): IptvLineUser @find(model: "App\\Models\\Services\\IptvLineUser")
+    iptvLineUsers(service_id: ID @eq): [IptvLineUser!]! @all(model: "App\\Models\\Services\\IptvLineUser")
+    iptvBouquets: [IptvBouquet!]! @field(resolver: "App\\GraphQL\\Queries\\IptvQuery@getBouquets")
+    iptvPackages: [IptvPackage!]! @field(resolver: "App\\GraphQL\\Queries\\IptvQuery@getPackages")
+    iptvLinesFromApi: JSON @field(resolver: "App\\GraphQL\\Queries\\IptvQuery@getLinesFromApi")
+}
+
+extend type Mutation @guard {
+    createIptvLineUser(
+        service_id: ID!
+        username: String!
+        password: String!
+        max_connections: Int
+        expire_date: String
+        bouquets: [String!]!
+    ): IptvLineUser @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@createLineUser")
+
+    updateIptvLineUser(
+        id: ID!
+        password: String
+        max_connections: Int
+        expire_date: String
+        bouquets: [String!]
+    ): IptvLineUser @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@updateLineUser")
+
+    deleteIptvLineUser(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@deleteLineUser")
+    disableIptvLineUser(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@disableLineUser")
+    enableIptvLineUser(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@enableLineUser")
+    banIptvLineUser(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@banLineUser")
+    unbanIptvLineUser(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@unbanLineUser")
+    syncIptvLineUserFromApi(id: ID!): IptvLineUser @field(resolver: "App\\GraphQL\\Mutations\\IptvMutation@syncLineUser")
+}

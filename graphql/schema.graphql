@@ -587,6 +587,7 @@ type Customer {
     addresses: [Address!]! @hasMany
     global_addresses: [Address!]! @method(name: "getGlobalAddressesAttribute")
     services: [Service!]! @hasMany
+    iptvLineUsers: [IptvLineUser!]! @hasMany
     invoices: [Invoice!]! @hasMany @orderBy(column: "increment_id", direction: DESC)
     router: Router @belongsTo
 }
@@ -646,6 +647,7 @@ type Service {
     address: Address @belongsTo(relation: "address")
     napPort: NapPort @hasOne(relation: "napPort")
     additionalPlans: [AdditionalPlan!]! @belongsToMany(relation: "additionalPlans")
+    iptvLineUser: IptvLineUser @hasOne(relation: "iptvLineUser")
 
     # Relaciones de facturación
     "Reglas de descuento/beneficio aplicables al servicio"
@@ -1126,3 +1128,4 @@ extend type Mutation {
 #import cash-registers.graphql
 #import onepay.graphql
 #import tickets.graphql
+#import iptv.graphql
