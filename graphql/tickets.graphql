@@ -65,8 +65,8 @@ extend type Query {
         priority: String @eq
         customer_id: ID @eq
         service_id: ID @eq
-        title: String @where(operator: "like")
-    ): [Ticket!]! @paginate(defaultCount: 10, scopes: ["recent"], model: "App\\Models\\Ticket") @orderBy(column: "created_at", direction: DESC)
+        title: String
+    ): [Ticket!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Builders\\TicketBuilder@index") @orderBy(column: "created_at", direction: DESC)
     ticket(id: ID! @eq): Ticket @find(model: "App\\Models\\Ticket")
     myTickets: [Ticket!]! @field(resolver: "App\\GraphQL\\Queries\\TicketQuery@myTickets")
 }
