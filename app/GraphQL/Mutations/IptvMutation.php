@@ -7,6 +7,7 @@ use App\Models\Services\Service;
 use App\Services\Iptv\XuiClient;
 use App\Settings\Iptv\ProviderIptv;
 use Illuminate\Support\Facades\Log;
+use GraphQL\Error\Error;
 
 class IptvMutation
 {
@@ -17,17 +18,17 @@ class IptvMutation
     {
         try {
             if (!ProviderIptv::getEnabled()) {
-                throw new \Exception('IPTV XUI.one integration is currently disabled in system settings.');
+                throw new Error('IPTV XUI.one integration is currently disabled in system settings.');
             }
 
             $service = Service::find($args['service_id']);
             if (!$service) {
-                throw new \Exception("Service not found with ID: {$args['service_id']}");
+                throw new Error("Service not found with ID: {$args['service_id']}");
             }
 
             // Check if service already has a line user
             if ($service->iptvLineUser()->exists()) {
-                throw new \Exception('This service already has a linked IPTV Line User.');
+                throw new Error('This service already has a linked IPTV Line User.');
             }
 
             // Parse expire date to timestamp if present
@@ -35,7 +36,7 @@ class IptvMutation
             if (!empty($args['expire_date'])) {
                 $expireTimestamp = is_numeric($args['expire_date']) ? (int) $args['expire_date'] : strtotime($args['expire_date']);
                 if ($expireTimestamp === false) {
-                    throw new \Exception("Invalid expire_date format provided.");
+                    throw new Error("Invalid expire_date format provided.");
                 }
             }
 
@@ -66,7 +67,7 @@ class IptvMutation
             if (!$response->successful() || !$this->isSuccess($responseJson)) {
                 $errorMsg = $responseJson['message'] ?? ($responseJson['error'] ?? 'API response indicates failure.');
                 Log::error('XUI.one API failed to create line.', ['response' => $responseJson, 'payload' => $apiData]);
-                throw new \Exception("XUI.one API Error: " . $errorMsg);
+                throw new Error("XUI.one API Error: " . $errorMsg);
             }
 
             $dataBlock = $responseJson['data'] ?? [];
@@ -90,9 +91,11 @@ class IptvMutation
             ]);
 
             return $lineUser;
+        } catch (Error $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error in createIptvLineUser mutation resolver', ['error' => $e->getMessage()]);
-            throw $e;
+            throw new Error($e->getMessage());
         }
     }
 
@@ -141,7 +144,7 @@ class IptvMutation
                 if (!$response->successful() || !$this->isSuccess($responseJson)) {
                     $errorMsg = $responseJson['message'] ?? ($responseJson['error'] ?? 'API response indicates failure.');
                     Log::error('XUI.one API failed to edit line.', ['response' => $responseJson, 'line_id' => $lineUser->line_id]);
-                    throw new \Exception("XUI.one API Error: " . $errorMsg);
+                    throw new Error("XUI.one API Error: " . $errorMsg);
                 }
 
                 // Sync changed credentials if XUI.one returns them in the data block
@@ -157,9 +160,11 @@ class IptvMutation
             $lineUser->update($dbData);
 
             return $lineUser;
+        } catch (Error $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error in updateIptvLineUser mutation resolver', ['error' => $e->getMessage()]);
-            throw $e;
+            throw new Error($e->getMessage());
         }
     }
 
@@ -168,18 +173,29 @@ class IptvMutation
      */
     public function deleteLineUser($root, array $args): array
     {
+        $apiErrorMsg = null;
         try {
             $lineUser = IptvLineUser::findOrFail($args['id']);
 
             if (!empty($lineUser->line_id)) {
-                $xuiClient = new XuiClient();
-                $response = $xuiClient->deleteLine((int) $lineUser->line_id);
-                $responseJson = $response->json();
+                try {
+                    $xuiClient = new XuiClient();
+                    $response = $xuiClient->deleteLine((int) $lineUser->line_id);
+                    $responseJson = $response->json();
 
-                if (!$response->successful() || !$this->isSuccess($responseJson)) {
-                    $errorMsg = $responseJson['message'] ?? ($responseJson['error'] ?? 'API response indicates failure.');
-                    Log::warning('XUI.one API failed to delete line.', ['response' => $responseJson, 'line_id' => $lineUser->line_id]);
-                    throw new \Exception("XUI.one API Error: " . $errorMsg);
+                    if (!$response->successful() || !$this->isSuccess($responseJson)) {
+                        $apiErrorMsg = $responseJson['message'] ?? ($responseJson['error'] ?? 'API response indicates failure.');
+                        Log::warning('XUI.one API failed to delete line, proceeding with local deletion.', [
+                            'response' => $responseJson,
+                            'line_id' => $lineUser->line_id
+                        ]);
+                    }
+                } catch (\Exception $apiEx) {
+                    $apiErrorMsg = $apiEx->getMessage();
+                    Log::warning('XUI.one API request exception during delete, proceeding with local deletion.', [
+                        'error' => $apiEx->getMessage(),
+                        'line_id' => $lineUser->line_id
+                    ]);
                 }
             }
 
@@ -187,11 +203,15 @@ class IptvMutation
 
             return [
                 'success' => true,
-                'message' => 'IPTV Line User deleted successfully.'
+                'message' => $apiErrorMsg
+                    ? "IPTV Line User deleted locally, but XUI.one API reported failure: {$apiErrorMsg}"
+                    : 'IPTV Line User deleted successfully.'
             ];
+        } catch (Error $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error in deleteIptvLineUser mutation resolver', ['error' => $e->getMessage()]);
-            throw $e;
+            throw new Error($e->getMessage());
         }
     }
 
@@ -209,7 +229,7 @@ class IptvMutation
                 $responseJson = $response->json();
 
                 if (!$response->successful() || !$this->isSuccess($responseJson)) {
-                    throw new \Exception("XUI.one API Error: " . ($responseJson['message'] ?? ($responseJson['error'] ?? 'Unknown error')));
+                    throw new Error("XUI.one API Error: " . ($responseJson['message'] ?? ($responseJson['error'] ?? 'Unknown error')));
                 }
             }
 
@@ -219,9 +239,11 @@ class IptvMutation
                 'success' => true,
                 'message' => 'IPTV Line User disabled successfully.'
             ];
+        } catch (Error $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error in disableIptvLineUser mutation resolver', ['error' => $e->getMessage()]);
-            throw $e;
+            throw new Error($e->getMessage());
         }
     }
 
@@ -239,7 +261,7 @@ class IptvMutation
                 $responseJson = $response->json();
 
                 if (!$response->successful() || !$this->isSuccess($responseJson)) {
-                    throw new \Exception("XUI.one API Error: " . ($responseJson['message'] ?? ($responseJson['error'] ?? 'Unknown error')));
+                    throw new Error("XUI.one API Error: " . ($responseJson['message'] ?? ($responseJson['error'] ?? 'Unknown error')));
                 }
             }
 
@@ -249,9 +271,11 @@ class IptvMutation
                 'success' => true,
                 'message' => 'IPTV Line User enabled successfully.'
             ];
+        } catch (Error $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error in enableIptvLineUser mutation resolver', ['error' => $e->getMessage()]);
-            throw $e;
+            throw new Error($e->getMessage());
         }
     }
 
@@ -269,7 +293,7 @@ class IptvMutation
                 $responseJson = $response->json();
 
                 if (!$response->successful() || !$this->isSuccess($responseJson)) {
-                    throw new \Exception("XUI.one API Error: " . ($responseJson['message'] ?? ($responseJson['error'] ?? 'Unknown error')));
+                    throw new Error("XUI.one API Error: " . ($responseJson['message'] ?? ($responseJson['error'] ?? 'Unknown error')));
                 }
             }
 
@@ -279,9 +303,11 @@ class IptvMutation
                 'success' => true,
                 'message' => 'IPTV Line User banned successfully.'
             ];
+        } catch (Error $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error in banIptvLineUser mutation resolver', ['error' => $e->getMessage()]);
-            throw $e;
+            throw new Error($e->getMessage());
         }
     }
 
@@ -299,7 +325,7 @@ class IptvMutation
                 $responseJson = $response->json();
 
                 if (!$response->successful() || !$this->isSuccess($responseJson)) {
-                    throw new \Exception("XUI.one API Error: " . ($responseJson['message'] ?? ($responseJson['error'] ?? 'Unknown error')));
+                    throw new Error("XUI.one API Error: " . ($responseJson['message'] ?? ($responseJson['error'] ?? 'Unknown error')));
                 }
             }
 
@@ -309,9 +335,11 @@ class IptvMutation
                 'success' => true,
                 'message' => 'IPTV Line User unbanned successfully.'
             ];
+        } catch (Error $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error in unbanIptvLineUser mutation resolver', ['error' => $e->getMessage()]);
-            throw $e;
+            throw new Error($e->getMessage());
         }
     }
 
@@ -324,7 +352,7 @@ class IptvMutation
             $lineUser = IptvLineUser::findOrFail($args['id']);
 
             if (empty($lineUser->line_id)) {
-                throw new \Exception("Cannot sync line user without a valid line_id.");
+                throw new Error("Cannot sync line user without a valid line_id.");
             }
 
             $xuiClient = new XuiClient();
@@ -332,7 +360,7 @@ class IptvMutation
             $responseJson = $response->json();
 
             if (!$response->successful() || !$this->isSuccess($responseJson)) {
-                throw new \Exception("XUI.one API Error: " . ($responseJson['message'] ?? ($responseJson['error'] ?? 'Failed to retrieve line details.')));
+                throw new Error("XUI.one API Error: " . ($responseJson['message'] ?? ($responseJson['error'] ?? 'Failed to retrieve line details.')));
             }
 
             // Sync database properties based on details returned from XUI.one
@@ -394,9 +422,11 @@ class IptvMutation
             }
 
             return $lineUser;
+        } catch (Error $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Error in syncIptvLineUserFromApi mutation resolver', ['error' => $e->getMessage()]);
-            throw $e;
+            throw new Error($e->getMessage());
         }
     }
 
