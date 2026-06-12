@@ -66,6 +66,8 @@ extend type Query {
         customer_id: ID @eq
         service_id: ID @eq
         title: String
+        recent_only: Boolean
+        router_id: ID
     ): [Ticket!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Builders\\TicketBuilder@index") @orderBy(column: "created_at", direction: DESC)
     ticket(id: ID! @eq): Ticket @find(model: "App\\Models\\Ticket")
     myTickets: [Ticket!]! @field(resolver: "App\\GraphQL\\Queries\\TicketQuery@myTickets")
