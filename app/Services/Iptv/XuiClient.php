@@ -65,16 +65,19 @@ class XuiClient
      */
     public function createLine(array $data)
     {
-        // XUI.one expects bouquets_selected[] array parameter for bouquets
+        // Normalize bouquets: always send as comma-separated string
         if (isset($data['bouquets'])) {
             $bouquetArray = is_array($data['bouquets']) ? $data['bouquets'] : explode(',', $data['bouquets']);
-            $data['bouquets_selected'] = $bouquetArray;
             $data['bouquets'] = implode(',', $bouquetArray);
         }
 
-        // Set allowed_outputs to default HLS, MPEGTS, RTMP if not provided
-        if (!isset($data['allowed_outputs'])) {
-            $data['allowed_outputs'] = ['hls', 'mpegts', 'rtmp'];
+        // Normalize allowed_outputs: convert array to comma-separated string
+        if (isset($data['allowed_outputs'])) {
+            $data['allowed_outputs'] = is_array($data['allowed_outputs'])
+                ? implode(',', $data['allowed_outputs'])
+                : $data['allowed_outputs'];
+        } else {
+            $data['allowed_outputs'] = 'hls,mpegts,rtmp';
         }
 
         return $this->request('create_line', $data, 'post');
@@ -103,12 +106,15 @@ class XuiClient
     {
         if (isset($data['bouquets'])) {
             $bouquetArray = is_array($data['bouquets']) ? $data['bouquets'] : explode(',', $data['bouquets']);
-            $data['bouquets_selected'] = $bouquetArray;
             $data['bouquets'] = implode(',', $bouquetArray);
         }
 
-        if (!isset($data['allowed_outputs'])) {
-            $data['allowed_outputs'] = ['hls', 'mpegts', 'rtmp'];
+        if (isset($data['allowed_outputs'])) {
+            $data['allowed_outputs'] = is_array($data['allowed_outputs'])
+                ? implode(',', $data['allowed_outputs'])
+                : $data['allowed_outputs'];
+        } else {
+            $data['allowed_outputs'] = 'hls,mpegts,rtmp';
         }
 
         $payload = array_merge(['line_id' => $lineId], $data);
