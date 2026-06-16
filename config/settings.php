@@ -250,7 +250,26 @@ return [
                 "field" => "text-field",
                 "label" => "Representative Role",
                 "placeholder" => "Enter the Representative's Role",
-
+            ],
+            "email_template_send" => [
+                "field" => "select-field",
+                "label" => "Email Template to Send Contract Link",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_signed" => [
+                "field" => "select-field",
+                "label" => "Email Template to Notify Signed Contract",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_approved" => [
+                "field" => "select-field",
+                "label" => "Email Template to Notify Approved Contract",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_rejected" => [
+                "field" => "select-field",
+                "label" => "Email Template to Notify Rejected Contract",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ]
         ],
     ],

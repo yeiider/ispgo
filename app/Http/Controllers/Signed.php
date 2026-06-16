@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Contract;
 use App\Models\HtmlTemplate;
+use App\Models\EmailTemplate;
 use App\Models\Services\Service;
 use App\Services\HtmlTemplateEngine;
 use App\Settings\ServiceProviderConfig;
+use App\Settings\GeneralProviderConfig;
+use App\Mail\DynamicEmail;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Illuminate\Http\Response;
 
@@ -44,7 +48,6 @@ class Signed extends Controller
         try {
             $htmlTemplate = $this->htmlBuild($templateId, $service);
         } catch (\Exception $e) {
-            // Manejar errores en la construcción del HTML
             return response()->json([
                 'error' => 'Failed to generate contract template.',
                 'message' => $e->getMessage(),
@@ -53,20 +56,10 @@ class Signed extends Controller
 
         // Verificar si el contrato ya ha sido firmado
         $isSigned = $contract->is_signed;
-        // Puedes ajustar la lógica de la fecha de firma:
-        // si tienes un campo signed_at, úsalo. De lo contrario, podría ser updated_at.
         $signedDate = $contract->signed_at ?? null;
 
-        // Construir la URL del PDF firmado (si existe)
-        // De acuerdo con tu lógica, lo guardas en: public/contracts/contract_{ID}_signed.pdf
-        $pdfFilename = "contract_{$contractId}_signed.pdf";
-        $pdfPath = "public/contracts/{$pdfFilename}"; // Ruta interna en storage
-        $pdfUrl = null;
-
-        // Si está firmado, armamos la url desde Storage
-        if ($isSigned && Storage::exists($pdfPath)) {
-            $pdfUrl = Storage::url($pdfPath);
-        }
+        // Si está firmado, obtenemos la URL desde S3
+        $pdfUrl = $isSigned ? $contract->contract_pdf_url : null;
 
         return Inertia::render('Signed/Index', [
             "contractHtml" => $htmlTemplate,
@@ -74,7 +67,6 @@ class Signed extends Controller
             "isSigned" => $isSigned,
             "signedAt" => $signedDate,
             "pdfUrl" => $pdfUrl
-
         ]);
     }
 
@@ -92,9 +84,13 @@ class Signed extends Controller
         }
     }
 
-    public function download($contractId): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    public function download($contractId)
     {
-        return response()->download(storage_path('app/public/contracts/' . $contractId . '.pdf'));
+        $contract = Contract::findOrFail($contractId);
+        if (empty($contract->contract_pdf_path)) {
+            abort(404, 'No PDF found for this contract.');
+        }
+        return redirect()->away($contract->contract_pdf_url);
     }
 
     public function signedContract(Request $request, $contractId): \Illuminate\Http\JsonResponse
@@ -104,31 +100,49 @@ class Signed extends Controller
             return abort(404, "Contract with ID {$contractId} not found.");
         }
 
-        // Si el contrato ya está firmado, puedes decidir qué hacer:
-        if ($contract->is_signed) {
-            // O puedes permitir firmarlo de nuevo, eso depende de tu lógica.
-            // En este ejemplo devolvemos un mensaje que ya está firmado.
+        if ($contract->status === 'approved') {
             return response()->json([
-                'message' => 'Contract is already signed.',
-                'pdf_url' => route('signed.download', $contractId), // o la URL de descarga, si gustas
+                'message' => 'Contract is already signed and approved.',
+                'pdf_url' => $contract->contract_pdf_url,
             ], 200);
         }
 
-        // Validar la solicitud y la firma
+        // Validar la solicitud, firma y documentos adjuntos
         $validated = $request->validate([
             'signature' => 'required|image|max:2048', // Solo permite imágenes de hasta 2MB
+            'cedula' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // Cédula obligatoria (hasta 5MB)
+            'utility_bill' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // Recibo opcional (hasta 5MB)
         ]);
 
         try {
-            // Leer el contenido binario de la imagen recibida
+            // Cargar cédula obligatoria a S3
+            $cedulaFile = $request->file('cedula');
+            $cedulaExt = $cedulaFile->getClientOriginalExtension();
+            $cedulaPath = $cedulaFile->storeAs(
+                'contracts/documents',
+                "{$contractId}_cedula.{$cedulaExt}",
+                's3'
+            );
+
+            // Cargar recibo opcional a S3 (si fue enviado)
+            $utilityBillPath = null;
+            if ($request->hasFile('utility_bill')) {
+                $billFile = $request->file('utility_bill');
+                $billExt = $billFile->getClientOriginalExtension();
+                $utilityBillPath = $billFile->storeAs(
+                    'contracts/documents',
+                    "{$contractId}_recibo.{$billExt}",
+                    's3'
+                );
+            }
+
+            // Leer el contenido binario de la firma y convertir a Base64
             $signatureFile = $request->file('signature');
             $signatureData = file_get_contents($signatureFile->getRealPath());
-            // Convertir a Base64
             $signatureBase64 = base64_encode($signatureData);
-            // Construir un "data URI" para la imagen
             $signatureUri = 'data:image/png;base64,' . $signatureBase64;
 
-            // Obtener la plantilla HTML del contrato
+            // Obtener el servicio y la plantilla HTML
             $service = $contract->service;
             if (!$service) {
                 return abort(404, "Service not found for contract ID {$contractId}.");
@@ -137,6 +151,8 @@ class Signed extends Controller
             $templateId = ServiceProviderConfig::contractTemplate();
             $htmlTemplate = $this->htmlBuild($templateId, $service);
 
+            // Cargar la firma del representante
+            $representativeSignatureUri = null;
             $signaturePath = ServiceProviderConfig::representativeSignature();
 
             if (!empty($signaturePath)) {
@@ -146,19 +162,14 @@ class Signed extends Controller
                 } else {
                     $fullPath = storage_path('app/public/' . ltrim($signaturePath, '/'));
                 }
+                if (file_exists($fullPath)) {
+                    $imageContent = file_get_contents($fullPath);
+                    $mimeType = mime_content_type($fullPath);
+                    $representativeSignatureUri = 'data:' . $mimeType . ';base64,' . base64_encode($imageContent);
+                }
             }
 
-            if (file_exists($fullPath)) {
-                $imageContent = file_get_contents($fullPath);
-                $mimeType = mime_content_type($fullPath);
-                $representativeSignatureBase64 = base64_encode($imageContent);
-                $representativeSignatureUri = 'data:' . $mimeType . ';base64,' . $representativeSignatureBase64;
-            } else {
-                throw new \Exception("File not found at path: {$fullPath}");
-            }
-
-
-
+            // Unir el HTML con firmas
             $htmlWithSignature = view('service/contract/contract_with_signature', [
                 'content' => $htmlTemplate,
                 'signatureUrl' => $signatureUri,
@@ -175,22 +186,40 @@ class Signed extends Controller
             // Convertir el HTML a PDF usando DomPDF
             $pdf = PDF::loadHTML($htmlWithSignature)->setPaper('a4', 'portrait');
 
-            // Guardar el PDF en almacenamiento local
-            $pdfPath = "public/contracts/contract_{$contractId}_signed.pdf";
-            Storage::put($pdfPath, $pdf->output());
+            // Guardar el PDF firmado en S3
+            $pdfPath = "contracts/signed/contract_{$contractId}_signed.pdf";
+            Storage::disk('s3')->put($pdfPath, $pdf->output());
 
-            // Obtener la URL pública del PDF
-            $pdfUrl = Storage::url($pdfPath);
-
-            // Actualizar el contrato para marcarlo como firmado
+            // Actualizar el contrato
             $contract->is_signed = true;
             $contract->signed_at = now();
+            $contract->contract_pdf_path = $pdfPath;
+            $contract->cedula_path = $cedulaPath;
+            $contract->utility_bill_path = $utilityBillPath;
+            $contract->status = 'signed';
             $contract->save();
 
-            // Responder con éxito
+            // Enviar correo de notificación de firma
+            $emailTemplateId = ServiceProviderConfig::emailTemplateSigned();
+            if ($emailTemplateId) {
+                try {
+                    $emailTemplate = EmailTemplate::find($emailTemplateId);
+                    if ($emailTemplate) {
+                        $customer = $contract->customer;
+                        $logo = GeneralProviderConfig::getCompanyLogo();
+                        $img_header = $logo ? asset('storage/' . $logo) : null;
+                        
+                        Mail::to($customer->email_address)
+                            ->send(new DynamicEmail(['contract' => $contract], $emailTemplate, $img_header));
+                    }
+                } catch (\Exception $e) {
+                    report($e);
+                }
+            }
+
             return response()->json([
                 'message' => 'Contract signed and saved successfully.',
-                'pdf_url' => asset($pdfUrl),
+                'pdf_url' => $contract->contract_pdf_url,
             ], 200);
 
         } catch (\Exception $e) {
@@ -200,6 +229,4 @@ class Signed extends Controller
             ], 500);
         }
     }
-
-
 }
