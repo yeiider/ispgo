@@ -41,9 +41,14 @@ type Query {
     customers(
         first_name: String
         last_name: String
+        name: String
         identity_document: String
         email_address: String
         customer_status: String
+        has_services: String
+        service_status: String
+        billing_status: String
+        created_at_date: String
         search: String
         sort_column: String
         sort_direction: String
@@ -81,6 +86,8 @@ type Query {
         mac_address: String
         service_type: String
         sn: String
+        plan_id: ID
+        additional_plans: [ID!]
         sort_column: String
         sort_direction: String
     ): [Service!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\ServiceQuery")
@@ -289,15 +296,15 @@ type Mutation @guard {
 
     createRouter(
         name: String! @rules(apply: ["required", "max:255"])
-        ip_address: String! @rules(apply: ["required", "ip"])
-        description: String
+        code: String! @rules(apply: ["required", "max:255", "unique:routers,code"])
+        status: String @rules(apply: ["in:enabled,disabled"])
     ): Router @create(model: "App\\Models\\Router")
 
     updateRouter(
         id: ID! @rules(apply: ["required", "exists:routers,id"])
         name: String
-        ip_address: String @rules(apply: ["ip"])
-        description: String
+        code: String @rules(apply: ["max:255"])
+        status: String @rules(apply: ["in:enabled,disabled"])
     ): Router @update(model: "App\\Models\\Router")
 
     createPlan(
@@ -587,6 +594,7 @@ type Customer {
     addresses: [Address!]! @hasMany
     global_addresses: [Address!]! @method(name: "getGlobalAddressesAttribute")
     services: [Service!]! @hasMany
+    iptvLineUsers: [IptvLineUser!]! @hasMany
     invoices: [Invoice!]! @hasMany @orderBy(column: "increment_id", direction: DESC)
     router: Router @belongsTo
 }
@@ -646,6 +654,7 @@ type Service {
     address: Address @belongsTo(relation: "address")
     napPort: NapPort @hasOne(relation: "napPort")
     additionalPlans: [AdditionalPlan!]! @belongsToMany(relation: "additionalPlans")
+    iptvLineUser: IptvLineUser @hasOne(relation: "iptvLineUser")
 
     # Relaciones de facturación
     "Reglas de descuento/beneficio aplicables al servicio"
@@ -815,9 +824,9 @@ type AdditionalPlan {
 
 type Router {
     id: ID!
+    code: String!
     name: String!
-    ip_address: String!
-    description: String
+    status: String!
     created_at: DateTime!
     updated_at: DateTime!
 
@@ -1126,3 +1135,4 @@ extend type Mutation {
 #import cash-registers.graphql
 #import onepay.graphql
 #import tickets.graphql
+#import iptv.graphql

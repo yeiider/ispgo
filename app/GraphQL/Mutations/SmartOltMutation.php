@@ -234,6 +234,56 @@ class SmartOltMutation
         }
     }
 
+    public function enableCatv($root, array $args)
+    {
+        try {
+            $response = $this->apiManager->enableOnuCatvByExternalId($args['external_id']);
+            $data = $response->json();
+
+            if ($data['status'] === true) {
+                return [
+                    'success' => true,
+                    'message' => 'CATV enabled successfully'
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => $data['error'] ?? 'Failed to enable CATV'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function disableCatv($root, array $args)
+    {
+        try {
+            $response = $this->apiManager->disableOnuCatvByExternalId($args['external_id']);
+            $data = $response->json();
+
+            if ($data['status'] === true) {
+                return [
+                    'success' => true,
+                    'message' => 'CATV disabled successfully'
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => $data['error'] ?? 'Failed to disable CATV'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
     private function limpiarCadena($str): array|string
     {
         // 1. Definir los caracteres originales y sus reemplazos

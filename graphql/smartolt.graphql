@@ -243,6 +243,11 @@ type SmartOltOnuTrafficGraph {
     content_type: String!
 }
 
+type SmartOltCatvStatus {
+    enabled: Boolean!
+    message: String
+}
+
 extend type Query {
     smartOltOlts: [SmartOltOlt!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOlts")
     smartOltOltCards(olt_id: ID!): [SmartOltOltCard!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltCards")
@@ -257,6 +262,7 @@ extend type Query {
     smartOltOnuTrafficGraph(external_id: String!, graph_type: String = "hourly"): SmartOltOnuTrafficGraph @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuTrafficGraph")
     smartOltVlans(olt_id: ID!): [SmartOltVlan!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getVlans")
     smartOltInstallationFormData(sn: String!): InstallationFormData @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getInstallationFormData")
+    smartOltCatvStatus(external_id: String!): SmartOltCatvStatus @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getCatvStatus")
 }
 
 extend type Mutation {
@@ -282,4 +288,6 @@ extend type Mutation {
     smartOltEnableOnu(sn: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@enableOnu")
     smartOltDisableOnu(sn: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@disableOnu")
     smartOltRemoveEquipment(sn: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@removeEquipment")
+    smartOltEnableCatv(external_id: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@enableCatv")
+    smartOltDisableCatv(external_id: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@disableCatv")
 }

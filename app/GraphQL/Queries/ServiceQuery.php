@@ -50,6 +50,16 @@ class ServiceQuery
             $query->where('sn', 'like', '%' . $args['sn'] . '%');
         }
 
+        if (!empty($args['plan_id']) && $args['plan_id'] !== 'all') {
+            $query->where('plan_id', $args['plan_id']);
+        }
+
+        if (!empty($args['additional_plans'])) {
+            $query->whereHas('additionalPlans', function (Builder $q) use ($args) {
+                $q->whereIn('additional_plans.id', $args['additional_plans']);
+            });
+        }
+
         // Apply sorting
         $sortColumn = $args['sort_column'] ?? 'id';
         $sortDirection = isset($args['sort_direction']) && strtolower($args['sort_direction']) === 'asc' ? 'asc' : 'desc';

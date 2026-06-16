@@ -88,6 +88,11 @@ class Service extends Model
         return $this->belongsTo(Plan::class);
     }
 
+    public function iptvLineUser()
+    {
+        return $this->hasOne(IptvLineUser::class, 'service_id');
+    }
+
     public function invoices()
     {
         return $this->hasMany(Invoice::class);

@@ -192,4 +192,29 @@ class SmartOltQuery
             return null;
         }
     }
+
+    public function getCatvStatus($root, array $args)
+    {
+        try {
+            $response = $this->apiManager->getOnuCatvStatusByExternalId($args['external_id']);
+            $data = $response->json();
+
+            $enabled = $data['status'] === true && ($data['catv_enabled'] ?? $data['enabled'] ?? false);
+
+            return [
+                'enabled' => (bool) $enabled,
+                'message' => $data['message'] ?? null,
+            ];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT CATV Status error', [
+                'external_id' => $args['external_id'],
+                'error' => $e->getMessage()
+            ]);
+
+            return [
+                'enabled' => false,
+                'message' => 'Error fetching CATV status: ' . $e->getMessage()
+            ];
+        }
+    }
 }

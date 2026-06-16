@@ -580,6 +580,15 @@ return [
         "general" => SettingSiigo::getGeneralSettings(),
     ],
 
+    "iptv" => [
+        "setting" => [
+            "label" => "IPTV XUI.one",
+            "class" => "form-control",
+        ],
+        "general"    => \App\Settings\Iptv\SettingIptv::getGeneralSettings(),
+        "activation" => \App\Settings\Iptv\SettingIptv::getActivationSettings(),
+    ],
+
     // OnePay integration settings
     "onepay" => [
         "setting" => [
