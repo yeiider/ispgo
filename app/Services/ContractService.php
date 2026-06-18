@@ -217,62 +217,12 @@ class ContractService
         $signatureData = base64_decode(preg_replace('/^data:image\/\w+;base64,/', '', $signatureBase64));
         $signatureUri = 'data:image/png;base64,' . base64_encode($signatureData);
 
-        // Generate contract HTML template
-        $service = $contract->service;
-        if (!$service) {
-            throw new Exception("El servicio asociado al contrato no fue encontrado.");
-        }
+        // Save client signature permanently to S3/Storage
+        $clientSignaturePath = "contracts/documents/{$contract->id}_signature.png";
+        Storage::disk('s3')->put($clientSignaturePath, $signatureData);
 
-        $htmlTemplateId = ServiceProviderConfig::contractTemplate();
-        if (is_null($htmlTemplateId)) {
-            throw new Exception("La plantilla HTML del contrato no está configurada.");
-        }
-
-        $htmlTemplate = HtmlTemplate::find($htmlTemplateId);
-        if (!$htmlTemplate) {
-            throw new Exception("La plantilla HTML con ID {$htmlTemplateId} no fue encontrada.");
-        }
-
-        $engineTemplate = new HtmlTemplateEngine($htmlTemplate, ["contract" => $contract, "service" => $service]);
-        $htmlContent = $engineTemplate->renderContentOnly();
-
-        // Representative signature configuration
-        $representativeSignatureUri = null;
-        $signaturePath = ServiceProviderConfig::representativeSignature();
-
-        if (!empty($signaturePath)) {
-            if (str_starts_with($signaturePath, '/storage')) {
-                $relativePath = str_replace('/storage', '', $signaturePath);
-                $fullPath = storage_path('app/public' . $relativePath);
-            } else {
-                $fullPath = storage_path('app/public/' . ltrim($signaturePath, '/'));
-            }
-            if (file_exists($fullPath)) {
-                $imageContent = file_get_contents($fullPath);
-                $mimeType = mime_content_type($fullPath);
-                $representativeSignatureUri = 'data:' . $mimeType . ';base64,' . base64_encode($imageContent);
-            }
-        }
-
-        $htmlWithSignature = view('service/contract/contract_with_signature', [
-            'content' => $htmlContent,
-            'signatureUrl' => $signatureUri,
-            'customer' => [
-                'name' => $service->customer->full_name,
-                'document' => $service->customer->identity_document,
-            ],
-            "representativeSignature" => $representativeSignatureUri,
-            "representativeName" => ServiceProviderConfig::representativeName(),
-            "representativeDocument" => ServiceProviderConfig::representativeDocument(),
-            "representativeRole" => ServiceProviderConfig::representativeRole(),
-        ])->render();
-
-        // Compile HTML to PDF using DomPDF
-        $pdf = PDF::loadHTML($htmlWithSignature)->setPaper('a4', 'portrait');
-
-        // Save PDF to S3
-        $pdfPath = "contracts/signed/contract_{$contract->id}_signed.pdf";
-        Storage::disk('s3')->put($pdfPath, $pdf->output());
+        // Generate contract PDF (Client-only signature for now)
+        $pdfPath = $this->generateContractPdf($contract, $signatureUri, false);
 
         // Update contract status
         $contract->is_signed = true;
@@ -306,6 +256,80 @@ class ContractService
     }
 
     /**
+     * Generate contract PDF with optional representative signature.
+     *
+     * @param Contract $contract
+     * @param string $clientSignatureUri
+     * @param bool $includeRepresentative
+     * @return string
+     * @throws Exception
+     */
+    public function generateContractPdf(Contract $contract, string $clientSignatureUri, bool $includeRepresentative = false)
+    {
+        $service = $contract->service;
+        if (!$service) {
+            throw new Exception("El servicio asociado al contrato no fue encontrado.");
+        }
+
+        $htmlTemplateId = ServiceProviderConfig::contractTemplate();
+        if (is_null($htmlTemplateId)) {
+            throw new Exception("La plantilla HTML del contrato no está configurada.");
+        }
+
+        $htmlTemplate = HtmlTemplate::find($htmlTemplateId);
+        if (!$htmlTemplate) {
+            throw new Exception("La plantilla HTML con ID {$htmlTemplateId} no fue encontrada.");
+        }
+
+        $engineTemplate = new HtmlTemplateEngine($htmlTemplate, ["contract" => $contract, "service" => $service]);
+        $htmlContent = $engineTemplate->renderContentOnly();
+
+        $representativeSignatureUri = null;
+        $representativeName = '';
+        $representativeDocument = '';
+        $representativeRole = '';
+
+        if ($includeRepresentative) {
+            $signaturePath = ServiceProviderConfig::representativeSignature();
+            if (!empty($signaturePath)) {
+                if (str_starts_with($signaturePath, '/storage')) {
+                    $relativePath = str_replace('/storage', '', $signaturePath);
+                    $fullPath = storage_path('app/public' . $relativePath);
+                } else {
+                    $fullPath = storage_path('app/public/' . ltrim($signaturePath, '/'));
+                }
+                if (file_exists($fullPath)) {
+                    $imageContent = file_get_contents($fullPath);
+                    $mimeType = mime_content_type($fullPath);
+                    $representativeSignatureUri = 'data:' . $mimeType . ';base64,' . base64_encode($imageContent);
+                }
+            }
+            $representativeName = ServiceProviderConfig::representativeName();
+            $representativeDocument = ServiceProviderConfig::representativeDocument();
+            $representativeRole = ServiceProviderConfig::representativeRole();
+        }
+
+        $htmlWithSignature = view('service/contract/contract_with_signature', [
+            'content' => $htmlContent,
+            'signatureUrl' => $clientSignatureUri,
+            'customer' => [
+                'name' => $service->customer->full_name,
+                'document' => $service->customer->identity_document,
+            ],
+            "representativeSignature" => $representativeSignatureUri,
+            "representativeName" => $representativeName,
+            "representativeDocument" => $representativeDocument,
+            "representativeRole" => $representativeRole,
+        ])->render();
+
+        $pdf = Pdf::loadHTML($htmlWithSignature)->setPaper('a4', 'portrait');
+        $pdfPath = "contracts/signed/contract_{$contract->id}_signed.pdf";
+        Storage::disk('s3')->put($pdfPath, $pdf->output());
+
+        return $pdfPath;
+    }
+
+    /**
      * Approve contract.
      *
      * @param string $id
@@ -314,6 +338,24 @@ class ContractService
     public function approveContract(string $id)
     {
         $contract = Contract::findOrFail($id);
+
+        // Regenerate contract PDF with representative signature and details
+        try {
+            $clientSignaturePath = "contracts/documents/{$contract->id}_signature.png";
+            $clientSignatureUri = null;
+            if (Storage::disk('s3')->exists($clientSignaturePath)) {
+                $signatureData = Storage::disk('s3')->get($clientSignaturePath);
+                $clientSignatureUri = 'data:image/png;base64,' . base64_encode($signatureData);
+            }
+
+            if ($clientSignatureUri) {
+                $this->generateContractPdf($contract, $clientSignatureUri, true);
+            }
+        } catch (Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error regenerating contract PDF on approval: ' . $e->getMessage());
+            throw $e;
+        }
+
         $contract->status = 'approved';
         $contract->save();
 

@@ -65,7 +65,7 @@
                 <img src="{{ $signatureUrl }}" alt="Firma del cliente" class="signature-image">
             @endif
             <div class="signature-line"></div>
-            <p><strong>EL MANDANTE</strong></p>
+            <p><strong>El Contratante</strong></p>
             <p><strong>Nombre:</strong> {{ $customer['name'] ?? 'N/A' }}</p>
             <p><strong>C.C.:</strong> {{ $customer['document'] ?? 'N/A' }}</p>
         </div>
@@ -76,7 +76,7 @@
                 <img src="{{ $representativeSignature }}" alt="Firma del prestador" class="signature-image">
             @endif
             <div class="signature-line"></div>
-            <p><strong>EL MANDATARIO</strong></p>
+            <p><strong>El Proveedor</strong></p>
             <p><strong>Nombre:</strong> {{$representativeName}}</p>
             <p><strong>Cargo:</strong> {{$representativeRole}}</p>
             <p><strong>C.C.:</strong> {{$representativeDocument}}</p>

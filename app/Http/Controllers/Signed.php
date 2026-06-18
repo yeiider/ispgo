@@ -142,6 +142,10 @@ class Signed extends Controller
             $signatureBase64 = base64_encode($signatureData);
             $signatureUri = 'data:image/png;base64,' . $signatureBase64;
 
+            // Guardar la firma del cliente permanentemente en S3/Storage
+            $clientSignaturePath = "contracts/documents/{$contractId}_signature.png";
+            Storage::disk('s3')->put($clientSignaturePath, $signatureData);
+
             // Obtener el servicio y la plantilla HTML
             $service = $contract->service;
             if (!$service) {
@@ -151,25 +155,7 @@ class Signed extends Controller
             $templateId = ServiceProviderConfig::contractTemplate();
             $htmlTemplate = $this->htmlBuild($templateId, $service);
 
-            // Cargar la firma del representante
-            $representativeSignatureUri = null;
-            $signaturePath = ServiceProviderConfig::representativeSignature();
-
-            if (!empty($signaturePath)) {
-                if (str_starts_with($signaturePath, '/storage')) {
-                    $relativePath = str_replace('/storage', '', $signaturePath);
-                    $fullPath = storage_path('app/public' . $relativePath);
-                } else {
-                    $fullPath = storage_path('app/public/' . ltrim($signaturePath, '/'));
-                }
-                if (file_exists($fullPath)) {
-                    $imageContent = file_get_contents($fullPath);
-                    $mimeType = mime_content_type($fullPath);
-                    $representativeSignatureUri = 'data:' . $mimeType . ';base64,' . base64_encode($imageContent);
-                }
-            }
-
-            // Unir el HTML con firmas
+            // Unir el HTML con firmas (solo firma del cliente por ahora)
             $htmlWithSignature = view('service/contract/contract_with_signature', [
                 'content' => $htmlTemplate,
                 'signatureUrl' => $signatureUri,
@@ -177,10 +163,10 @@ class Signed extends Controller
                     'name' => $service->customer->full_name,
                     'document' => $service->customer->identity_document,
                 ],
-                "representativeSignature" => $representativeSignatureUri,
-                "representativeName" => ServiceProviderConfig::representativeName(),
-                "representativeDocument" => ServiceProviderConfig::representativeDocument(),
-                "representativeRole" => ServiceProviderConfig::representativeRole(),
+                "representativeSignature" => null,
+                "representativeName" => '',
+                "representativeDocument" => '',
+                "representativeRole" => '',
             ])->render();
 
             // Convertir el HTML a PDF usando DomPDF

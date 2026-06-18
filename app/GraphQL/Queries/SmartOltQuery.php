@@ -4,6 +4,7 @@ namespace App\GraphQL\Queries;
 
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Support\Facades\Log;
+use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 
 class SmartOltQuery
 {
@@ -14,121 +15,222 @@ class SmartOltQuery
         $this->apiManager = $apiManager;
     }
 
+    private function isConfigured(): bool
+    {
+        return ProviderSmartOlt::getEnabled() && !empty(ProviderSmartOlt::getUrl()) && !empty(ProviderSmartOlt::getToken());
+    }
+
     public function getOlts($root, array $args)
     {
-        $response = $this->apiManager->getOlts();
-        $data = $response->json();
-        return $data['response'] ?? [];
+        try {
+            if (!$this->isConfigured()) {
+                return [];
+            }
+            $response = $this->apiManager->getOlts();
+            $data = $response->json();
+            return $data['response'] ?? [];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getOlts error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function getOltCards($root, array $args)
     {
-        $response = $this->apiManager->getOltCardsDetails($args['olt_id']);
-        $data = $response->json();
-        return $data['response'] ?? [];
+        try {
+            if (!$this->isConfigured()) {
+                return [];
+            }
+            $response = $this->apiManager->getOltCardsDetails($args['olt_id']);
+            $data = $response->json();
+            return $data['response'] ?? [];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getOltCards error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function getOltPonPorts($root, array $args)
     {
-        $response = $this->apiManager->getOltPonPortsDetails($args['olt_id']);
-        $data = $response->json();
-        return $data['response'] ?? [];
+        try {
+            if (!$this->isConfigured()) {
+                return [];
+            }
+            $response = $this->apiManager->getOltPonPortsDetails($args['olt_id']);
+            $data = $response->json();
+            return $data['response'] ?? [];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getOltPonPorts error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function getZones($root, array $args)
     {
-        $response = $this->apiManager->getZones();
-        $data = $response->json();
-        return $data['response'] ?? [];
+        try {
+            if (!$this->isConfigured()) {
+                return [];
+            }
+            $response = $this->apiManager->getZones();
+            $data = $response->json();
+            return $data['response'] ?? [];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getZones error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function getOdbs($root, array $args)
     {
-        $response = $this->apiManager->getOdbs($args['zone_id']);
-        $data = $response->json();
-        return $data['response'] ?? [];
+        try {
+            if (!$this->isConfigured()) {
+                return [];
+            }
+            $response = $this->apiManager->getOdbs($args['zone_id']);
+            $data = $response->json();
+            return $data['response'] ?? [];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getOdbs error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function getSpeedProfiles($root, array $args)
     {
-        $response = $this->apiManager->getSpeedProfiles();
-        $data = $response->json();
-        return $data['response'] ?? [];
+        try {
+            if (!$this->isConfigured()) {
+                return [];
+            }
+            $response = $this->apiManager->getSpeedProfiles();
+            $data = $response->json();
+            return $data['response'] ?? [];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getSpeedProfiles error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function getUnconfiguredOnus($root, array $args)
     {
-        $response = $this->apiManager->getUnconfiguredOnusForOlt($args['olt_id']);
-        $data = $response->json();
-        return $data['response'] ?? [];
+        try {
+            if (!$this->isConfigured()) {
+                return [];
+            }
+            $response = $this->apiManager->getUnconfiguredOnusForOlt($args['olt_id']);
+            $data = $response->json();
+            return $data['response'] ?? [];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getUnconfiguredOnus error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function getOltsUptime($root, array $args)
     {
-        $response = $this->apiManager->getOltsUptimeAndEnvTemperature();
-        $data = $response->json();
-        return $data['response'] ?? [];
+        try {
+            if (!$this->isConfigured()) {
+                return [];
+            }
+            $response = $this->apiManager->getOltsUptimeAndEnvTemperature();
+            $data = $response->json();
+            return $data['response'] ?? [];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getOltsUptime error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function getOnuDetails($root, array $args)
     {
-        $response = $this->apiManager->getOnuDetailsByExternalId($args['sn']);
-        $data = $response->json();
+        try {
+            if (!$this->isConfigured()) {
+                return null;
+            }
+            $response = $this->apiManager->getOnuDetailsByExternalId($args['sn']);
+            $data = $response->json();
 
-        if (isset($data['onu_details'])) {
-            return $data['onu_details'];
+            if (isset($data['onu_details'])) {
+                return $data['onu_details'];
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getOnuDetails error: ' . $e->getMessage());
+            return null;
         }
-
-        return null;
     }
 
     public function getVlans($root, array $args)
     {
-        $response = $this->apiManager->getVlansByOltId((int) $args['olt_id']);
-        $data = $response->json();
-        return $data['response'] ?? [];
+        try {
+            if (!$this->isConfigured()) {
+                return [];
+            }
+            $response = $this->apiManager->getVlansByOltId((int) $args['olt_id']);
+            $data = $response->json();
+            return $data['response'] ?? [];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getVlans error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function getInstallationFormData($root, array $args)
     {
-        $sn = $args['sn'];
+        try {
+            if (!$this->isConfigured()) {
+                return null;
+            }
+            $sn = $args['sn'];
 
-        $onuResponse = $this->apiManager->getUnconfiguredOnusBySn($sn);
-        $onuData = $onuResponse->json();
-        $onu = !empty($onuData['response']) ? $onuData['response'][0] : null;
+            $onuResponse = $this->apiManager->getUnconfiguredOnusBySn($sn);
+            $onuData = $onuResponse->json();
+            $onu = !empty($onuData['response']) ? $onuData['response'][0] : null;
 
-        if (!$onu) {
+            if (!$onu) {
+                return null;
+            }
+
+            $oltId = (int) $onu['olt_id'];
+
+            $vlanData     = $this->apiManager->getVlansByOltId($oltId)->json();
+            $zonesData    = $this->apiManager->getZones()->json();
+            $profilesData = $this->apiManager->getSpeedProfiles()->json();
+
+            return [
+                'onu'           => $onu,
+                'vlans'         => $vlanData['response'] ?? [],
+                'zones'         => $zonesData['response'] ?? [],
+                'speed_profiles' => $profilesData['response'] ?? [],
+            ];
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getInstallationFormData error: ' . $e->getMessage());
             return null;
         }
-
-        $oltId = (int) $onu['olt_id'];
-
-        $vlanData     = $this->apiManager->getVlansByOltId($oltId)->json();
-        $zonesData    = $this->apiManager->getZones()->json();
-        $profilesData = $this->apiManager->getSpeedProfiles()->json();
-
-        return [
-            'onu'           => $onu,
-            'vlans'         => $vlanData['response'] ?? [],
-            'zones'         => $zonesData['response'] ?? [],
-            'speed_profiles' => $profilesData['response'] ?? [],
-        ];
     }
 
     public function getOnuTypeImage($root, array $args)
     {
-        $response = $this->apiManager->getOnuTypeImage($args['onu_type_id']);
+        try {
+            if (!$this->isConfigured()) {
+                return null;
+            }
+            $response = $this->apiManager->getOnuTypeImage($args['onu_type_id']);
 
-        // Retornar la imagen como base64
-        if ($response->successful()) {
-            $imageData = base64_encode($response->body());
-            return [
-                'image_base64' => $imageData,
-                'content_type' => $response->header('Content-Type') ?? 'image/jpeg'
-            ];
+            // Retornar la imagen como base64
+            if ($response->successful()) {
+                $imageData = base64_encode($response->body());
+                return [
+                    'image_base64' => $imageData,
+                    'content_type' => $response->header('Content-Type') ?? 'image/jpeg'
+                ];
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('SmartOLT getOnuTypeImage error: ' . $e->getMessage());
+            return null;
         }
-
-        return null;
     }
 
     public function getOnuTrafficGraph($root, array $args)
@@ -141,6 +243,9 @@ class SmartOltQuery
         ]);
 
         try {
+            if (!$this->isConfigured()) {
+                return null;
+            }
             $response = $this->apiManager->getOnuTrafficGraphByExternalId($args['external_id'], $graphType);
 
             $body = $response->body();
@@ -196,6 +301,12 @@ class SmartOltQuery
     public function getCatvStatus($root, array $args)
     {
         try {
+            if (!$this->isConfigured()) {
+                return [
+                    'enabled' => false,
+                    'message' => 'SmartOLT is not configured'
+                ];
+            }
             $response = $this->apiManager->getOnuCatvStatusByExternalId($args['external_id']);
             $data = $response->json();
 
