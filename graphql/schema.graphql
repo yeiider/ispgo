@@ -228,7 +228,7 @@ type Mutation @guard {
 
     deleteAddress(
         id: ID! @rules(apply: ["required", "exists:addresses,id"])
-    ): Address @delete(model: "App\\Models\\Customers\\Address")
+    ): Address @field(resolver: "App\\GraphQL\\Mutations\\DeleteAddressMutation@resolve")
 
     # Upsert configuration values by scope
     upsertConfigValues(

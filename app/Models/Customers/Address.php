@@ -64,12 +64,12 @@ class Address extends Model
                 return;
             }
 
-            // Filter addresses by whether their customer has at least one SERVICE in the user's routers.
-            // Correct logic: router → services → customers → addresses
+            // Filter addresses by whether their customer has at least one SERVICE in the user's routers or the customer belongs to the user's routers.
+            // Correct logic: router → services → customers → addresses or customer router
             $builder->whereHas('customer', function ($query) use ($routerIds) {
                 $query->whereHas('services', function ($q) use ($routerIds) {
                     $q->whereIn('router_id', $routerIds);
-                });
+                })->orWhereIn('router_id', $routerIds);
             });
         });
 

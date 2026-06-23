@@ -63,12 +63,12 @@ class ServiceOltManagerListenerActive
         // ── Paso 2: Activar CATV tras 2 segundos ────────────────────────────
         ActivateCatvJob::dispatch($externalId, $service->id)
             ->onQueue('redis')
-            ->delay(now()->addSeconds(2));
+            ->delay(now()->addSeconds(65));
 
         // ── Paso 3: Reboot de la ONU 3 segundos después del CATV (t=5s) ────
         RebootOnuJob::dispatch($externalId, $service->id)
             ->onQueue('redis')
-            ->delay(now()->addSeconds(5));
+            ->delay(now()->addSeconds(95));
     }
 
     private function resolveExternalId(\App\Models\Services\Service $service): string
