@@ -5,8 +5,8 @@ namespace Ispgo\Smartolt\Listeners;
 use App\Events\ServiceUpdateStatus;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
-use Ispgo\Smartolt\Jobs\ActivateCatvJob;
 use Ispgo\Smartolt\Jobs\RebootOnuJob;
+use Ispgo\Smartolt\Jobs\ToggleCatvJob;
 use Ispgo\Smartolt\Services\ApiManager;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 
@@ -69,18 +69,19 @@ class ServiceOltManagerListener
                 // Paso 1: Activar ONU inmediatamente
                 $response = $apiManager->enableOnu($sn);
 
-                Log::info("ServiceOltManagerListener: ONU {$sn} activada. Programando CATV y reboot.", [
+                Log::info("ServiceOltManagerListener: ONU {$sn} activada. Programando reboot y toggle CATV.", [
                     'service_id'  => $service->id,
                     'external_id' => $externalId,
                 ]);
 
-                // Paso 2: Activar CATV tras 2 segundos
-                ActivateCatvJob::dispatch($externalId, $service->id)
-                    ->onQueue('redis')
-                    ->delay(now()->addSeconds(2));
+                // Paso 2: Reboot de la ONU (t=30s)
+                // RebootOnuJob::dispatch($externalId, $service->id)
+                //     ->onQueue('redis')
+                //     ->delay(now()->addSeconds(80));
 
-                // Paso 3: Reboot de la ONU 5 segundos después (3s después de CATV)
-                RebootOnuJob::dispatch($externalId, $service->id)
+                // Paso 3: Toggle CATV post-reboot (t=5s)
+                // Ciclo disable→enable para forzar que el equipo aplique la TV
+                ToggleCatvJob::dispatch($externalId, $service->id)
                     ->onQueue('redis')
                     ->delay(now()->addSeconds(5));
 

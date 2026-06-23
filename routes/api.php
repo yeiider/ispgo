@@ -140,4 +140,17 @@ Route::prefix('v1')
 // OnePay webhook endpoint
 Route::post('/webhooks/onepay', [OnePayWebhookController::class, 'handle']);
 
-
+/*
+|--------------------------------------------------------------------------
+| Public Contract Signing Routes (no authentication required)
+|--------------------------------------------------------------------------
+| These endpoints are used by the client-facing contract signing page.
+| Security is provided by the UUID contract ID (cryptographically random).
+*/
+Route::prefix('public/contract')->group(function () {
+    Route::get('/{id}', [\App\Http\Controllers\Api\PublicContractController::class, 'show']);
+    Route::post('/{id}/sign', [\App\Http\Controllers\Api\PublicContractController::class, 'sign']);
+    Route::get('/{id}/preview', [\App\Http\Controllers\Api\PublicContractController::class, 'preview']);
+    Route::get('/{id}/preview-pdf', [\App\Http\Controllers\Api\PublicContractController::class, 'previewPdf']);
+});
+Route::post('/public/upload/temp', [\App\Http\Controllers\Api\PublicContractController::class, 'uploadTemp']);

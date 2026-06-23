@@ -33,18 +33,18 @@ class ContractRepository
      /**
      * Get contract by id
      *
-     * @param $id
+     * @param string $id
      * @return mixed
      */
-    public function getById(int $id)
+    public function getById(string $id)
     {
-        return $this->contract->find($id);
+        return $this->contract->findOrFail($id);
     }
 
     /**
      * Save Contract
      *
-     * @param $data
+     * @param array $data
      * @return Contract
      */
      public function save(array $data)
@@ -55,12 +55,13 @@ class ContractRepository
      /**
      * Update Contract
      *
-     * @param $data
+     * @param array $data
+     * @param string $id
      * @return Contract
      */
-    public function update(array $data, int $id)
+    public function update(array $data, string $id)
     {
-        $contract = $this->contract->find($id);
+        $contract = $this->contract->findOrFail($id);
         $contract->update($data);
         return $contract;
     }
@@ -68,12 +69,12 @@ class ContractRepository
     /**
      * Delete Contract
      *
-     * @param $data
+     * @param string $id
      * @return Contract
      */
-   	 public function delete(int $id)
+   	 public function delete(string $id)
     {
-        $contract = $this->contract->find($id);
+        $contract = $this->contract->findOrFail($id);
         $contract->delete();
         return $contract;
     }

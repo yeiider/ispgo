@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 class Contract extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\HasSignedUrls;
 
     /**
      * The table associated with the model.
@@ -53,7 +53,11 @@ class Contract extends Model
         'start_date',
         'end_date',
         'is_signed',
-        'signed_at'
+        'signed_at',
+        'status',
+        'contract_pdf_path',
+        'cedula_path',
+        'utility_bill_path'
     ];
 
     protected $casts = [
@@ -61,8 +65,25 @@ class Contract extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'signed_at' => 'datetime',
-
     ];
+
+    /**
+     * Accessors for S3 Signed URLs
+     */
+    public function getContractPdfUrlAttribute()
+    {
+        return $this->generateSignedUrl($this->contract_pdf_path);
+    }
+
+    public function getCedulaUrlAttribute()
+    {
+        return $this->generateSignedUrl($this->cedula_path);
+    }
+
+    public function getUtilityBillUrlAttribute()
+    {
+        return $this->generateSignedUrl($this->utility_bill_path);
+    }
 
     /**
      * Boot model events.

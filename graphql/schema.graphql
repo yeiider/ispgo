@@ -5,6 +5,8 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 #import invoice-payments.graphql
 #import invoice.schema.graphql
 #import frontend_permissions.graphql
+#import templates.graphql
+#import contracts.graphql
 
 "A date string with format 'Y-m-d', e.g. '2011-05-23'."
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
@@ -226,7 +228,7 @@ type Mutation @guard {
 
     deleteAddress(
         id: ID! @rules(apply: ["required", "exists:addresses,id"])
-    ): Address @delete(model: "App\\Models\\Customers\\Address")
+    ): Address @field(resolver: "App\\GraphQL\\Mutations\\DeleteAddressMutation@resolve")
 
     # Upsert configuration values by scope
     upsertConfigValues(
