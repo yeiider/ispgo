@@ -26,20 +26,34 @@ class InvoicePaymentMutations
      */
     public function create($root, array $args)
     {
+        $dailyBoxId = $args['daily_box_id'] ?? null;
+        if (!$dailyBoxId && Auth::check()) {
+            $assignedRegister = \App\Models\Finance\CashRegister::where('user_id', Auth::id())->latest()->first();
+
+            if (!$assignedRegister || $assignedRegister->status !== \App\Models\Finance\CashRegister::STATUS_OPEN) {
+                throw new InvalidArgumentException(
+                    'No puedes registrar pagos en este momento. La caja que tienes asignada se encuentra CERRADA o no tienes ninguna caja asignada. Por favor, abre tu caja para continuar.'
+                );
+            }
+            $dailyBoxId = $assignedRegister->id;
+        }
+
         // Preparar datos
         $data = [
-            'invoice_id' => $args['invoiceId'],
+            'invoice_id' => $args['invoice_id'],
             'user_id' => Auth::id(),
             'amount' => $args['amount'],
-            'payment_date' => $args['paymentDate'],
-            'payment_method' => $args['paymentMethod'] ?? null,
-            'reference_number' => $args['referenceNumber'] ?? null,
+            'payment_date' => $args['payment_date'],
+            'payment_method' => $args['payment_method'] ?? null,
+            'payment_registered_by' => Auth::id(),
+            'reference_number' => $args['reference_number'] ?? null,
             'notes' => $args['notes'] ?? null,
-            'payment_support' => $args['paymentSupport'] ?? null,
+            'payment_support' => $args['payment_support'] ?? null,
+            'daily_box_id' => $dailyBoxId,
         ];
 
         // Validar que el monto no exceda el saldo pendiente
-        $invoice = Invoice::findOrFail($args['invoiceId']);
+        $invoice = Invoice::findOrFail($args['invoice_id']);
 
         if ($data['amount'] > $invoice->real_outstanding_balance) {
             throw new InvalidArgumentException(
@@ -64,9 +78,9 @@ class InvoicePaymentMutations
     {
         $data = array_filter([
             'amount' => $args['amount'] ?? null,
-            'payment_date' => $args['paymentDate'] ?? null,
-            'payment_method' => $args['paymentMethod'] ?? null,
-            'reference_number' => $args['referenceNumber'] ?? null,
+            'payment_date' => $args['payment_date'] ?? null,
+            'payment_method' => $args['payment_method'] ?? null,
+            'reference_number' => $args['reference_number'] ?? null,
             'notes' => $args['notes'] ?? null,
         ], fn($value) => $value !== null);
 

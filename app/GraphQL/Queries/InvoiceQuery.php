@@ -16,7 +16,7 @@ class InvoiceQuery
      */
     public function __invoke($root, array $args): Builder
     {
-        $query = Invoice::query();
+        $query = Invoice::query()->with(['customer', 'service', 'payments']);
 
         // Apply increment_id filter if provided
         if (!empty($args['increment_id'])) {
@@ -50,12 +50,38 @@ class InvoiceQuery
 
         // Apply customer_name filter if provided
         if (!empty($args['customer_name'])) {
-            $query->whereHas('customer', function ($q) use ($args) {
-                $name = $args['customer_name'];
-                $q->where('first_name', 'LIKE', "%{$name}%")
-                    ->orWhere('last_name', 'LIKE', "%{$name}%")
-                    ->orWhere(\Illuminate\Support\Facades\DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%{$name}%");
-            });
+            $query->searchByCustomerName($args['customer_name']);
+        }
+
+        // Apply payment_date_from filter if provided
+        if (!empty($args['payment_date_from'])) {
+            $query->where('payment_date', '>=', $args['payment_date_from']);
+        }
+
+        // Apply payment_date_to filter if provided
+        if (!empty($args['payment_date_to'])) {
+            $query->where('payment_date', '<=', $args['payment_date_to']);
+        }
+
+        // Apply payment_method filter directly on invoices table
+        if (!empty($args['payment_method'])) {
+            $query->where('payment_method', $args['payment_method']);
+        }
+
+        // Apply payment_registered_by filter directly on invoices table
+        if (!empty($args['payment_registered_by'])) {
+            $query->where('payment_registered_by', $args['payment_registered_by']);
+        }
+
+        // Apply sorting
+        $sortColumn = $args['sort_column'] ?? 'created_at';
+        $sortDirection = isset($args['sort_direction']) && strtolower($args['sort_direction']) === 'asc' ? 'asc' : 'desc';
+
+        $allowedSortColumns = ['created_at', 'issue_date', 'due_date', 'payment_date', 'total', 'increment_id', 'status'];
+        if (in_array($sortColumn, $allowedSortColumns)) {
+            $query->orderBy($sortColumn, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
         }
 
         return $query;

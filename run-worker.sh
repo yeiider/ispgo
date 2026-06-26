@@ -1,6 +1,6 @@
 #!/bin/bash
-# Make sure this file has executable permissions, run `chmod +x run-worker.sh`
-
 # This command runs the queue worker.
-# An alternative is to use the php artisan queue:listen command
-php artisan queue:work --queue=redis
+# It uses the default connection but listens to multiple queues.
+# Ensure QUEUE_CONNECTION is set correctly in your environment (e.g., redis or database).
+php artisan queue:work --queue=redis,default,invoice_notifications --verbose --tries=3 --timeout=90
+

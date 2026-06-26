@@ -208,4 +208,57 @@ class OnePayHandler
         }
         return $response->body() ?: 'Error desconocido';
     }
+
+    public function getPayment(string $paymentId): array
+    {
+        $endpoint = $this->baseUrl . '/payments/' . $paymentId;
+        $response = Http::timeout(30)
+            ->withToken($this->token)
+            ->acceptJson()
+            ->get($endpoint);
+
+        if (!$response->successful()) {
+            $msg = $this->extractErrorMessage($response);
+            throw new \Exception("Error al consultar cobro OnePay: {$msg}");
+        }
+
+        return $response->json();
+    }
+
+    public function getPaymentIntents(string $paymentId): array
+    {
+        $endpoint = $this->baseUrl . '/payments/' . $paymentId . '/intents';
+        $response = Http::timeout(30)
+            ->withToken($this->token)
+            ->acceptJson()
+            ->get($endpoint);
+
+        if (!$response->successful()) {
+            $msg = $this->extractErrorMessage($response);
+            throw new \Exception("Error al consultar intentos de cobro OnePay: {$msg}");
+        }
+
+        return (array) $response->json();
+    }
+
+    public function getCustomerByDocument(string $documentNumber): ?array
+    {
+        $endpoint = $this->baseUrl . '/customers';
+        $response = Http::timeout(30)
+            ->withToken($this->token)
+            ->acceptJson()
+            ->get($endpoint, [
+                'document_number' => $documentNumber,
+                'limit' => 20,
+                'page' => 1
+            ]);
+
+        if (!$response->successful()) {
+            $msg = $this->extractErrorMessage($response);
+            throw new \Exception("Error al consultar cliente OnePay: {$msg}");
+        }
+
+        $data = $response->json('data');
+        return !empty($data) ? $data[0] : null;
+    }
 }

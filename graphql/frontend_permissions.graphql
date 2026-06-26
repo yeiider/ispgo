@@ -1,0 +1,39 @@
+extend type Query {
+    frontendPermissions: [FrontendPermission!]! @all(model: "App\\Models\\FrontendPermission")
+    frontendPermission(id: ID! @eq): FrontendPermission @find(model: "App\\Models\\FrontendPermission")
+}
+
+extend type Mutation {
+    createFrontendPermission(
+        name: String! @rules(apply: ["required", "unique:frontend_permissions,name"])
+    ): FrontendPermission @create(model: "App\\Models\\FrontendPermission")
+
+    updateFrontendPermission(
+        id: ID! @rules(apply: ["required", "exists:frontend_permissions,id"])
+        name: String @rules(apply: ["unique:frontend_permissions,name"])
+    ): FrontendPermission @update(model: "App\\Models\\FrontendPermission")
+
+    deleteFrontendPermission(
+        id: ID! @rules(apply: ["required", "exists:frontend_permissions,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\FrontendPermissionMutation@delete")
+
+    syncFrontendPermissionsToRole(
+        role_id: ID! @rules(apply: ["required", "exists:roles,id"])
+        permission_ids: [ID!]! @rules(apply: ["required"])
+    ): Role @field(resolver: "App\\GraphQL\\Mutations\\FrontendPermissionMutation@syncToRole")
+
+    syncFrontendPermissionsToUser(
+        user_id: ID! @rules(apply: ["required", "exists:users,id"])
+        permission_ids: [ID!]! @rules(apply: ["required"])
+    ): User @field(resolver: "App\\GraphQL\\Mutations\\FrontendPermissionMutation@syncToUser")
+}
+
+type FrontendPermission {
+    id: ID!
+    name: String!
+    guard_name: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+    roles: [Role!]! @belongsToMany
+    users: [User!]! @belongsToMany
+}

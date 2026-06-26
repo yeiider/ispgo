@@ -35,15 +35,17 @@ class OnePaySettings
         return ConfigHelper::getConfigValue(self::PATH . 'onepay_api_token');
     }
 
-    public static function autoCreateDay(): ?int
+    public static function autoCreateDay(?int $routerId = null): ?int
     {
-        $day = ConfigHelper::getConfigValue(self::PATH . 'onepay_auto_create_day');
+        $scopeId = $routerId ?? 0;
+        $day = ConfigHelper::getConfigValue(self::PATH . 'onepay_auto_create_day', $scopeId);
         return is_numeric($day) ? (int) $day : null;
     }
 
-    public static function autoRemindDay(): ?int
+    public static function autoRemindDay(?int $routerId = null): ?int
     {
-        $day = ConfigHelper::getConfigValue(self::PATH . 'onepay_auto_remind_day');
+        $scopeId = $routerId ?? 0;
+        $day = ConfigHelper::getConfigValue(self::PATH . 'onepay_auto_remind_day', $scopeId);
         return is_numeric($day) ? (int) $day : null;
     }
 }

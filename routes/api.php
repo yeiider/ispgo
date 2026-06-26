@@ -22,7 +22,25 @@ use App\Http\Controllers\Webhooks\OnePayWebhookController;
 */
 Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
-        return $request->user()->load(['roles', 'permissions'])->withoutRelations();
+        $user = $request->user();
+        $user->load(['roles.frontendPermissions', 'frontendPermissions']);
+
+        $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : collect();
+
+        $frontendPermissions = $user->getAllFrontendPermissions()->map(function($perm) {
+            return $perm->name;
+        })->unique()->values();
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'telephone' => $user->telephone,
+            'role' => $roles->first() ?: 'Sin rol',
+            'roles' => $user->roles,
+            'frontendPermissions' => $frontendPermissions,
+            'user' => $user->withoutRelations()
+        ]);
     });
 
     // Returns the currently authenticated user including role information
@@ -30,11 +48,16 @@ Route::middleware('auth:api')->group(function () {
         $user = $request->user();
 
         // Eager load roles for efficiency
-        $user->load('roles');
+        $user->load(['roles.frontendPermissions', 'frontendPermissions']);
 
         // Using Spatie\Permission helpers provided by HasRoles trait
         $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : collect();
         $permissions = method_exists($user, 'getPermissionNames') ? $user->getPermissionNames() : collect();
+
+        // Get all frontend permissions (direct + from roles)
+        $frontendPermissions = $user->getAllFrontendPermissions()->map(function($perm) {
+            return $perm->name;
+        })->unique()->values();
 
         return response()->json([
             'id' => $user->id,
@@ -44,18 +67,18 @@ Route::middleware('auth:api')->group(function () {
             // convenience single role (first role if multiple)
             'role' => $roles->first() ?: null,
             'permissions' => $permissions,
+            'frontendPermissions' => $frontendPermissions,
             // raw user (without relations) for clients that need extra attributes
             'user' => $user->withoutRelations(),
         ]);
     });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/v1/invoice/search', [InvoiceApi::class, 'searchInvoices']);
-    Route::post('/v1/invoice/pay', [InvoiceApi::class, 'registerPayment']);
+    Route::post('/v1/invoice/pay', [InvoiceApi::class, 'registerPayment'])->middleware(\App\Http\Middleware\LogApiRequests::class);
     Route::post('/v1/cotizaciones', [CotizacionController::class, 'store']);
     Route::apiResource('tasks', TaskControllerApi::class);
     Route::apiResource('comments', TaskCommentController::class);
     Route::apiResource('attachments', TaskAttachmentController::class);
-
     /*
     |--------------------------------------------------------------------------
     | File Upload Routes - Two-Step Upload Pattern
@@ -108,6 +131,7 @@ Route::middleware('auth:api')->group(function () {
 
 Route::post('/login', [\App\Http\Controllers\API\AuthController::class, 'login']);
 Route::prefix('v1')
+    ->as('v1.')
     ->middleware('auth:api')
     ->group(base_path('routes/api_v1.php'));
 
@@ -116,4 +140,17 @@ Route::prefix('v1')
 // OnePay webhook endpoint
 Route::post('/webhooks/onepay', [OnePayWebhookController::class, 'handle']);
 
-
+/*
+|--------------------------------------------------------------------------
+| Public Contract Signing Routes (no authentication required)
+|--------------------------------------------------------------------------
+| These endpoints are used by the client-facing contract signing page.
+| Security is provided by the UUID contract ID (cryptographically random).
+*/
+Route::prefix('public/contract')->group(function () {
+    Route::get('/{id}', [\App\Http\Controllers\Api\PublicContractController::class, 'show']);
+    Route::post('/{id}/sign', [\App\Http\Controllers\Api\PublicContractController::class, 'sign']);
+    Route::get('/{id}/preview', [\App\Http\Controllers\Api\PublicContractController::class, 'preview']);
+    Route::get('/{id}/preview-pdf', [\App\Http\Controllers\Api\PublicContractController::class, 'previewPdf']);
+});
+Route::post('/public/upload/temp', [\App\Http\Controllers\Api\PublicContractController::class, 'uploadTemp']);

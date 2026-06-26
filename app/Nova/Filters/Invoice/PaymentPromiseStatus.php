@@ -44,9 +44,10 @@ class PaymentPromiseStatus extends Filter
     public function options(Request $request): array
     {
         return [
-            __('attribute.pending') => 'pending',
-            __('attribute.fulfilled') => 'fulfilled',
-            __('attribute.cancelled') => 'cancelled',
+            'Pendiente' => 'pending',
+            'Cumplida' => 'fulfilled',
+            'Vencida' => 'expired',
+            'Cancelada' => 'cancelled',
         ];
     }
 }

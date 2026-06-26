@@ -24,6 +24,11 @@ class DailyBox extends Model
         return $this->belongsTo(Box::class);
     }
 
+    public function expenses()
+    {
+        return $this->hasMany(\App\Models\Finance\Expense::class, 'daily_box_id');
+    }
+
     protected static function boot()
     {
         parent::boot();

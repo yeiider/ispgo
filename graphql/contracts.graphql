@@ -1,0 +1,68 @@
+type Contract {
+    id: ID!
+    customer: Customer! @belongsTo
+    service: Service! @belongsTo
+    start_date: Date!
+    end_date: Date!
+    is_signed: Boolean!
+    signed_at: DateTime
+    status: String!
+    contract_pdf_path: String
+    contract_pdf_url: String
+    cedula_path: String
+    cedula_url: String
+    utility_bill_path: String
+    utility_bill_url: String
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type ContractResponse {
+    success: Boolean!
+    message: String!
+    contract: Contract
+}
+
+extend type Query {
+    contracts(
+        status: String
+        customer_id: ID
+        search: String
+        sort_column: String
+        sort_direction: String
+    ): [Contract!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\ContractQuery")
+
+    contract(id: ID! @eq): Contract @find(model: "App\\Models\\Contract")
+}
+
+extend type Mutation {
+    createContract(
+        customer_id: ID!
+        service_id: ID!
+        start_date: Date!
+        end_date: Date!
+    ): Contract! @field(resolver: "App\\GraphQL\\Mutations\\ContractMutation@create")
+
+    updateContract(
+        id: ID!
+        start_date: Date
+        end_date: Date
+        status: String
+    ): Contract! @field(resolver: "App\\GraphQL\\Mutations\\ContractMutation@update")
+
+    deleteContract(id: ID!): Contract! @delete(model: "App\\Models\\Contract")
+
+    # Ciclo de vida y notificaciones
+    sendContract(id: ID!): ContractResponse! @field(resolver: "App\\GraphQL\\Mutations\\ContractMutation@send")
+    resendContract(id: ID!): ContractResponse! @field(resolver: "App\\GraphQL\\Mutations\\ContractMutation@resend")
+    approveContract(id: ID!): Contract! @field(resolver: "App\\GraphQL\\Mutations\\ContractMutation@approve")
+    rejectContract(id: ID!, reason: String!): Contract! @field(resolver: "App\\GraphQL\\Mutations\\ContractMutation@reject")
+
+    # Firma y carga de soportes desde el lado cliente
+    signContract(
+        id: ID!
+        signature_base64: String!
+        cedula_temp_path: String!
+        utility_bill_temp_path: String
+    ): ContractResponse! @field(resolver: "App\\GraphQL\\Mutations\\ContractMutation@sign")
+}

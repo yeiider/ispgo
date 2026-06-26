@@ -45,7 +45,18 @@ class Customer extends Authenticatable implements MustVerifyEmail
         'password',
         'onepay_customer_id',
         'router_id',
+        'billing_mode',
     ];
+
+    /**
+     * Indica si el cliente tiene habilitada la facturación por servicio.
+     * null / 'total' => modo por defecto (una factura total)
+     * 'per_service'  => una factura individual por servicio
+     */
+    public function usesPerServiceBilling(): bool
+    {
+        return $this->billing_mode === 'per_service';
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -95,7 +106,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
     public function activeServices()
     {
-        return $this->services()->whereNotIn('service_status', ['free', 'inactive']);
+        return $this->services()->whereNotIn('service_status', ['free', 'inactive','pending']);
     }
 
     public function addresses()
@@ -113,6 +124,18 @@ class Customer extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Service::class);
     }
 
+    public function iptvLineUsers()
+    {
+        return $this->hasManyThrough(
+            \App\Models\Services\IptvLineUser::class,
+            \App\Models\Services\Service::class,
+            'customer_id',
+            'service_id',
+            'id',
+            'id'
+        );
+    }
+
     public function contracts()
     {
         return $this->hasMany(Contract::class);
@@ -126,6 +149,11 @@ class Customer extends Authenticatable implements MustVerifyEmail
     public function getFullNameAttribute()
     {
         return ucwords("{$this->first_name} {$this->last_name}");
+    }
+
+    public function getGlobalAddressesAttribute()
+    {
+        return $this->addresses()->withoutGlobalScope('router_filter')->get();
     }
 
     public function setFirstNameAttribute($value)
@@ -142,11 +170,13 @@ class Customer extends Authenticatable implements MustVerifyEmail
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router(s)
+        // Global Scope: Filter customers by the routers of their SERVICES
+        // A customer is visible in a zone if they have at least one service in that zone.
+        // This allows a customer registered in zone A to appear in zone B if they have a service there.
         static::addGlobalScope('router_filter', function (Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
-            
+
             // If not authenticated, no filtering
             if (!$user) {
                 return;
@@ -155,13 +185,18 @@ class Customer extends Authenticatable implements MustVerifyEmail
             // If user has no routers assigned, show all data
             // Role permissions control what actions they can perform
             $routerIds = $user->getRouterIds();
-            
+
             if (empty($routerIds)) {
                 return;
             }
 
-            // Filter by user's assigned router(s)
-            $builder->whereIn('router_id', $routerIds);
+            // Filter customers that have at least one SERVICE in the user's router(s).
+            // This is the correct logic: router → services → customers
+            $builder->where(function (Builder $query) use ($routerIds) {
+                $query->whereHas('services', function ($q) use ($routerIds) {
+                    $q->whereIn('router_id', $routerIds);
+                })->orWhereIn('router_id', $routerIds);
+            });
         });
 
         static::creating(function ($customer) {
@@ -170,7 +205,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
                 $birthDate = Carbon::parse($customer->date_of_birth);
                 $today = Carbon::now();
                 $age = $birthDate->diffInYears($today);
-                
+
                 // Verificar que tenga al menos 18 años completos
                 if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
                     $validator = \Illuminate\Support\Facades\Validator::make([], []);
@@ -185,14 +220,14 @@ class Customer extends Authenticatable implements MustVerifyEmail
             $customer->updated_by = Auth::id();
             event(new CustomerCreated($customer));
         });
-        
+
         static::updating(function ($customer) {
             // Validar que el cliente sea mayor de edad si se actualiza la fecha de nacimiento
             if ($customer->isDirty('date_of_birth') && $customer->date_of_birth) {
                 $birthDate = Carbon::parse($customer->date_of_birth);
                 $today = Carbon::now();
                 $age = $birthDate->diffInYears($today);
-                
+
                 // Verificar que tenga al menos 18 años completos
                 if ($age < 18 || ($age == 18 && $birthDate->copy()->addYears(18)->isFuture())) {
                     $validator = \Illuminate\Support\Facades\Validator::make([], []);
@@ -200,7 +235,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
                     throw new ValidationException($validator);
                 }
             }
-            
+
             if ($customer->isDirty('customer_status')) {
                 $customer->updated_by = Auth::id();
                 event(new CustomerStatusUpdated($customer));
@@ -216,14 +251,29 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
     public function scopeSearch($query, $search)
     {
-        if (!$search) {
+        if (empty($search)) {
             return $query;
         }
 
         return $query->where(function ($q) use ($search) {
-            $q->where('first_name', 'LIKE', "%{$search}%")
-              ->orWhere('last_name', 'LIKE', "%{$search}%")
-              ->orWhere('identity_document', 'LIKE', "%{$search}%")
+            // Split the search string into individual words/tokens
+            // Filter out empty tokens from multiple spaces
+            $tokens = array_filter(explode(' ', $search));
+
+            if (!empty($tokens)) {
+                // Name matching: all words must exist in either first_name or last_name
+                $q->where(function ($nameQuery) use ($tokens) {
+                    foreach ($tokens as $token) {
+                        $nameQuery->where(function ($tokenQuery) use ($token) {
+                            $tokenQuery->where('first_name', 'LIKE', "%{$token}%")
+                                       ->orWhere('last_name', 'LIKE', "%{$token}%");
+                        });
+                    }
+                });
+            }
+
+            // Identification or Email matching: the full search string
+            $q->orWhere('identity_document', 'LIKE', "%{$search}%")
               ->orWhere('email_address', 'LIKE', "%{$search}%");
         });
     }
@@ -235,10 +285,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
     public static function searchCustomersWithInvoices($input)
     {
-        return self::where(function ($query) use ($input) {
-            $query->where('identity_document', 'LIKE', "%{$input}%")
-                ->orWhere('first_name', 'LIKE', "%{$input}%");
-        })
+        return self::search($input)
             ->with(['invoices' => function ($query) {
                 $query->where('status', 'unpaid'); // Filtrar solo facturas no pagadas
             }])

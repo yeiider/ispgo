@@ -38,15 +38,20 @@ class ProrrateoInicialCalculator implements NovedadCalculator
             $periodEnd = $periodStart->copy()->endOfMonth();
         }
 
-        /* 4️⃣  Días a facturar --------------------------------------- */
-        $includeToday  = $rule['include_today'] ?? true;
-        $daysRemaining = $start->diffInDays($periodEnd) + ($includeToday ? 1 : 0);
+        /* 4️⃣  Días a facturar (Base 30 días) ----------------------- */
+        $startDay = (int) ($rule['start_day'] ?? 1);
+        if ($startDay > 30) $startDay = 30; // Tratar día 31 como 30
+        
+        $daysOfService = 30 - $startDay + 1;
 
-        /* 5️⃣  Precio por día ---------------------------------------- */
-        $daysInCycle = $periodStart->diffInDays($periodEnd) + 1;
-        $dailyPrice  = $service->plan->monthly_price / $daysInCycle;
+        /* 5️⃣  Precio por día (Base 30 días) ------------------------ */
+        $dailyPrice  = $service->plan->monthly_price / 30;
 
-        /* 6️⃣  Resultado (+cargo) ------------------------------------ */
-        return -abs(round(($dailyPrice * $daysRemaining)-$service->plan->monthly_price));
+        /* 6️⃣  Resultado (Descuento por días no usados) -------------- */
+        // El monto final a cobrar sería (dailyPrice * daysOfService)
+        // La novedad es un descuento: (dailyPrice * daysOfService) - PrecioTotal
+        $discount = ($dailyPrice * $daysOfService) - $service->plan->monthly_price;
+        
+        return -abs(round($discount));
     }
 }

@@ -98,6 +98,28 @@ class TaxDetailController extends Controller
     }
 
     /**
+     * Retrieve the tax detail for a specific customer.
+     *
+     * @OA\Get(
+     *     path="/api/v1/customers/{customerId}/tax-detail",
+     *     summary="Get tax detail by customer ID",
+     *     tags={"Tax Details"},
+     *     security={{"BearerAuth": {}}},
+     *     @OA\Parameter(name="customerId", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Tax detail retrieved"),
+     *     @OA\Response(response=404, description="Not found")
+     * )
+     */
+    public function byCustomer(int $customerId)
+    {
+        $taxDetail = \App\Models\Customers\TaxDetail::where('customer_id', $customerId)->first();
+        if (!$taxDetail) {
+            return response()->json(['data' => null], 200);
+        }
+        return new TaxDetailResource($taxDetail);
+    }
+
+    /**
      * Create a new tax detail.
      *
      * @OA\Post(

@@ -4,12 +4,25 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 #import reports.graphql
 #import invoice-payments.graphql
 #import invoice.schema.graphql
+#import frontend_permissions.graphql
+#import templates.graphql
+#import contracts.graphql
 
 "A date string with format 'Y-m-d', e.g. '2011-05-23'."
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
 "Arbitrary JSON object."
 scalar JSON @scalar(class: "App\\GraphQL\\Scalars\\JSON")
+
+input OrderByClause {
+    column: String!
+    order: SortOrder!
+}
+
+enum SortOrder {
+    ASC @enum(value: "asc")
+    DESC @enum(value: "desc")
+}
 
 type Query {
     # Users
@@ -21,30 +34,65 @@ type Query {
     user(id: ID! @eq): User @find(model: "App\\Models\\User")
 
     # Roles and Permissions
-    roles: [Role!]! @all(model: "Spatie\\Permission\\Models\\Role")
-    role(id: ID! @eq): Role @find(model: "Spatie\\Permission\\Models\\Role")
+    roles: [Role!]! @all(model: "App\\Models\\Role")
+    role(id: ID! @eq): Role @find(model: "App\\Models\\Role")
 
     permissions: [Permission!]! @all(model: "Spatie\\Permission\\Models\\Permission")
     permission(id: ID! @eq): Permission @find(model: "Spatie\\Permission\\Models\\Permission")
 
     customers(
-        first_name: String @where(operator: "like")
-        last_name: String @where(operator: "like")
-        identity_document: String @where(operator: "like")
-        email_address: String @where(operator: "like")
-        customer_status: String @eq
-        search: String @scope(name: "search")
-    ): [Customer!]! @paginate(defaultCount: 10, model: "App\\Models\\Customers\\Customer")
+        first_name: String
+        last_name: String
+        name: String
+        identity_document: String
+        email_address: String
+        customer_status: String
+        has_services: String
+        service_status: String
+        billing_status: String
+        created_at_date: String
+        search: String
+        sort_column: String
+        sort_direction: String
+    ): [Customer!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CustomerQuery")
     customer(id: ID! @eq): Customer @find(model: "App\\Models\\Customers\\Customer")
 
+    # Search ALL customers in the system regardless of router/zone assignment.
+    # Used when creating a service, so the operator can find any customer including
+    # those originally registered in a different zone.
+    allCustomers(
+        search: String
+        customer_status: String
+    ): [Customer!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\AllCustomersQuery")
+
+    # Get a specific customer bypassing the router filter. Used when selecting
+    # a customer from the allCustomers list to fetch their details and addresses.
+    globalCustomer(id: ID! @eq): Customer @field(resolver: "App\\GraphQL\\Queries\\GlobalCustomerQuery")
+
+    # Get a specific customer's addresses bypassing the router filter.
+    globalCustomerAddresses(customer_id: ID!): [Address!]! @field(resolver: "App\\GraphQL\\Queries\\GlobalCustomerAddressesQuery")
+
+    addresses(
+        address: String
+        city: String
+        customer_id: ID
+        sort_column: String
+        sort_direction: String
+    ): [Address!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\AddressQuery")
+
     services(
-        service_ip: String @where(operator: "like")
-        service_status: String @eq
-        customer_id: ID @eq
-        mac_address: String @where(operator: "like")
-        service_type: String @eq
-        sn: String @where(operator: "like")
-    ): [Service!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Service")
+        search: String
+        service_ip: String
+        service_status: String
+        customer_id: ID
+        mac_address: String
+        service_type: String
+        sn: String
+        plan_id: ID
+        additional_plans: [ID!]
+        sort_column: String
+        sort_direction: String
+    ): [Service!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\ServiceQuery")
     service(id: ID! @eq): Service @find(model: "App\\Models\\Services\\Service")
 
     invoices(
@@ -55,12 +103,29 @@ type Query {
         created_at_from: DateTime
         created_at_to: DateTime
         customer_name: String
+        payment_method: String
+        payment_registered_by: ID
+        payment_date_from: DateTime
+        payment_date_to: DateTime
+        sort_column: String
+        sort_direction: String
     ): [Invoice!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\InvoiceQuery")
     invoice(id: ID! @eq): Invoice @find(model: "App\\Models\\Invoice\\Invoice")
 
     # billingNovedades movido a billing.graphql con más opciones de filtrado
     creditNotes: [CreditNote!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\CreditNote")
-    paymentPromises: [PaymentPromise!]! @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\PaymentPromise")
+    paymentPromises(
+        id: ID
+        invoice_id: ID
+        status: String
+        customer_id: ID
+        user_id: ID
+        customer_name: String
+        promise_date_from: Date
+        promise_date_to: Date
+        sort_column: String
+        sort_direction: String
+    ): [PaymentPromise!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\PaymentPromiseQuery")
 
     routers: [Router!]! @paginate(defaultCount: 10, model: "App\\Models\\Router")
     router(id: ID! @eq): Router @find(model: "App\\Models\\Router")
@@ -68,24 +133,52 @@ type Query {
     plans: [Plan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Plan")
     plan(id: ID! @eq): Plan @find(model: "App\\Models\\Services\\Plan")
 
-    tickets(
-        status: String @eq
-        priority: String @eq
-        customer_id: ID @eq
-        service_id: ID @eq
-        title: String @where(operator: "like")
-    ): [Ticket!]! @paginate(defaultCount: 10, model: "App\\Models\\Ticket")
-    ticket(id: ID! @eq): Ticket @find(model: "App\\Models\\Ticket")
-    myTickets: [Ticket!]! @field(resolver: "App\\GraphQL\\Queries\\TicketQuery@myTickets")
-
+    additionalPlans: [AdditionalPlan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\AdditionalPlan")
+    additionalPlan(id: ID! @eq): AdditionalPlan @find(model: "App\\Models\\Services\\AdditionalPlan")
     # Configuration schema and values for external frontend
     configSchema: [ConfigSection!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@schema")
     configFields(scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@fields")
     configValues(paths: [String!]!, scope_id: Int = 0): [ConfigItem!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@values")
     configSearch(term: String!, scope_id: Int = 0): [ConfigField!]! @field(resolver: "App\\GraphQL\\Queries\\ConfigQuery@search")
+
+    # Cotizaciones
+    cotizaciones(
+        search: String
+        estado: String
+        sort_column: String
+        sort_direction: String
+    ): [Cotizacion!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CotizacionQuery")
+    cotizacion(id: ID! @eq): Cotizacion @find(model: "App\\Models\\Cotizacion")
 }
 
 type Mutation @guard {
+    # Cotizaciones
+    createCotizacion(
+        nombre: String!
+        apellido: String!
+        email: String!
+        telefono: String!
+        direccion: String
+        ciudad: String
+        plan: String
+        canal: String
+        estado: String
+        notas: String
+        metadata: JSON
+    ): Cotizacion @create(model: "App\\Models\\Cotizacion")
+
+    updateCotizacion(
+        id: ID!
+        estado: String
+        notas: String
+        metadata: JSON
+    ): Cotizacion @update(model: "App\\Models\\Cotizacion")
+
+    updateCotizacionesStatus(
+        ids: [ID!]!
+        estado: String!
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\UpdateCotizacionesStatus")
+
     createCustomer(
         first_name: String! @rules(apply: ["required", "max:255"])
         last_name: String! @rules(apply: ["required", "max:255"])
@@ -94,6 +187,7 @@ type Mutation @guard {
         identity_document: String @rules(apply: ["required", "unique:customers,identity_document"])
         document_type: String! @rules(apply: ["required", "max:50"])
         router_id: Int @rules(apply: ["exists:routers,id"])
+        billing_mode: String @rules(apply: ["nullable", "in:total,per_service"])
     ): Customer @create(model: "App\\Models\\Customers\\Customer")
 
     updateCustomer(
@@ -102,8 +196,10 @@ type Mutation @guard {
         last_name: String
         email_address: String @rules(apply: ["email"])
         phone_number: String
+        identity_document: String
         document_type: String
         router_id: Int @rules(apply: ["exists:routers,id"])
+        billing_mode: String @rules(apply: ["nullable", "in:total,per_service"])
     ): Customer @update(model: "App\\Models\\Customers\\Customer")
 
     deleteCustomer(
@@ -132,7 +228,7 @@ type Mutation @guard {
 
     deleteAddress(
         id: ID! @rules(apply: ["required", "exists:addresses,id"])
-    ): Address @delete(model: "App\\Models\\Customers\\Address")
+    ): Address @field(resolver: "App\\GraphQL\\Mutations\\DeleteAddressMutation@resolve")
 
     # Upsert configuration values by scope
     upsertConfigValues(
@@ -167,7 +263,8 @@ type Mutation @guard {
         unu_latitude: String
         assigned_technician: Int
         service_contract: String
-    ): Service @create(model: "App\\Models\\Services\\Service")
+        additional_plans: [ID!]
+    ): Service @field(resolver: "App\\GraphQL\\Mutations\\ServiceMutation@create")
 
     updateService(
         id: ID! @rules(apply: ["required", "exists:services,id"])
@@ -196,19 +293,20 @@ type Mutation @guard {
         unu_latitude: String
         assigned_technician: Int
         service_contract: String
-    ): Service @update(model: "App\\Models\\Services\\Service")
+        additional_plans: [ID!]
+    ): Service @field(resolver: "App\\GraphQL\\Mutations\\ServiceMutation@update")
 
     createRouter(
         name: String! @rules(apply: ["required", "max:255"])
-        ip_address: String! @rules(apply: ["required", "ip"])
-        description: String
+        code: String! @rules(apply: ["required", "max:255", "unique:routers,code"])
+        status: String @rules(apply: ["in:enabled,disabled"])
     ): Router @create(model: "App\\Models\\Router")
 
     updateRouter(
         id: ID! @rules(apply: ["required", "exists:routers,id"])
         name: String
-        ip_address: String @rules(apply: ["ip"])
-        description: String
+        code: String @rules(apply: ["max:255"])
+        status: String @rules(apply: ["in:enabled,disabled"])
     ): Router @update(model: "App\\Models\\Router")
 
     createPlan(
@@ -292,9 +390,30 @@ type Mutation @guard {
         service_id: ID! @rules(apply: ["required", "exists:services,id"])
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SuspendServiceMutation@resolve")
 
+    createAdditionalPlan(
+        name: String! @rules(apply: ["required", "max:255"])
+        monthly_price: Float! @rules(apply: ["required", "numeric", "min:0"])
+        status: String! @rules(apply: ["required", "in:active,inactive"])
+        description: String
+    ): AdditionalPlan @create(model: "App\\Models\\Services\\AdditionalPlan")
+
+    updateAdditionalPlan(
+        id: ID! @rules(apply: ["required", "exists:additional_plans,id"])
+        name: String
+        monthly_price: Float @rules(apply: ["numeric", "min:0"])
+        status: String @rules(apply: ["in:active,inactive"])
+        description: String
+    ): AdditionalPlan @update(model: "App\\Models\\Services\\AdditionalPlan")
+
+    deleteAdditionalPlan(
+        id: ID! @rules(apply: ["required", "exists:additional_plans,id"]) @eq
+    ): AdditionalPlan @delete(model: "App\\Models\\Services\\AdditionalPlan")
+
     registerPayment(
         invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
         payment_method: String! @rules(apply: ["required", "in:cash,transfer,card,online"])
+        payment_registered_by: ID @rules(apply: ["exists:users,id"])
+        transfer_reference: String
         notes: String
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentMutation@resolve")
 
@@ -310,97 +429,6 @@ type Mutation @guard {
         promise_date: Date! @rules(apply: ["required"])
         notes: String
     ): PaymentPromiseResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentPromiseMutation@resolve")
-
-    # Ticket Mutations
-    createTicket(
-        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
-        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
-        issue_type: String! @rules(apply: ["required", "max:255"])
-        priority: String! @rules(apply: ["required", "in:low,medium,high,urgent"])
-        status: String @rules(apply: ["in:open,in_progress,resolved,closed"])
-        title: String! @rules(apply: ["required", "max:255"])
-        description: String! @rules(apply: ["required"])
-        contact_method: String
-        user_ids: [ID!]
-    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@create")
-
-    updateTicket(
-        id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
-        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
-        issue_type: String
-        priority: String @rules(apply: ["in:low,medium,high,urgent"])
-        status: String @rules(apply: ["in:open,in_progress,resolved,closed"])
-        title: String
-        description: String
-        contact_method: String
-        resolution_notes: String
-    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@update")
-
-    deleteTicket(
-        id: ID! @rules(apply: ["required", "exists:tickets,id"])
-    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@delete")
-
-    assignUsersToTicket(
-        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        user_ids: [ID!]! @rules(apply: ["required"])
-    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignUsers")
-
-    removeUserFromTicket(
-        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        user_id: ID! @rules(apply: ["required", "exists:users,id"])
-    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@removeUser")
-
-    assignCustomerToTicket(
-        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
-    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignCustomer")
-
-    assignServiceToTicket(
-        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        service_id: ID @rules(apply: ["nullable", "exists:services,id"])
-    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@assignService")
-
-    # Ticket Comments
-    addTicketComment(
-        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        comment: String! @rules(apply: ["required"])
-        is_internal: Boolean
-    ): TicketComment @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@add")
-
-    updateTicketComment(
-        id: ID! @rules(apply: ["required", "exists:ticket_comments,id"])
-        comment: String! @rules(apply: ["required"])
-    ): TicketComment @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@update")
-
-    deleteTicketComment(
-        id: ID! @rules(apply: ["required", "exists:ticket_comments,id"])
-    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketCommentMutation@delete")
-
-    # Ticket Attachments
-    addTicketAttachment(
-        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        file_name: String! @rules(apply: ["required", "max:255"])
-        file_path: String! @rules(apply: ["required", "max:500"])
-        file_type: String
-        file_size: Int
-    ): TicketAttachment @field(resolver: "App\\GraphQL\\Mutations\\TicketAttachmentMutation@add")
-
-    deleteTicketAttachment(
-        id: ID! @rules(apply: ["required", "exists:ticket_attachments,id"])
-    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketAttachmentMutation@delete")
-
-    # Ticket Labels
-    addTicketLabel(
-        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        name: String! @rules(apply: ["required", "max:50"])
-        color: String @rules(apply: ["max:7"])
-    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketLabelMutation@add")
-
-    removeTicketLabel(
-        ticket_id: ID! @rules(apply: ["required", "exists:tickets,id"])
-        name: String! @rules(apply: ["required"])
-    ): Ticket @field(resolver: "App\\GraphQL\\Mutations\\TicketLabelMutation@remove")
 
     # User Mutations
     createUser(
@@ -560,12 +588,16 @@ type Customer {
     document_type: String!
     customer_status: String
     router_id: Int
+    "Modo de facturación: null|'total' = una factura total por cliente (default); 'per_service' = una factura por servicio"
+    billing_mode: String
     created_at: DateTime!
     updated_at: DateTime!
 
     addresses: [Address!]! @hasMany
+    global_addresses: [Address!]! @method(name: "getGlobalAddressesAttribute")
     services: [Service!]! @hasMany
-    invoices: [Invoice!]! @hasMany
+    iptvLineUsers: [IptvLineUser!]! @hasMany
+    invoices: [Invoice!]! @hasMany @orderBy(column: "increment_id", direction: DESC)
     router: Router @belongsTo
 }
 
@@ -618,11 +650,13 @@ type Service {
     updated_at: DateTime!
 
     customer: Customer! @belongsTo
-    invoices: [Invoice!]! @hasMany
+    invoices: [Invoice!]! @hasMany @orderBy(column: "increment_id", direction: DESC)
     plan: Plan! @belongsTo
     router: Router! @belongsTo
     address: Address @belongsTo(relation: "address")
     napPort: NapPort @hasOne(relation: "napPort")
+    additionalPlans: [AdditionalPlan!]! @belongsToMany(relation: "additionalPlans")
+    iptvLineUser: IptvLineUser @hasOne(relation: "iptvLineUser")
 
     # Relaciones de facturación
     "Reglas de descuento/beneficio aplicables al servicio"
@@ -646,14 +680,21 @@ type Invoice {
     status: String!
     issue_date: Date
     due_date: Date
+    payment_date: DateTime
+    payment_registered_by: ID
+    payment_method: String
     router_id: Int
     notes: String
+    additional_information: JSON
+    onepay_charge_id: String
+    onepay_payment_link: String
     created_at: DateTime!
     updated_at: DateTime!
 
     customer: Customer! @belongsTo
     service: Service @belongsTo
     items: [InvoiceItem!]! @hasMany
+    paymentRegisteredByUser: User @belongsTo
     adjustments: [InvoiceAdjustment!]! @hasMany
     creditNotes: [CreditNote!]! @hasMany
     paymentPromises: [PaymentPromise!]! @hasMany
@@ -662,6 +703,7 @@ type Invoice {
 
     totalPaid: Float! @method(name: "getTotalPaidAttribute")
     realOutstandingBalance: Float! @method(name: "getRealOutstandingBalanceAttribute")
+    collection_amount: Float @method(name: "getCollectionAmountAttribute")
     isFullyPaid: Boolean! @method(name: "isFullyPaid")
 }
 
@@ -700,6 +742,23 @@ type Plan {
     updated_at: DateTime!
 
     services: [Service!]! @hasMany
+}
+
+type Cotizacion {
+    id: ID!
+    nombre: String!
+    apellido: String!
+    email: String!
+    telefono: String!
+    direccion: String
+    ciudad: String
+    plan: String
+    canal: String
+    estado: String!
+    notas: String
+    metadata: JSON
+    created_at: DateTime!
+    updated_at: DateTime!
 }
 
 type InvoiceItem {
@@ -750,13 +809,26 @@ type PaymentPromise {
 
     invoice: Invoice! @belongsTo
     customer: Customer! @belongsTo
+    user: User @belongsTo
+}
+
+type AdditionalPlan {
+    id: ID!
+    name: String!
+    monthly_price: Float!
+    status: String!
+    description: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    services: [Service!]! @belongsToMany
 }
 
 type Router {
     id: ID!
+    code: String!
     name: String!
-    ip_address: String!
-    description: String
+    status: String!
     created_at: DateTime!
     updated_at: DateTime!
 
@@ -782,65 +854,6 @@ type PaymentPromiseResult {
     payment_promise: PaymentPromise
 }
 
-# --------------- Ticket types ---------------
-
-type Ticket {
-    id: ID!
-    customer_id: ID
-    service_id: ID
-    issue_type: String!
-    priority: String!
-    status: String!
-    title: String!
-    description: String!
-    resolution_notes: String
-    contact_method: String
-    closed_at: DateTime
-    labels: [TicketLabel!]
-    created_at: DateTime!
-    updated_at: DateTime!
-
-    customer: Customer @belongsTo
-    service: Service @belongsTo
-    users: [User!]! @belongsToMany
-    comments: [TicketComment!]! @hasMany
-    attachments: [TicketAttachment!]! @hasMany
-}
-
-type TicketLabel {
-    name: String!
-    color: String!
-}
-
-type TicketComment {
-    id: ID!
-    ticket_id: ID!
-    user_id: ID!
-    comment: String!
-    is_internal: Boolean!
-    created_at: DateTime!
-    updated_at: DateTime!
-
-    ticket: Ticket! @belongsTo
-    user: User! @belongsTo
-}
-
-type TicketAttachment {
-    id: ID!
-    ticket_id: ID!
-    user_id: ID!
-    file_name: String!
-    file_path: String!
-    image_url: String
-    file_type: String
-    file_size: Int
-    created_at: DateTime!
-    updated_at: DateTime!
-
-    ticket: Ticket! @belongsTo
-    user: User! @belongsTo
-}
-
 type User {
     id: ID!
     name: String!
@@ -854,6 +867,7 @@ type User {
     tickets: [Ticket!]! @belongsToMany
     roles: [Role!]! @belongsToMany(relation: "roles")
     permissions: [Permission!]! @belongsToMany(relation: "permissions")
+    frontendPermissions: [FrontendPermission!]! @belongsToMany(relation: "frontendPermissions")
     allPermissions: [Permission!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@allPermissions")
     registeredPayments: [InvoicePayment!]! @hasMany(relation: "invoicePayments")
 }
@@ -866,6 +880,7 @@ type Role {
     updated_at: DateTime!
 
     permissions: [Permission!]! @belongsToMany(relation: "permissions")
+    frontendPermissions: [FrontendPermission!]! @belongsToMany(relation: "frontendPermissions")
     users: [User!]! @belongsToMany(relation: "users")
 }
 
@@ -1120,3 +1135,6 @@ extend type Mutation {
 #import mikrotik.graphql
 #import inventory.graphql
 #import cash-registers.graphql
+#import onepay.graphql
+#import tickets.graphql
+#import iptv.graphql

@@ -15,6 +15,8 @@ use App\Nova\Customers;
 use App\Nova\Filters\Invoice\InvoiceStatusFilter;
 use App\Nova\Filters\Invoice\InvoiceDateRangeFilter;
 use App\Nova\Filters\Invoice\InvoiceDateToFilter;
+use App\Nova\Filters\Invoice\InvoicePaymentDateFromFilter;
+use App\Nova\Filters\Invoice\InvoicePaymentDateToFilter;
 use App\Nova\Filters\RouterFilter;
 use App\Nova\Metrics\Invoice\InvoicesStatus;
 use App\Nova\Metrics\Invoice\OutstandingBalance;
@@ -121,6 +123,8 @@ class Invoice extends Resource
             // 📆 Fechas y estado
             Date::make(__('invoice.issue_date'), 'issue_date'),
             Date::make(__('invoice.due_date'), 'due_date'),
+            Date::make(__('Fecha de Pago'), 'payment_date')->readonly()->hideFromIndex(),
+            Text::make(__('Registrado por'), 'payment_registered_by')->readonly()->hideFromIndex(),
 
             Select::make(__('attribute.status'), 'status')->options([
                 'paid' => __('attribute.paid'),
@@ -211,6 +215,8 @@ class Invoice extends Resource
             new InvoiceStatusFilter(),
             new InvoiceDateRangeFilter(),
             new InvoiceDateToFilter(),
+            new InvoicePaymentDateFromFilter(),
+            new InvoicePaymentDateToFilter(),
             new RouterFilter(),
         ];
     }

@@ -20,7 +20,7 @@ class PaymentPromiseRequest extends FormRequest
             'amount' => 'numeric',
             'promise_date' => 'date',
             'notes' => 'string',
-            'status' => 'in:pending,fulfilled,cancelled',
+            'status' => 'in:pending,fulfilled,expired,cancelled',
         ];
     }
 }

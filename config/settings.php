@@ -250,7 +250,26 @@ return [
                 "field" => "text-field",
                 "label" => "Representative Role",
                 "placeholder" => "Enter the Representative's Role",
-
+            ],
+            "email_template_send" => [
+                "field" => "select-field",
+                "label" => "Email Template to Send Contract Link",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_signed" => [
+                "field" => "select-field",
+                "label" => "Email Template to Notify Signed Contract",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_approved" => [
+                "field" => "select-field",
+                "label" => "Email Template to Notify Approved Contract",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_rejected" => [
+                "field" => "select-field",
+                "label" => "Email Template to Notify Rejected Contract",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ]
         ],
     ],
@@ -568,8 +587,8 @@ return [
             "label" => "Smart Olt",
             "class" => "form-control",
         ],
-        "general" => SettingSmartolt::getGeneralSettings(),
-
+        "general"    => SettingSmartolt::getGeneralSettings(),
+        "activation" => SettingSmartolt::getActivationSettings(),
     ],
 
     "siigo" => [
@@ -578,6 +597,15 @@ return [
             "class" => "form-control",
         ],
         "general" => SettingSiigo::getGeneralSettings(),
+    ],
+
+    "iptv" => [
+        "setting" => [
+            "label" => "IPTV XUI.one",
+            "class" => "form-control",
+        ],
+        "general"    => \App\Settings\Iptv\SettingIptv::getGeneralSettings(),
+        "activation" => \App\Settings\Iptv\SettingIptv::getActivationSettings(),
     ],
 
     // OnePay integration settings
@@ -616,6 +644,58 @@ return [
                 "options" => \App\Settings\Config\Sources\DaysOfMonth::class
             ],
         ],
-    ]
-
+    ],
+    "finance" => [
+        "setting" => [
+            "label" => "Finanzas",
+            "class" => "form-control",
+        ],
+        "cash_register" => [
+            "setting" => [
+                "label" => "Cierre Automático de Caja",
+                "code" => "cash_register"
+            ],
+            "auto_close_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Habilitar Cierre Automático",
+            ],
+            "auto_close_time" => [
+                "field" => "time-field",
+                "label" => "Hora de Cierre",
+                "placeholder" => "23:59",
+            ],
+        ],
+    ],
+    "tables" => [
+        "setting" => [
+            "label" => "Configuración de Tablas",
+            "class" => "form-control",
+        ],
+        "columns" => [
+            "setting" => [
+                "label" => "Visibilidad de Columnas",
+                "code" => "columns"
+            ],
+            "clients" => [
+                "field" => "text-field",
+                "label" => "Columnas Clientes",
+                "default" => "id,name,document,services,service_states,billing_status,status,created_at,actions",
+            ],
+            "services" => [
+                "field" => "text-field",
+                "label" => "Columnas Servicios",
+                "default" => "id,name,status,created_at,actions",
+            ],
+            "invoices" => [
+                "field" => "text-field",
+                "label" => "Columnas Facturas",
+                "default" => "id,increment_id,customer,total,outstanding_balance,status,created_at,due_date,actions",
+            ],
+            "cotizaciones" => [
+                "field" => "text-field",
+                "label" => "Columnas Cotizaciones",
+                "default" => "id,name,email,phone,plan,status,created_at,actions",
+            ],
+        ],
+    ],
 ];

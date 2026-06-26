@@ -130,6 +130,23 @@ extend type Invoice {
     invoice_type: InvoiceType!
 }
 
+type CashierDailyReport {
+    date_from: Date
+    date_to: Date
+    initial_balance: Float!
+    total_cash: Float!
+    total_transfer: Float!
+    total_collected: Float!
+    total_invoices: Int!
+    total_expenses: Float!
+    total_cash_expenses: Float!
+    total_transfer_expenses: Float!
+    total_transfers_out: Float!
+    total_transfers_in: Float!
+    total_abonos: Float!
+    total_neto: Float!
+}
+
 extend type Mutation {
     "Crear una factura manual para conceptos diferentes a servicios mensuales"
     createManualInvoice(
@@ -151,6 +168,13 @@ extend type Mutation {
     ): ManualInvoiceResult
         @field(resolver: "App\\GraphQL\\Mutations\\ManualInvoiceMutation@delete")
         @guard
+
+    "Cancelar una factura de cualquier tipo (solo si no ha sido pagada)"
+    cancelInvoice(
+        invoice_id: ID! @rules(apply: ["required", "exists:invoices,id"])
+    ): ManualInvoiceResult
+        @field(resolver: "App\\GraphQL\\Mutations\\CancelInvoiceMutation@resolve")
+        @guard
 }
 
 extend type Query {
@@ -166,4 +190,19 @@ extend type Query {
         @paginate(defaultCount: 10, model: "App\\Models\\Invoice\\Invoice")
         @where(column: "invoice_type", operator: "IN", value: ["manual", "adjustment"])
         @guard
+
+    myCollectedInvoices(
+        date: Date
+        date_from: Date
+        date_to: Date
+        payment_method: String
+        cash_register_id: ID
+    ): [Invoice!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CashierInvoicesQuery@myInvoices")
+
+    myDailyCollectionReport(
+        date: Date
+        date_from: Date
+        date_to: Date
+        cash_register_id: ID
+    ): CashierDailyReport! @field(resolver: "App\\GraphQL\\Queries\\CashierInvoicesQuery@dailyReport")
 }

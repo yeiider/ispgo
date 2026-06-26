@@ -6,6 +6,7 @@ use App\Models\Services\Service;
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\ProcessOnuAuthorization;
+use App\Jobs\CompleteOnuActivationJob;
 
 class SmartOltMutation
 {
@@ -64,37 +65,23 @@ class SmartOltMutation
             $data = $response->json();
 
             if ($data['status'] === true) {
-                // Guardar el SN en el servicio
                 try {
                     $service->sn = $args['sn'];
+                    $service->service_status = 'active';
                     $service->save();
-                    $this->apiManager->setOnuManagementIpDhcpByExternalId($args['sn'], $args['vlan']);
 
-                    // Habilitar TR069 si se proporciona el perfil
+                    // Pasos 2-4: mgmt IP DHCP → TR069 → WAN mode DHCP (30 segundos de espera)
+                    CompleteOnuActivationJob::dispatch($args['sn'], $args['vlan_mgmt'])
+                        ->delay(now()->addSeconds(30))
+                        ->onQueue('redis');
 
-                    try {
-                        $tr069Response = $this->apiManager->enableTr069($args['sn'], "SmartOLT");
-                        $tr069Data = $tr069Response->json();
-
-                        if ($tr069Data['status'] !== true) {
-                            Log::warning('Failed to enable TR069 for ONU', [
-                                'sn' => $args['sn'],
-                                'error' => $tr069Data['error'] ?? 'Unknown error'
-                            ]);
-                        }
-                    } catch (\Exception $e) {
-                        Log::error('Error enabling TR069 for ONU', [
-                            'sn' => $args['sn'],
-                            'error' => $e->getMessage()
-                        ]);
-                    }
-
-                    // Dispatch job to finalize configuration after 3 minutes
+                    // Provisionamiento en Mikrotik (4 minutos, después de la activación)
                     ProcessOnuAuthorization::dispatch($service->id, $args['sn'], $args['vlan'], $args['olt_id'])
-                        ->delay(now()->addMinutes(3))->onQueue('redis');
+                        ->delay(now()->addMinutes(4))
+                        ->onQueue('redis');
 
                 } catch (\Exception $e) {
-                    Log::error('Failed to set ONU management IP DHCP or dispatch job', ['exception' => $e]);
+                    Log::error('Error dispatching ONU activation jobs', ['exception' => $e]);
                 }
                 return [
                     'success' => true,
@@ -238,6 +225,56 @@ class SmartOltMutation
             return [
                 'success' => true,
                 'message' => 'Equipment removed successfully from service and SmartOLT'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function enableCatv($root, array $args)
+    {
+        try {
+            $response = $this->apiManager->enableOnuCatvByExternalId($args['external_id']);
+            $data = $response->json();
+
+            if ($data['status'] === true) {
+                return [
+                    'success' => true,
+                    'message' => 'CATV enabled successfully'
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => $data['error'] ?? 'Failed to enable CATV'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function disableCatv($root, array $args)
+    {
+        try {
+            $response = $this->apiManager->disableOnuCatvByExternalId($args['external_id']);
+            $data = $response->json();
+
+            if ($data['status'] === true) {
+                return [
+                    'success' => true,
+                    'message' => 'CATV disabled successfully'
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => $data['error'] ?? 'Failed to disable CATV'
             ];
         } catch (\Exception $e) {
             return [

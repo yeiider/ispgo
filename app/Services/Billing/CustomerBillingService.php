@@ -12,11 +12,20 @@ use Exception;
 
 class CustomerBillingService
 {
-    public function generateForPeriod(Customer $customer, Carbon $period): ?Invoice
+    public function generateForPeriod(Customer $customer, Carbon $period, ?int $serviceId = null): ?Invoice
     {
         try {
             // 1. Validar que tenga al menos un servicio facturable
-            $services = $customer->activeServices()->get();
+            $servicesQuery = $customer->activeServices();
+
+            // Si se especifica un servicio en particular, filtrar solo ese
+            // y asegurar explícitamente que pertenece al cliente (doble verificación)
+            if ($serviceId) {
+                $servicesQuery->where('customer_id', $customer->id)
+                    ->where('id', $serviceId);
+            }
+
+            $services = $servicesQuery->get();
 
             if ($services->isEmpty()) {
                 return null;
@@ -84,6 +93,17 @@ class CustomerBillingService
                 $hasServiceItems = false;
 
                 foreach ($services as $service) {
+                    // SEGURIDAD: Siempre verificar que el servicio pertenezca al cliente
+                    // Esto evita que se facturen accidentalmente servicios de terceros
+                    if ((int) $service->customer_id !== (int) $customer->id) {
+                        Log::error("Servicio {$service->id} no pertenece al cliente {$customer->id}. Omitiendo de la facturación.", [
+                            'service_id' => $service->id,
+                            'customer_id' => $customer->id,
+                            'service_customer_id' => $service->customer_id
+                        ]);
+                        continue;
+                    }
+
                     // Verificar si debemos omitir el item del servicio
                     $shouldSkipService = false;
 
@@ -102,14 +122,15 @@ class CustomerBillingService
 
                     // Si no debemos omitir el servicio, crear el item
                     if (!$shouldSkipService) {
-                        $servicePrice = $service->plan->monthly_price;
+                        $planPrice = $service->plan->monthly_price;
+                        $servicePrice = $planPrice;
 
                         // Si el arrendamiento está activo y el cliente está al día, descontar el arrendo del servicio
                         if ($enableRouterRental && $routerRentalAmount > 0 && $isCustomerUpToDate) {
                             $servicePrice = max(0, $servicePrice - $routerRentalAmount);
                         }
 
-                        // Solo crear el item si el precio es mayor a 0
+                        // 1. Crear el ítem del plan base
                         if ($servicePrice > 0) {
                             $item = $invoice->items()->create([
                                 'description' => "Suscripción {$service->plan->name}",
@@ -134,6 +155,35 @@ class CustomerBillingService
                                 'created_by' => auth()->id(),
                             ]);
 
+                            $hasServiceItems = true;
+                        }
+
+                        // 2. Crear ítems para cada plan adicional ACTIVO
+                        $activeAdditionals = $service->additionalPlans()->where('status', 'active')->get();
+                        foreach ($activeAdditionals as $ap) {
+                            $apItem = $invoice->items()->create([
+                                'description' => $ap->name,
+                                'invoice_id' => $invoice->id,
+                                'unit_price' => $ap->monthly_price,
+                                'service_id' => $service->id,
+                                'quantity' => 1,
+                                'subtotal' => $ap->monthly_price,
+                            ]);
+
+                            $invoice->adjustments()->create([
+                                'kind' => 'charge',
+                                'amount' => $apItem->subtotal,
+                                'source_type' => get_class($ap),
+                                'source_id' => $ap->id,
+                                'label' => "Ajuste: {$ap->name}",
+                                'metadata' => [
+                                    'service_id' => $service->id,
+                                    'additional_plan_id' => $ap->id,
+                                    'invoice_item_id' => $apItem->id,
+                                ],
+                                'created_by' => auth()->id(),
+                            ]);
+                            
                             $hasServiceItems = true;
                         }
                     }
@@ -169,6 +219,25 @@ class CustomerBillingService
             });
 
             event(new \App\Events\InvoiceItemsCreated($invoice));
+
+            // Si se facturó un servicio específico, asociarlo a la cabecera de la factura
+            // Verificando una vez más la pertenencia al cliente
+            if ($serviceId && $services->isNotEmpty()) {
+                $specificService = $services->first();
+
+                if ($specificService && (int) $specificService->customer_id === (int) $customer->id) {
+                    $update = [];
+                    if (empty($invoice->service_id)) {
+                        $update['service_id'] = $specificService->id;
+                    }
+                    if ($specificService->router_id && empty($invoice->router_id)) {
+                        $update['router_id'] = $specificService->router_id;
+                    }
+                    if (!empty($update)) {
+                        $invoice->update($update);
+                    }
+                }
+            }
 
             return $invoice;
 

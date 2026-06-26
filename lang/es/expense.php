@@ -7,5 +7,8 @@ return [
     'date' => 'Fecha',
     'payment_method' => 'Método de Pago',
     'category' => 'Categoría',
+    'expense_category' => 'Categoría de Gasto',
+    'expense_categories' => 'Categorías de Gastos',
+    'expenses' => 'Gastos',
     'supplier' => 'Proveedor',
 ];

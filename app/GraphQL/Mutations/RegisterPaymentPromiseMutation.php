@@ -24,10 +24,10 @@ class RegisterPaymentPromiseMutation
                 ];
             }
 
-            if ($invoice->paymentPromises->count()) {
+            if ($invoice->paymentPromises()->where('status', 'pending')->exists()) {
                 return [
                     'success' => false,
-                    'message' => __('There is already a promise to pay for this invoice :id', ['id' => $invoice->id]),
+                    'message' => __('There is already a pending promise to pay for this invoice :id', ['id' => $invoice->id]),
                     'payment_promise' => null,
                 ];
             }

@@ -305,16 +305,13 @@ class FileUploadMutation
         ]);
     }
 
-    /**
-     * Valida si un path temporal existe y es válido.
-     */
     public static function validateTempPath(string $tempPath): bool
     {
         if (!str_starts_with($tempPath, self::TEMP_FOLDER . '/')) {
             return false;
         }
 
-        $disk = config('filesystems.default', 's3');
+        $disk = 's3';
         return Storage::disk($disk)->exists($tempPath);
     }
 

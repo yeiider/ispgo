@@ -76,6 +76,20 @@ class InvoicePaymentService
             if ($invoice->isFullyPaid()) {
                 $invoice->status = 'paid';
                 $invoice->outstanding_balance = 0;
+                $invoice->payment_date = now();
+                $invoice->payment_registered_by = \Illuminate\Support\Facades\Auth::id();
+                if (!empty($data['daily_box_id'])) {
+                    $invoice->daily_box_id = $data['daily_box_id'];
+                }
+
+                // Registrar fecha de pago en additional_information
+                $now = now();
+                $existing = is_array($invoice->additional_information) ? $invoice->additional_information : [];
+                $invoice->additional_information = array_merge($existing, [
+                    'id'           => $invoice->increment_id . '-' . $now->timestamp,
+                    'created_at'   => $now->toIso8601String(),
+                    'finalized_at' => $now->toIso8601String(),
+                ]);
             }
             
             $invoice->save();
@@ -109,8 +123,12 @@ class InvoicePaymentService
             
             if ($invoice->isFullyPaid()) {
                 $invoice->status = 'paid';
+                $invoice->payment_date = now();
+                $invoice->payment_registered_by = \Illuminate\Support\Facades\Auth::id();
             } else {
                 $invoice->status = 'unpaid';
+                $invoice->payment_date = null;
+                $invoice->payment_registered_by = null;
             }
             
             $invoice->save();
@@ -145,8 +163,12 @@ class InvoicePaymentService
             
             if ($invoice->isFullyPaid()) {
                 $invoice->status = 'paid';
+                $invoice->payment_date = now();
+                $invoice->payment_registered_by = \Illuminate\Support\Facades\Auth::id();
             } else {
                 $invoice->status = 'unpaid';
+                $invoice->payment_date = null;
+                $invoice->payment_registered_by = null;
             }
             
             $invoice->save();

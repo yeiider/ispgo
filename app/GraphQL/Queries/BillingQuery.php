@@ -20,7 +20,7 @@ class BillingQuery
      */
     public function serviceRules($root, array $args): array
     {
-        $query = ServiceRule::query()->with(['service']);
+        $query = ServiceRule::query()->with(['service', 'service.plan', 'service.customer']);
 
         if (!empty($args['service_id'])) {
             $query->where('service_id', $args['service_id']);
@@ -63,7 +63,7 @@ class BillingQuery
      */
     public function serviceRule($root, array $args): ?ServiceRule
     {
-        return ServiceRule::with(['service'])->find($args['id']);
+        return ServiceRule::with(['service', 'service.plan', 'service.customer'])->find($args['id']);
     }
 
     /**
@@ -77,7 +77,7 @@ class BillingQuery
     {
         return ServiceRule::where('service_id', $args['service_id'])
             ->active()
-            ->with(['service'])
+            ->with(['service', 'service.plan', 'service.customer'])
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -113,6 +113,22 @@ class BillingQuery
 
         if (!empty($args['effective_period'])) {
             $query->whereDate('effective_period', $args['effective_period']);
+        }
+
+        if (!empty($args['search'])) {
+            $search = $args['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                    ->orWhere('id', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($q) use ($search) {
+                        $q->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('identity_document', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('service', function ($q) use ($search) {
+                        $q->where('service_ip', 'like', "%{$search}%");
+                    });
+            });
         }
 
         $first = $args['first'] ?? 15;

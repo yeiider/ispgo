@@ -27,7 +27,7 @@ use Symfony\Component\HttpFoundation\Response;
  *     @OA\Property(property="amount", type="number", format="float", description="Promised payment amount", example=500.00),
  *     @OA\Property(property="promise_date", type="string", format="date", description="Date by which payment is promised", example="2023-11-01"),
  *     @OA\Property(property="notes", type="string", description="Optional notes related to the promise", example="Partial payment for outstanding invoice"),
- *     @OA\Property(property="status", type="string", enum={"pending", "fulfilled", "cancelled"}, description="Status of the payment promise", example="pending")
+ *     @OA\Property(property="status", type="string", enum={"pending", "fulfilled", "expired", "cancelled"}, description="Status of the payment promise", example="pending")
  * )
  *
  * @OA\Schema(

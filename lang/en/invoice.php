@@ -16,6 +16,8 @@ return [
     'issue_date' => 'Issue Date',
     'issue_date_from' => 'Issue Date From',
     'issue_date_to' => 'Issue Date To',
+    'payment_date_from' => 'Payment Date From',
+    'payment_date_to' => 'Payment Date To',
     'due_date' => 'Due Date',
     'cancel_invoice' => 'Cancel invoice',
     'payment_method' => 'Payment Method',

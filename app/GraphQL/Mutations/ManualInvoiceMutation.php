@@ -79,7 +79,13 @@ class ManualInvoiceMutation
 
             // Calcular billing_period en formato YYYY-MM
             $issueDate = \Carbon\Carbon::parse($args['issue_date']);
+            $dueDate = \Carbon\Carbon::parse($args['due_date']);
             $billingPeriod = $issueDate->format('Y-m');
+
+            // Validar que due_date >= issue_date
+            if ($dueDate->lt($issueDate)) {
+                throw new \Exception('La fecha de vencimiento no puede ser anterior a la fecha de emisión.');
+            }
 
             // Crear la factura
             $invoice = Invoice::create([

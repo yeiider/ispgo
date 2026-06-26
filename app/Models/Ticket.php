@@ -274,6 +274,17 @@ class Ticket extends Model
             : collect();
     }
 
+    /**
+     * Scope: tickets creados en los últimos 30 días.
+     *
+     * Uso:
+     *   Ticket::recent()->get();
+     */
+    public function scopeRecent(Builder $query): Builder
+    {
+        return $query->where('created_at', '>=', now()->subDays(30));
+    }
+
     protected static function boot()
     {
         parent::boot();
