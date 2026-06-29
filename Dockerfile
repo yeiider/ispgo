@@ -22,6 +22,9 @@ RUN chmod +x /usr/local/bin/install-php-extensions && \
     sockets \
     redis
 
+# Habilitar y configurar OPcache (esencial para rendimiento en producción)
+RUN docker-php-ext-enable opcache
+
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -33,6 +36,7 @@ COPY . .
 # Configuración de red (Railway)
 COPY docker/railway/nginx.conf /etc/nginx/http.d/default.conf
 COPY php-fpm.conf /usr/local/etc/php-fpm.conf
+COPY docker/railway/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY docker/railway/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh run-start.sh run-worker.sh run-cron.sh
 

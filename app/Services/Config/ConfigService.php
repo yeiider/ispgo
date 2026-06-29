@@ -119,8 +119,10 @@ class ConfigService
                 $value = (int)$value;
                 break;
             case 'select':
-                $allowed = collect($meta['options'] ?? [])->pluck('value')->all();
-                if (!in_array($value, $allowed, true)) {
+                $allowed = collect($meta['options'] ?? [])->pluck('value')->map(function ($val) {
+                    return (string)$val;
+                })->all();
+                if (!in_array((string)$value, $allowed, true)) {
                     throw new \InvalidArgumentException('Invalid option for select');
                 }
                 $value = (string)$value;

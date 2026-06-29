@@ -330,7 +330,7 @@ class ApiManager
     public function rebootOnuByExternalId(string $externalId): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/reboot', ['external_id' => $externalId]);
+        return $this->request('api/onu/reboot/' . $externalId);
     }
 
     /**
@@ -343,7 +343,7 @@ class ApiManager
     public function restoreOnuFactoryDefaultsByExternalId(string $externalId): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/restore_onu_factory_defaults_by_onu_external_id', ['external_id' => $externalId]);
+        return $this->request('api/onu/restore_factory_defaults/' . $externalId);
     }
 
     /**
@@ -357,8 +357,7 @@ class ApiManager
     public function updateOnuSpeedProfileByExternalId(string $externalId, int $speedProfileId): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/update_onu_speed_profiles_by_onu_external_id', [
-            'external_id' => $externalId,
+        return $this->request('api/onu/update_onu_speed_profiles/' . $externalId, [
             'speed_profile_id' => $speedProfileId
         ]);
     }
@@ -649,7 +648,7 @@ class ApiManager
     public function rebootOnuBySn(string $sn): Response
     {
         $this->validateSerialNumber($sn);
-        return $this->request('api/onu/reboot', ['sn' => $sn]);
+        return $this->request('api/onu/reboot/' . $sn);
     }
 
     /**

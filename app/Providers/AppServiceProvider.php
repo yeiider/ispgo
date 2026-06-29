@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 use Laravel\Passport\Passport;
+use App\Events\ServiceUpdateStatus;
+use App\Listeners\ServiceIptvManagerListener;
 
 class AppServiceProvider extends ServiceProvider
 
@@ -95,6 +97,12 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             InvoiceItemsCreated::class,
             [ApplyTaxByFiscalRegime::class, 'handle']
+        );
+
+        // IPTV XUI.one status sync
+        Event::listen(
+            ServiceUpdateStatus::class,
+            [ServiceIptvManagerListener::class, 'handle']
         );
     }
 }

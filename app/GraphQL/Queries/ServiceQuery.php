@@ -13,7 +13,7 @@ class ServiceQuery
      */
     public function __invoke($_, array $args): Builder
     {
-        $query = Service::query();
+        $query = Service::query()->with(['customer', 'customer.addresses', 'plan', 'router', 'additionalPlans']);
 
         // Generic search: SN or customer name (first_name + last_name)
         if (!empty($args['search'])) {
@@ -48,6 +48,16 @@ class ServiceQuery
 
         if (!empty($args['sn'])) {
             $query->where('sn', 'like', '%' . $args['sn'] . '%');
+        }
+
+        if (!empty($args['plan_id']) && $args['plan_id'] !== 'all') {
+            $query->where('plan_id', $args['plan_id']);
+        }
+
+        if (!empty($args['additional_plans'])) {
+            $query->whereHas('additionalPlans', function (Builder $q) use ($args) {
+                $q->whereIn('additional_plans.id', $args['additional_plans']);
+            });
         }
 
         // Apply sorting
