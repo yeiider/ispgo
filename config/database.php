@@ -59,6 +59,7 @@ return [
             ]) : [],
             'dump' => [
                 'skip_ssl' => true,
+                'ssl_flag' => 'skip-ssl',
             ],
         ],
 
@@ -82,6 +83,7 @@ return [
             ]) : [],
             'dump' => [
                 'skip_ssl' => true,
+                'ssl_flag' => 'skip-ssl',
             ],
         ],
 
