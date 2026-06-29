@@ -12,9 +12,6 @@ if [ -n "$PORT" ]; then
     echo "Optimizando Laravel (Modo Seguro)..."
     # Añadimos || true para ignorar errores fatales y que el contenedor siga vivo
     php artisan optimize:clear || true
-    php artisan config:cache || true
-    php artisan route:cache || true
-    php artisan view:cache || true
     php artisan storage:link || true
 
     if [ "$RUN_MIGRATIONS" = "true" ]; then
