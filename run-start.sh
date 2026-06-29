@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+echo "=== Arreglando permisos de storage... ==="
+chmod -R 775 /app/storage /app/bootstrap/cache
+
 echo "=== Limpiando cache y optimizando... ==="
 php artisan optimize:clear
 php artisan storage:link 2>/dev/null || true
