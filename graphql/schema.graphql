@@ -841,6 +841,7 @@ type GenerateInvoiceResult {
     success: Boolean!
     message: String
     invoice: Invoice
+    invoices: [Invoice!]
 }
 
 type ActionResult {
