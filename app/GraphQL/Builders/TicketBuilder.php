@@ -59,6 +59,14 @@ class TicketBuilder
             $query->where('service_id', $args['service_id']);
         }
 
+        if (isset($args['created_at_from']) && !empty($args['created_at_from'])) {
+            $query->whereDate('created_at', '>=', $args['created_at_from']);
+        }
+
+        if (isset($args['created_at_to']) && !empty($args['created_at_to'])) {
+            $query->whereDate('created_at', '<=', $args['created_at_to']);
+        }
+
         return $query;
     }
 }
