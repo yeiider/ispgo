@@ -373,6 +373,8 @@ class Invoice extends Model
                 ]);
             }
         }
+
+        event(new \App\Events\InvoiceCanceled($this));
     }
 
     public function applyDiscountWithoutTax(float $discount)
@@ -448,7 +450,7 @@ class Invoice extends Model
         });
         static::created(function ($model) {
             $model->load('customer');
-            // event(new InvoiceCreated($model));
+            event(new \App\Events\InvoiceCreated($model));
         });
         static::updating(function ($model) {
             $model->updated_by = Auth::id();

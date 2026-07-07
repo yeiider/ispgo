@@ -19,8 +19,6 @@ class CreateSiigoCustomer implements ShouldQueue
     public function handle(SiigoClient $siigo): void
     {
         $payload = SiigoHelper::buildPayload($this->customer);
-        dd($payload);
-        $response = $siigo->createCustomer($payload);
-        $response->getStatusCode();
+        $siigo->createCustomer($payload);
     }
 }

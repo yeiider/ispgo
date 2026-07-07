@@ -53,4 +53,19 @@ class SiigoClient
     {
         return $this->req('POST', "/v1/invoices/{$id}/stamp");
     }
+
+    public function createVoucher(array $payload): ResponseInterface
+    {
+        return $this->req('POST', '/v1/vouchers', ['json' => $payload]);
+    }
+
+    public function createCreditNote(array $payload): ResponseInterface
+    {
+        return $this->req('POST', '/v1/credit-notes', ['json' => $payload]);
+    }
+
+    public function stampCreditNote(string $id): ResponseInterface
+    {
+        return $this->req('POST', "/v1/credit-notes/{$id}/stamp");
+    }
 }

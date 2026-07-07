@@ -28,7 +28,8 @@ class onCreatedCustomerSiigo extends Action
                     return Action::danger(__(":customer no tiene habilitado el pago por impuestos", ["customer" => $model->first_name . " " . $model->last_name]));
                 }
                 $payload = SiigoHelper::buildPayload($model);
-                dd($payload);
+                $siigo = app(\Ispgo\Siigo\SiigoClient::class);
+                $siigo->createCustomer($payload);
             } catch (\Exception $e) {
                 return Action::danger('Error: ' . $e->getMessage());
             }

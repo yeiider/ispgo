@@ -11,7 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class CreateSiigoInvoice implements ShouldQueue
+class CancelSiigoInvoice implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -19,42 +19,44 @@ class CreateSiigoInvoice implements ShouldQueue
 
     public function handle(SiigoClient $siigo)
     {
-        // Reload relations if needed
         $this->invoice->load(['customer.taxDetails', 'items']);
 
-        // Prevent double sync
         $info = $this->invoice->additional_information ?? [];
-        if (!empty($info['siigo_invoice_id'])) {
+        if (empty($info['siigo_invoice_id'])) {
+            Log::info('Skipping Siigo Credit Note creation because invoice has not been synced to Siigo.', [
+                'invoice_id' => $this->invoice->id
+            ]);
+            return;
+        }
+
+        // Prevent double sync
+        if (!empty($info['siigo_credit_note_id'])) {
             return;
         }
 
         try {
-            $payload = SiigoHelper::buildInvoicePayload($this->invoice);
-            $response = $siigo->createInvoice($payload);
+            $payload = SiigoHelper::buildCreditNotePayload($this->invoice);
+            $response = $siigo->createCreditNote($payload);
             $body = json_decode((string) $response->getBody(), true);
             
             $id = $body['id'] ?? null;
             if ($id) {
-                // Save Siigo info
-                $info['siigo_invoice_id'] = $id;
-                $info['siigo_prefix'] = $body['prefix'] ?? 'FV';
-                $info['siigo_consecutive'] = $body['number'] ?? null;
-                $info['siigo_date'] = $body['date'] ?? null;
+                $info['siigo_credit_note_id'] = $id;
                 $this->invoice->additional_information = $info;
                 $this->invoice->save();
 
-                // Stamp it
+                // Trigger stamping if required
                 try {
-                    $siigo->stampInvoice($id);
+                    $siigo->stampCreditNote($id);
                 } catch (\Exception $stampEx) {
-                    Log::warning('Siigo Invoice created but stamping failed: ' . $stampEx->getMessage(), [
+                    Log::warning('Siigo Credit Note created but stamping failed: ' . $stampEx->getMessage(), [
                         'invoice_id' => $this->invoice->id,
-                        'siigo_invoice_id' => $id
+                        'siigo_credit_note_id' => $id
                     ]);
                 }
             }
         } catch (\Exception $e) {
-            Log::error('Error creating Siigo Invoice: ' . $e->getMessage(), [
+            Log::error('Error creating Siigo Credit Note: ' . $e->getMessage(), [
                 'invoice_id' => $this->invoice->id
             ]);
             throw $e;

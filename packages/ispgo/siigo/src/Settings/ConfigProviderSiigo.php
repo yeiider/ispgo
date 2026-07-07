@@ -56,6 +56,57 @@ class ConfigProviderSiigo
         return self::getValue('sync_customers_trigger');
     }
 
+    public static function getDocumentId(): ?int
+    {
+        $val = self::getValue('document_id');
+        return $val !== null ? (int)$val : null;
+    }
+
+    public static function getPaymentId(): ?int
+    {
+        $val = self::getValue('payment_id');
+        return $val !== null ? (int)$val : null;
+    }
+
+    public static function getProductCode(): ?string
+    {
+        return self::getValue('product_code');
+    }
+
+    public static function getTaxId(): ?int
+    {
+        $val = self::getValue('tax_id');
+        return $val !== null ? (int)$val : null;
+    }
+
+    public static function getVoucherDocumentId(): ?int
+    {
+        $val = self::getValue('voucher_document_id');
+        return $val !== null ? (int)$val : null;
+    }
+
+    public static function getVoucherAccountDebit(): ?string
+    {
+        return self::getValue('voucher_account_debit');
+    }
+
+    public static function getVoucherAccountCredit(): ?string
+    {
+        return self::getValue('voucher_account_credit');
+    }
+
+    public static function getCreditNoteDocumentId(): ?int
+    {
+        $val = self::getValue('credit_note_document_id');
+        return $val !== null ? (int)$val : null;
+    }
+
+    public static function getSellerId(): ?int
+    {
+        $val = self::getValue('seller_id');
+        return $val !== null ? (int)$val : null;
+    }
+
     private static function getValue($field): ?string
     {
         return ConfigHelper::getConfigValue("siigo/general/$field");

@@ -415,6 +415,7 @@ type Mutation @guard {
         payment_registered_by: ID @rules(apply: ["exists:users,id"])
         transfer_reference: String
         notes: String
+        transaction_date: String
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentMutation@resolve")
 
     applyDiscount(
