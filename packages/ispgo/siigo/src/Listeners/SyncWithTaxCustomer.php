@@ -7,7 +7,7 @@ use Ispgo\Siigo\Settings\ConfigProviderSiigo;
 
 class SyncWithTaxCustomer
 {
-    public function handle(\App\Events\TaxCustomerCreated $event): void
+    public function handle($event): void
     {
         if (!ConfigProviderSiigo::getEnabled())
             return;

@@ -17,8 +17,14 @@ class SyncInvoice
             return;
         }
 
+        $invoice = $event->invoice;
+        $customer = $invoice->customer;
+        if (!$customer || !$customer->taxDetails || !$customer->taxDetails->enable_billing) {
+            return;
+        }
+
         if (ConfigProviderSiigo::getSyncInvoiceTrigger() === 'all') {
-            CreateSiigoInvoice::dispatch($event->invoice)->delay(now()->addSeconds(10))->onQueue('redis');
+            CreateSiigoInvoice::dispatch($invoice)->delay(now()->addSeconds(10))->onQueue('redis');
         }
     }
 
@@ -32,7 +38,13 @@ class SyncInvoice
             return;
         }
 
-        PaySiigoInvoice::dispatch($event->invoice, (float)$event->invoice->total)->delay(now()->addSeconds(5))->onQueue('redis');
+        $invoice = $event->invoice;
+        $customer = $invoice->customer;
+        if (!$customer || !$customer->taxDetails || !$customer->taxDetails->enable_billing) {
+            return;
+        }
+
+        PaySiigoInvoice::dispatch($invoice, (float)$invoice->total)->delay(now()->addSeconds(5))->onQueue('redis');
     }
 
     public function onCanceled(InvoiceCanceled $event): void
@@ -41,6 +53,12 @@ class SyncInvoice
             return;
         }
 
-        CancelSiigoInvoice::dispatch($event->invoice)->delay(now()->addSeconds(5))->onQueue('redis');
+        $invoice = $event->invoice;
+        $customer = $invoice->customer;
+        if (!$customer || !$customer->taxDetails || !$customer->taxDetails->enable_billing) {
+            return;
+        }
+
+        CancelSiigoInvoice::dispatch($invoice)->delay(now()->addSeconds(5))->onQueue('redis');
     }
 }

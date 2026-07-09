@@ -22,6 +22,17 @@ class CreateSiigoInvoice implements ShouldQueue
         // Reload relations if needed
         $this->invoice->load(['customer.taxDetails', 'items']);
 
+        // Check if customer has billing enabled
+        $customer = $this->invoice->customer;
+        if (!$customer) {
+            return;
+        }
+        $taxDetails = $customer->taxDetails;
+        if (!$taxDetails || !$taxDetails->enable_billing) {
+            Log::info("Skipping Siigo Invoice creation because billing (enable_billing) is not enabled for customer #{$customer->id}");
+            return;
+        }
+
         // Prevent double sync
         $info = $this->invoice->additional_information ?? [];
         if (!empty($info['siigo_invoice_id'])) {

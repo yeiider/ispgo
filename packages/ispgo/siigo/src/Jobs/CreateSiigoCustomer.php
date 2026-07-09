@@ -8,6 +8,8 @@ use Ispgo\Siigo\SiigoClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
+use Illuminate\Support\Facades\Log;
+
 class CreateSiigoCustomer implements ShouldQueue
 {
     use Queueable;
@@ -18,6 +20,13 @@ class CreateSiigoCustomer implements ShouldQueue
 
     public function handle(SiigoClient $siigo): void
     {
+        $this->customer->load('taxDetails');
+        $taxDetails = $this->customer->taxDetails;
+        if (!$taxDetails || !$taxDetails->enable_billing) {
+            Log::info("Skipping Siigo Customer creation because billing (enable_billing) is not enabled for customer #{$this->customer->id}");
+            return;
+        }
+
         $payload = SiigoHelper::buildPayload($this->customer);
         $siigo->createCustomer($payload);
     }

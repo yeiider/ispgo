@@ -21,6 +21,17 @@ class PaySiigoInvoice implements ShouldQueue
     {
         $this->invoice->load(['customer.taxDetails', 'items']);
 
+        // Check if customer has billing enabled
+        $customer = $this->invoice->customer;
+        if (!$customer) {
+            return;
+        }
+        $taxDetails = $customer->taxDetails;
+        if (!$taxDetails || !$taxDetails->enable_billing) {
+            Log::info("Skipping Siigo Voucher creation because billing (enable_billing) is not enabled for customer #{$customer->id}");
+            return;
+        }
+
         // Check if invoice has been synced to Siigo, if not sync it first!
         $info = $this->invoice->additional_information ?? [];
         if (empty($info['siigo_invoice_id'])) {

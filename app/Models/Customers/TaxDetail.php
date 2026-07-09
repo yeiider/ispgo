@@ -46,5 +46,9 @@ class TaxDetail extends Model
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
         });
+
+        static::updated(function ($model) {
+            event(new \App\Events\TaxCustomerUpdated($model));
+        });
     }
 }

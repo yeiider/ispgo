@@ -21,6 +21,17 @@ class CancelSiigoInvoice implements ShouldQueue
     {
         $this->invoice->load(['customer.taxDetails', 'items']);
 
+        // Check if customer has billing enabled
+        $customer = $this->invoice->customer;
+        if (!$customer) {
+            return;
+        }
+        $taxDetails = $customer->taxDetails;
+        if (!$taxDetails || !$taxDetails->enable_billing) {
+            Log::info("Skipping Siigo Credit Note creation because billing (enable_billing) is not enabled for customer #{$customer->id}");
+            return;
+        }
+
         $info = $this->invoice->additional_information ?? [];
         if (empty($info['siigo_invoice_id'])) {
             Log::info('Skipping Siigo Credit Note creation because invoice has not been synced to Siigo.', [
