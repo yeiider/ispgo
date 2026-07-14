@@ -20,16 +20,32 @@ class onCreatedCustomerSiigo extends Action
     {
         foreach ($models as $model) {
             try {
-                // Verifica si se seleccionó un técnico
-                if (!$model->taxDetails) {
-                    return Action::danger('No tiene informacion de impuestos');
+                $identification = SiigoHelper::getCustomerIdentification($model);
+                if (empty($identification)) {
+                    return Action::danger(__(":customer no tiene identificación válida", ["customer" => $model->first_name . " " . $model->last_name]));
                 }
-                if (!$model->taxDetails->enable_billing) {
-                    return Action::danger(__(":customer no tiene habilitado el pago por impuestos", ["customer" => $model->first_name . " " . $model->last_name]));
-                }
+
                 $payload = SiigoHelper::buildPayload($model);
                 $siigo = app(\Ispgo\Siigo\SiigoClient::class);
-                $siigo->createCustomer($payload);
+
+                // Check if customer already exists in Siigo
+                $existingCustomer = null;
+                try {
+                    $searchResponse = $siigo->getCustomer($identification);
+                    $searchBody = json_decode((string) $searchResponse->getBody(), true);
+                    $results = $searchBody['results'] ?? [];
+                    if (!empty($results)) {
+                        $existingCustomer = $results[0];
+                    }
+                } catch (\Exception $searchEx) {
+                    // Ignore search errors, continue to create/update
+                }
+
+                if ($existingCustomer && !empty($existingCustomer['id'])) {
+                    $siigo->updateCustomer($existingCustomer['id'], $payload);
+                } else {
+                    $siigo->createCustomer($payload);
+                }
             } catch (\Exception $e) {
                 return Action::danger('Error: ' . $e->getMessage());
             }

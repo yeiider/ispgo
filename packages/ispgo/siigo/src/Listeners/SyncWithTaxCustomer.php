@@ -12,9 +12,12 @@ class SyncWithTaxCustomer
         if (!ConfigProviderSiigo::getEnabled())
             return;
 
-        if (ConfigProviderSiigo::getSyncCustomer() && ConfigProviderSiigo::getSyncCustomersTrigger() !== 'all') {
-            $job = new CreateSiigoCustomer($event->taxDetail->customer);
-            dispatch($job)->delay(now()->addSeconds(10))->onQueue('redis');
+        if (ConfigProviderSiigo::getSyncCustomer()) {
+            $customer = $event->taxDetail->customer;
+            if ($customer && ($customer->taxDetails && $customer->taxDetails->enable_billing)) {
+                $job = new CreateSiigoCustomer($customer);
+                dispatch($job)->delay(now()->addSeconds(10))->onQueue('redis');
+            }
         }
     }
 }

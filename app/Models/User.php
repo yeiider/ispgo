@@ -89,6 +89,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the equipment assignments for this user.
+     */
+    public function equipmentAssignments()
+    {
+        return $this->hasMany(\App\Models\Inventory\EquipmentAssignment::class);
+    }
+
+
+    /**
      * Get all frontend permissions for the user (direct + from roles).
      */
     public function getAllFrontendPermissions()

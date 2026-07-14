@@ -31,6 +31,7 @@ class SiigoServiceProvider extends ServiceProvider
         ], 'config');
 
         Event::listen(\App\Events\CustomerCreated::class, SyncCustomer::class);
+        Event::listen(\App\Events\CustomerUpdated::class, SyncCustomer::class);
         Event::listen(\App\Events\TaxCustomerCreated::class, SyncWithTaxCustomer::class);
         Event::listen(\App\Events\TaxCustomerUpdated::class, SyncWithTaxCustomer::class);
         Event::listen(\App\Events\InvoiceCreated::class, [SyncInvoice::class, 'onCreated']);

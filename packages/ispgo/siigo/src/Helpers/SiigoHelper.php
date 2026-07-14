@@ -9,58 +9,131 @@ class SiigoHelper
 
     public static function buildPayload(Customer $customer): array
     {
-        $address = $customer->addresses()->first(); // Primera dirección asociada
-        $taxDetails = $customer->taxDetails; // Detalles fiscales
-        $phone = $customer->phone_number; // Número de teléfono principal
+        $addressObj = $customer->addresses()->first();
+        $taxDetails = $customer->taxDetails;
+        $phone = $customer->phone_number;
 
-        return [
+        $dbPersonType = $taxDetails ? $taxDetails->taxpayer_type : "Person";
+        $personType = "Person";
+        if (in_array($dbPersonType, ['personas_juridicas', 'Company', 'regimen_simple', 'regimen_ordinario', 'grandes_contribuyentes'])) {
+            $personType = "Company";
+        }
+
+        // Map document types to Siigo codes: CC -> 13, NIT -> 31, CE -> 22, PAS -> 41
+        $docType = strtoupper($taxDetails ? ($taxDetails->tax_identification_type ?: $customer->document_type) : $customer->document_type);
+        $idType = '13'; // Default to Cédula
+        if ($docType === 'NIT') {
+            $idType = '31';
+        } elseif ($docType === 'CE' || $docType === 'CÉDULA DE EXTRANJERÍA') {
+            $idType = '22';
+        } elseif ($docType === 'PAS' || $docType === 'PASAPORTE' || $docType === 'PP') {
+            $idType = '41';
+        }
+
+        $identification = self::getCustomerIdentification($customer);
+
+        $checkDigit = null;
+        if ($taxDetails && !empty($taxDetails->tax_identification_number)) {
+            $idStr = $taxDetails->tax_identification_number;
+            if (strpos($idStr, '-') !== false) {
+                $checkDigit = substr($idStr, strpos($idStr, '-') + 1);
+            }
+        }
+
+        $name = [];
+        if ($personType === 'Company') {
+            $name[] = ($taxDetails && !empty($taxDetails->business_name))
+                ? $taxDetails->business_name
+                : trim($customer->first_name . ' ' . $customer->last_name);
+        } else {
+            $name[] = $customer->first_name ?: 'N/A';
+            $name[] = $customer->last_name ?: 'N/A';
+        }
+
+        $fiscalRegimeCode = "R-99-PN";
+        if ($taxDetails && !empty($taxDetails->fiscal_regime)) {
+            $regimeRaw = strtolower($taxDetails->fiscal_regime);
+            if ($regimeRaw === 'general' || $regimeRaw === 'responsible') {
+                $fiscalRegimeCode = "O-13";
+            } elseif ($regimeRaw === 'simplified' || $regimeRaw === 'nonresponsible') {
+                $fiscalRegimeCode = "R-99-PN";
+            } elseif (preg_match('/^[OR]-[0-9]+(-[A-Z]+)?$/', $taxDetails->fiscal_regime)) {
+                $fiscalRegimeCode = $taxDetails->fiscal_regime;
+            } else {
+                $fiscalRegimeCode = $personType === 'Company' ? 'O-99' : 'R-99-PN';
+            }
+        }
+
+        $addressText = $addressObj ? $addressObj->address : 'Direccion';
+        $country = $addressObj ? ($addressObj->country ?? 'CO') : 'CO';
+
+        $mappedCity = self::mapStateAndCity(
+            $addressObj ? $addressObj->state_province : null,
+            $addressObj ? $addressObj->city : null
+        );
+        $state = $mappedCity['state_code'];
+        $city = $mappedCity['city_code'];
+        $postal = $addressObj ? $addressObj->postal_code : '110001';
+
+        // Clean phone number: keep only digits and limit to 10 chars
+        $cleanPhone = preg_replace('/[^0-9]/', '', $phone ?: '3000000000');
+        if (strlen($cleanPhone) > 10) {
+            $cleanPhone = substr($cleanPhone, -10);
+        }
+
+        $payload = [
             "type" => "Customer",
-            "person_type" => $taxDetails ? $taxDetails->taxpayer_type : "Person", // Tipo de persona
-            "id_type" => $customer->document_type === 'NIT' ? '13' : '31', // Tipo de documento
-            "identification" => substr($taxDetails->tax_identification_number, 0, strpos($taxDetails->tax_identification_number, '-')),
-            "check_digit" => substr($taxDetails->tax_identification_number, strpos($taxDetails->tax_identification_number, '-') + 1),
-            "name" => [
-                $customer->first_name,
-                $customer->last_name
-            ],
-            "commercial_name" => $taxDetails->business_name, // Nombre comercial
-            "branch_office" => 0, // Establecimiento
-            "active" => true, // Cliente activo
+            "person_type" => $personType,
+            "id_type" => $idType,
+            "identification" => $identification,
+            "name" => $name,
+            "branch_office" => 0,
+            "active" => true,
             "vat_responsible" => $taxDetails && $taxDetails->fiscal_regime === 'Responsible',
             "fiscal_responsibilities" => [
                 [
-                    "code" => $taxDetails ? $taxDetails->fiscal_regime : "R-99-PN" // Responsabilidad fiscal
+                    "code" => $fiscalRegimeCode
                 ]
             ],
             "address" => [
-                "address" => $address->address,
+                "address" => $addressText,
                 "city" => [
-                    "country_code" => $address->country ?? "CO",
-                    "state_code" => $address->state_province,
-                    "city_code" => $address->city
+                    "country_code" => $country,
+                    "state_code" => $state,
+                    "city_code" => $city
                 ],
-                "postal_code" => $address->postal_code
+                "postal_code" => $postal
             ],
             "phones" => [
                 [
-                    "indicative" => "57", // Indicativo del país
-                    "number" => $phone,
-                    "extension" => null // Si hay extensiones
+                    "indicative" => "57",
+                    "number" => $cleanPhone,
+                    "extension" => null
                 ]
             ],
             "contacts" => [
                 [
-                    "first_name" => $customer->first_name,
-                    "last_name" => $customer->last_name,
-                    "email" => $customer->email_address,
+                    "first_name" => $customer->first_name ?: 'N/A',
+                    "last_name" => $customer->last_name ?: 'N/A',
+                    "email" => $customer->email_address ?: 'correo@temporal.com',
                     "phone" => [
                         "indicative" => "57",
-                        "number" => $phone,
+                        "number" => $cleanPhone,
                         "extension" => null
                     ]
                 ]
             ]
         ];
+
+        if ($checkDigit !== null && $checkDigit !== '') {
+            $payload['check_digit'] = $checkDigit;
+        }
+
+        if ($taxDetails && !empty($taxDetails->business_name)) {
+            $payload['commercial_name'] = $taxDetails->business_name;
+        }
+
+        return $payload;
     }
 
     public static function getCustomerIdentification(Customer $customer): string
@@ -261,5 +334,66 @@ class SiigoHelper
         ];
 
         return $payload;
+    }
+
+    public static function mapStateAndCity(?string $stateName, ?string $cityName): array
+    {
+        $stateClean = strtolower(trim($stateName ?? ''));
+        $cityClean = strtolower(trim($cityName ?? ''));
+
+        // Default: Bogotá
+        $stateCode = '11';
+        $cityCode = '11001';
+
+        // State Mapping
+        if (strpos($stateClean, 'cauca') !== false) {
+            if (strpos($stateClean, 'valle') !== false) {
+                $stateCode = '76'; // Valle del Cauca
+            } else {
+                $stateCode = '19'; // Cauca
+            }
+        } elseif (strpos($stateClean, 'valle') !== false) {
+            $stateCode = '76';
+        } elseif (strpos($stateClean, 'bogota') !== false || strpos($stateClean, 'cundinamarca') !== false) {
+            $stateCode = '11';
+        }
+
+        // City Mapping
+        if ($stateCode === '19') {
+            // Cauca Cities
+            if (strpos($cityClean, 'santander') !== false || strpos($cityClean, 'quilichao') !== false) {
+                $cityCode = '19698';
+            } elseif (strpos($cityClean, 'guachene') !== false) {
+                $cityCode = '19318';
+            } elseif (strpos($cityClean, 'popayan') !== false) {
+                $cityCode = '19001';
+            } elseif (strpos($cityClean, 'caloto') !== false) {
+                $cityCode = '19142';
+            } elseif (strpos($cityClean, 'villa rica') !== false || strpos($cityClean, 'villarica') !== false) {
+                $cityCode = '19845';
+            } elseif (strpos($cityClean, 'puerto tejada') !== false || strpos($cityClean, 'tejada') !== false) {
+                $cityCode = '19573';
+            } elseif (strpos($cityClean, 'miranda') !== false) {
+                $cityCode = '19455';
+            } elseif (strpos($cityClean, 'corinto') !== false) {
+                $cityCode = '19212';
+            } elseif (strpos($cityClean, 'padilla') !== false) {
+                $cityCode = '19517';
+            }
+        } elseif ($stateCode === '76') {
+            // Valle del Cauca Cities
+            if (strpos($cityClean, 'cali') !== false) {
+                $cityCode = '76001';
+            } elseif (strpos($cityClean, 'jamundi') !== false) {
+                $cityCode = '76364';
+            } elseif (strpos($cityClean, 'palmira') !== false) {
+                $cityCode = '76520';
+            }
+        }
+
+        return [
+            'state_code' => $stateCode,
+            'city_code' => $cityCode,
+        ];
     }
 }

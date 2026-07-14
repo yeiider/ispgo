@@ -7,14 +7,21 @@ use Ispgo\Siigo\Settings\ConfigProviderSiigo;
 
 class SyncCustomer
 {
-    public function handle(\App\Events\CustomerCreated $event): void
+    public function handle($event): void
     {
         if (!ConfigProviderSiigo::getEnabled())
             return;
 
-        if (ConfigProviderSiigo::getSyncCustomer() && ConfigProviderSiigo::getSyncCustomersTrigger() === 'all') {
-            $job = new CreateSiigoCustomer($event->customer);
-            dispatch($job)->delay(now()->addSeconds(10))->onQueue('redis');
+        if (ConfigProviderSiigo::getSyncCustomer()) {
+            $customer = $event->customer;
+            $trigger = ConfigProviderSiigo::getSyncCustomersTrigger();
+
+            $shouldSync = ($trigger === 'all') || ($customer->taxDetails && $customer->taxDetails->enable_billing);
+
+            if ($shouldSync) {
+                $job = new CreateSiigoCustomer($customer);
+                dispatch($job)->delay(now()->addSeconds(10))->onQueue('redis');
+            }
         }
     }
 }

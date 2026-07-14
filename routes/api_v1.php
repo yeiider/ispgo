@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::apiResource('/customers', \App\Http\Controllers\API\Customers\CustomerController::class);
+Route::post('/customers/{id}/sync-siigo', [\App\Http\Controllers\API\Customers\CustomerController::class, 'syncToSiigo']);
 
 Route::apiResource('/addresses', \App\Http\Controllers\API\Customers\AddressController::class);
 

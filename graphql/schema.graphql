@@ -872,6 +872,7 @@ type User {
     frontendPermissions: [FrontendPermission!]! @belongsToMany(relation: "frontendPermissions")
     allPermissions: [Permission!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@allPermissions")
     registeredPayments: [InvoicePayment!]! @hasMany(relation: "invoicePayments")
+    equipmentAssignments: [EquipmentAssignment!]! @hasMany(relation: "equipmentAssignments")
 }
 
 type Role {

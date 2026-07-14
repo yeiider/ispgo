@@ -85,5 +85,17 @@ class Address extends Model
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
         });
+
+        static::saved(function ($model) {
+            if ($model->customer) {
+                event(new \App\Events\CustomerUpdated($model->customer));
+            }
+        });
+
+        static::deleted(function ($model) {
+            if ($model->customer) {
+                event(new \App\Events\CustomerUpdated($model->customer));
+            }
+        });
     }
 }
