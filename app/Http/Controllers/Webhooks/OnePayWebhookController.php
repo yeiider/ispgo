@@ -25,7 +25,9 @@ class OnePayWebhookController extends Controller
         }
 
         /** @var Invoice|null $invoice */
-        $invoice = Invoice::where('onepay_charge_id', $paymentId)->first();
+        $invoice = Invoice::where('onepay_charge_id', $paymentId)
+            ->orWhere('onepay_invoice_id', $paymentId)
+            ->first();
         if (!$invoice) {
             return response()->json(['message' => 'invoice not found'], 404);
         }

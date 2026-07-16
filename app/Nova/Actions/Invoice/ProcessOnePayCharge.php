@@ -104,7 +104,7 @@ class ProcessOnePayCharge extends Action implements ShouldQueue
     {
         // Centralize logic through OnePayHandler
         $handler = new OnePayHandler();
-        if (!$invoice->onepay_charge_id) {
+        if (!$invoice->onepay_charge_id && !$invoice->onepay_invoice_id) {
             $data = $handler->createPayment($invoice);
             $this->updateInvoiceWithChargeData($invoice, $data);
         } else {
@@ -215,10 +215,18 @@ class ProcessOnePayCharge extends Action implements ShouldQueue
 
     protected function updateInvoiceWithChargeData(Invoice $invoice, array $data): void
     {
+        $respData = isset($data['data']) && is_array($data['data']) ? $data['data'] : $data;
+
+        $invoiceId = $respData['id'] ?? null;
+        $chargeId = $respData['payment_id'] ?? $respData['payment']['id'] ?? null;
+        $paymentLink = $respData['payment']['payment_link'] ?? $respData['payment_link'] ?? null;
+        $status = $respData['status'] ?? 'pending';
+
         $invoice->update([
-            'onepay_charge_id' => $data['id'] ?? null,
-            'onepay_payment_link' => $data['payment_link'] ?? null,
-            'onepay_status' => $data['status'] ?? 'pending',
+            'onepay_invoice_id' => $invoiceId,
+            'onepay_charge_id' => $chargeId,
+            'onepay_payment_link' => $paymentLink,
+            'onepay_status' => $status,
             'onepay_metadata' => $data,
         ]);
     }

@@ -35,7 +35,7 @@ class Invoice extends Model
         'issue_date', 'due_date', 'payment_date', 'payment_registered_by', 'full_name', 'status', 'invoice_type', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
         'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total','router_id',
         // OnePay integration fields
-        'onepay_charge_id', 'onepay_payment_link', 'onepay_status', 'onepay_metadata'
+        'onepay_invoice_id', 'onepay_charge_id', 'onepay_payment_link', 'onepay_status', 'onepay_metadata'
     ];
 
     protected $casts = [
@@ -360,10 +360,20 @@ class Invoice extends Model
         $this->status = 'canceled';
         $this->save();
 
-        // Delete OnePay payment if exists
-        if ($this->onepay_charge_id) {
+        // Delete OnePay invoice or payment if exists
+        $onePayHandler = app(\App\Services\Payments\OnePay\OnePayHandler::class);
+        if ($this->onepay_invoice_id) {
             try {
-                $onePayHandler = app(\App\Services\Payments\OnePay\OnePayHandler::class);
+                $onePayHandler->deleteInvoice($this->onepay_invoice_id);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Error eliminando factura OnePay al cancelar', [
+                    'invoice_id' => $this->id,
+                    'onepay_invoice_id' => $this->onepay_invoice_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        } elseif ($this->onepay_charge_id) {
+            try {
                 $onePayHandler->deletePayment($this->onepay_charge_id);
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::warning('Error eliminando cobro OnePay al cancelar factura', [
@@ -460,10 +470,20 @@ class Invoice extends Model
         });
 
         static::deleting(function ($model) {
-            // Delete OnePay payment if exists
-            if ($model->onepay_charge_id) {
+            // Delete OnePay invoice or payment if exists
+            $onePayHandler = app(\App\Services\Payments\OnePay\OnePayHandler::class);
+            if ($model->onepay_invoice_id) {
                 try {
-                    $onePayHandler = app(\App\Services\Payments\OnePay\OnePayHandler::class);
+                    $onePayHandler->deleteInvoice($model->onepay_invoice_id);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Error eliminando factura OnePay al eliminar', [
+                        'invoice_id' => $model->id,
+                        'onepay_invoice_id' => $model->onepay_invoice_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            } elseif ($model->onepay_charge_id) {
+                try {
                     $onePayHandler->deletePayment($model->onepay_charge_id);
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::warning('Error eliminando cobro OnePay al eliminar factura', [

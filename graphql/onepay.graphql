@@ -56,6 +56,24 @@ type OnePayCustomer {
     created_at: String
 }
 
+type OnePayInvoice {
+    id: String!
+    name: String
+    description: String
+    amount: Float
+    provider: String
+    provider_id: String
+    reference: String
+    status: String
+    remarks: String
+    metadata: JSON
+    due_date: String
+    created_at: String
+    updated_at: String
+    payment_id: String
+    payment: OnePayPayment
+}
+
 type OnePayPaymentResult {
     success: Boolean!
     message: String!
@@ -65,6 +83,9 @@ type OnePayPaymentResult {
 extend type Query @guard {
     "Obtener información de un cobro específico en OnePay"
     onePayPayment(payment_id: String!): OnePayPayment @field(resolver: "App\\GraphQL\\Queries\\OnePayQuery@getPayment")
+
+    "Obtener información de una factura específica en OnePay"
+    onePayInvoice(invoice_id: String!): OnePayInvoice @field(resolver: "App\\GraphQL\\Queries\\OnePayQuery@getInvoice")
 
     "Obtener el historial de intentos de pago de un cobro en OnePay"
     onePayPaymentIntents(payment_id: String!): [OnePayPaymentIntent!]! @field(resolver: "App\\GraphQL\\Queries\\OnePayQuery@getPaymentIntents")
