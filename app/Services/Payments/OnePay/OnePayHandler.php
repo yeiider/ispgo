@@ -156,8 +156,8 @@ class OnePayHandler
 
         return [
             'reference' => (string) $invoice->increment_id,
-            'provider_id' => (string) $invoice->increment_id,
-            'provider' => 'biller',
+            'provider_id' => (string) ($customer->identity_document ?? $customer->document_number ?? $customer->id),
+            'provider' => \App\Settings\OnePaySettings::provider(),
             'amount' => $amount,
             'name' => 'Pago Factura #' . $invoice->increment_id,
             'description' => 'Cobro de factura en ISPGo',
