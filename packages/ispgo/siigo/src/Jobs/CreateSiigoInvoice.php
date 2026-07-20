@@ -15,7 +15,10 @@ class CreateSiigoInvoice implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(private Invoice $invoice) {}
+    public $tries = 5;
+    public $backoff = 30;
+
+    public function __construct(private Invoice $invoice, private bool $force = false) {}
 
     public function handle(SiigoClient $siigo)
     {
@@ -28,20 +31,40 @@ class CreateSiigoInvoice implements ShouldQueue
             return;
         }
         $taxDetails = $customer->taxDetails;
-        if (!$taxDetails || !$taxDetails->enable_billing) {
+        if (!$this->force && (!$taxDetails || !$taxDetails->enable_billing)) {
             Log::info("Skipping Siigo Invoice creation because billing (enable_billing) is not enabled for customer #{$customer->id}");
             return;
         }
 
-        // Prevent double sync
+        // Prevent double sync unless forced
         $info = $this->invoice->additional_information ?? [];
-        if (!empty($info['siigo_invoice_id'])) {
+        if (!empty($info['siigo_invoice_id']) && !$this->force) {
             return;
+        }
+
+        // Ensure customer is synced to Siigo first
+        try {
+            $customerJob = new CreateSiigoCustomer($customer, $this->force);
+            $customerJob->handle($siigo);
+        } catch (\Exception $custEx) {
+            Log::warning("Customer sync prior to invoice creation warning: " . $custEx->getMessage());
         }
 
         try {
             $payload = SiigoHelper::buildInvoicePayload($this->invoice);
-            $response = $siigo->createInvoice($payload);
+            
+            try {
+                $response = $siigo->createInvoice($payload);
+            } catch (\Exception $createEx) {
+                // Fallback: If document is non-electronic, Siigo rejects 'stamp' ('The send cannot be used')
+                if (isset($payload['stamp']) && (str_contains($createEx->getMessage(), 'The send cannot be used') || str_contains($createEx->getMessage(), 'document_settings'))) {
+                    unset($payload['stamp']);
+                    $response = $siigo->createInvoice($payload);
+                } else {
+                    throw $createEx;
+                }
+            }
+
             $body = json_decode((string) $response->getBody(), true);
             
             $id = $body['id'] ?? null;

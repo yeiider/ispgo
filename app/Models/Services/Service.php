@@ -33,7 +33,7 @@ class Service extends Model
         'password_router', 'service_status', 'activation_date', 'deactivation_date',
         'bandwidth', 'mac_address', 'installation_date', 'service_notes', 'contract_id',
         'support_contact', 'service_location', 'service_type', 'static_ip', 'data_limit',
-        'last_maintenance', 'billing_cycle', 'service_priority', 'sn','unu_longitude','unu_latitude',
+        'last_maintenance', 'billing_cycle', 'billing_cycle_id', 'service_priority', 'sn','unu_longitude','unu_latitude',
         'assigned_technician', 'service_contract', 'created_by', 'updated_by',
     ];
 
@@ -47,6 +47,11 @@ class Service extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function billingCycle()
+    {
+        return $this->belongsTo(\App\Models\BillingCycle::class, 'billing_cycle_id');
     }
 
     public function getFullNameAttribute()

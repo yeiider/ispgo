@@ -56,7 +56,9 @@ class RegisterPaymentPromiseMutation
 
                 if ($shouldActivate) {
                     $invoice->loadMissing('service');
-                    optional($invoice->service)->activate();
+                    if ($invoice->service && $invoice->service->service_status === 'suspended') {
+                        $invoice->service->activate();
+                    }
                 }
             }
 

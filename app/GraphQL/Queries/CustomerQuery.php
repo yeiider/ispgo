@@ -74,6 +74,16 @@ class CustomerQuery
             $query->whereDate('created_at', $args['created_at_date']);
         }
 
+        if (!empty($args['router_id']) && $args['router_id'] !== 'all') {
+            $routerId = (int) $args['router_id'];
+            $query->where(function ($q) use ($routerId) {
+                $q->where('router_id', $routerId)
+                  ->orWhereHas('services', function ($sq) use ($routerId) {
+                      $sq->where('router_id', $routerId);
+                  });
+            });
+        }
+
         if (!empty($args['search'])) {
             $query->search($args['search']);
         }

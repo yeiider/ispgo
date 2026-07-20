@@ -266,7 +266,12 @@ class CustomerController extends Controller
             $job = new \Ispgo\Siigo\Jobs\CreateSiigoCustomer($customer, true); // force = true
             dispatch_sync($job);
 
-            return response()->json(['message' => 'Cliente sincronizado exitosamente con Siigo.'], Response::HTTP_OK);
+            $identification = \Ispgo\Siigo\Helpers\SiigoHelper::getCustomerIdentification($customer);
+
+            return response()->json([
+                'message' => "Cliente ({$identification}) sincronizado exitosamente con Siigo.",
+                'identification' => $identification,
+            ], Response::HTTP_OK);
         } catch (\Exception $exception) {
             report($exception);
             return response()->json(['error' => 'Error al sincronizar con Siigo: ' . $exception->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);

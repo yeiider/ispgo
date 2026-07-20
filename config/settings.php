@@ -57,6 +57,15 @@ return [
                 "label" => "Configuración del Ciclo de Facturación",
                 "code" => "billing_cycle"
             ],
+            "billing_mode" => [
+                "field" => "select-field",
+                "label" => "Modo de Facturación",
+                "options" => \App\Settings\Config\Sources\BillingMode::class
+            ],
+            "manageable_billing_cycle" => [
+                "field" => "boolean-field",
+                "label" => "Ciclo de Facturación Administrable",
+            ],
             "billing_date" => [
                 "field" => "select-field",
                 "label" => "Día de Facturación",
