@@ -636,6 +636,8 @@ type TaxDetail {
     enable_billing: Boolean
     send_notifications: Boolean
     send_invoice: Boolean
+    siigo_customer_id: String
+    siigo_synced_at: DateTime
     created_at: DateTime
     updated_at: DateTime
 }

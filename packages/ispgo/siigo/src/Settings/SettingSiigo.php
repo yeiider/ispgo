@@ -100,6 +100,11 @@ class SettingSiigo
                 "label" => "ID del Vendedor por defecto",
                 "placeholder" => "e.g. 719"
             ],
+            "cost_center" => [
+                "field" => "text-field",
+                "label" => "ID del Centro de Costo",
+                "placeholder" => "e.g.941"
+            ],
         ];
     }
 }

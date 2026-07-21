@@ -72,6 +72,11 @@ class SiigoClient
         return $this->req('GET', '/v1/customers', ['query' => ['identification' => $identification]]);
     }
 
+    public function getCustomerByUuid(string $id): ResponseInterface
+    {
+        return $this->req('GET', "/v1/customers/{$id}");
+    }
+
     public function updateCustomer(string $id, array $payload): ResponseInterface
     {
         return $this->req('PUT', "/v1/customers/{$id}", ['json' => $payload]);
@@ -105,5 +110,10 @@ class SiigoClient
     public function stampCreditNote(string $id): ResponseInterface
     {
         return $this->req('POST', "/v1/credit-notes/{$id}/stamp");
+    }
+
+    public function getCostCenters(): ResponseInterface
+    {
+        return $this->req('GET', '/v1/cost-centers');
     }
 }

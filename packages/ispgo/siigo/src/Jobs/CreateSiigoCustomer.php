@@ -77,14 +77,25 @@ class CreateSiigoCustomer implements ShouldQueue
         }
 
         try {
+            $siigoId = null;
             if ($existingCustomer && !empty($existingCustomer['id'])) {
                 Log::info("Updating customer #{$this->customer->id} in Siigo...");
                 $siigo->updateCustomer($existingCustomer['id'], $payload);
+                $siigoId = $existingCustomer['id'];
                 Log::info("Customer #{$this->customer->id} successfully updated in Siigo.");
             } else {
                 Log::info("Creating customer #{$this->customer->id} in Siigo...");
-                $siigo->createCustomer($payload);
+                $res = $siigo->createCustomer($payload);
+                $resBody = json_decode((string) $res->getBody(), true);
+                $siigoId = $resBody['id'] ?? null;
                 Log::info("Customer #{$this->customer->id} successfully created in Siigo.");
+            }
+
+            // Save sync timestamp and siigo_customer_id in taxDetails quietly to avoid firing TaxDetailSaved listener loop
+            if ($taxDetails) {
+                $taxDetails->siigo_customer_id = $siigoId ?? ($existingCustomer['id'] ?? null);
+                $taxDetails->siigo_synced_at = now();
+                $taxDetails->saveQuietly();
             }
         } catch (\Exception $e) {
             Log::error("Error syncing customer #{$this->customer->id} to Siigo: " . $e->getMessage(), [

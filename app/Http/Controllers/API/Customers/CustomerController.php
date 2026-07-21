@@ -267,10 +267,14 @@ class CustomerController extends Controller
             dispatch_sync($job);
 
             $identification = \Ispgo\Siigo\Helpers\SiigoHelper::getCustomerIdentification($customer);
+            $customer->load('taxDetails');
+            $taxDetails = $customer->taxDetails;
 
             return response()->json([
                 'message' => "Cliente ({$identification}) sincronizado exitosamente con Siigo.",
                 'identification' => $identification,
+                'siigo_customer_id' => $taxDetails?->siigo_customer_id,
+                'siigo_synced_at' => $taxDetails?->siigo_synced_at ? $taxDetails->siigo_synced_at->toIso8601String() : now()->toIso8601String(),
             ], Response::HTTP_OK);
         } catch (\Exception $exception) {
             report($exception);

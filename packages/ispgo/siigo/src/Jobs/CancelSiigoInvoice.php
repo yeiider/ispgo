@@ -63,8 +63,16 @@ class CancelSiigoInvoice implements ShouldQueue
             $body = json_decode((string) $response->getBody(), true);
             
             $id = $body['id'] ?? null;
+            $name = $body['name'] ?? null;
+            $number = $body['number'] ?? null;
             if ($id) {
                 $info['siigo_credit_note_id'] = $id;
+                if ($name) {
+                    $info['siigo_credit_note_name'] = $name;
+                }
+                if ($number) {
+                    $info['siigo_credit_note_number'] = $number;
+                }
                 $this->invoice->additional_information = $info;
                 $this->invoice->save();
 

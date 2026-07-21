@@ -13,21 +13,25 @@ class SiigoHelper
         $taxDetails = $customer->taxDetails;
         $phone = $customer->phone_number;
 
-        $dbPersonType = $taxDetails ? $taxDetails->taxpayer_type : "Person";
+        $dbPersonType = $taxDetails ? strtolower((string)$taxDetails->taxpayer_type) : "person";
         $personType = "Person";
-        if (in_array($dbPersonType, ['personas_juridicas', 'Company', 'regimen_simple', 'regimen_ordinario', 'grandes_contribuyentes'])) {
+        if (in_array($dbPersonType, ['personas_juridicas', 'company', 'juridica', 'empresa', 'regimen_simple', 'regimen_ordinario', 'grandes_contribuyentes'])) {
             $personType = "Company";
         }
 
-        // Map document types to Siigo codes: CC -> 13, NIT -> 31, CE -> 22, PAS -> 41
+        // Map document types to Siigo codes: CC -> 13, NIT -> 31, CE -> 22, PAS -> 41, TI -> 12, RC -> 11
         $docType = strtoupper($taxDetails ? ($taxDetails->tax_identification_type ?: $customer->document_type) : $customer->document_type);
         $idType = '13'; // Default to Cédula
-        if ($docType === 'NIT') {
+        if ($docType === 'NIT' || $docType === '31') {
             $idType = '31';
-        } elseif ($docType === 'CE' || $docType === 'CÉDULA DE EXTRANJERÍA') {
+        } elseif ($docType === 'CE' || $docType === '22' || str_contains($docType, 'EXTRANJER')) {
             $idType = '22';
-        } elseif ($docType === 'PAS' || $docType === 'PASAPORTE' || $docType === 'PP') {
+        } elseif ($docType === 'PAS' || $docType === 'PP' || $docType === '41' || str_contains($docType, 'PASAPORTE')) {
             $idType = '41';
+        } elseif ($docType === 'TI' || $docType === '12' || str_contains($docType, 'TARJETA DE IDENTIDAD')) {
+            $idType = '12';
+        } elseif ($docType === 'RC' || $docType === '11') {
+            $idType = '11';
         }
 
         $identification = self::getCustomerIdentification($customer);
@@ -50,17 +54,33 @@ class SiigoHelper
             $name[] = $customer->last_name ?: 'N/A';
         }
 
-        $fiscalRegimeCode = "R-99-PN";
+        // Mapping Fiscal Regime and VAT Responsibility according to Siigo API rules
+        $vatResponsible = false;
+        $fiscalRegimeCode = $personType === 'Company' ? 'O-99' : 'R-99-PN'; // Default
+
         if ($taxDetails && !empty($taxDetails->fiscal_regime)) {
-            $regimeRaw = strtolower($taxDetails->fiscal_regime);
-            if ($regimeRaw === 'general' || $regimeRaw === 'responsible') {
-                $fiscalRegimeCode = "O-13";
-            } elseif ($regimeRaw === 'simplified' || $regimeRaw === 'nonresponsible') {
-                $fiscalRegimeCode = "R-99-PN";
-            } elseif (preg_match('/^[OR]-[0-9]+(-[A-Z]+)?$/', $taxDetails->fiscal_regime)) {
-                $fiscalRegimeCode = $taxDetails->fiscal_regime;
-            } else {
+            $regimeRaw = strtolower((string)$taxDetails->fiscal_regime);
+            if (in_array($regimeRaw, ['general', 'responsible', 'responsable', 'responsable_iva', 'comun'])) {
+                $vatResponsible = true;
                 $fiscalRegimeCode = $personType === 'Company' ? 'O-99' : 'R-99-PN';
+            } elseif (in_array($regimeRaw, ['gran_contribuyente', 'gran contribuyente', 'o-13'])) {
+                $vatResponsible = true;
+                $fiscalRegimeCode = "O-13";
+            } elseif (in_array($regimeRaw, ['autorretenedor', 'o-15'])) {
+                $vatResponsible = true;
+                $fiscalRegimeCode = "O-15";
+            } elseif (in_array($regimeRaw, ['agente_retencion', 'o-23'])) {
+                $vatResponsible = true;
+                $fiscalRegimeCode = "O-23";
+            } elseif (in_array($regimeRaw, ['regimen_simple', 'simple', 'o-47'])) {
+                $vatResponsible = false;
+                $fiscalRegimeCode = "O-47";
+            } elseif (in_array($regimeRaw, ['simplified', 'nonresponsible', 'no_responsable', 'no_responsable_iva', 'r-99-pn', 'simplificado'])) {
+                $vatResponsible = false;
+                $fiscalRegimeCode = $personType === 'Company' ? 'O-99' : 'R-99-PN';
+            } elseif (in_array(strtoupper($taxDetails->fiscal_regime), ['O-13', 'O-15', 'O-23', 'O-47', 'R-99-PN', 'O-99'])) {
+                $fiscalRegimeCode = strtoupper($taxDetails->fiscal_regime);
+                $vatResponsible = in_array($fiscalRegimeCode, ['O-13', 'O-15', 'O-23']);
             }
         }
 
@@ -89,7 +109,7 @@ class SiigoHelper
             "name" => $name,
             "branch_office" => 0,
             "active" => true,
-            "vat_responsible" => $taxDetails && $taxDetails->fiscal_regime === 'Responsible',
+            "vat_responsible" => $vatResponsible,
             "fiscal_responsibilities" => [
                 [
                     "code" => $fiscalRegimeCode
@@ -155,20 +175,46 @@ class SiigoHelper
         $identification = self::getCustomerIdentification($customer);
         
         $items = [];
-        foreach ($invoice->items as $item) {
-            $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId();
-            $itemTax = [];
-            if ($taxId) {
-                $itemTax[] = ['id' => $taxId];
+        $subtotalTotal = (float) $invoice->subtotal;
+        $invoiceTotal = (float) $invoice->total;
+        $invoiceItems = $invoice->items;
+        $itemCount = count($invoiceItems);
+
+        if ($itemCount > 0) {
+            $currentSum = 0;
+            foreach ($invoiceItems as $index => $item) {
+                $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId();
+                $itemTax = [];
+                if ($taxId) {
+                    $itemTax[] = ['id' => $taxId];
+                }
+
+                $qty = max(1, (int) ($item->quantity ?: 1));
+                $itemSubtotal = (float) ($item->subtotal ?: ($item->unit_price * $qty));
+
+                if ($subtotalTotal > 0) {
+                    $itemTotalAmount = round(($itemSubtotal / $subtotalTotal) * $invoiceTotal, 2);
+                } else {
+                    $itemTotalAmount = round($invoiceTotal / $itemCount, 2);
+                }
+
+                if ($index === $itemCount - 1) {
+                    $itemTotalAmount = round($invoiceTotal - $currentSum, 2);
+                } else {
+                    $currentSum += $itemTotalAmount;
+                }
+
+                $pricePerUnit = round($itemTotalAmount / $qty, 2);
+
+                $items[] = [
+                    'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode() ?: 'ISP01',
+                    'description' => $item->description ?: 'Servicio de Internet',
+                    'quantity' => $qty,
+                    'price' => $pricePerUnit,
+                    'discount' => 0.0,
+                    'tax' => $itemTax
+                ];
             }
-            $items[] = [
-                'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode() ?: 'ISP01',
-                'description' => $item->description ?: 'Servicio de Internet',
-                'quantity' => (int) ($item->quantity ?: 1),
-                'price' => (float) ($item->unit_price ?: 0),
-                'discount' => 0.0,
-                'tax' => $itemTax
-            ];
         }
 
         if (empty($items)) {
@@ -181,7 +227,7 @@ class SiigoHelper
                 'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode() ?: 'ISP01',
                 'description' => 'Servicios de Internet - Factura ' . $invoice->increment_id,
                 'quantity' => 1,
-                'price' => (float) $invoice->total,
+                'price' => $invoiceTotal,
                 'discount' => 0.0,
                 'tax' => $itemTax
             ];
@@ -203,14 +249,19 @@ class SiigoHelper
             'payments' => [
                 [
                     'id' => $paymentId,
-                    'value' => (float) $invoice->total,
+                    'value' => $invoiceTotal,
                     'due_date' => $invoice->due_date ? $invoice->due_date->format('Y-m-d') : now()->addDays(30)->format('Y-m-d')
                 ]
             ],
             'stamp' => [
-                'send' => true
+                'send' => false
             ]
         ];
+
+        $costCenter = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getCostCenter();
+        if ($costCenter) {
+            $payload['cost_center'] = $costCenter;
+        }
 
         $sellerId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getSellerId();
         if ($sellerId) {
@@ -230,6 +281,16 @@ class SiigoHelper
         $consecutive = (int) ($info['siigo_consecutive'] ?? 0);
         $date = $info['siigo_date'] ?? ($invoice->issue_date ? $invoice->issue_date->format('Y-m-d') : now()->format('Y-m-d'));
 
+        $debitAccount = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getVoucherAccountDebit();
+        if (!$debitAccount) {
+            $debitAccount = '11050501';
+        }
+
+        $creditAccount = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getVoucherAccountCredit();
+        if (!$creditAccount) {
+            $creditAccount = '13050501';
+        }
+
         $payload = [
             'document' => [
                 'id' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getVoucherDocumentId() ?: 24446
@@ -243,7 +304,7 @@ class SiigoHelper
             'items' => [
                 [
                     'account' => [
-                        'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getVoucherAccountDebit() ?: '11100501',
+                        'code' => $debitAccount,
                         'movement' => 'Debit'
                     ],
                     'description' => 'Pago Recibido Factura ' . $invoice->increment_id,
@@ -251,7 +312,7 @@ class SiigoHelper
                 ],
                 [
                     'account' => [
-                        'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getVoucherAccountCredit() ?: '13050501',
+                        'code' => $creditAccount,
                         'movement' => 'Credit'
                     ],
                     'due' => [
@@ -279,20 +340,46 @@ class SiigoHelper
         $invoiceUuid = $info['siigo_invoice_id'] ?? '';
 
         $items = [];
-        foreach ($invoice->items as $item) {
-            $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId();
-            $itemTax = [];
-            if ($taxId) {
-                $itemTax[] = ['id' => $taxId];
+        $subtotalTotal = (float) $invoice->subtotal;
+        $invoiceTotal = (float) $invoice->total;
+        $invoiceItems = $invoice->items;
+        $itemCount = count($invoiceItems);
+
+        if ($itemCount > 0) {
+            $currentSum = 0;
+            foreach ($invoiceItems as $index => $item) {
+                $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId();
+                $itemTax = [];
+                if ($taxId) {
+                    $itemTax[] = ['id' => $taxId];
+                }
+
+                $qty = max(1, (int) ($item->quantity ?: 1));
+                $itemSubtotal = (float) ($item->subtotal ?: ($item->unit_price * $qty));
+
+                if ($subtotalTotal > 0) {
+                    $itemTotalAmount = round(($itemSubtotal / $subtotalTotal) * $invoiceTotal, 2);
+                } else {
+                    $itemTotalAmount = round($invoiceTotal / $itemCount, 2);
+                }
+
+                if ($index === $itemCount - 1) {
+                    $itemTotalAmount = round($invoiceTotal - $currentSum, 2);
+                } else {
+                    $currentSum += $itemTotalAmount;
+                }
+
+                $pricePerUnit = round($itemTotalAmount / $qty, 2);
+
+                $items[] = [
+                    'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode() ?: 'ISP01',
+                    'description' => 'Anulación: ' . ($item->description ?: 'Servicio de Internet'),
+                    'quantity' => $qty,
+                    'price' => $pricePerUnit,
+                    'discount' => 0.0,
+                    'tax' => $itemTax
+                ];
             }
-            $items[] = [
-                'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode() ?: 'ISP01',
-                'description' => 'Anulación: ' . ($item->description ?: 'Servicio de Internet'),
-                'quantity' => (int) ($item->quantity ?: 1),
-                'price' => (float) ($item->unit_price ?: 0),
-                'discount' => 0.0,
-                'tax' => $itemTax
-            ];
         }
 
         if (empty($items)) {
@@ -305,7 +392,7 @@ class SiigoHelper
                 'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode() ?: 'ISP01',
                 'description' => 'Anulación Factura ' . $invoice->increment_id,
                 'quantity' => 1,
-                'price' => (float) $invoice->total,
+                'price' => $invoiceTotal,
                 'discount' => 0.0,
                 'tax' => $itemTax
             ];
@@ -325,13 +412,24 @@ class SiigoHelper
             'payments' => [
                 [
                     'id' => $paymentId,
-                    'value' => (float) $invoice->total
+                    'value' => (float) $invoice->total,
+                    'due_date' => $invoice->due_date ? $invoice->due_date->format('Y-m-d') : now()->format('Y-m-d')
                 ]
             ],
             'stamp' => [
-                'send' => true
+                'send' => false
             ]
         ];
+
+        $costCenter = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getCostCenter();
+        if ($costCenter) {
+            $payload['cost_center'] = $costCenter;
+        }
+
+        $sellerId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getSellerId();
+        if ($sellerId) {
+            $payload['seller'] = $sellerId;
+        }
 
         return $payload;
     }

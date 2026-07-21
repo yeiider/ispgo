@@ -107,6 +107,12 @@ class ConfigProviderSiigo
         return $val !== null ? (int)$val : null;
     }
 
+    public static function getCostCenter(): ?int
+    {
+        $val = self::getValue('cost_center');
+        return $val !== null ? (int)$val : null;
+    }
+
     private static function getValue($field): ?string
     {
         return ConfigHelper::getConfigValue("siigo/general/$field");

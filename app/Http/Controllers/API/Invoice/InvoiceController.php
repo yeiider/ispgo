@@ -279,7 +279,23 @@ class InvoiceController extends Controller
                 dispatch_sync($cancelJob);
             }
 
-            return response()->json(['message' => 'Factura sincronizada exitosamente con Siigo.'], Response::HTTP_OK);
+            $invoice->refresh();
+            $info = $invoice->additional_information ?? [];
+
+            return response()->json([
+                'message' => 'Factura sincronizada exitosamente con Siigo.',
+                'siigo_invoice_id' => $info['siigo_invoice_id'] ?? null,
+                'siigo_consecutive' => $info['siigo_consecutive'] ?? null,
+                'siigo_prefix' => $info['siigo_prefix'] ?? 'FV',
+                'siigo_date' => $info['siigo_date'] ?? null,
+                'siigo_voucher_id' => $info['siigo_voucher_id'] ?? null,
+                'siigo_voucher_name' => $info['siigo_voucher_name'] ?? null,
+                'siigo_voucher_number' => $info['siigo_voucher_number'] ?? null,
+                'siigo_credit_note_id' => $info['siigo_credit_note_id'] ?? null,
+                'siigo_credit_note_name' => $info['siigo_credit_note_name'] ?? null,
+                'siigo_credit_note_number' => $info['siigo_credit_note_number'] ?? null,
+                'additional_information' => $info,
+            ], Response::HTTP_OK);
         } catch (\Exception $exception) {
             report($exception);
             return response()->json(['error' => 'Error al sincronizar factura con Siigo: ' . $exception->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
