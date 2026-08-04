@@ -13,6 +13,7 @@ class EquipmentAssignment extends Model
     protected $fillable = [
         'user_id',
         'product_id',
+        'warehouse_id',
         'assigned_at',
         'returned_at',
         'status',
@@ -23,6 +24,7 @@ class EquipmentAssignment extends Model
     ];
 
     protected $casts = [
+        'quantity' => 'float',
         'assigned_at' => 'datetime',
         'returned_at' => 'datetime'
     ];
@@ -35,5 +37,10 @@ class EquipmentAssignment extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
     }
 }

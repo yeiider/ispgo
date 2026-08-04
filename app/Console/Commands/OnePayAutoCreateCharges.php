@@ -145,15 +145,15 @@ class OnePayAutoCreateCharges extends Command
                     $processed++;
 
                     if ($dryRun) {
-                        if (!$invoice->onepay_charge_id) {
-                            $this->line("[DRY-RUN] Crear cobro para factura #{$invoice->increment_id}");
+                        if (!$invoice->onepay_invoice_id && !$invoice->onepay_charge_id) {
+                            $this->line("[DRY-RUN] Crear factura para #{$invoice->increment_id}");
                         } else {
                             $this->line("[DRY-RUN] Reenviar cobro para factura #{$invoice->increment_id} ({$invoice->onepay_charge_id})");
                         }
                         continue;
                     }
 
-                    if (!$invoice->onepay_charge_id) {
+                    if (!$invoice->onepay_charge_id && !$invoice->onepay_invoice_id) {
                         $invoicesToProcess[] = $invoice;
                     }
                 }
@@ -171,24 +171,32 @@ class OnePayAutoCreateCharges extends Command
      */
     private function processBatchInParallel(array $invoices, OnePayHandler $handler, int &$created, int &$errors): void
     {
+        // Enviar todas las peticiones en paralelo
+        $results = $handler->createInvoicesParallel($invoices);
+
         foreach ($invoices as $invoice) {
-            try {
-                // Asegura cliente y crea cobro; luego guarda en la factura
-                $data = $handler->createPayment($invoice);
+            $res = $results[$invoice->id] ?? null;
+
+            if ($res && $res['success']) {
+                $data = $res['data'];
+                $paymentLink = $data['payment']['payment_link'] ?? $data['payment_link'] ?? null;
+
                 $invoice->update([
-                    'onepay_charge_id' => $data['id'] ?? null,
-                    'onepay_payment_link' => $data['payment_link'] ?? null,
+                    'onepay_invoice_id' => $data['id'] ?? null,
+                    'onepay_charge_id' => $data['payment_id'] ?? $data['payment']['id'] ?? null,
+                    'onepay_payment_link' => $paymentLink,
                     'onepay_status' => $data['status'] ?? 'pending',
                     'onepay_metadata' => $data,
                 ]);
                 $created++;
-            } catch (\Throwable $e) {
+            } else {
                 $errors++;
+                $errorMsg = $res['error'] ?? 'Unknown error';
                 Log::error('Error procesando factura para OnePay (command)', [
                     'invoice_id' => $invoice->id,
-                    'message' => $e->getMessage(),
+                    'message' => $errorMsg,
                 ]);
-                $this->error("Factura #{$invoice->increment_id}: " . $e->getMessage());
+                $this->error("Factura #{$invoice->increment_id}: " . $errorMsg);
             }
         }
     }

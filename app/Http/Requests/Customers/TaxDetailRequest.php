@@ -13,10 +13,12 @@ class TaxDetailRequest extends FormRequest
 
     public function rules(): array
     {
+        $id = $this->route('id') ?: $this->route('tax_detail');
+
         return [
             'customer_id' => 'integer',
             'tax_identification_type' => 'string|max:5',
-            'tax_identification_number' => 'string|max:255|unique:tax_details,tax_identification_number',
+            'tax_identification_number' => 'string|max:255|unique:tax_details,tax_identification_number' . ($id ? ',' . $id : ''),
             'taxpayer_type' => 'string|max:255',
             'fiscal_regime' => 'string|max:255',
             'business_name' => 'string|max:255',

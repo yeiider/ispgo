@@ -4,6 +4,7 @@ namespace App\Nova\Actions\Customers;
 
 use App\Models\Customers\Address;
 use App\Models\Customers\Customer;
+use App\Models\Customers\TaxDetail;
 use App\Models\Services\Service;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -76,8 +77,8 @@ class ImportCustomers extends Action
             try {
                 DB::beginTransaction();
 
-                // Split data by prefixes: customer., address., service.
-                [$customerData, $addressData, $serviceData] = $this->splitData($data);
+                // Split data by prefixes: customer., address., service., tax.
+                [$customerData, $addressData, $serviceData, $taxData] = $this->splitData($data);
 
                 // Track if any update occurred in this row
                 $rowUpdated = false;
@@ -172,6 +173,62 @@ class ImportCustomers extends Action
                     }
                 }
 
+                // TaxDetail handling: if any tax fields provided, create or update
+                if (!empty($taxData) && isset($taxData['tax_identification_number']) && trim($taxData['tax_identification_number']) !== '') {
+                    // Try to find if customer already has a tax detail
+                    $taxModel = TaxDetail::where('customer_id', $customer->id)->first();
+                    
+                    // Normalize boolean fields
+                    foreach (['enable_billing', 'send_notifications', 'send_invoice'] as $boolField) {
+                        if (isset($taxData[$boolField])) {
+                            $val = strtolower(trim($taxData[$boolField]));
+                            $taxData[$boolField] = in_array($val, ['1', 'true', 'yes', 'si', 'sí', 'on', 'active']) ? 1 : 0;
+                        } else {
+                            // Default values if not specified
+                            if ($boolField === 'enable_billing') {
+                                $taxData[$boolField] = 1; // enable by default if tax info is imported
+                            } else {
+                                $taxData[$boolField] = 0;
+                            }
+                        }
+                    }
+
+                    // For fields that are NOT NULL in DB, provide defaults if not set in CSV
+                    if (!isset($taxData['tax_identification_type']) || trim($taxData['tax_identification_type']) === '') {
+                        $taxData['tax_identification_type'] = 'NIT'; // Default
+                    }
+                    if (!isset($taxData['taxpayer_type']) || trim($taxData['taxpayer_type']) === '') {
+                        $taxData['taxpayer_type'] = 'personas_naturales'; // Default
+                    }
+                    if (!isset($taxData['fiscal_regime']) || trim($taxData['fiscal_regime']) === '') {
+                        $taxData['fiscal_regime'] = 'simplified'; // Default
+                    }
+                    if (!isset($taxData['business_name']) || trim($taxData['business_name']) === '') {
+                        // Default to customer full name
+                        $taxData['business_name'] = ucwords(($customerData['first_name'] ?? $customer->first_name) . ' ' . ($customerData['last_name'] ?? $customer->last_name));
+                    }
+
+                    if ($taxModel) {
+                        // Update existing tax detail
+                        $taxModel->fill($taxData);
+                        if ($taxModel->isDirty()) {
+                            $taxModel->save();
+                            $rowUpdated = true;
+                        }
+                    } else {
+                        // Check if the NIT is already used by another customer to avoid unique constraint error
+                        $existingTax = TaxDetail::where('tax_identification_number', $taxData['tax_identification_number'])->first();
+                        if ($existingTax) {
+                            throw new \RuntimeException("El NIT {$taxData['tax_identification_number']} ya está registrado en otro cliente.");
+                        }
+
+                        $taxModel = new TaxDetail($taxData);
+                        $taxModel->customer_id = $customer->id;
+                        $taxModel->save();
+                        $rowUpdated = true;
+                    }
+                }
+
                 // Service handling: if any service fields provided, create or update
                 if (!empty($serviceData)) {
                     $serviceId = $serviceData['id'] ?? null;
@@ -260,6 +317,7 @@ class ImportCustomers extends Action
         $customer = [];
         $address = [];
         $service = [];
+        $tax = [];
         foreach ($data as $key => $value) {
             if (strpos($key, 'customer.') === 0) {
                 $customer[substr($key, 9)] = $this->nullIfEmpty($value);
@@ -267,13 +325,15 @@ class ImportCustomers extends Action
                 $address[substr($key, 8)] = $this->nullIfEmpty($value);
             } elseif (strpos($key, 'service.') === 0) {
                 $service[substr($key, 8)] = $this->nullIfEmpty($value);
+            } elseif (strpos($key, 'tax.') === 0) {
+                $tax[substr($key, 4)] = $this->nullIfEmpty($value);
             }
         }
         // defaults for customer
         if (!isset($customer['customer_status']) || empty($customer['customer_status'])) {
             $customer['customer_status'] = 'active';
         }
-        return [$customer, $address, $service];
+        return [$customer, $address, $service, $tax];
     }
 
     private function nullIfEmpty($value)

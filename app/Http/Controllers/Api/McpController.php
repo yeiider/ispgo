@@ -107,7 +107,7 @@ class McpController extends Controller
             if ($method === 'onepay') {
                 $handler = new OnePayHandler();
                 if ($action === 'resend') {
-                    if (!$invoice->onepay_charge_id) {
+                    if (!$invoice->onepay_charge_id && !$invoice->onepay_invoice_id) {
                         return response()->json(['message' => 'La factura no tiene cobro OnePay para reenviar'], 422);
                     }
                     $handler->resendPayment($invoice);
@@ -122,11 +122,14 @@ class McpController extends Controller
                 // create or recreate
                 $resp = $handler->createPayment($invoice);
 
-                // Try to capture common fields from OnePay response
-                $chargeId = $resp['id'] ?? ($resp['data']['id'] ?? null);
-                $paymentLink = $resp['payment_link'] ?? $resp['checkout_url'] ?? $resp['url'] ?? ($resp['data']['url'] ?? null);
-                $status = $resp['status'] ?? ($resp['data']['status'] ?? null);
+                $data = isset($resp['data']) && is_array($resp['data']) ? $resp['data'] : $resp;
 
+                $invoiceId = $data['id'] ?? null;
+                $chargeId = $data['payment_id'] ?? $data['payment']['id'] ?? null;
+                $paymentLink = $data['payment']['payment_link'] ?? $data['payment_link'] ?? null;
+                $status = $data['status'] ?? 'pending';
+
+                $invoice->onepay_invoice_id = $invoiceId;
                 $invoice->onepay_charge_id = $chargeId;
                 $invoice->onepay_payment_link = $paymentLink;
                 $invoice->onepay_status = $status;
@@ -136,6 +139,7 @@ class McpController extends Controller
                 return response()->json([
                     'method' => 'onepay',
                     'action' => 'create',
+                    'onepay_invoice_id' => $invoiceId,
                     'onepay_charge_id' => $chargeId,
                     'payment_link' => $paymentLink,
                     'status' => $status,

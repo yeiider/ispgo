@@ -22,7 +22,7 @@ class ProductStock extends Model
     ];
 
     protected $casts = [
-        'quantity' => 'integer',
+        'quantity' => 'float',
         'min_stock' => 'integer',
         'max_stock' => 'integer',
     ];
@@ -68,7 +68,7 @@ class ProductStock extends Model
     /**
      * Incrementa la cantidad de stock.
      */
-    public function incrementStock(int $amount): self
+    public function incrementStock($amount): self
     {
         $this->increment('quantity', $amount);
         return $this;
@@ -77,7 +77,7 @@ class ProductStock extends Model
     /**
      * Decrementa la cantidad de stock.
      */
-    public function decrementStock(int $amount): self
+    public function decrementStock($amount): self
     {
         $this->decrement('quantity', $amount);
         return $this;

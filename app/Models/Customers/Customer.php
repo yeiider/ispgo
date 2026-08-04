@@ -241,6 +241,10 @@ class Customer extends Authenticatable implements MustVerifyEmail
                 event(new CustomerStatusUpdated($customer));
             }
         });
+
+        static::updated(function ($customer) {
+            event(new \App\Events\CustomerUpdated($customer));
+        });
     }
 
     public function scopeActive($query)

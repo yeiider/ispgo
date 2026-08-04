@@ -110,9 +110,11 @@ type EquipmentAssignment {
     id: ID!
     user_id: ID!
     product_id: ID!
+    warehouse_id: ID
     user: User! @belongsTo
     product: InventoryProduct! @belongsTo
-    quantity: Int!
+    warehouse: InventoryWarehouse @belongsTo
+    quantity: Float!
     assigned_at: String
     returned_at: String
     status: String
@@ -296,6 +298,11 @@ extend type Query {
 
     productTotalStock(product_id: ID!): ProductTotalStock @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@productTotalStock")
 
+    # Obtener usuarios que tienen inventario asignado
+    usersWithInventory(
+        search: String
+    ): [User!]! @paginate(defaultCount: 15, builder: "App\\GraphQL\\Queries\\InventoryQuery@usersWithInventoryQuery")
+
     # Asignaciones
     equipmentAssignments(
         user_id: ID @eq
@@ -309,6 +316,7 @@ extend type Query {
         service_id: ID @eq
         product_id: ID @eq
         user_id: ID @eq
+        from_user_stock: Boolean @eq
     ): [ServiceMaterial!]! @paginate(defaultCount: 15, model: "App\\Models\\Services\\ServiceMaterial")
 }
 
@@ -376,11 +384,12 @@ extend type Mutation {
     assignProductToUser(
         user_id: ID! @rules(apply: ["required", "exists:users,id"])
         product_id: ID! @rules(apply: ["required", "exists:products,id"])
-        quantity: Int! @rules(apply: ["required", "numeric", "min:1"])
+        warehouse_id: ID! @rules(apply: ["required", "exists:warehouses,id"])
+        quantity: Float! @rules(apply: ["required", "numeric", "min:0.01"])
         assigned_at: String
         condition_on_assignment: String
         notes: String
-    ): EquipmentAssignment @create(model: "App\\Models\\Inventory\\EquipmentAssignment")
+    ): EquipmentAssignment @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@assignProductToUser")
 
     updateEquipmentAssignment(
         id: ID! @rules(apply: ["required", "exists:equipment_assignments,id"])
@@ -390,12 +399,23 @@ extend type Mutation {
         notes: String
     ): EquipmentAssignment @update(model: "App\\Models\\Inventory\\EquipmentAssignment")
 
+    returnEquipmentAssignment(
+        id: ID! @rules(apply: ["required", "exists:equipment_assignments,id"])
+        quantity: Float! @rules(apply: ["required", "numeric", "min:0.01"])
+        warehouse_id: ID @rules(apply: ["exists:warehouses,id"])
+        returned_at: String
+        status: String! @rules(apply: ["required", "in:returned,lost,damaged"])
+        condition_on_return: String
+        notes: String
+    ): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@returnEquipmentAssignment")
+
     assignProductToService(
         service_id: Int! @rules(apply: ["required", "exists:services,id"])
         product_id: Int! @rules(apply: ["required", "exists:products,id"])
         quantity: Float! @rules(apply: ["required", "numeric", "min:0.01"])
         from_user_stock: Boolean = false
-        user_id: Int @rules(apply: ["exists:users,id"])
+        user_id: Int @rules(apply: ["nullable", "exists:users,id"])
+        warehouse_id: Int @rules(apply: ["nullable", "exists:warehouses,id"])
         notes: String
     ): ServiceMaterial @field(resolver: "App\\GraphQL\\Mutations\\ServiceMaterialMutation@assign")
 }

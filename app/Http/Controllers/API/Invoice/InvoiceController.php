@@ -248,4 +248,57 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * Sincronizar una factura manualmente con Siigo de forma síncrona.
+     */
+    public function syncToSiigo(int $id): \Illuminate\Http\JsonResponse
+    {
+        try {
+            /** @var \App\Models\Invoice\Invoice $invoice */
+            $invoice = $this->invoiceService->getById($id);
+            if (!\Ispgo\Siigo\Settings\ConfigProviderSiigo::getEnabled()) {
+                return response()->json(['error' => 'La integración con Siigo no está activa en la configuración.'], Response::HTTP_BAD_REQUEST);
+            }
+
+            // 1. Sync invoice creation
+            $job = new \Ispgo\Siigo\Jobs\CreateSiigoInvoice($invoice, true);
+            dispatch_sync($job);
+
+            $invoice->refresh();
+
+            // 2. If status is paid, sync payment voucher as well
+            if ($invoice->status === 'paid') {
+                $payJob = new \Ispgo\Siigo\Jobs\PaySiigoInvoice($invoice, (float)$invoice->total, true);
+                dispatch_sync($payJob);
+            }
+
+            // 3. If status is canceled, sync credit note as well
+            if ($invoice->status === 'canceled') {
+                $cancelJob = new \Ispgo\Siigo\Jobs\CancelSiigoInvoice($invoice, true);
+                dispatch_sync($cancelJob);
+            }
+
+            $invoice->refresh();
+            $info = $invoice->additional_information ?? [];
+
+            return response()->json([
+                'message' => 'Factura sincronizada exitosamente con Siigo.',
+                'siigo_invoice_id' => $info['siigo_invoice_id'] ?? null,
+                'siigo_consecutive' => $info['siigo_consecutive'] ?? null,
+                'siigo_prefix' => $info['siigo_prefix'] ?? 'FV',
+                'siigo_date' => $info['siigo_date'] ?? null,
+                'siigo_voucher_id' => $info['siigo_voucher_id'] ?? null,
+                'siigo_voucher_name' => $info['siigo_voucher_name'] ?? null,
+                'siigo_voucher_number' => $info['siigo_voucher_number'] ?? null,
+                'siigo_credit_note_id' => $info['siigo_credit_note_id'] ?? null,
+                'siigo_credit_note_name' => $info['siigo_credit_note_name'] ?? null,
+                'siigo_credit_note_number' => $info['siigo_credit_note_number'] ?? null,
+                'additional_information' => $info,
+            ], Response::HTTP_OK);
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'Error al sincronizar factura con Siigo: ' . $exception->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

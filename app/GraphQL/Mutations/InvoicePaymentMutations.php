@@ -38,6 +38,11 @@ class InvoicePaymentMutations
             $dailyBoxId = $assignedRegister->id;
         }
 
+        $additional = [];
+        if (!empty($args['transaction_date'])) {
+            $additional['transaction_date'] = $args['transaction_date'];
+        }
+
         // Preparar datos
         $data = [
             'invoice_id' => $args['invoice_id'],
@@ -50,6 +55,7 @@ class InvoicePaymentMutations
             'notes' => $args['notes'] ?? null,
             'payment_support' => $args['payment_support'] ?? null,
             'daily_box_id' => $dailyBoxId,
+            'additional_information' => !empty($additional) ? $additional : null,
         ];
 
         // Validar que el monto no exceda el saldo pendiente

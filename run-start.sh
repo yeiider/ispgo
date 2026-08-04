@@ -1,19 +1,26 @@
 #!/bin/bash
+set -e
 
-# Ejecutar las demás tareas
-echo "Limpiando la caché y optimizando..."
+echo "=== Arreglando permisos de storage... ==="
+mkdir -p /app/storage/framework/views /app/storage/framework/cache/data /app/storage/framework/sessions /app/storage/logs
+chown -R nobody:nogroup /app/storage /app/bootstrap/cache 2>/dev/null || true
+chmod -R 775 /app/storage /app/bootstrap/cache
+
+echo "=== Limpiando cache y optimizando... ==="
 php artisan optimize:clear
-php artisan storage:link
+php artisan storage:link 2>/dev/null || true
 
-echo "Ejecutando migraciones..."
+echo "=== Ejecutando migraciones... ==="
 php artisan migrate --force
 
-echo "Validacion del schema graphql"
-php artisan lighthouse:validate-schema || echo "Advertencia: Error en schema"
+echo "=== Validando schema GraphQL... ==="
+php artisan lighthouse:validate-schema || echo "⚠️ Advertencia: Error en schema"
 
-echo "Verificando la licencia de Laravel Nova..."
-php artisan nova:check-license || echo "Advertencia: Error en licencia"
+echo "=== Verificando licencia Laravel Nova... ==="
+php artisan nova:check-license || echo "⚠️ Advertencia: Error en licencia"
 
-php artisan route:clear
+echo "=== Iniciando php-fpm... ==="
+php-fpm -y /assets/php-fpm.conf -D
 
-echo "¡Script completado con éxito!"
+echo "=== Iniciando nginx... ==="
+exec nginx -c /app/nginx.conf

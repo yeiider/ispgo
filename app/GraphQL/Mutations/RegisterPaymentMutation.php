@@ -67,9 +67,19 @@ class RegisterPaymentMutation
             $notes = $args['notes'] ?? null;
             $paymentRegisteredById = $args['payment_registered_by'] ?? null;
 
+            if ($paymentMethod === 'transfer' && empty($args['transaction_date'])) {
+                return [
+                    'success' => false,
+                    'message' => __('La fecha de transacción es obligatoria para pagos por transferencia.'),
+                ];
+            }
+
             $additional = [];
             if (!empty($args['transfer_reference'])) {
                 $additional['transfer_reference'] = $args['transfer_reference'];
+            }
+            if (!empty($args['transaction_date'])) {
+                $additional['transaction_date'] = $args['transaction_date'];
             }
 
             $dailyBoxId = null;

@@ -57,9 +57,25 @@ type TicketAttachment {
     user: User! @belongsTo
 }
 
+type TicketIssueType {
+    id: ID!
+    name: String!
+    description: String
+    is_active: Boolean!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
 # --------------- Ticket Queries ---------------
 
 extend type Query {
+    ticketIssueTypes(
+        search: String
+        name: String @where(operator: "like")
+        is_active: Boolean @eq
+    ): [TicketIssueType!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Builders\\TicketIssueTypeBuilder@index") @orderBy(column: "created_at", direction: DESC)
+    allTicketIssueTypes: [TicketIssueType!]! @field(resolver: "App\\GraphQL\\Queries\\TicketIssueTypeQuery@allActive")
+
     tickets(
         status: String @eq
         priority: String @eq
@@ -68,6 +84,8 @@ extend type Query {
         title: String
         recent_only: Boolean
         router_id: ID
+        created_at_from: String
+        created_at_to: String
     ): [Ticket!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Builders\\TicketBuilder@index") @orderBy(column: "created_at", direction: DESC)
     ticket(id: ID! @eq): Ticket @find(model: "App\\Models\\Ticket")
     myTickets: [Ticket!]! @field(resolver: "App\\GraphQL\\Queries\\TicketQuery@myTickets")
@@ -76,6 +94,23 @@ extend type Query {
 # --------------- Ticket Mutations ---------------
 
 extend type Mutation {
+    createTicketIssueType(
+        name: String! @rules(apply: ["required", "max:255"])
+        description: String
+        is_active: Boolean
+    ): TicketIssueType @create(model: "App\\Models\\TicketIssueType") @guard
+
+    updateTicketIssueType(
+        id: ID! @rules(apply: ["required", "exists:ticket_issue_types,id"])
+        name: String @rules(apply: ["max:255"])
+        description: String
+        is_active: Boolean
+    ): TicketIssueType @update(model: "App\\Models\\TicketIssueType") @guard
+
+    deleteTicketIssueType(
+        id: ID! @rules(apply: ["required", "exists:ticket_issue_types,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketIssueTypeMutation@delete") @guard
+
     createTicket(
         customer_id: ID @rules(apply: ["nullable", "exists:customers,id"])
         service_id: ID @rules(apply: ["nullable", "exists:services,id"])

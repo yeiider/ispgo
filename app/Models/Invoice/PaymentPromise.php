@@ -95,7 +95,7 @@ class PaymentPromise extends Model
             return;
         }
 
-        if ($service->service_status === 'active') {
+        if ($service->service_status !== 'suspended') {
             return;
         }
 

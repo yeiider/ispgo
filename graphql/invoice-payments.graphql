@@ -72,6 +72,9 @@ input CreateInvoicePaymentInput {
     "Comprobante de pago"
     paymentSupport: String @rename(attribute: "payment_support")
     dailyBoxId: ID @rename(attribute: "daily_box_id") @rules(apply: ["exists:cash_registers,id"])
+
+    "Fecha y hora de transacción para transferencias"
+    transactionDate: String @rename(attribute: "transaction_date")
 }
 
 "Input para actualizar un abono existente"
