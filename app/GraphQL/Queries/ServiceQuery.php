@@ -13,7 +13,7 @@ class ServiceQuery
      */
     public function __invoke($_, array $args): Builder
     {
-        $query = Service::query();
+        $query = Service::query()->with(['customer', 'customer.addresses', 'plan', 'router', 'additionalPlans']);
 
         // Generic search: SN or customer name (first_name + last_name)
         if (!empty($args['search'])) {

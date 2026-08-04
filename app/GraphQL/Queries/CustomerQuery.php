@@ -13,7 +13,7 @@ class CustomerQuery
      */
     public function __invoke($_, array $args): Builder
     {
-        $query = Customer::query();
+        $query = Customer::query()->with(['services', 'invoices', 'addresses']);
 
         if (!empty($args['first_name'])) {
             $query->where('first_name', 'like', '%' . $args['first_name'] . '%');
