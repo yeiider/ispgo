@@ -22,18 +22,20 @@ class OnePayMutation
         try {
             $payment = $this->onePayHandler->createPayment($invoice);
 
-            // Actualizar la factura con el ID del cobro si se generó correctamente
-            if (isset($payment['data']) && isset($payment['data']['id'])) {
-                $invoice->forceFill(
-                    [
-                        'onepay_charge_id' => $payment['data']['id'],
-                        'onepay_payment_link' => $payment['data']['payment_link'],
-                        'onepay_status' => $payment['data']['status'],
-                    ]
-                )->save();
-            } elseif (isset($payment['id'])) {
-                $invoice->forceFill(['onepay_charge_id' => $payment['id']])->save();
-            }
+            $data = isset($payment['data']) && is_array($payment['data']) ? $payment['data'] : $payment;
+
+            $invoiceId = $data['id'] ?? null;
+            $chargeId = $data['payment_id'] ?? $data['payment']['id'] ?? null;
+            $paymentLink = $data['payment']['payment_link'] ?? $data['payment_link'] ?? null;
+            $status = $data['status'] ?? 'pending';
+
+            $invoice->forceFill([
+                'onepay_invoice_id' => $invoiceId,
+                'onepay_charge_id' => $chargeId,
+                'onepay_payment_link' => $paymentLink,
+                'onepay_status' => $status,
+                'onepay_metadata' => $payment,
+            ])->save();
 
             return [
                 'success' => true,

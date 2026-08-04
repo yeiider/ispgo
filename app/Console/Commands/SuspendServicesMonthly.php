@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 class SuspendServicesMonthly extends Command
 {
     protected $signature = 'services:suspend_everyday {router_id?}';
-    protected $description = 'Suspend services everyday if it matches the cut-off day (supports per-service billing mode)';
+    protected $description = 'Suspend services everyday if it matches the cut-off day (supports per-service billing mode and manageable billing cycles)';
 
     public function __construct()
     {
@@ -21,9 +21,10 @@ class SuspendServicesMonthly extends Command
 
     public function handle()
     {
-        $currentDate = Carbon::now();
-        $today       = Carbon::now()->startOfDay();
-        $routerId    = $this->argument('router_id');
+        $isManageable = GeneralProviderConfig::getManageableBillingCycle();
+        $currentDate  = Carbon::now();
+        $today        = Carbon::now()->startOfDay();
+        $routerId     = $this->argument('router_id');
 
         $this->info("[EVERYDAY] Iniciando suspensión de servicios con facturas vencidas e impagas sin promesa vigente...");
         $this->info("[EVERYDAY] Fecha actual: {$today->toDateString()}");
@@ -37,20 +38,21 @@ class SuspendServicesMonthly extends Command
             $routersQuery->where('id', $routerId);
         }
 
-        $routersQuery->get()->each(function ($router) use ($currentDate, $today) {
+        $routersQuery->get()->each(function ($router) use ($isManageable, $currentDate, $today) {
             $cutOffDate = GeneralProviderConfig::getCutOffDate($router->id);
 
-            if ($currentDate->day != $cutOffDate) {
+            // Si los ciclos no son administrables y hoy no es el día de corte por defecto del router, omitir todo el router
+            if (!$isManageable && (int)$currentDate->day !== (int)$cutOffDate) {
                 return;
             }
 
-            $this->info("[EVERYDAY] Procesando router {$router->name} (ID: {$router->id}) - Día de corte: {$cutOffDate}");
+            $this->info("[EVERYDAY] Procesando router {$router->name} (ID: {$router->id}) - Día de corte por defecto: {$cutOffDate}");
 
-            // Obtener servicios activos del router con su customer cargado
+            // Obtener servicios activos del router con su customer y billingCycle cargados
             $services = Service::withoutGlobalScope('router_filter')
                 ->where('service_status', 'active')
                 ->where('router_id', $router->id)
-                ->with('customer')
+                ->with(['customer', 'billingCycle'])
                 ->get();
 
             foreach ($services as $service) {
@@ -59,6 +61,19 @@ class SuspendServicesMonthly extends Command
 
                     if (!$customer) {
                         continue;
+                    }
+
+                    // Si los ciclos son administrables, verificar si hoy es el día de suspensión de este servicio específico
+                    if ($isManageable) {
+                        if ($service->billingCycle && $service->billingCycle->status === 'active') {
+                            if ((int)$service->billingCycle->suspension_day !== (int)$currentDate->day) {
+                                continue;
+                            }
+                        } else {
+                            if ((int)$cutOffDate !== (int)$currentDate->day) {
+                                continue;
+                            }
+                        }
                     }
 
                     if ($customer->usesPerServiceBilling()) {

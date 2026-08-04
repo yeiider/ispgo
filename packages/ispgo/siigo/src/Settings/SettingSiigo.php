@@ -55,6 +55,56 @@ class SettingSiigo
                 "label" => "Cuando sincronizar facturas",
                 "options" =>  \Ispgo\Siigo\Settings\Sources\SyncCustomersOptions::class,
             ],
+            "document_id" => [
+                "field" => "text-field",
+                "label" => "ID del Tipo de Documento de Factura (FV)",
+                "placeholder" => "e.g. 24445"
+            ],
+            "payment_id" => [
+                "field" => "text-field",
+                "label" => "ID del Medio de Pago a Crédito",
+                "placeholder" => "e.g. 12"
+            ],
+            "product_code" => [
+                "field" => "text-field",
+                "label" => "Código de Producto/Servicio por defecto",
+                "placeholder" => "e.g. ISP01"
+            ],
+            "tax_id" => [
+                "field" => "text-field",
+                "label" => "ID de Impuesto por defecto (opcional)",
+                "placeholder" => "e.g. 31779"
+            ],
+            "voucher_document_id" => [
+                "field" => "text-field",
+                "label" => "ID del Tipo de Documento de Recibo de Caja (RC)",
+                "placeholder" => "e.g. 24446"
+            ],
+            "voucher_account_debit" => [
+                "field" => "text-field",
+                "label" => "Cuenta contable de Caja/Banco (Débito)",
+                "placeholder" => "e.g. 11100501"
+            ],
+            "voucher_account_credit" => [
+                "field" => "text-field",
+                "label" => "Cuenta contable de Cartera/Cliente (Crédito)",
+                "placeholder" => "e.g. 13050501"
+            ],
+            "credit_note_document_id" => [
+                "field" => "text-field",
+                "label" => "ID del Tipo de Documento de Nota Crédito (NC)",
+                "placeholder" => "e.g. 24447"
+            ],
+            "seller_id" => [
+                "field" => "text-field",
+                "label" => "ID del Vendedor por defecto",
+                "placeholder" => "e.g. 719"
+            ],
+            "cost_center" => [
+                "field" => "text-field",
+                "label" => "ID del Centro de Costo",
+                "placeholder" => "e.g.941"
+            ],
         ];
     }
 }

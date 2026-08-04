@@ -1,0 +1,40 @@
+# --------------- Billing Cycles ---------------
+
+type BillingCycle {
+    id: ID!
+    name: String!
+    billing_day: Int!
+    suspension_day: Int!
+    payment_due_day: Int!
+    status: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+    services: [Service!]! @hasMany
+}
+
+input CreateBillingCycleInput {
+    name: String! @rules(apply: ["required", "string", "max:255"])
+    billing_day: Int! @rules(apply: ["required", "integer", "min:1", "max:31"])
+    suspension_day: Int! @rules(apply: ["required", "integer", "min:1", "max:31"])
+    payment_due_day: Int! @rules(apply: ["required", "integer", "min:1", "max:31"])
+    status: String @rules(apply: ["in:active,inactive"])
+}
+
+input UpdateBillingCycleInput {
+    name: String @rules(apply: ["string", "max:255"])
+    billing_day: Int @rules(apply: ["integer", "min:1", "max:31"])
+    suspension_day: Int @rules(apply: ["integer", "min:1", "max:31"])
+    payment_due_day: Int @rules(apply: ["integer", "min:1", "max:31"])
+    status: String @rules(apply: ["in:active,inactive"])
+}
+
+extend type Query {
+    billingCycles(status: String @eq): [BillingCycle!]! @all(model: "App\\Models\\BillingCycle")
+    billingCycle(id: ID! @eq): BillingCycle @find(model: "App\\Models\\BillingCycle")
+}
+
+extend type Mutation {
+    createBillingCycle(input: CreateBillingCycleInput! @spread): BillingCycle! @create(model: "App\\Models\\BillingCycle")
+    updateBillingCycle(id: ID! @eq, input: UpdateBillingCycleInput! @spread): BillingCycle! @update(model: "App\\Models\\BillingCycle")
+    deleteBillingCycle(id: ID! @eq): BillingCycle! @delete(model: "App\\Models\\BillingCycle")
+}

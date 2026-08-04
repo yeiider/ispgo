@@ -33,16 +33,19 @@ class GenerateInvoiceMutation
                     'success' => false,
                     'message' => __('El cliente no existe.'),
                     'invoice' => null,
+                    'invoices' => [],
                 ];
             }
 
             // Verificar servicios activos
-            $activeServices = $customer->activeServices()->count();
-            if ($activeServices === 0) {
+            $activeServicesQuery = $customer->activeServices();
+            $activeServicesCount = $activeServicesQuery->count();
+            if ($activeServicesCount === 0) {
                 return [
                     'success' => false,
                     'message' => __('El cliente no tiene servicios activos. Verifique que el cliente tenga servicios con estado diferente a "free" o "inactive".'),
                     'invoice' => null,
+                    'invoices' => [],
                 ];
             }
 
@@ -54,6 +57,7 @@ class GenerateInvoiceMutation
                         'success' => false,
                         'message' => __('El servicio seleccionado no existe o no pertenece al cliente.'),
                         'invoice' => null,
+                        'invoices' => [],
                     ];
                 }
             }
@@ -71,15 +75,68 @@ class GenerateInvoiceMutation
                 }
             }
 
-            // Generar la factura, filtrando por servicio específico si se indicó
             $serviceBuildInvoice = new CustomerBillingService();
+
+            // ─── Facturación "Por servicios" (per_service) ───
+            // Cuando el cliente tiene billing_mode='per_service' y NO se seleccionó
+            // un servicio específico ("Todos los servicios activos"), se genera
+            // una factura individual por cada servicio activo.
+            if ($customer->usesPerServiceBilling() && !$serviceId) {
+                $activeServices = $customer->activeServices()->get();
+                $generatedInvoices = [];
+                $errors = [];
+
+                foreach ($activeServices as $svc) {
+                    try {
+                        $invoice = $serviceBuildInvoice->generateForPeriod($customer, now(), $svc->id);
+                        if ($invoice) {
+                            event(new FinalizeInvoice($invoice));
+                            $generatedInvoices[] = $invoice;
+                        }
+                    } catch (\Exception $e) {
+                        Log::warning("No se pudo generar factura individual para servicio {$svc->id}", [
+                            'customer_id' => $customerId,
+                            'service_id' => $svc->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                        $errors[] = $svc->id;
+                    }
+                }
+
+                if (empty($generatedInvoices)) {
+                    return [
+                        'success' => false,
+                        'message' => __('No se pudo generar ninguna factura para los servicios del cliente.'),
+                        'invoice' => null,
+                        'invoices' => [],
+                    ];
+                }
+
+                $count = count($generatedInvoices);
+                $msg = $count === 1
+                    ? __('Se generó 1 factura individual exitosamente.')
+                    : __("Se generaron {$count} facturas individuales exitosamente.");
+
+                if (!empty($errors)) {
+                    $msg .= ' ' . __('Algunos servicios no pudieron ser facturados: ') . implode(', ', $errors);
+                }
+
+                return [
+                    'success' => true,
+                    'message' => $msg,
+                    'invoice' => $generatedInvoices[0],
+                    'invoices' => $generatedInvoices,
+                ];
+            }
+
+            // ─── Facturación "Total" (default) o servicio específico ───
             $invoice = $serviceBuildInvoice->generateForPeriod($customer, now(), $serviceId ?: null);
 
             if (!$invoice) {
                 Log::warning('No se generó factura para el cliente', [
                     'customer_id' => $customerId,
                     'service_id'  => $serviceId,
-                    'active_services_count' => $activeServices,
+                    'active_services_count' => $activeServicesCount,
                     'customer_status' => $customer->customer_status,
                 ]);
 
@@ -87,6 +144,7 @@ class GenerateInvoiceMutation
                     'success' => false,
                     'message' => __('No se pudo generar la factura para el cliente. Puede que ya exista una factura para este período o que no haya servicios facturables.'),
                     'invoice' => null,
+                    'invoices' => [],
                 ];
             }
 
@@ -97,6 +155,7 @@ class GenerateInvoiceMutation
                 'success' => true,
                 'message' => __('Factura generada exitosamente.'),
                 'invoice' => $invoice,
+                'invoices' => [$invoice],
             ];
 
         } catch (\Exception $e) {
@@ -115,6 +174,7 @@ class GenerateInvoiceMutation
                 'success' => false,
                 'message' => __('Error al generar la factura: :message', ['message' => $errorMessage]),
                 'invoice' => null,
+                'invoices' => [],
             ];
         }
     }

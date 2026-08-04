@@ -29,9 +29,20 @@
         .print-btn { display: block; width: 100%; margin: 10px auto; padding: 8px; background: #2563eb; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
         @media print {
             @page { size: auto; margin: 2mm; }
-            body { background: #fff; }
+            body { 
+                background: #fff; 
+                color: #000000;
+                -webkit-text-stroke: 0.1px #000000;
+                text-shadow: 0.1px 0 0 #000000;
+            }
             .print-btn { display: none; }
             .ticket { box-shadow: none; border: 0; margin: 0 auto; }
+            .muted { color: #000000 !important; font-size: 13px; }
+            .divider { border-top: 1px dashed #000000 !important; }
+            .row { font-size: 13px; }
+            h1 { font-size: 17px; }
+            h2 { font-size: 14px; }
+            .total { font-size: 15px; }
         }
     </style>
 </head>

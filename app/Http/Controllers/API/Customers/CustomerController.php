@@ -250,4 +250,35 @@ class CustomerController extends Controller
             return response()->json(['error' => 'There is an error.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * Sincronizar un cliente manualmente con Siigo de forma síncrona.
+     */
+    public function syncToSiigo(int $id): \Illuminate\Http\JsonResponse
+    {
+        try {
+            /** @var \App\Models\Customers\Customer $customer */
+            $customer = $this->customerService->getById($id);
+            if (!\Ispgo\Siigo\Settings\ConfigProviderSiigo::getEnabled()) {
+                return response()->json(['error' => 'La integración con Siigo no está activa en la configuración.'], Response::HTTP_BAD_REQUEST);
+            }
+
+            $job = new \Ispgo\Siigo\Jobs\CreateSiigoCustomer($customer, true); // force = true
+            dispatch_sync($job);
+
+            $identification = \Ispgo\Siigo\Helpers\SiigoHelper::getCustomerIdentification($customer);
+            $customer->load('taxDetails');
+            $taxDetails = $customer->taxDetails;
+
+            return response()->json([
+                'message' => "Cliente ({$identification}) sincronizado exitosamente con Siigo.",
+                'identification' => $identification,
+                'siigo_customer_id' => $taxDetails?->siigo_customer_id,
+                'siigo_synced_at' => $taxDetails?->siigo_synced_at ? $taxDetails->siigo_synced_at->toIso8601String() : now()->toIso8601String(),
+            ], Response::HTTP_OK);
+        } catch (\Exception $exception) {
+            report($exception);
+            return response()->json(['error' => 'Error al sincronizar con Siigo: ' . $exception->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

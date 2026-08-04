@@ -49,4 +49,19 @@ class OnePayQuery
     {
         return $this->onePayHandler->getCustomerByDocument($args['document_number']);
     }
+
+    public function getInvoice($_, array $args)
+    {
+        $result = $this->onePayHandler->getInvoice($args['invoice_id']);
+
+        if (isset($result['data']) && is_array($result['data']) && count($result['data']) > 0) {
+            return $result['data'][0];
+        }
+
+        if (isset($result['id'])) {
+            return $result;
+        }
+
+        return null;
+    }
 }

@@ -7,6 +7,7 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 #import frontend_permissions.graphql
 #import templates.graphql
 #import contracts.graphql
+#import billing_cycles.graphql
 
 "A date string with format 'Y-m-d', e.g. '2011-05-23'."
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
@@ -51,6 +52,7 @@ type Query {
         service_status: String
         billing_status: String
         created_at_date: String
+        router_id: Int
         search: String
         sort_column: String
         sort_direction: String
@@ -257,6 +259,7 @@ type Mutation @guard {
         data_limit: Int
         last_maintenance: Date
         billing_cycle: String
+        billing_cycle_id: Int
         service_priority: String @rules(apply: ["in:normal,high,critical"])
         sn: String
         unu_longitude: String
@@ -287,6 +290,7 @@ type Mutation @guard {
         data_limit: Int
         last_maintenance: Date
         billing_cycle: String
+        billing_cycle_id: Int
         service_priority: String @rules(apply: ["in:normal,high,critical"])
         sn: String
         unu_longitude: String
@@ -415,6 +419,7 @@ type Mutation @guard {
         payment_registered_by: ID @rules(apply: ["exists:users,id"])
         transfer_reference: String
         notes: String
+        transaction_date: String
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentMutation@resolve")
 
     applyDiscount(
@@ -587,6 +592,8 @@ type Customer {
     identity_document: String
     document_type: String!
     customer_status: String
+    date_of_birth: Date
+    additional_notes: String
     router_id: Int
     "Modo de facturación: null|'total' = una factura total por cliente (default); 'per_service' = una factura por servicio"
     billing_mode: String
@@ -599,6 +606,7 @@ type Customer {
     iptvLineUsers: [IptvLineUser!]! @hasMany
     invoices: [Invoice!]! @hasMany @orderBy(column: "increment_id", direction: DESC)
     router: Router @belongsTo
+    taxDetails: TaxDetail @hasOne
 }
 
 type Address {
@@ -609,10 +617,29 @@ type Address {
     postal_code: String
     country: String
     address_type: String
+    latitude: String
+    longitude: String
     created_at: DateTime!
     updated_at: DateTime!
 
     customer: Customer! @belongsTo
+}
+
+type TaxDetail {
+    id: ID!
+    customer_id: Int!
+    tax_identification_type: String
+    tax_identification_number: String
+    taxpayer_type: String
+    fiscal_regime: String
+    business_name: String
+    enable_billing: Boolean
+    send_notifications: Boolean
+    send_invoice: Boolean
+    siigo_customer_id: String
+    siigo_synced_at: DateTime
+    created_at: DateTime
+    updated_at: DateTime
 }
 
 type Service {
@@ -638,6 +665,7 @@ type Service {
     data_limit: Int
     last_maintenance: Date
     billing_cycle: String
+    billing_cycle_id: Int
     service_priority: String
     sn: String
     unu_longitude: String
@@ -657,6 +685,7 @@ type Service {
     napPort: NapPort @hasOne(relation: "napPort")
     additionalPlans: [AdditionalPlan!]! @belongsToMany(relation: "additionalPlans")
     iptvLineUser: IptvLineUser @hasOne(relation: "iptvLineUser")
+    billingCycle: BillingCycle @belongsTo(relation: "billingCycle")
 
     # Relaciones de facturación
     "Reglas de descuento/beneficio aplicables al servicio"
@@ -841,6 +870,7 @@ type GenerateInvoiceResult {
     success: Boolean!
     message: String
     invoice: Invoice
+    invoices: [Invoice!]
 }
 
 type ActionResult {
@@ -870,6 +900,7 @@ type User {
     frontendPermissions: [FrontendPermission!]! @belongsToMany(relation: "frontendPermissions")
     allPermissions: [Permission!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@allPermissions")
     registeredPayments: [InvoicePayment!]! @hasMany(relation: "invoicePayments")
+    equipmentAssignments: [EquipmentAssignment!]! @hasMany(relation: "equipmentAssignments")
 }
 
 type Role {

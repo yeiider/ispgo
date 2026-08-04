@@ -5,6 +5,7 @@ namespace App\Services\Billing;
 use App\Models\Customers\Customer;
 use App\Models\Invoice\Invoice;
 use App\Settings\InvoiceProviderConfig;
+use App\Settings\GeneralProviderConfig;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -77,7 +78,10 @@ class CustomerBillingService
             }
 
             // Flujo normal: crear el draft invoice
-            $periodKey = $period->format('Y-m');
+            $billingMode = GeneralProviderConfig::getBillingMode();
+            $periodKey = ($billingMode === 'arrears')
+                ? $period->copy()->subMonth()->format('Y-m')
+                : $period->format('Y-m');
             $invoice = $customer->openDraftInvoice($periodKey);
 
             DB::transaction(function () use (
@@ -266,7 +270,10 @@ class CustomerBillingService
         string   $routerRentalName
     ): Invoice
     {
-        $periodKey = $period->format('Y-m');
+        $billingMode = GeneralProviderConfig::getBillingMode();
+        $periodKey = ($billingMode === 'arrears')
+            ? $period->copy()->subMonth()->format('Y-m')
+            : $period->format('Y-m');
         $invoice = $customer->openDraftInvoice($periodKey);
         DB::transaction(function () use ($invoice, $routerRentalAmount, $routerRentalName) {
             $rentalItem = $invoice->items()->create([

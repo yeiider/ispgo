@@ -4,6 +4,8 @@ namespace App\GraphQL\Mutations;
 
 use App\Models\Inventory\EquipmentAssignment;
 use App\Models\Inventory\Product;
+use App\Models\Inventory\ProductStock;
+use App\Models\Inventory\Warehouse;
 use App\Models\Services\ServiceMaterial;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
@@ -19,8 +21,6 @@ class ServiceMaterialMutation
         $product = Product::findOrFail($args['product_id']);
 
         // 1. Validar que el producto sea asignable a servicio
-        // Si assignable_to_service es false, lanzamos error.
-        // Asumimos que si la columna es null, es false.
         if (!$product->assignable_to_service) {
             throw ValidationException::withMessages([
                 'product_id' => ['Este producto no está marcado como asignable a servicios.'],
@@ -30,6 +30,8 @@ class ServiceMaterialMutation
         $quantity = $args['quantity'];
         $fromUserStock = $args['from_user_stock'] ?? false;
         $userId = $args['user_id'] ?? auth()->id();
+        $serviceId = $args['service_id'];
+        $notes = $args['notes'] ?? null;
 
         // Validar que tengamos un usuario si es desde stock de usuario
         if ($fromUserStock && !$userId) {
@@ -38,33 +40,45 @@ class ServiceMaterialMutation
             ]);
         }
 
-        return DB::transaction(function () use ($args, $product, $quantity, $fromUserStock, $userId) {
-            // Lógica para descontar del stock del usuario
+        return DB::transaction(function () use ($args, $product, $quantity, $fromUserStock, $userId, $serviceId, $notes) {
+            // Lógica para descontar del stock del usuario o bodega general
             if ($fromUserStock) {
-                $this->decrementUserStock($userId, $product->id, $quantity);
+                $this->decrementUserStock($userId, $product->id, $quantity, $serviceId, $notes);
             } else {
-                // "Asignación Normal".
-                // Aquí podrías implementar descuento de bodega general si fuera necesario.
-                // Por ahora, solo registramos la asignación sin descontar de bodega específica
-                // o asumimos bodega principal. El requerimiento no especifica bodega para "normal".
+                // Asignación desde Bodega General: descontar de ProductStock
+                $warehouseId = $args['warehouse_id'] ?? $product->warehouse_id ?? Warehouse::first()?->id;
+                if ($warehouseId) {
+                    $stock = ProductStock::lockForUpdate()
+                        ->where('product_id', $product->id)
+                        ->where('warehouse_id', $warehouseId)
+                        ->first();
+
+                    if ($stock) {
+                        if ($stock->quantity < $quantity) {
+                            throw ValidationException::withMessages([
+                                'quantity' => ["Stock insuficiente en la bodega seleccionada. Disponible: {$stock->quantity}, Requerido: {$quantity}"],
+                            ]);
+                        }
+                        $stock->decrementStock($quantity);
+                    }
+                }
             }
 
             // Crear el registro de asignación al servicio
             return ServiceMaterial::create([
-                'service_id' => $args['service_id'],
-                'product_id' => $args['product_id'],
-                'user_id' => $userId, // Guardamos quién hizo la asignación o de quién se descontó
+                'service_id' => $serviceId,
+                'product_id' => $product->id,
+                'user_id' => $userId,
                 'quantity' => $quantity,
                 'from_user_stock' => $fromUserStock,
-                'notes' => $args['notes'] ?? null,
+                'notes' => $notes,
             ]);
         });
     }
 
-    protected function decrementUserStock($userId, $productId, $neededQty)
+    protected function decrementUserStock($userId, $productId, $neededQty, $serviceId = null, $notes = null)
     {
         // Buscar asignaciones 'assigned' de este usuario y producto
-        // Ordenamos por fecha mas antigua para FIFO? O cualquiera?
         $assignments = EquipmentAssignment::where('user_id', $userId)
             ->where('product_id', $productId)
             ->where('status', 'assigned')
@@ -84,33 +98,38 @@ class ServiceMaterialMutation
         foreach ($assignments as $assignment) {
             if ($remainingToDeduct <= 0) break;
 
+            $noteSuffix = "Instalado en servicio #" . ($serviceId ?? "N/A") . (!empty($notes) ? ": {$notes}" : "");
+
             if ($assignment->quantity <= $remainingToDeduct) {
                 // Consumimos toda esta asignación
                 $deducted = $assignment->quantity;
-                $assignment->status = 'consumed_in_service'; // O 'returned' o 'installed'?
-                // 'consumed_in_service' no es standard en EquipmentAssignmentStatus enum si existe,
-                // Pero status es string. Usaremos 'installed' o simplemente bajamos quantity a 0?
-                // El modelo EquipmentAssignment parece ser de "prestamo".
-                // Si se instala, ya no lo tiene el usuario.
-                // Vamos a reducir la cantidad o marcar como 'installed'.
-                
-                // Opción A: Reducir cantidad. Si 0, delete o status 'consumed'.
-                // Vamos a cambiar status a 'installed' si es total, o reducir quantity.
-                
                 $remainingToDeduct -= $deducted;
-                
-                // Actualizar assignment
-                $assignment->quantity = 0; 
-                $assignment->status = 'installed'; // Nuevo estado para indicar que se usó
-                $assignment->returned_at = now(); // Técnicamente "devuelto" o "finalizado"
-                $assignment->notes = ($assignment->notes ? $assignment->notes . "\n" : "") . "Instalado en servicio (Auto)";
-                $assignment->save(); 
+
+                // Actualizar la asignación a estado 'installed' conservando la cantidad consumida para el historial
+                $assignment->status = 'installed';
+                $assignment->returned_at = now();
+                $assignment->notes = ($assignment->notes ? $assignment->notes . "\n" : "") . $noteSuffix;
+                $assignment->save();
 
             } else {
-                // Consumimos parcial
-                $assignment->quantity -= $remainingToDeduct;
-                // No cambiamos status, sigue teniendo items
+                // Consumimos parcialmente: decrementar cantidad de la asignación original
+                $deducted = $remainingToDeduct;
+                $assignment->quantity -= $deducted;
                 $assignment->save();
+
+                // Crear nuevo registro de asignación consumida ('installed') para mantener el historial completo del técnico
+                $installedAssignment = new EquipmentAssignment();
+                $installedAssignment->user_id = $userId;
+                $installedAssignment->product_id = $productId;
+                $installedAssignment->warehouse_id = $assignment->warehouse_id;
+                $installedAssignment->quantity = $deducted;
+                $installedAssignment->assigned_at = $assignment->assigned_at ?? now();
+                $installedAssignment->returned_at = now();
+                $installedAssignment->status = 'installed';
+                $installedAssignment->condition_on_assignment = $assignment->condition_on_assignment;
+                $installedAssignment->notes = $noteSuffix;
+                $installedAssignment->save();
+
                 $remainingToDeduct = 0;
             }
         }
