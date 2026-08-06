@@ -55,12 +55,6 @@ class InvoiceApi extends Controller
 
     public function registerPayment(Request $request): JsonResponse
     {
-        // n8n / OnePay pueden enviar el payload como array con un solo elemento
-        $payload = $request->all();
-        if (is_array($payload) && array_is_list($payload) && isset($payload[0]) && is_array($payload[0])) {
-            $request->merge($payload[0]);
-        }
-
         $request->validate([
             'reference' => 'required|string',
             'method' => 'required|string',
@@ -73,25 +67,6 @@ class InvoiceApi extends Controller
         try {
             $reference = $request->input('reference');
             $invoiceModel = Invoice::findByDniOrInvoiceId($reference);
-
-            // Idempotencia: si la factura ya está pagada (webhook duplicado / reintento
-            // de la pasarela), devolver éxito para que n8n/OnePay dejen de reintentar.
-            if (!$invoiceModel) {
-                $paidInvoice = Invoice::where(function ($query) use ($reference) {
-                    $query->whereHas('customer', function ($q) use ($reference) {
-                        $q->where('identity_document', $reference);
-                    })->orWhere('increment_id', $reference);
-                })->where('status', 'paid')->orderBy('id', 'desc')->first();
-
-                if ($paidInvoice) {
-                    return response()->json([
-                        'message' => __('Payment already registered'),
-                        'data' => $paidInvoice,
-                        'status' => 200,
-                    ], 200);
-                }
-            }
-
             if ($invoiceModel) {
                 $invoiceModel->applyPayment(amount: $request->input("amount"),
                     paymentMethod: $request->input('method'),
