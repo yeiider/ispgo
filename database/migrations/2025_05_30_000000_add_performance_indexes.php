@@ -90,12 +90,14 @@ return new class extends Migration
         });
 
         // ── invoice_payments ─────────────────────────────────────────────────
-        Schema::table('invoice_payments', function (Blueprint $table) {
-            // invoice_id FK — eager-load invoice.payments
-            if (!$this->indexExists('invoice_payments', 'invoice_payments_invoice_id_index')) {
-                $table->index('invoice_id', 'invoice_payments_invoice_id_index');
-            }
-        });
+        if (Schema::hasTable('invoice_payments')) {
+            Schema::table('invoice_payments', function (Blueprint $table) {
+                // invoice_id FK — eager-load invoice.payments
+                if (!$this->indexExists('invoice_payments', 'invoice_payments_invoice_id_index')) {
+                    $table->index('invoice_id', 'invoice_payments_invoice_id_index');
+                }
+            });
+        }
     }
 
     public function down(): void
@@ -122,9 +124,11 @@ return new class extends Migration
             $table->dropIndex('customers_router_id_index');
         });
 
-        Schema::table('invoice_payments', function (Blueprint $table) {
-            $table->dropIndex('invoice_payments_invoice_id_index');
-        });
+        if (Schema::hasTable('invoice_payments')) {
+            Schema::table('invoice_payments', function (Blueprint $table) {
+                $table->dropIndex('invoice_payments_invoice_id_index');
+            });
+        }
     }
 
     /**
@@ -134,15 +138,6 @@ return new class extends Migration
      */
     private function indexExists(string $table, string $indexName): bool
     {
-        $connection = Schema::getConnection();
-        $dbName     = $connection->getDatabaseName();
-
-        $count = $connection->table('information_schema.statistics')
-            ->where('table_schema', $dbName)
-            ->where('table_name', $table)
-            ->where('index_name', $indexName)
-            ->count();
-
-        return $count > 0;
+        return in_array($indexName, collect(Schema::getIndexes($table))->pluck('name')->all());
     }
 };
