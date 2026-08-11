@@ -9,18 +9,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $dbName = DB::connection()->getDatabaseName();
-
         // Get existing indexes for customers and services tables
-        $customersIndexes = collect(DB::select(
-            "SELECT DISTINCT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
-            [$dbName, 'customers']
-        ))->pluck('INDEX_NAME')->unique()->values()->all();
-
-        $servicesIndexes = collect(DB::select(
-            "SELECT DISTINCT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
-            [$dbName, 'services']
-        ))->pluck('INDEX_NAME')->unique()->values()->all();
+        $customersIndexes = collect(Schema::getIndexes('customers'))->pluck('name')->all();
+        $servicesIndexes = collect(Schema::getIndexes('services'))->pluck('name')->all();
 
         Schema::table('customers', function (Blueprint $table) use ($customersIndexes) {
             // FULLTEXT indexes for LIKE %search% queries (scopeSearch)
