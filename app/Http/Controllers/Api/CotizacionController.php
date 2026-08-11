@@ -27,7 +27,7 @@ class CotizacionController extends Controller
             'ciudad' => ['required', 'string', 'max:120'],
             'plan' => ['required', 'string', 'max:150'],
             'canal' => ['required', Rule::in(['web', 'whatsapp'])],
-            'estado' => ['sometimes', Rule::in(['pendiente', 'atendida'])],
+            'estado' => ['sometimes', Rule::in(['pendiente', 'atendida', 'cancelada', 'no_contactado', 'completada'])],
             'notas' => ['nullable', 'string'],
             'metadata' => ['nullable', 'array'],
         ]);

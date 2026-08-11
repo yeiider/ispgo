@@ -4,6 +4,7 @@ namespace App\Nova\Actions\Customers;
 
 use App\Models\Customers\Address;
 use App\Models\Customers\Customer;
+use App\Models\Customers\TaxDetail;
 use App\Models\Services\Service;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -76,8 +77,11 @@ class ImportCustomers extends Action
             try {
                 DB::beginTransaction();
 
-                // Split data by prefixes: customer., address., service.
-                [$customerData, $addressData, $serviceData] = $this->splitData($data);
+                // Split data by prefixes: customer., address., service., tax.
+                [$customerData, $addressData, $serviceData, $taxData] = $this->splitData($data);
+
+                // Track if any update occurred in this row
+                $rowUpdated = false;
 
                 // Basic normalization
                 $identity = $customerData['identity_document'] ?? null;
@@ -100,6 +104,7 @@ class ImportCustomers extends Action
                         'document_type' => 'required|max:20',
                         'identity_document' => 'required|max:12',
                         'customer_status' => 'required|in:active,inactive',
+                        'router_id' => 'required|exists:routers,id',
                     ]);
                     if ($validator->fails()) {
                         throw new \RuntimeException('Errores de validación (customer): ' . $validator->errors()->toJson());
@@ -116,9 +121,7 @@ class ImportCustomers extends Action
                     $customer->fill($customerData);
                     if ($customer->isDirty()) {
                         $customer->save();
-                        $updated++;
-                    } else {
-                        $skipped++;
+                        $rowUpdated = true;
                     }
                 }
 
@@ -126,15 +129,27 @@ class ImportCustomers extends Action
                 if (!empty($addressData)) {
                     $addressId = $addressData['id'] ?? null;
                     $addressModel = null;
+                    
+                    // First try to find by ID if provided
                     if ($addressId) {
                         $addressModel = Address::where('customer_id', $customer->id)->where('id', $addressId)->first();
                     }
+                    
+                    // If not found by ID, check if customer already has an address
+                    if (!$addressModel) {
+                        $addressModel = Address::where('customer_id', $customer->id)->first();
+                    }
+                    
                     if ($addressModel) {
+                        // Update existing address
                         $addressModel->fill($addressData);
                         $addressModel->customer_id = $customer->id;
-                        $addressModel->save();
+                        if ($addressModel->isDirty()) {
+                            $addressModel->save();
+                            $rowUpdated = true;
+                        }
                     } else {
-                        // minimal required for address on create
+                        // Create new address - minimal required validation
                         $addrValidator = Validator::make($addressData, [
                             'address' => 'required|max:100',
                             'city' => 'required|max:100',
@@ -158,56 +173,123 @@ class ImportCustomers extends Action
                     }
                 }
 
-                // Service handling: if any service fields provided, create or update
-                if (!empty($serviceData)) {
-                    // Verificar si el cliente ya tiene algún servicio
-                    $existingService = Service::where('customer_id', $customer->id)->first();
+                // TaxDetail handling: if any tax fields provided, create or update
+                if (!empty($taxData) && isset($taxData['tax_identification_number']) && trim($taxData['tax_identification_number']) !== '') {
+                    // Try to find if customer already has a tax detail
+                    $taxModel = TaxDetail::where('customer_id', $customer->id)->first();
                     
-                    if (!$existingService) {
-                        // El cliente no tiene servicios, proceder a crear uno
-                        $serviceId = $serviceData['id'] ?? null;
-                        $serviceModel = null;
-                        if ($serviceId) {
-                            $serviceModel = Service::where('customer_id', $customer->id)->where('id', $serviceId)->first();
-                        }
-
-                        // If creating and service_location not provided, try to use first address
-                        if (!isset($serviceData['service_location'])) {
-                            $firstAddress = $customer->addresses()->first();
-                            if ($firstAddress) {
-                                $serviceData['service_location'] = $firstAddress->id;
-                            }
-                        }
-
-                        if ($serviceModel) {
-                            // Si se encontró por ID, actualizar
-                            $serviceModel->fill($serviceData);
-                            $serviceModel->customer_id = $customer->id;
-                            $serviceModel->save();
+                    // Normalize boolean fields
+                    foreach (['enable_billing', 'send_notifications', 'send_invoice'] as $boolField) {
+                        if (isset($taxData[$boolField])) {
+                            $val = strtolower(trim($taxData[$boolField]));
+                            $taxData[$boolField] = in_array($val, ['1', 'true', 'yes', 'si', 'sí', 'on', 'active']) ? 1 : 0;
                         } else {
-                            // Crear nuevo servicio solo si el cliente no tiene ninguno
-                            $svcValidator = Validator::make($serviceData, [
-                                'router_id' => 'required|exists:routers,id',
-                                'service_ip' => 'required|ip',
-                                'username_router' => 'required|string|max:255',
-                                'password_router' => 'required|string|max:255',
-                                'service_status' => 'required|in:active,inactive,suspended,pending,free',
-                                'activation_date' => 'required|date',
-                                'plan_id' => 'required|exists:plans,id',
-                            ]);
-                            if ($svcValidator->fails()) {
-                                if ($mode === 'update_only') {
-                                    // ignore service errors in update-only mode
-                                } else {
-                                    throw new \RuntimeException('Errores de validación (service): ' . $svcValidator->errors()->toJson());
-                                }
+                            // Default values if not specified
+                            if ($boolField === 'enable_billing') {
+                                $taxData[$boolField] = 1; // enable by default if tax info is imported
                             } else {
-                                $serviceModel = new Service($serviceData);
-                                $serviceModel->customer_id = $customer->id;
-                                $serviceModel->save();
+                                $taxData[$boolField] = 0;
                             }
                         }
                     }
+
+                    // For fields that are NOT NULL in DB, provide defaults if not set in CSV
+                    if (!isset($taxData['tax_identification_type']) || trim($taxData['tax_identification_type']) === '') {
+                        $taxData['tax_identification_type'] = 'NIT'; // Default
+                    }
+                    if (!isset($taxData['taxpayer_type']) || trim($taxData['taxpayer_type']) === '') {
+                        $taxData['taxpayer_type'] = 'personas_naturales'; // Default
+                    }
+                    if (!isset($taxData['fiscal_regime']) || trim($taxData['fiscal_regime']) === '') {
+                        $taxData['fiscal_regime'] = 'simplified'; // Default
+                    }
+                    if (!isset($taxData['business_name']) || trim($taxData['business_name']) === '') {
+                        // Default to customer full name
+                        $taxData['business_name'] = ucwords(($customerData['first_name'] ?? $customer->first_name) . ' ' . ($customerData['last_name'] ?? $customer->last_name));
+                    }
+
+                    if ($taxModel) {
+                        // Update existing tax detail
+                        $taxModel->fill($taxData);
+                        if ($taxModel->isDirty()) {
+                            $taxModel->save();
+                            $rowUpdated = true;
+                        }
+                    } else {
+                        // Check if the NIT is already used by another customer to avoid unique constraint error
+                        $existingTax = TaxDetail::where('tax_identification_number', $taxData['tax_identification_number'])->first();
+                        if ($existingTax) {
+                            throw new \RuntimeException("El NIT {$taxData['tax_identification_number']} ya está registrado en otro cliente.");
+                        }
+
+                        $taxModel = new TaxDetail($taxData);
+                        $taxModel->customer_id = $customer->id;
+                        $taxModel->save();
+                        $rowUpdated = true;
+                    }
+                }
+
+                // Service handling: if any service fields provided, create or update
+                if (!empty($serviceData)) {
+                    $serviceId = $serviceData['id'] ?? null;
+                    $serviceModel = null;
+                    
+                    // First try to find by ID if provided
+                    if ($serviceId) {
+                        $serviceModel = Service::withoutGlobalScopes()->where('customer_id', $customer->id)->where('id', $serviceId)->first();
+                    }
+                    
+                    // If not found by ID, check if customer already has a service
+                    if (!$serviceModel) {
+                        $serviceModel = Service::withoutGlobalScopes()->where('customer_id', $customer->id)->first();
+                    }
+
+                    // If creating and service_location not provided, try to use first address
+                    if (!isset($serviceData['service_location'])) {
+                        $firstAddress = $customer->addresses()->first();
+                        if ($firstAddress) {
+                            $serviceData['service_location'] = $firstAddress->id;
+                        }
+                    }
+
+                    if ($serviceModel) {
+                        // Update existing service
+                        $serviceModel->fill($serviceData);
+                        $serviceModel->customer_id = $customer->id;
+                        if ($serviceModel->isDirty()) {
+                            // saveQuietly() evita disparar eventos (ej: SmartOLT)
+                            // que hacen llamadas HTTP síncronas y cuelgan la importación masiva
+                            $serviceModel->saveQuietly();
+                            $rowUpdated = true;
+                        }
+                    } else {
+                        // Create new service - minimal required validation
+                        $svcValidator = Validator::make($serviceData, [
+                            'router_id' => 'required|exists:routers,id',
+                            'service_ip' => 'required|ip',
+                            'service_status' => 'required|in:active,inactive,suspended,pending,free',
+                            'plan_id' => 'required|exists:plans,id',
+                        ]);
+                        if ($svcValidator->fails()) {
+                            if ($mode === 'update_only') {
+                                // ignore service errors in update-only mode
+                            } else {
+                                throw new \RuntimeException('Errores de validación (service): ' . $svcValidator->errors()->toJson());
+                            }
+                        } else {
+                            $serviceModel = new Service($serviceData);
+                            $serviceModel->customer_id = $customer->id;
+                            $serviceModel->save();
+                        }
+                    }
+                }
+
+                // If something was updated but not counted yet, count it now
+                if ($rowUpdated) {
+                    $updated++;
+                } else if (!$rowUpdated && $customer->wasRecentlyCreated === false && $created === 0) {
+                    // Nothing was updated or created in this iteration
+                    $skipped++;
                 }
 
                 DB::commit();
@@ -235,6 +317,7 @@ class ImportCustomers extends Action
         $customer = [];
         $address = [];
         $service = [];
+        $tax = [];
         foreach ($data as $key => $value) {
             if (strpos($key, 'customer.') === 0) {
                 $customer[substr($key, 9)] = $this->nullIfEmpty($value);
@@ -242,13 +325,15 @@ class ImportCustomers extends Action
                 $address[substr($key, 8)] = $this->nullIfEmpty($value);
             } elseif (strpos($key, 'service.') === 0) {
                 $service[substr($key, 8)] = $this->nullIfEmpty($value);
+            } elseif (strpos($key, 'tax.') === 0) {
+                $tax[substr($key, 4)] = $this->nullIfEmpty($value);
             }
         }
         // defaults for customer
         if (!isset($customer['customer_status']) || empty($customer['customer_status'])) {
             $customer['customer_status'] = 'active';
         }
-        return [$customer, $address, $service];
+        return [$customer, $address, $service, $tax];
     }
 
     private function nullIfEmpty($value)

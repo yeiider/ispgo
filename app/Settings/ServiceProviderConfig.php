@@ -52,4 +52,28 @@ class ServiceProviderConfig
     {
         return ConfigHelper::getConfigValue(self::PATH_SERVICE_CONTRACT . 'representative_role');
     }
+
+    public static function emailTemplateSend(): ?int
+    {
+        $val = ConfigHelper::getConfigValue(self::PATH_SERVICE_CONTRACT . 'email_template_send');
+        return $val ? (int)$val : null;
+    }
+
+    public static function emailTemplateSigned(): ?int
+    {
+        $val = ConfigHelper::getConfigValue(self::PATH_SERVICE_CONTRACT . 'email_template_signed');
+        return $val ? (int)$val : null;
+    }
+
+    public static function emailTemplateApproved(): ?int
+    {
+        $val = ConfigHelper::getConfigValue(self::PATH_SERVICE_CONTRACT . 'email_template_approved');
+        return $val ? (int)$val : null;
+    }
+
+    public static function emailTemplateRejected(): ?int
+    {
+        $val = ConfigHelper::getConfigValue(self::PATH_SERVICE_CONTRACT . 'email_template_rejected');
+        return $val ? (int)$val : null;
+    }
 }

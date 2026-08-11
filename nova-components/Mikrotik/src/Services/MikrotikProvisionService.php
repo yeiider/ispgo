@@ -175,9 +175,11 @@ class MikrotikProvisionService
 
         try {
             // Usar el endpoint de flujo simple del microservicio
+            $dhcpServer = MikrotikConfigProvider::getDhcpServer($this->routerId);
             $result = $this->apiClient->provisionService(
                 $macAddress,
                 $selectedIp,
+                $dhcpServer,
                 $queueName,
                 $maxLimit,
                 $comment

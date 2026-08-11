@@ -2,8 +2,11 @@
 
 namespace App\GraphQL\Mutations;
 
+use App\Models\Services\Service;
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\ProcessOnuAuthorization;
+use App\Jobs\CompleteOnuActivationJob;
 
 class SmartOltMutation
 {
@@ -17,13 +20,72 @@ class SmartOltMutation
     public function authorizeOnu($root, array $args)
     {
         try {
-            $response = $this->apiManager->authorizeOnu($args);
+            // Obtener el servicio
+            $service = Service::with(['customer', 'plan'])->find($args['service_id']);
+
+            if (!$service) {
+                return [
+                    'success' => false,
+                    'message' => 'Service not found with ID: ' . $args['service_id']
+                ];
+            }
+
+            $customer = $service->customer;
+
+            if (!$customer) {
+                return [
+                    'success' => false,
+                    'message' => 'Customer not found for service ID: ' . $args['service_id']
+                ];
+            }
+
+            // Construir el payload para la API de SmartOLT
+            $payload = [
+                'olt_id' => $args['olt_id'],
+                'pon_type' => $args['pon_type'],
+                'board' => $args['board'],
+                'port' => $args['port'],
+                'sn' => $args['sn'],
+                'vlan' => $args['vlan'],
+                'onu_type' => $args['onu_type'],
+                'zone' => $args['zone'],
+                'onu_mode' => $args['onu_mode'],
+                'name' => $args['name'] = strtoupper($this->limpiarCadena($customer->full_name)),
+                'address_or_comment' => preg_replace('/[^a-zA-Z0-9]/', ' ', str_replace('ñ', 'n', str_replace('Ñ', 'N', $customer->addresses()->first()->address ?? 'N/A'))),
+            ];
+
+            // Agregar odb si está presente
+            if (!empty($args['odb'])) {
+                $payload['odb'] = $args['odb'];
+            }
+
+            Log::info('SmartOLT authorizeOnu payload', ['payload' => $payload]);
+
+            $response = $this->apiManager->authorizeOnu($payload);
             $data = $response->json();
-            
+
             if ($data['status'] === true) {
-                 return [
+                try {
+                    $service->sn = $args['sn'];
+                    $service->service_status = 'active';
+                    $service->save();
+
+                    // Pasos 2-4: mgmt IP DHCP → TR069 → WAN mode DHCP (30 segundos de espera)
+                    CompleteOnuActivationJob::dispatch($args['sn'], $args['vlan_mgmt'])
+                        ->delay(now()->addSeconds(30))
+                        ->onQueue('redis');
+
+                    // Provisionamiento en Mikrotik (4 minutos, después de la activación)
+                    ProcessOnuAuthorization::dispatch($service->id, $args['sn'], $args['vlan'], $args['olt_id'])
+                        ->delay(now()->addMinutes(4))
+                        ->onQueue('redis');
+
+                } catch (\Exception $e) {
+                    Log::error('Error dispatching ONU activation jobs', ['exception' => $e]);
+                }
+                return [
                     'success' => true,
-                    'message' => 'ONU authorized successfully'
+                    'message' => 'ONU authorized successfully and assigned to service'
                 ];
             }
 
@@ -33,6 +95,11 @@ class SmartOltMutation
             ];
 
         } catch (\Exception $e) {
+            Log::error('SmartOLT authorizeOnu error', [
+                'message' => $e->getMessage(),
+                'args' => $args
+            ]);
+
             return [
                 'success' => false,
                 'message' => $e->getMessage()
@@ -46,8 +113,8 @@ class SmartOltMutation
             $response = $this->apiManager->rebootOnuByExternalId($args['external_id']);
             $data = $response->json();
 
-             if ($data['status'] === true) {
-                 return [
+            if ($data['status'] === true) {
+                return [
                     'success' => true,
                     'message' => 'ONU rebooted successfully'
                 ];
@@ -71,8 +138,8 @@ class SmartOltMutation
             $response = $this->apiManager->enableOnu($args['sn']);
             $data = $response->json();
 
-             if ($data['status'] === true) {
-                 return [
+            if ($data['status'] === true) {
+                return [
                     'success' => true,
                     'message' => 'ONU enabled successfully'
                 ];
@@ -96,8 +163,8 @@ class SmartOltMutation
             $response = $this->apiManager->disableOnu($args['sn']);
             $data = $response->json();
 
-             if ($data['status'] === true) {
-                 return [
+            if ($data['status'] === true) {
+                return [
                     'success' => true,
                     'message' => 'ONU disabled successfully'
                 ];
@@ -165,5 +232,67 @@ class SmartOltMutation
                 'message' => $e->getMessage()
             ];
         }
+    }
+
+    public function enableCatv($root, array $args)
+    {
+        try {
+            $response = $this->apiManager->enableOnuCatvByExternalId($args['external_id']);
+            $data = $response->json();
+
+            if ($data['status'] === true) {
+                return [
+                    'success' => true,
+                    'message' => 'CATV enabled successfully'
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => $data['error'] ?? 'Failed to enable CATV'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function disableCatv($root, array $args)
+    {
+        try {
+            $response = $this->apiManager->disableOnuCatvByExternalId($args['external_id']);
+            $data = $response->json();
+
+            if ($data['status'] === true) {
+                return [
+                    'success' => true,
+                    'message' => 'CATV disabled successfully'
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => $data['error'] ?? 'Failed to disable CATV'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    private function limpiarCadena($str): array|string
+    {
+        // 1. Definir los caracteres originales y sus reemplazos
+        $originales = ['À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ð', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ'];
+        $modificadas = ['A', 'A', 'A', 'A', 'A', 'A', 'AE', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U', 'U', 'Y', 's', 'a', 'a', 'a', 'a', 'a', 'a', 'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'd', 'n', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y'];
+
+        // 2. Reemplazar los caracteres especiales
+        $cadena = str_replace($originales, $modificadas, $str);
+
+        return $cadena;
     }
 }

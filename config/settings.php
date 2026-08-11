@@ -7,98 +7,107 @@ use Ispgo\Smartolt\Settings\SettingSmartolt;
 return [
     "general" => [
         "setting" => [
-            "label" => "General Setting",
+            "label" => "Ajustes Generales",
             "class" => "form-control",
         ],
         "general" => [
             "setting" => [
-                "label" => "General Information",
+                "label" => "Información General",
                 "code" => "general"
             ],
             "company_name" => [
                 "field" => "text-field",
-                "label" => "Company Name",
-                "placeholder" => "Company Name",
+                "label" => "Nombre de la Empresa",
+                "placeholder" => "Nombre de la Empresa",
             ],
             "company_description" => [
                 "field" => "textarea-field",
-                "label" => "Company Description",
-                "placeholder" => "Company Description",
+                "label" => "Descripción de la Empresa",
+                "placeholder" => "Descripción de la Empresa",
             ],
 
             "company_address" => [
                 "field" => "text-field",
-                "label" => "Company Address",
-                "placeholder" => "Company Address",
+                "label" => "Dirección de la Empresa",
+                "placeholder" => "Dirección de la Empresa",
             ],
             "company_telephone" => [
                 "field" => "text-field",
-                "label" => "Company Telephone",
-                "placeholder" => "Company Telephone",
+                "label" => "Teléfono de la Empresa",
+                "placeholder" => "Teléfono de la Empresa",
             ],
             "company_url" => [
                 "field" => "text-field",
-                "label" => "Web URL",
+                "label" => "URL Web",
                 "placeholder" => "http://example.com",
             ],
             "company_email" => [
                 "field" => "text-field",
-                "label" => "Company Email",
-                "placeholder" => "Company Email",
+                "label" => "Correo Electrónico de la Empresa",
+                "placeholder" => "Correo Electrónico de la Empresa",
             ],
             "company_logo" => [
                 "field" => "image-field",
-                "label" => "Company Logo",
-                "placeholder" => "Company Logo",
+                "label" => "Logo de la Empresa",
+                "placeholder" => "Logo de la Empresa",
             ]
         ],
         "billing_cycle" => [
             "setting" => [
-                "label" => "Billing Cycle Configuration",
+                "label" => "Configuración del Ciclo de Facturación",
                 "code" => "billing_cycle"
+            ],
+            "billing_mode" => [
+                "field" => "select-field",
+                "label" => "Modo de Facturación",
+                "options" => \App\Settings\Config\Sources\BillingMode::class
+            ],
+            "manageable_billing_cycle" => [
+                "field" => "boolean-field",
+                "label" => "Ciclo de Facturación Administrable",
             ],
             "billing_date" => [
                 "field" => "select-field",
-                "label" => "Billing Date",
+                "label" => "Día de Facturación",
                 "options" => \App\Settings\Config\Sources\DaysOfMonth::class
             ],
             "cut_off_date" => [
                 "field" => "select-field",
-                "label" => "Cut-Off Date",
+                "label" => "Día de Suspensión (Corte)",
                 "options" => \App\Settings\Config\Sources\DaysOfMonth::class
             ],
             "payment_due_date" => [
                 "field" => "select-field",
-                "label" => "Payment Due Date",
+                "label" => "Día Límite de Pago",
                 "options" => \App\Settings\Config\Sources\DaysOfMonth::class
             ],
 
             "automatic_cut_off" => [
                 "field" => "boolean-field",
-                "label" => "Automatic Cut-Off",
+                "label" => "Corte Automático",
             ],
             "automatic_invoice_generation" => [
                 "field" => "boolean-field",
-                "label" => "Automatic Invoice Generation",
+                "label" => "Generación Automática de Facturas",
             ],
             "send_payment_reminders" => [
                 "field" => "boolean-field",
-                "label" => "Send Payment Reminders",
+                "label" => "Enviar Recordatorios de Pago",
             ],
             "late_fee_percentage" => [
                 "field" => "text-field",
-                "label" => "Late Fee Percentage",
-                "placeholder" => "Enter percentage",
+                "label" => "Porcentaje de Recargo por Mora",
+                "placeholder" => "Ej. 5",
             ],
             "grace_period_days" => [
                 "field" => "text-field",
-                "label" => "Grace Period (Days)",
-                "placeholder" => "Enter number of days",
+                "label" => "Días de Período de Gracia",
+                "placeholder" => "Ej. 3",
             ],
             "default_user" => [
                 "field" => "select-field",
-                "label" => "User default",
-                "placeholder" => "User default",
+                "label" => "Usuario por Defecto",
+                "placeholder" => "Usuario por Defecto",
                 "options" => \App\Settings\Config\Sources\Users::class
 
             ]
@@ -106,81 +115,86 @@ return [
     ],
     "customer" => [
         "setting" => [
-            "label" => "Customer",
+            "label" => "Clientes",
             "class" => "form-control",
         ],
         "general" => [
             "setting" => [
-                "label" => "General Customer",
+                "label" => "Configuración General de Clientes",
                 "class" => "form-control",
                 "code" => "general"
             ],
             "allow_login" => [
                 "field" => "boolean-field",
-                "label" => "Allow login",
-                "placeholder" => "Allow login",
+                "label" => "Permitir inicio de sesión",
+                "placeholder" => "Permitir inicio de sesión",
             ],
             "allow_payment_as_a_guest" => [
                 "field" => "boolean-field",
-                "label" => "Allow Payment As A Guest",
-                "placeholder" => "Allow Payment As A Guest",
+                "label" => "Permitir pago como invitado",
+                "placeholder" => "Permitir pago como invitado",
             ],
             "send_welcome_email" => [
                 "field" => "boolean-field",
-                "label" => "Send Welcome Email",
-                "placeholder" => "Send Welcome Email",
+                "label" => "Enviar correo de bienvenida",
+                "placeholder" => "Enviar correo de bienvenida",
             ],
             "send_welcome_email_template" => [
                 "field" => "select-field",
-                "label" => "Send Welcome Email Template",
+                "label" => "Plantilla de correo de bienvenida",
                 "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ],
             "email_confirmation_account_confirmation" => [
                 "field" => "boolean-field",
-                "label" => "Email Account Confirmation",
+                "label" => "Confirmación de cuenta por correo",
             ],
             "email_confirmation_account_template" => [
                 "field" => "select-field",
-                "label" => "Email confirmation Account Template",
+                "label" => "Plantilla de confirmación de cuenta",
                 "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ],
             "allow_requesting_a_new_service" => [
                 "field" => "boolean-field",
-                "label" => "Allow Requesting New Service",
-                "placeholder" => "Allow Requesting New Service",
+                "label" => "Permitir solicitar nuevo servicio",
+                "placeholder" => "Permitir solicitar nuevo servicio",
             ],
             "save_payment_methods" => [
                 "field" => "boolean-field",
-                "label" => "Save Payment Methods",
-                "placeholder" => "Save Payment Methods",
+                "label" => "Guardar métodos de pago",
+                "placeholder" => "Guardar métodos de pago",
             ],
             "allow_customer_registration" => [
                 "field" => "boolean-field",
-                "label" => "Allow Customer Registration",
-                "placeholder" => "Allow Customer Registration",
+                "label" => "Permitir registro de clientes",
+                "placeholder" => "Permitir registro de clientes",
+            ],
+            "require_fiscal_info" => [
+                "field" => "boolean-field",
+                "label" => "Requerir información fiscal al crear cliente",
+                "placeholder" => "Requerir información fiscal al crear cliente",
             ],
         ],
 
         "security" => [
             "setting" => [
-                "label" => "Recaptcha",
+                "label" => "Configuración de ReCAPTCHA",
                 "class" => "form-control",
                 "code" => "general"
             ],
             "api_key" => [
                 "field" => "text-field",
-                "label" => "Api key",
-                "placeholder" => "Api key",
+                "label" => "Clave API de ReCAPTCHA",
+                "placeholder" => "Clave API",
             ],
             "show_in_sign_in" => [
                 "field" => "boolean-field",
-                "label" => "Show In Sign In",
-                "placeholder" => "Show In Sign In",
+                "label" => "Mostrar en inicio de sesión",
+                "placeholder" => "Mostrar en inicio de sesión",
             ],
             "show_in_sign_up" => [
                 "field" => "boolean-field",
-                "label" => "Show In Sign Up",
-                "placeholder" => "Show In Sign Up",
+                "label" => "Mostrar en registro",
+                "placeholder" => "Mostrar en registro",
             ]
         ]
     ],
@@ -188,300 +202,319 @@ return [
 
     "service" => [
         "setting" => [
-            "label" => "Services",
+            "label" => "Servicios",
             "class" => "form-control",
         ],
         "general" => [
             "setting" => [
-                "label" => "General Service Settings",
+                "label" => "Configuración General de Servicios",
                 "class" => "form-control",
                 "code" => "general"
             ],
             "create_installation_order" => [
                 "field" => "boolean-field",
-                "label" => "Create Installation Order when Creating a Service",
-                "placeholder" => "Create Installation Order",
+                "label" => "Crear orden de instalación al crear servicio",
+                "placeholder" => "Crear orden de instalación",
             ],
             "notify_user_service_creation" => [
                 "field" => "boolean-field",
-                "label" => "Notify User when Service is Created",
-                "placeholder" => "Notify User when Service is Created",
+                "label" => "Notificar al usuario al crear servicio",
+                "placeholder" => "Notificar al usuario al crear servicio",
             ],
             "show_services_in_customer_section" => [
                 "field" => "boolean-field",
-                "label" => "Show Services in Customer Section",
-                "placeholder" => "Show Services in Customer Section",
+                "label" => "Mostrar servicios en portal del cliente",
+                "placeholder" => "Mostrar servicios en portal del cliente",
             ],
         ],
         "contract" => [
             "setting" => [
-                "label" => "Contacts",
+                "label" => "Contratos",
                 "class" => "form-control",
                 "code" => "contract"
             ],
             "enabled" => [
                 "field" => "boolean-field",
-                "label" => "enable the use of contracts",
-                "placeholder" => "Create Installation Order",
+                "label" => "Habilitar uso de contratos",
+                "placeholder" => "Habilitar uso de contratos",
             ],
             "contract_template" => [
                 "field" => "select-field",
-                "label" => "Contract Template",
+                "label" => "Plantilla de contrato",
                 "options" => \App\Settings\Config\Sources\HtmlTemplate::class
             ],
 
             "representative_signature" => [
                 "field" => "image-field",
-                "label" => "Company Representative Signature",
-                "placeholder" => "Upload Signature",
+                "label" => "Firma del representante legal",
+                "placeholder" => "Subir Firma",
                 "accept" => "image/*", // Limits file types to images
             ],
             "representative_name" => [
                 "field" => "text-field",
-                "label" => "Representative Name",
-                "placeholder" => "Enter the Representative's Name",
+                "label" => "Nombre del representante",
+                "placeholder" => "Ingrese el nombre del representante",
             ],
             "representative_document" => [
                 "field" => "text-field",
-                "label" => "Representative Document",
-                "placeholder" => "Enter the Representative's Document",
+                "label" => "Documento del representante",
+                "placeholder" => "Ingrese el documento del representante",
             ],
             "representative_role" => [
                 "field" => "text-field",
-                "label" => "Representative Role",
-                "placeholder" => "Enter the Representative's Role",
-
+                "label" => "Cargo del representante",
+                "placeholder" => "Ingrese el cargo del representante",
+            ],
+            "email_template_send" => [
+                "field" => "select-field",
+                "label" => "Plantilla de correo para enviar link de contrato",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_signed" => [
+                "field" => "select-field",
+                "label" => "Plantilla de correo para notificar contrato firmado",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_approved" => [
+                "field" => "select-field",
+                "label" => "Plantilla de correo para notificar contrato aprobado",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
+            ],
+            "email_template_rejected" => [
+                "field" => "select-field",
+                "label" => "Plantilla de correo para notificar contrato rechazado",
+                "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ]
         ],
     ],
 
     "invoice" => [
         "setting" => [
-            "label" => "Invoices",
+            "label" => "Facturas",
             "class" => "form-control",
         ],
         "general" => [
             "setting" => [
-                "label" => "General Invoice",
+                "label" => "Facturación General",
                 "class" => "form-control",
                 "code" => "general"
             ],
             "enable_service_when_paying" => [
                 "field" => "boolean-field",
-                "label" => "Enable Service when paying",
+                "label" => "Habilitar servicio al pagar",
             ],
             "enable_service_by_payment_promise" => [
                 "field" => "boolean-field",
-                "label" => "Enable service if a promise is created",
+                "label" => "Habilitar servicio al crear promesa de pago",
             ],
             "enable_partial_payment" => [
                 "field" => "boolean-field",
-                "label" => "Enable partial payment",
+                "label" => "Habilitar pago parcial",
             ],
             "send_email_when_paying" => [
                 "field" => "boolean-field",
-                "label" => "Send Email when paying",
+                "label" => "Enviar correo al pagar",
             ],
             "email_template_paying" => [
                 "field" => "select-field",
-                "label" => "Email template Paying",
+                "label" => "Plantilla de correo al pagar",
                 "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ],
             "send_email_create_invoice" => [
                 "field" => "boolean-field",
-                "label" => "Send Email when creating invoice",
+                "label" => "Enviar correo al crear factura",
             ],
             "email_template_created_invoice" => [
                 "field" => "select-field",
-                "label" => "Send Email when creating invoice",
+                "label" => "Plantilla de correo al crear factura",
                 "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ],
             "bcc_invoice_to" => [
                 "field" => "text-field",
-                "label" => "BCC Invoice To",
-                "placeholder" => "BCC Invoice To",
+                "label" => "Copia oculta (BCC) de factura a",
+                "placeholder" => "Copia oculta (BCC) de factura a",
             ],
             "attach_invoice" => [
                 "field" => "boolean-field",
-                "label" => "Attach PDF invoice",
+                "label" => "Adjuntar factura en PDF",
             ],
             "skip_invoice_if_suspended_and_unpaid" => [
                 "field" => "boolean-field",
-                "label" => "Skip Invoice Generation if Service is Suspended and Last Invoice is Unpaid",
+                "label" => "Omitir generación si el servicio está suspendido y la última factura está vencida",
             ],
             "enable_router_rental" => [
                 "field" => "boolean-field",
-                "label" => "Enable Router Rental Charge",
+                "label" => "Habilitar cobro por alquiler de router",
             ],
             "router_rental_amount" => [
                 "field" => "text-field",
-                "label" => "Router Rental Amount",
-                "placeholder" => "Enter rental amount",
+                "label" => "Valor de alquiler de router",
+                "placeholder" => "Ingrese el valor de alquiler",
             ],
             "router_rental_name" => [
                 "field" => "text-field",
-                "label" => "Router Rental Item Name",
-                "placeholder" => "Enter rental item name (e.g., Router Rental)",
+                "label" => "Nombre del ítem de alquiler",
+                "placeholder" => "Ingrese el nombre (ej. Alquiler de Router)",
             ],
         ]
     ],
     "payment" => [
         "setting" => [
-            "label" => "Payment",
+            "label" => "Pasarelas de Pago",
             "class" => "form-control",
         ],
         "payu" => [
             "setting" => [
-                "label" => "PayU Settings",
+                "label" => "Configuración de PayU",
                 "class" => "form-control",
                 "code" => "payu"
             ],
             "payu-enabled" => [
                 "field" => "boolean-field",
-                "label" => "Enabled",
-                "placeholder" => "Enabled",
+                "label" => "Habilitado",
+                "placeholder" => "Habilitado",
             ],
             "api_key" => [
                 "field" => "text-field",
-                "label" => "API Key",
-                "placeholder" => "API Key",
+                "label" => "Llave API (API Key)",
+                "placeholder" => "Llave API",
             ],
             "api_login" => [
                 "field" => "text-field",
-                "label" => "API Login",
-                "placeholder" => "API Login",
+                "label" => "Inicio de sesión API (API Login)",
+                "placeholder" => "Inicio de sesión API",
             ],
             "merchant_id" => [
                 "field" => "text-field",
-                "label" => "Merchant ID",
-                "placeholder" => "Merchant ID",
+                "label" => "ID de Comercio (Merchant ID)",
+                "placeholder" => "ID de Comercio",
             ],
             "account_id" => [
                 "field" => "text-field",
-                "label" => "Account ID",
-                "placeholder" => "Account ID",
+                "label" => "ID de Cuenta (Account ID)",
+                "placeholder" => "ID de Cuenta",
             ],
             "url_confirmation" => [
                 "field" => "text-field",
-                "label" => "URL Confirmation",
-                "placeholder" => "URL Confirmation",
+                "label" => "URL de Confirmación",
+                "placeholder" => "URL de Confirmación",
             ],
             "url_response" => [
                 "field" => "text-field",
-                "label" => "URL Response",
-                "placeholder" => "URL Response",
+                "label" => "URL de Respuesta",
+                "placeholder" => "URL de Respuesta",
             ],
             ".env" => [
                 "field" => "select-field",
-                "label" => "Environment",
-                "placeholder" => "Environment",
+                "label" => "Entorno",
+                "placeholder" => "Entorno",
                 "options" => \App\Settings\Config\Sources\Environment::class,
             ],
         ],
         'wompi' => [
             'setting' => [
-                'label' => 'Wompi Settings',
+                'label' => 'Configuración de Wompi',
                 'class' => 'form-control',
                 'code' => 'wompi',
             ],
             'wompi-enabled' => [
                 'field' => 'boolean-field',
-                'label' => 'Enabled',
-                'placeholder' => 'Enabled',
+                'label' => 'Habilitado',
+                'placeholder' => 'Habilitado',
             ],
             ".env" => [
                 "field" => "select-field",
-                "label" => "Environment",
-                "placeholder" => "Environment",
+                "label" => "Entorno",
+                "placeholder" => "Entorno",
                 "options" => \App\Settings\Config\Sources\Environment::class,
             ],
             'public_key_sandbox' => [
                 'field' => 'text-field',
-                'label' => 'Public Key Sandbox',
-                'placeholder' => 'Public Key',
+                'label' => 'Llave Pública Sandbox',
+                'placeholder' => 'Llave Pública Sandbox',
             ],
             'public_key' => [
                 'field' => 'text-field',
-                'label' => 'Public Key',
-                'placeholder' => 'Public Key',
+                'label' => 'Llave Pública Producción',
+                'placeholder' => 'Llave Pública Producción',
             ],
             'private_key_sandbox' => [
                 'field' => 'text-field',
-                'label' => 'Public Key Sandbox',
-                'placeholder' => 'Public Key',
+                'label' => 'Llave Privada Sandbox',
+                'placeholder' => 'Llave Privada Sandbox',
             ],
             'private_key' => [
                 'field' => 'text-field',
-                'label' => 'Public Key',
-                'placeholder' => 'Public Key',
+                'label' => 'Llave Privada Producción',
+                'placeholder' => 'Llave Privada Producción',
             ],
             'integrity_sandbox' => [
                 'field' => 'text-field',
-                'label' => 'Integrity Sandbox',
-                'placeholder' => 'Integrity',
+                'label' => 'Firma de Integridad Sandbox',
+                'placeholder' => 'Firma de Integridad Sandbox',
             ],
 
             'integrity' => [
                 'field' => 'text-field',
-                'label' => 'Integrity',
-                'placeholder' => 'Integrity',
+                'label' => 'Firma de Integridad Producción',
+                'placeholder' => 'Firma de Integridad Producción',
             ],
 
             'event_secret_sandbox' => [
                 'field' => 'text-field',
-                'label' => 'Event Secret Sandbox',
-                'placeholder' => 'Event Secret Sandbox',
+                'label' => 'Secreto de Eventos Sandbox',
+                'placeholder' => 'Secreto de Eventos Sandbox',
             ],
             'event_secret' => [
                 'field' => 'text-field',
-                'label' => 'Event Secret',
-                'placeholder' => 'Event Secret',
+                'label' => 'Secreto de Eventos Producción',
+                'placeholder' => 'Secreto de Eventos Producción',
             ],
 
             'confirmation_url' => [
                 'field' => 'text-field',
-                'label' => 'Confirmation URL',
-                'placeholder' => 'Confirmation URL',
+                'label' => 'URL de Confirmación',
+                'placeholder' => 'URL de Confirmación',
             ],
         ],
     ],
 
     "notifications" => [
         "setting" => [
-            "label" => "Notifications",
+            "label" => "Notificaciones",
             "class" => "form-control",
         ],
         "email_settings" => [
             "setting" => [
-                "label" => "General Email",
+                "label" => "Configuración de Correo General",
                 "class" => "form-control",
                 "code" => "email_settings"
             ],
             "host" => [
                 "field" => "text-field",
-                "label" => "Host Name",
-                "placeholder" => "Hostname",
+                "label" => "Servidor SMTP (Host)",
+                "placeholder" => "Servidor SMTP",
             ],
             "security" => [
                 "field" => "select-field",
-                "label" => "Security",
-                "placeholder" => "Security",
+                "label" => "Seguridad",
+                "placeholder" => "Seguridad",
                 "options" => \App\Settings\Config\Sources\EmailSecurity::class,
             ],
             "username" => [
                 "field" => "text-field",
-                "label" => "Username",
-                "placeholder" => "Username",
+                "label" => "Usuario SMTP",
+                "placeholder" => "Usuario SMTP",
             ],
             "port" => [
                 "field" => "text-field",
-                "label" => "Port",
-                "placeholder" => "Port",
+                "label" => "Puerto SMTP",
+                "placeholder" => "Puerto SMTP",
             ],
             "password" => [
                 "field" => "password-field",
-                "label" => "Password",
-                "placeholder" => "Password",
+                "label" => "Contraseña SMTP",
+                "placeholder" => "Contraseña SMTP",
             ],
         ],
         "wiivo" => \Ispgo\Wiivo\SettingWiivo::getSetting()
@@ -489,63 +522,63 @@ return [
 
     "support" => [
         "setting" => [
-            "label" => "Support",
+            "label" => "Soporte / Tickets",
             "class" => "form-control",
         ],
         "ticket_settings" => [
             "setting" => [
-                "label" => "Ticket Settings",
+                "label" => "Configuración de Tickets",
                 "class" => "form-control",
                 "code" => "ticket_settings"
             ],
             "allow_create_ticket" => [
                 "field" => "boolean-field",
-                "label" => "Allow Clients to Create Tickets",
-                "placeholder" => "Allow Clients to Create Tickets",
+                "label" => "Permitir a clientes crear tickets",
+                "placeholder" => "Permitir a clientes crear tickets",
             ],
             "notify_client" => [
                 "field" => "boolean-field",
-                "label" => "Notify Client",
-                "placeholder" => "Notify Client",
+                "label" => "Notificar al cliente",
+                "placeholder" => "Notificar al cliente",
             ],
             "ticket_priority" => [
                 "field" => "select-field",
-                "label" => "Default Ticket Priority",
+                "label" => "Prioridad de ticket por defecto",
                 "options" => \App\Settings\Config\Sources\TicketPriority::class,
             ],
             "ticket_status" => [
                 "field" => "select-field",
-                "label" => "Default Ticket Status",
+                "label" => "Estado de ticket por defecto",
                 "options" => \App\Settings\Config\Sources\TicketStatus::class,
             ],
             "notify_technician" => [
                 "field" => "boolean-field",
-                "label" => "Notify Technician",
-                "placeholder" => "Notify Technician",
+                "label" => "Notificar al técnico",
+                "placeholder" => "Notificar al técnico",
             ],
             "allow_client_close_ticket" => [
                 "field" => "boolean-field",
-                "label" => "Allow Clients to Close Tickets",
-                "placeholder" => "Allow Clients to Close Tickets",
+                "label" => "Permitir a clientes cerrar tickets",
+                "placeholder" => "Permitir a clientes cerrar tickets",
             ],
             "notify_by_email" => [
                 "field" => "boolean-field",
-                "label" => "Notify by Email",
-                "placeholder" => "Notify by Email",
+                "label" => "Notificar por correo electrónico",
+                "placeholder" => "Notificar por correo electrónico",
             ],
             "email_template_client" => [
                 "field" => "select-field",
-                "label" => "Email Template for Client Notification",
+                "label" => "Plantilla para notificar al cliente",
                 "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ],
             "email_template_technician" => [
                 "field" => "select-field",
-                "label" => "Email Template for Technician Notification",
+                "label" => "Plantilla para notificar al técnico",
                 "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ],
             "email_template_change_status" => [
                 "field" => "select-field",
-                "label" => "Email Template for Change Status",
+                "label" => "Plantilla para cambio de estado",
                 "options" => \Ispgo\SettingsManager\Source\Config\EmailTemplate::class
             ],
         ],
@@ -568,8 +601,8 @@ return [
             "label" => "Smart Olt",
             "class" => "form-control",
         ],
-        "general" => SettingSmartolt::getGeneralSettings(),
-
+        "general"    => SettingSmartolt::getGeneralSettings(),
+        "activation" => SettingSmartolt::getActivationSettings(),
     ],
 
     "siigo" => [
@@ -580,6 +613,15 @@ return [
         "general" => SettingSiigo::getGeneralSettings(),
     ],
 
+    "iptv" => [
+        "setting" => [
+            "label" => "IPTV XUI.one",
+            "class" => "form-control",
+        ],
+        "general"    => \App\Settings\Iptv\SettingIptv::getGeneralSettings(),
+        "activation" => \App\Settings\Iptv\SettingIptv::getActivationSettings(),
+    ],
+
     // OnePay integration settings
     "onepay" => [
         "setting" => [
@@ -588,34 +630,86 @@ return [
         ],
         "general" => [
             "setting" => [
-                "label" => "OnePay Settings",
+                "label" => "Ajustes de OnePay",
                 "code" => "general"
             ],
             "onepay_enabled" => [
                 "field" => "boolean-field",
-                "label" => "Enable OnePay",
+                "label" => "Habilitar OnePay",
             ],
             "onepay_base_url" => [
                 "field" => "text-field",
-                "label" => "OnePay Base URL",
+                "label" => "URL Base de OnePay",
                 "placeholder" => "https://api.onepay.la/v1"
             ],
             "onepay_api_token" => [
                 "field" => "password-field",
-                "label" => "OnePay API Token",
-                "placeholder" => "Secret Token"
+                "label" => "Token API de OnePay",
+                "placeholder" => "Token Secreto"
             ],
             "onepay_auto_create_day" => [
                 "field" => "select-field",
-                "label" => "Day of Month to Auto-Create Charges",
+                "label" => "Día del mes para generar cargos automáticamente",
                 "options" => \App\Settings\Config\Sources\DaysOfMonth::class
             ],
             "onepay_auto_remind_day" => [
                 "field" => "select-field",
-                "label" => "Day of Month to Auto-Remind Charges",
+                "label" => "Día del mes para enviar recordatorios automáticamente",
                 "options" => \App\Settings\Config\Sources\DaysOfMonth::class
             ],
         ],
-    ]
-
+    ],
+    "finance" => [
+        "setting" => [
+            "label" => "Finanzas",
+            "class" => "form-control",
+        ],
+        "cash_register" => [
+            "setting" => [
+                "label" => "Cierre Automático de Caja",
+                "code" => "cash_register"
+            ],
+            "auto_close_enabled" => [
+                "field" => "boolean-field",
+                "label" => "Habilitar Cierre Automático",
+            ],
+            "auto_close_time" => [
+                "field" => "time-field",
+                "label" => "Hora de Cierre",
+                "placeholder" => "23:59",
+            ],
+        ],
+    ],
+    "tables" => [
+        "setting" => [
+            "label" => "Configuración de Tablas",
+            "class" => "form-control",
+        ],
+        "columns" => [
+            "setting" => [
+                "label" => "Visibilidad de Columnas",
+                "code" => "columns"
+            ],
+            "clients" => [
+                "field" => "text-field",
+                "label" => "Columnas Clientes",
+                "default" => "id,name,document,services,service_states,billing_status,status,created_at,actions",
+            ],
+            "services" => [
+                "field" => "text-field",
+                "label" => "Columnas Servicios",
+                "default" => "id,name,status,created_at,actions",
+            ],
+            "invoices" => [
+                "field" => "text-field",
+                "label" => "Columnas Facturas",
+                "default" => "id,increment_id,customer,total,outstanding_balance,status,created_at,due_date,actions",
+            ],
+            "cotizaciones" => [
+                "field" => "text-field",
+                "label" => "Columnas Cotizaciones",
+                "default" => "id,name,email,phone,plan,status,created_at,actions",
+            ],
+        ],
+    ],
 ];

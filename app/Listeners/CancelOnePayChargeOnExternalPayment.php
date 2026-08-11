@@ -4,11 +4,45 @@ namespace App\Listeners;
 
 use App\Events\InvoicePaid;
 use App\Settings\OnePaySettings;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class CancelOnePayChargeOnExternalPayment
+class CancelOnePayChargeOnExternalPayment implements ShouldQueue
 {
+    use InteractsWithQueue;
+
+
+    /**
+     * The name of the queue the job should be sent to.
+     *
+     * @var string|null
+     */
+    public $queue = 'redis';
+
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
+     * The number of seconds the job can run before timing out.
+     *
+     * @var int
+     */
+    public $timeout = 120;
+
+    /**
+     * The number of seconds to delay the job.
+     *
+     * @var int
+     */
+    public $delay = 10;
+
+
     /**
      * Handle the event.
      */
@@ -16,9 +50,11 @@ class CancelOnePayChargeOnExternalPayment
     {
         $invoice = $event->invoice;
 
+
         // If payment did come from OnePay, do nothing
         if (($invoice->payment_method ?? null) === 'onepay') {
-            return;
+            $invoice->update(['onepay_status' => 'paid']);
+            $invoice->save();
         }
 
         // If there is a pending OnePay charge, cancel it
@@ -41,13 +77,6 @@ class CancelOnePayChargeOnExternalPayment
             } catch (\Throwable $e) {
                 Log::error('Error cancelling OnePay charge after external payment: ' . $e->getMessage());
             }
-
-            // Clear local fields regardless to avoid dangling links
-            $invoice->onepay_charge_id = null;
-            $invoice->onepay_payment_link = null;
-            $invoice->onepay_status = null;
-            $invoice->onepay_metadata = null;
-            $invoice->save();
         }
     }
 }

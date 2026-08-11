@@ -5,10 +5,12 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::apiResource('/customers', \App\Http\Controllers\API\Customers\CustomerController::class);
+Route::post('/customers/{id}/sync-siigo', [\App\Http\Controllers\API\Customers\CustomerController::class, 'syncToSiigo']);
 
 Route::apiResource('/addresses', \App\Http\Controllers\API\Customers\AddressController::class);
 
 Route::apiResource('/tax-details', \App\Http\Controllers\API\Customers\TaxDetailController::class);
+Route::get('/customers/{customerId}/tax-detail', [\App\Http\Controllers\API\Customers\TaxDetailController::class, 'byCustomer']);
 
 Route::apiResource('/document-types', \App\Http\Controllers\API\Customers\DocumentTypeController::class);
 
@@ -41,8 +43,11 @@ Route::apiResource('/credit-notes', \App\Http\Controllers\API\Invoice\CreditNote
 Route::apiResource('/daily-invoice-balances', \App\Http\Controllers\API\Invoice\DailyInvoiceBalanceController::class);
 
 Route::apiResource('/invoices', \App\Http\Controllers\API\Invoice\InvoiceController::class);
+Route::post('/invoices/{id}/sync-siigo', [\App\Http\Controllers\API\Invoice\InvoiceController::class, 'syncToSiigo']);
 
 Route::apiResource('/payment-promises', \App\Http\Controllers\API\Invoice\PaymentPromiseController::class);
+
+Route::apiResource('/invoice-payments', \App\Http\Controllers\API\Invoice\InvoicePaymentController::class);
 
 Route::apiResource('/pages', \App\Http\Controllers\API\PageBuilder\PagesController::class);
 

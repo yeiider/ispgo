@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\HasSignedUrls;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TicketAttachment extends Model
 {
-    use HasFactory;
+    use HasFactory, HasSignedUrls;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +26,12 @@ class TicketAttachment extends Model
         'user_id',
     ];
 
+    protected $appends = ['image_url'];
+
+    protected function imageUrl(): Attribute
+    {
+        return $this->signedUrlAttribute('file_path', 's3', 60);
+    }
     /**
      * Get the ticket that owns the attachment.
      */

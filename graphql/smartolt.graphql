@@ -203,9 +203,49 @@ type SmartOltVoipPort {
     allowed_vlans: String
 }
 
+type SmartOltVlan {
+    id: ID!
+    vlan: String
+    description: String
+    olt_id: String
+    scope: String
+    default_for_pon_ports: String
+}
+
+type SmartOltUnconfiguredOnu {
+    id: Int
+    pon_type: String
+    board: String
+    port: String
+    pon_description: String
+    onu: String
+    sn: String
+    onu_type_name: String
+    onu_type_id: String
+    olt_id: String
+    is_disabled: Int
+}
+
+type InstallationFormData {
+    onu: SmartOltUnconfiguredOnu
+    vlans: [SmartOltVlan!]!
+    zones: [SmartOltZone!]!
+    speed_profiles: [SmartOltSpeedProfile!]!
+}
+
 type SmartOltOnuTypeImage {
     image_base64: String!
     content_type: String!
+}
+
+type SmartOltOnuTrafficGraph {
+    image_base64: String!
+    content_type: String!
+}
+
+type SmartOltCatvStatus {
+    enabled: Boolean!
+    message: String
 }
 
 extend type Query {
@@ -219,6 +259,10 @@ extend type Query {
     smartOltOltsUptime: [SmartOltUptime!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltsUptime")
     smartOltOnuDetails(sn: String!): SmartOltOnuDetails @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuDetails")
     smartOltOnuTypeImage(onu_type_id: ID!): SmartOltOnuTypeImage @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuTypeImage")
+    smartOltOnuTrafficGraph(external_id: String!, graph_type: String = "hourly"): SmartOltOnuTrafficGraph @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuTrafficGraph")
+    smartOltVlans(olt_id: ID!): [SmartOltVlan!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getVlans")
+    smartOltInstallationFormData(sn: String!): InstallationFormData @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getInstallationFormData")
+    smartOltCatvStatus(external_id: String!): SmartOltCatvStatus @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getCatvStatus")
 }
 
 extend type Mutation {
@@ -229,18 +273,21 @@ extend type Mutation {
         port: String!
         sn: String!
         vlan: Int!
+        vlan_mgmt: Int!
         onu_mode: String!
         onu_type: String!
-        zone_id: ID!
-        odb_id: ID
-        name: String!
-        address: String
-        contact: String
-        speed_profile_id: ID!
+        zone: String!
+        service_id: ID!
+        odb: String
+        name: String
+        address_or_comment: String
+        onu_external_id: String
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@authorizeOnu")
 
     smartOltRebootOnu(external_id: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@rebootOnu")
     smartOltEnableOnu(sn: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@enableOnu")
     smartOltDisableOnu(sn: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@disableOnu")
     smartOltRemoveEquipment(sn: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@removeEquipment")
+    smartOltEnableCatv(external_id: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@enableCatv")
+    smartOltDisableCatv(external_id: String!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\SmartOltMutation@disableCatv")
 }

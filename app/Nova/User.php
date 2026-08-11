@@ -7,6 +7,7 @@ use Illuminate\Validation\Rules;
 use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphToMany;
+use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -62,10 +63,20 @@ class User extends Resource
                 ->sortable()
                 ->rules('required', 'max:10'),
 
-            \Laravel\Nova\Fields\BelongsTo::make('Router', 'router', Router::class)
-                ->nullable()
+            // Campo para múltiples routers
+            BelongsToMany::make('Routers', 'routers', Router::class)
                 ->searchable()
-                ->help('Router asignado al usuario. Super-admin siempre ve todo. Admin y usuarios normales sin router ven todo, con router solo ven su zona.'),
+                ->help('Routers asignados al usuario. Si no tiene ningún router asignado, verá todos los datos. Si tiene uno o más routers, solo verá datos de esos routers.')
+                ->fields(function () {
+                    return [
+                        Text::make('Asignado el', 'created_at')
+                            ->readonly()
+                            ->hideWhenCreating()
+                            ->displayUsing(function ($value) {
+                                return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                            }),
+                    ];
+                }),
 
             Password::make('Password')
                 ->onlyOnForms()

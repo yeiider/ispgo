@@ -28,7 +28,9 @@ services:
             - mailpit
             - selenium
     mysql:
-        image: 'mysql/mysql-server:8.0'
+        # CAMBIO: 'mysql/mysql-server:8.0' no es compatible con ARM64 (Raspberry Pi).
+        # 'mariadb:10.8' es un reemplazo directo y compatible.
+        image: 'mariadb:10.8'
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
@@ -45,8 +47,9 @@ services:
             - sail
         healthcheck:
             test:
+                # CAMBIO: Ajustamos el healthcheck para que use 'mariadb-admin' en lugar de 'mysqladmin'
                 - CMD
-                - mysqladmin
+                - mariadb-admin
                 - ping
                 - '-p${DB_PASSWORD}'
             retries: 3
@@ -93,7 +96,9 @@ services:
         networks:
             - sail
     selenium:
-        image: selenium/standalone-chrome
+        # CAMBIO: 'selenium/standalone-chrome' no es compatible con ARM64.
+        # 'seleniarm/standalone-chromium' es el reemplazo para ARM.
+        image: 'seleniarm/standalone-chromium'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         volumes:

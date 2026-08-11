@@ -53,9 +53,13 @@ class SendInvoiceNotification implements ShouldQueue
     public function handle(InvoiceIssued $event): void
     {
         /**
-         * @var Invoice $invoice;
+         * @var Invoice $invoice ;
          */
+
+
         $invoice = $event->invoice;
+        if (!InvoiceProviderConfig::sendEmailCreateInvoice())
+            return;
 
         $templateId = InvoiceProviderConfig::emailTemplateCreatedInvoice();
         $emailTemplate = $templateId ? EmailTemplate::where('id', $templateId)->first() : null;

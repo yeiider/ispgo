@@ -2,6 +2,9 @@
 
 namespace Ispgo\Mikrotik\Settings;
 
+use Ispgo\Mikrotik\Settings\Config\Sources\SuspendAction;
+use Ispgo\Mikrotik\Settings\Config\Sources\ActivateAction;
+
 /**
  * Configuración simplificada de Mikrotik para el nuevo flujo:
  * - Conexión con microservicio API
@@ -30,8 +33,8 @@ class SettingMikrotik
             "api_base_url" => [
                 "field" => "text-field",
                 "label" => "URL Base del Microservicio",
-                "placeholder" => "http://localhost:8000/api/v1",
-                "description" => "URL base del microservicio de Mikrotik (sin slash final)"
+                "placeholder" => "http://host.docker.internal:8000/api/v1",
+                "description" => "URL base del microservicio de Mikrotik. Usa host.docker.internal si Laravel corre en Docker."
             ],
             "api_timeout" => [
                 "field" => "number-field",
@@ -184,11 +187,7 @@ class SettingMikrotik
                 "label" => "Acción al Suspender",
                 "placeholder" => "disable_queue",
                 "description" => "Qué hacer cuando se suspende un servicio",
-                "options" => [
-                    ["value" => "disable_queue", "label" => "Deshabilitar Queue"],
-                    ["value" => "limit_speed", "label" => "Limitar Velocidad"],
-                    ["value" => "remove_queue", "label" => "Eliminar Queue"],
-                ]
+                "options" => SuspendAction::class
             ],
             "suspend_limit_upload" => [
                 "field" => "text-field",
@@ -207,11 +206,7 @@ class SettingMikrotik
                 "label" => "Acción al Activar",
                 "placeholder" => "enable_queue",
                 "description" => "Qué hacer cuando se activa un servicio",
-                "options" => [
-                    ["value" => "enable_queue", "label" => "Habilitar Queue"],
-                    ["value" => "restore_speed", "label" => "Restaurar Velocidad"],
-                    ["value" => "create_queue", "label" => "Crear Queue"],
-                ]
+                "options" => ActivateAction::class
             ],
         ];
     }

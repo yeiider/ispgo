@@ -4,9 +4,12 @@ namespace App\GraphQL\Queries;
 
 use App\Services\Config\ConfigSchema;
 use App\Services\Config\ConfigService;
+use App\Traits\HasSignedUrls;
+use Illuminate\Support\Facades\Storage;
 
 class ConfigQuery
 {
+    use HasSignedUrls;
     protected ConfigService $service;
 
     public function __construct()
@@ -87,10 +90,15 @@ class ConfigQuery
         $list = $this->service->fieldsWithValues($scopeId);
         // Ensure value/default/options are string types where needed
         return array_map(function ($item) {
-            if (isset($item['value']) && $item['value'] !== null && !is_string($item['value'])) {
+            // Si el campo es de tipo image, generar URL firmada
+            if (($item['type'] ?? null) === 'image' && !empty($item['value'])) {
+                $item['value'] = $this->generateSignedUrl($item['value']);
+            }
+
+            if (isset($item['value']) && !is_string($item['value'])) {
                 $item['value'] = (string)$item['value'];
             }
-            if (isset($item['default']) && $item['default'] !== null && !is_string($item['default'])) {
+            if (isset($item['default']) && !is_string($item['default'])) {
                 $item['default'] = (string)$item['default'];
             }
             if (isset($item['options']) && is_array($item['options'])) {
@@ -117,10 +125,18 @@ class ConfigQuery
         $result = [];
         foreach ($paths as $path) {
             $meta = $index[$path] ?? ['label' => null, 'type' => 'string'];
+            $type = $meta['type'] ?? 'string';
+            $value = array_key_exists($path, $values) ? $values[$path] : null;
+
+            // Si el tipo es image y hay un valor, firmar la URL
+            if ($type === 'image' && !empty($value)) {
+                $value = $this->generateSignedUrl($value);
+            }
+
             $result[] = [
                 'path' => $path,
-                'value' => array_key_exists($path, $values) ? (string)$values[$path] : null,
-                'type' => $meta['type'] ?? 'string',
+                'value' => $value !== null ? (string)$value : null,
+                'type' => $type,
                 'label' => $meta['label'] ?? null,
             ];
         }
@@ -138,10 +154,17 @@ class ConfigQuery
         $values = $this->service->getValues(array_keys($fields), $scopeId);
         $result = [];
         foreach ($fields as $path => $meta) {
+            $value = array_key_exists($path, $values)
+                ? $values[$path]
+                : ($meta['default'] ?? null);
+
+            // Si el tipo es image y hay un valor, firmar la URL
+            if (($meta['type'] ?? 'string') === 'image' && !empty($value)) {
+                $value = $this->generateSignedUrl($value);
+            }
+
             $result[] = array_merge($meta, [
-                'value' => array_key_exists($path, $values)
-                    ? (string)$values[$path]
-                    : (isset($meta['default']) ? (string)$meta['default'] : null),
+                'value' => $value !== null ? (string)$value : null,
             ]);
         }
         return array_values($result);

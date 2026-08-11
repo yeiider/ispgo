@@ -46,9 +46,13 @@ class Router extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    /**
+     * Get all users assigned to this router.
+     */
     public function users()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class, 'user_router')
+            ->withTimestamps();
     }
 
     public function napBoxes(): HasMany

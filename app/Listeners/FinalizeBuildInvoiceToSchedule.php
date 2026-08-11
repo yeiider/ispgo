@@ -52,9 +52,10 @@ class FinalizeBuildInvoiceToSchedule implements ShouldQueue
     {
         $currentBillingPeriod = now()->format('Y-m'); // Obtener el periodo actual
 
-        $invoices = Invoice::where('billing_period', $currentBillingPeriod)
-        ->where('state', 'building')
-        ->get();
+        $invoices = Invoice::withoutGlobalScope('router_filter')
+            ->where('billing_period', $currentBillingPeriod)
+            ->where('state', 'building')
+            ->get();
 
 
 

@@ -33,13 +33,13 @@ class Service extends Model
         'password_router', 'service_status', 'activation_date', 'deactivation_date',
         'bandwidth', 'mac_address', 'installation_date', 'service_notes', 'contract_id',
         'support_contact', 'service_location', 'service_type', 'static_ip', 'data_limit',
-        'last_maintenance', 'billing_cycle', 'service_priority', 'sn','unu_longitude','unu_latitude',
+        'last_maintenance', 'billing_cycle', 'billing_cycle_id', 'service_priority', 'sn','unu_longitude','unu_latitude',
         'assigned_technician', 'service_contract', 'created_by', 'updated_by',
     ];
 
     protected $casts = [
-        'deactivation_date' => 'date',
-        'activation_date' => 'date',
+        'deactivation_date' => 'datetime',
+        'activation_date' => 'datetime',
         'installation_date' => 'date',
         'last_maintenance' => 'date',
     ];
@@ -47,6 +47,11 @@ class Service extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function billingCycle()
+    {
+        return $this->belongsTo(\App\Models\BillingCycle::class, 'billing_cycle_id');
     }
 
     public function getFullNameAttribute()
@@ -88,9 +93,30 @@ class Service extends Model
         return $this->belongsTo(Plan::class);
     }
 
+    public function iptvLineUser()
+    {
+        return $this->hasOne(IptvLineUser::class, 'service_id');
+    }
+
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function additionalPlans()
+    {
+        return $this->belongsToMany(AdditionalPlan::class, 'service_additional_plan');
+    }
+
+    /**
+     * Get the total monthly price of the service (Plan + Additional Plans).
+     */
+    public function getTotalPriceAttribute(): float
+    {
+        $planPrice = $this->plan?->monthly_price ?? 0;
+        $additionalPrice = $this->additionalPlans()->where('status', 'active')->sum('monthly_price');
+
+        return (float) ($planPrice + $additionalPrice);
     }
 
     public function napPort()
@@ -114,7 +140,8 @@ class Service extends Model
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router through customer
+        // Global Scope: Filter services by their own router_id
+        // Services belong directly to a router, so we filter by router_id directly.
         static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = \Illuminate\Support\Facades\Auth::user();
@@ -124,17 +151,17 @@ class Service extends Model
                 return;
             }
 
-            // If super admin always sees all, or if no router assigned, show all
-            if ($user->isSuperAdmin() || !$user->router_id) {
+            // If user has no routers assigned, show all data
+            // Role permissions control what actions they can perform
+            $routerIds = $user->getRouterIds();
+
+            if (empty($routerIds)) {
                 return;
             }
 
-            // Filter by router_id through customer relationship (applies to admin with router_id and regular users with router_id)
-            $builder->where(function ($query) use ($user) {
-                $query->whereHas('customer', function ($q) use ($user) {
-                    $q->where('router_id', $user->router_id);
-                })->orWhere('router_id', $user->router_id);
-            });
+            // Filter services directly by their router_id.
+            // Correct logic: router → services (direct relationship)
+            $builder->whereIn('router_id', $routerIds);
         });
 
         static::creating(function ($model) {
@@ -147,11 +174,10 @@ class Service extends Model
 
         });
         static::updating(function ($service) {
+            $service->updated_by = Auth::id();
             if ($service->isDirty('service_status')) {
-                $service->updated_by = Auth::id();
                 event(new ServiceUpdateStatus($service));
             }
-            event(new ServiceUpdateStatus($service));
         });
     }
 
@@ -161,7 +187,7 @@ class Service extends Model
             // No generar factura para servicios con estado 'free'
             return null;
         }
-        $price = $this->plan->monthly_price;
+        $price = $this->total_price;
 
         $invoice = new Invoice();
         $invoice->service_id = $this->id;
@@ -237,7 +263,7 @@ class Service extends Model
     {
         $this->service_status = 'suspended';
         $this->save();
-        event(new ServiceSuspend($this));
+        //event(new ServiceSuspend($this));
     }
 
     public function activate()

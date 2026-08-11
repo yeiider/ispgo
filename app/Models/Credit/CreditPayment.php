@@ -44,7 +44,7 @@ class CreditPayment extends Model
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router through credit account -> customer
+        // Global Scope: Filter by user's router(s) through credit account -> customer
         static::addGlobalScope('router_filter', function (Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
@@ -54,14 +54,17 @@ class CreditPayment extends Model
                 return;
             }
 
-            // If super admin always sees all, or if no router assigned, show all
-            if ($user->isSuperAdmin() || !$user->router_id) {
+            // If user has no routers assigned, show all data
+            // Role permissions control what actions they can perform
+            $routerIds = $user->getRouterIds();
+            
+            if (empty($routerIds)) {
                 return;
             }
 
-            // Filter by router_id through credit account -> customer relationship (applies to admin with router_id and regular users with router_id)
-            $builder->whereHas('creditAccount.customer', function ($query) use ($user) {
-                $query->where('router_id', $user->router_id);
+            // Filter by user's assigned router(s) through credit account -> customer relationship
+            $builder->whereHas('creditAccount.customer', function ($query) use ($routerIds) {
+                $query->whereIn('router_id', $routerIds);
             });
         });
     }

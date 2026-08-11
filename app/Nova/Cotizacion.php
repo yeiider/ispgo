@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use App\Models\Cotizacion as CotizacionModel;
+use App\Nova\Actions\UpdateCotizacionEstado;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Badge;
 use Laravel\Nova\Fields\DateTime;
@@ -67,6 +68,9 @@ class Cotizacion extends Resource
                 ->options([
                     'pendiente' => 'Pendiente',
                     'atendida' => 'Atendida',
+                    'cancelada' => 'Cancelada',
+                    'no_contactado' => 'No Contactado',
+                    'completada' => 'Completada',
                 ])->displayUsingLabels()->rules('required')->sortable()->default('pendiente'),
 
             Text::make('Notas')->hideFromIndex()->nullable(),
@@ -105,6 +109,8 @@ class Cotizacion extends Resource
      */
     public function actions(Request $request): array
     {
-        return [];
+        return [
+            new UpdateCotizacionEstado,
+        ];
     }
 }

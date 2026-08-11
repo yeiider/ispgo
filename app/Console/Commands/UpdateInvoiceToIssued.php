@@ -29,9 +29,10 @@ class UpdateInvoiceToIssued extends Command
     {
         $currentBillingPeriod = now()->format('Y-m'); // Obtener el periodo actual
 
-        $invoices = Invoice::where('billing_period', $currentBillingPeriod) // Filtrar facturas del periodo actual
-        ->where('state', 'building') // Filtrar facturas con el estado "building"
-        ->get();
+        $invoices = Invoice::withoutGlobalScope('router_filter')
+            ->where('billing_period', $currentBillingPeriod)
+            ->where('state', 'building')
+            ->get();
 
         foreach ($invoices as $invoice) {
             try {

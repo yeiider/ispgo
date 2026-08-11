@@ -43,7 +43,9 @@ class RegisterPaymentPromise extends Action
 
                 if ($shouldActivate) {
                     $model->loadMissing('service');
-                    optional($model->service)->activate();
+                    if ($model->service && $model->service->service_status === 'suspended') {
+                        $model->service->activate();
+                    }
                 }
             }
         }

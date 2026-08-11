@@ -11,6 +11,13 @@ class TaxDetail extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'siigo_synced_at' => 'datetime',
+        'enable_billing' => 'boolean',
+        'send_notifications' => 'boolean',
+        'send_invoice' => 'boolean',
+    ];
+
     protected $fillable = [
         'customer_id',
         'tax_identification_type',
@@ -21,6 +28,8 @@ class TaxDetail extends Model
         'enable_billing',
         'send_notifications',
         'send_invoice',
+        'siigo_customer_id',
+        'siigo_synced_at',
         'created_by',
         'updated_by'
     ];
@@ -45,6 +54,10 @@ class TaxDetail extends Model
 
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
+        });
+
+        static::updated(function ($model) {
+            event(new \App\Events\TaxCustomerUpdated($model));
         });
     }
 }

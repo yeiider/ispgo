@@ -238,4 +238,25 @@ class InventoryQuery
         }
         return 0;
     }
+
+    /**
+     * Builder method for usersWithInventory query.
+     */
+    public function usersWithInventoryQuery($root, array $args): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = \App\Models\User::query()
+            ->whereHas('equipmentAssignments', function ($q) {
+                $q->where('status', 'assigned');
+            });
+
+        if (isset($args['search']) && !empty($args['search'])) {
+            $search = $args['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        return $query;
+    }
 }

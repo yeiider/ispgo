@@ -14,6 +14,7 @@ use App\Listeners\AfterPayingInvoice;
 use App\Events\InvoiceItemsCreated;
 use App\Listeners\ApplyBillingNovedades;
 use App\Listeners\ApplyRuleInvoice;
+use App\Listeners\ApplyTaxByFiscalRegime;
 use App\Listeners\FinalizeBuildInvoiceToSchedule;
 use App\Listeners\SendInvoiceNotification;
 use App\Listeners\UpdateStateToIssued;
@@ -21,6 +22,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 use Laravel\Passport\Passport;
+use App\Events\ServiceUpdateStatus;
+use App\Listeners\ServiceIptvManagerListener;
 
 class AppServiceProvider extends ServiceProvider
 
@@ -79,6 +82,27 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             InvoicePaid::class,
             [CancelOnePayChargeOnExternalPayment::class, 'handle']
+        );
+
+        // When invoice items are created, apply pending billing novedades and rules
+        Event::listen(
+            InvoiceItemsCreated::class,
+            [ApplyBillingNovedades::class, 'handle']
+        );
+        Event::listen(
+            InvoiceItemsCreated::class,
+            [ApplyRuleInvoice::class, 'handle']
+        );
+        // Automatically apply IVA (19%) for customers in Régimen Común
+        Event::listen(
+            InvoiceItemsCreated::class,
+            [ApplyTaxByFiscalRegime::class, 'handle']
+        );
+
+        // IPTV XUI.one status sync
+        Event::listen(
+            ServiceUpdateStatus::class,
+            [ServiceIptvManagerListener::class, 'handle']
         );
     }
 }

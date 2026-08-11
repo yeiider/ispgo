@@ -489,6 +489,45 @@ class OnuController extends Controller
     }
 
     /**
+     * Get ONU traffic graph by external_id (Direct API).
+     *
+     * @param Request $request
+     * @param string $externalId
+     * @param string $graphType
+     * @return ResponseFactory|Application|object|Response
+     */
+    public function getTrafficGraphByExternalId(Request $request, string $externalId, string $graphType = 'hourly')
+    {
+        try {
+            $response = $this->apiManager->getOnuTrafficGraphByExternalId($externalId, $graphType);
+
+            // Set the content type to image/png as specified in the requirements
+            return response($response->body(), 200, ['Content-Type' => 'image/png']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get ONU signal graph by external_id (Direct API).
+     *
+     * @param Request $request
+     * @param string $externalId
+     * @return ResponseFactory|Application|object|Response
+     */
+    public function getSignalGraphByExternalId(Request $request, string $externalId)
+    {
+        try {
+            $response = $this->apiManager->getOnuSignalGraphByExternalId($externalId);
+
+            // Set the content type to image/png as specified in the requirements
+            return response($response->body(), 200, ['Content-Type' => 'image/png']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Determina el external_id a utilizar para las peticiones a SmartOLT.
      */
     private function resolveExternalId(Service $service): string

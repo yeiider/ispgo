@@ -18,10 +18,13 @@ class SendContractToCustomerAction extends Action implements ShouldQueue
      */
     public function handle(ActionFields $fields, \Illuminate\Support\Collection $models)
     {
+        $contractService = resolve(\App\Services\ContractService::class);
         foreach ($models as $contract) {
-            $customer = $contract->customer;
-
-            $this->markAsFinished($contract);
+            try {
+                $contractService->sendContract($contract->id);
+            } catch (\Exception $e) {
+                return Action::danger('Error enviando contrato #' . $contract->id . ': ' . $e->getMessage());
+            }
         }
 
         return Action::message(__('El contrato se ha enviado al cliente.'));

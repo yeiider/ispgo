@@ -24,24 +24,31 @@ class Invoice extends Model
     use HasFactory;
 
     const STATUS_PAID = "paid";
+
+    // Invoice types
+    const TYPE_SUBSCRIPTION = 'subscription'; // Facturas mensuales de servicios
+    const TYPE_MANUAL = 'manual'; // Facturas manuales (instalaciones, otros)
+    const TYPE_ADJUSTMENT = 'adjustment'; // Ajustes/correcciones
+
     protected $fillable = [
         'service_id', 'customer_id', 'user_id', 'subtotal', 'tax', 'total', 'amount', 'outstanding_balance',
-        'issue_date', 'due_date', 'full_name', 'status', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
+        'issue_date', 'due_date', 'payment_date', 'payment_registered_by', 'full_name', 'status', 'invoice_type', 'payment_method', 'notes', 'created_by', 'updated_by', 'discount', 'payment_support', 'increment_id', 'additional_information', 'daily_box_id',
         'payment_link', 'expiration_date', 'customer_name', 'billing_period', 'state', 'amount_before_discounts', 'tax_total', 'void_total','router_id',
         // OnePay integration fields
-        'onepay_charge_id', 'onepay_payment_link', 'onepay_status', 'onepay_metadata'
+        'onepay_invoice_id', 'onepay_charge_id', 'onepay_payment_link', 'onepay_status', 'onepay_metadata'
     ];
 
     protected $casts = [
         "due_date" => 'date',
         "issue_date" => 'date',
+        "payment_date" => 'datetime',
         "expiration_date" => 'date',
         "additional_information" => 'array',
         'quantity' => 'int',
         'onepay_metadata' => 'array',
 
     ];
-    protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay'];
+    protected $appends = ['full_name', 'email_address', 'qr_image', 'issue__month_formatted', 'total_formatted', 'due_date_formatted', 'url_preview', 'url_pay', 'total_paid', 'credit_notes_total', 'real_outstanding_balance', 'collection_amount'];
 
     public function getFullNameAttribute()
     {
@@ -117,10 +124,61 @@ class Invoice extends Model
         return $this->customer->email_address;
     }
 
+    /**
+     * Get the total amount paid through InvoicePayment records or direct payments.
+     * Note: The 'amount' field contains the total paid (updated by both payment records and direct payments)
+     */
+    public function getTotalPaidAttribute(): float
+    {
+        return $this->amount ?? 0;
+    }
+
+    /**
+     * Get the total amount of credit notes applied.
+     */
+    public function getCreditNotesTotalAttribute(): float
+    {
+        return $this->creditNotes()->sum('amount');
+    }
+
+    /**
+     * Get the real outstanding balance considering payments and credit notes.
+     * Formula: total - amount - credit_notes
+     * Note: 'amount' field contains total paid (from both InvoicePayment records and direct payments)
+     */
+    public function getRealOutstandingBalanceAttribute(): float
+    {
+        return max(0, $this->total - ($this->amount ?? 0) - $this->getCreditNotesTotalAttribute());
+    }
+
+    /**
+     * Get the amount collected in the final transaction (total paid - sum of partial payments)
+     */
+    public function getCollectionAmountAttribute(): float
+    {
+        // When an invoice is paid, 'amount' is the total sum of all payments.
+        // We subtract the InvoicePayment records (abonos) to get what was received in the final full payment.
+        $totalAbonos = $this->payments()->sum('amount');
+        return max(0, ($this->amount ?? 0) - $totalAbonos);
+    }
+
+    /**
+     * Check if the invoice is fully paid.
+     */
+    public function isFullyPaid(): bool
+    {
+        return $this->real_outstanding_balance <= 0;
+    }
+
 
     public function creditNotes()
     {
         return $this->hasMany(CreditNote::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(InvoicePayment::class);
     }
 
     public function paymentPromises()
@@ -148,6 +206,11 @@ class Invoice extends Model
         return $this->belongsTo(Router::class);
     }
 
+    public function paymentRegisteredByUser()
+    {
+        return $this->belongsTo(User::class, 'payment_registered_by');
+    }
+
     public static function findByDniOrInvoiceId($input)
     {
         return self::where(function ($query) use ($input) {
@@ -171,42 +234,111 @@ class Invoice extends Model
             ->get();
     }
 
+    /**
+     * Scope to search invoices by customer name (first_name or last_name).
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $name
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSearchByCustomerName($query, $name)
+    {
+        return $query->whereHas('customer', function ($q) use ($name) {
+            $q->search($name);
+        });
+    }
+
 
     protected static function generateIncrementId()
     {
-        $lastInvoice = self::orderBy('id', 'desc')->first();
+        // Use withoutGlobalScopes to ensure we find the absolute last ID in the database,
+        // ignoring any router/user filters that might hide newer invoices.
+        $lastInvoice = self::withoutGlobalScopes()->orderBy('id', 'desc')->first();
         $lastId = $lastInvoice ? intval($lastInvoice->id) : 0;
         $incrementId = str_pad($lastId + 1, 10, '0', STR_PAD_LEFT);
         return $incrementId;
     }
 
-    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null, $dailyBoxId = null): void
+    public function applyPayment($amount = null, $paymentMethod = "cash", array $additional = [], $notes = null, $dailyBoxId = null, $createPaymentRecord = false, $paymentRegisteredById = null): void
     {
+        $amount = $amount ?? $this->real_outstanding_balance;
 
-        $amount = $amount ?? $this->total;
         if ($this->status === 'paid') {
             throw new \Exception('La factura ya ha sido pagada');
         }
-        if ($amount > $this->total - $this->amount) {
-            throw new \Exception('El monto pagado no puede ser mayor que el adeudado.');
+
+        if ($amount > $this->real_outstanding_balance) {
+            throw new \Exception('El monto pagado no puede ser mayor que el saldo pendiente.');
         }
 
-        $this->amount += $amount;
-        $this->outstanding_balance = $this->total - $this->amount;
-        $this->payment_method = $paymentMethod;
+        $registeredUser = $paymentRegisteredById ? \App\Models\User::find($paymentRegisteredById) : (Auth::check() ? Auth::user() : null);
+        $registeredByName = $registeredUser ? $registeredUser->name : '';
+        $registeredById = $registeredUser ? $registeredUser->id : null;
 
-        if ($this->outstanding_balance <= 0) {
+        // Only create InvoicePayment record for partial payments (when explicitly requested)
+        if ($createPaymentRecord) {
+            InvoicePayment::create([
+                'invoice_id' => $this->id,
+                'user_id' => $registeredById,
+                'amount' => $amount,
+                'payment_date' => now(),
+                'payment_method' => $paymentMethod,
+                'payment_registered_by' => $registeredById,
+                'notes' => $notes,
+                'additional_information' => $additional,
+                'daily_box_id' => $dailyBoxId,
+            ]);
+
+            // Update amount from sum of payments
+            $this->amount = $this->payments()->sum('amount');
+        } else {
+            // For full payments or console commands: update amount directly
+            $this->amount += $amount;
+        }
+
+        $this->outstanding_balance = $this->real_outstanding_balance;
+        $this->payment_method = $paymentMethod;
+        if ($dailyBoxId) {
+            $this->daily_box_id = $dailyBoxId;
+            
+            // Si el pago es en efectivo, incrementar el balance actual de la caja
+            if ($paymentMethod === 'cash') {
+                \App\Models\Finance\CashRegister::where('id', $dailyBoxId)->increment('current_balance', $amount);
+            }
+        }
+
+        if ($this->isFullyPaid()) {
             $this->status = 'paid';
             $this->outstanding_balance = 0;
+            $this->payment_date = now();
+
+            $this->payment_registered_by = $registeredById;
+
+            // Registrar fecha de pago en additional_information
+            $now = now();
+            $paymentInfo = [
+                //'id'           => $this->increment_id . '-' . $now->timestamp,
+                'created_at'   => $now->toIso8601String(),
+                'finalized_at' => $now->toIso8601String(),
+            ];
+            // Combinar con cualquier dato extra que venga del llamador
+            $additional = array_merge($additional, $paymentInfo);
+
+            // Update any pending payment promise to fulfilled
+            $this->paymentPromises()->where('status', 'pending')->update(['status' => 'fulfilled']);
+
         } else if ($this->due_date < now() && $this->outstanding_balance > 0) {
-            $this->status = 'overdue';
+            $this->status = 'unpaid';
         }
+
         if ($notes) {
             $this->notes = $notes;
         }
+
         $this->daily_box_id = $dailyBoxId;
         $this->additional_information = $additional;
         $this->save();
+
         event(new InvoicePaid($this));
     }
 
@@ -227,18 +359,44 @@ class Invoice extends Model
     {
         $this->status = 'canceled';
         $this->save();
+
+        // Delete OnePay invoice or payment if exists
+        $onePayHandler = app(\App\Services\Payments\OnePay\OnePayHandler::class);
+        if ($this->onepay_invoice_id) {
+            try {
+                $onePayHandler->deleteInvoice($this->onepay_invoice_id);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Error eliminando factura OnePay al cancelar', [
+                    'invoice_id' => $this->id,
+                    'onepay_invoice_id' => $this->onepay_invoice_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        } elseif ($this->onepay_charge_id) {
+            try {
+                $onePayHandler->deletePayment($this->onepay_charge_id);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Error eliminando cobro OnePay al cancelar factura', [
+                    'invoice_id' => $this->id,
+                    'onepay_charge_id' => $this->onepay_charge_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        event(new \App\Events\InvoiceCanceled($this));
     }
 
     public function applyDiscountWithoutTax(float $discount)
     {
         $this->discount = $discount;
+        // El descuento se aplica solo al subtotal, el impuesto existente NO cambia
         $subtotal = $this->subtotal - $discount;
-        $tax = $subtotal * 0.19;
-        $total = $subtotal + $tax;
+        $total    = $subtotal + $this->tax; // tax se conserva tal cual
 
         $this->subtotal = $subtotal;
-        $this->tax = $tax;
-        $this->total = $total;
+        // $this->tax permanece sin cambios
+        $this->total    = $total;
         $this->outstanding_balance = $total - $this->amount;
         $this->save();
     }
@@ -261,27 +419,33 @@ class Invoice extends Model
     {
         parent::boot();
 
-        // Global Scope: Filter by user's router
+        // Global Scope: Filter invoices by the routers of the customer's SERVICES
+        // An invoice is visible if its customer has at least one service in the user's router(s).
+        // This is more correct than filtering by invoice.router_id directly, since manual invoices
+        // may not have a router_id set.
         static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
             /** @var \App\Models\User|null $user */
             $user = Auth::user();
-            
+
             // If not authenticated, no filtering
             if (!$user) {
                 return;
             }
 
-            // If super admin always sees all, or if no router assigned, show all
-            if ($user->isSuperAdmin() || !$user->router_id) {
+            // If user has no routers assigned, show all data
+            // Role permissions control what actions they can perform
+            $routerIds = $user->getRouterIds();
+
+            if (empty($routerIds)) {
                 return;
             }
 
-            // Filter by router_id directly or through customer relationship (applies to admin with router_id and regular users with router_id)
-            $builder->where(function ($query) use ($user) {
-                $query->where('router_id', $user->router_id)
-                    ->orWhereHas('customer', function ($q) use ($user) {
-                        $q->where('router_id', $user->router_id);
-                    });
+            // Filter invoices whose customer has at least one SERVICE in the user's router(s).
+            // Correct logic: router → services → customers → invoices
+            $builder->whereHas('customer', function ($q) use ($routerIds) {
+                $q->whereHas('services', function ($sq) use ($routerIds) {
+                    $sq->whereIn('router_id', $routerIds);
+                });
             });
         });
 
@@ -296,12 +460,38 @@ class Invoice extends Model
         });
         static::created(function ($model) {
             $model->load('customer');
-            // event(new InvoiceCreated($model));
+            event(new \App\Events\InvoiceCreated($model));
         });
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
             if ($model->isDirty('status')) {
                 //  event(new InvoiceUpdateStatus($model));
+            }
+        });
+
+        static::deleting(function ($model) {
+            // Delete OnePay invoice or payment if exists
+            $onePayHandler = app(\App\Services\Payments\OnePay\OnePayHandler::class);
+            if ($model->onepay_invoice_id) {
+                try {
+                    $onePayHandler->deleteInvoice($model->onepay_invoice_id);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Error eliminando factura OnePay al eliminar', [
+                        'invoice_id' => $model->id,
+                        'onepay_invoice_id' => $model->onepay_invoice_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            } elseif ($model->onepay_charge_id) {
+                try {
+                    $onePayHandler->deletePayment($model->onepay_charge_id);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Error eliminando cobro OnePay al eliminar factura', [
+                        'invoice_id' => $model->id,
+                        'onepay_charge_id' => $model->onepay_charge_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
         });
     }

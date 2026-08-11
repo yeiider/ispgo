@@ -20,6 +20,8 @@ class CustomerResource extends JsonResource
             'identity_document' => $this->identity_document,
             'customer_status' => $this->customer_status,
             'additional_notes' => $this->additional_notes,
+            'router_id' => $this->router_id,
+            'billing_mode' => $this->billing_mode,
             'created_by' => $this->created_by,
             'updated_by' => $this->updated_by,
             'password' => $this->password,

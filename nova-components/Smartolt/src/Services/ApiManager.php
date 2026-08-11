@@ -15,8 +15,8 @@ class ApiManager
 
     public function __construct()
     {
-        $this->baseUrl = ProviderSmartOlt::getUrl();
-        $this->token = ProviderSmartOlt::getToken();
+        $this->baseUrl = ProviderSmartOlt::getUrl() ?? '';
+        $this->token = ProviderSmartOlt::getToken() ?? '';
     }
 
     private function request(string $endpoint, array $payload = [], bool $asForm = false, string $method = 'post'): Response
@@ -264,7 +264,20 @@ class ApiManager
     public function getOnuSignalGraphByExternalId(string $externalId): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/get_onu_signal_graph/' . $externalId, [], false, 'get');
+
+        // Para imágenes, necesitamos manejar la respuesta binaria directamente
+        try {
+            $response = Http::withHeaders(['X-Token' => $this->token])
+                ->withOptions([
+                    'stream' => false, // No usar stream
+                    'decode_content' => true, // Decodificar contenido
+                ])
+                ->get($this->baseUrl . 'api/onu/get_onu_signal_graph/' . $externalId);
+
+            return $response;
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -278,7 +291,20 @@ class ApiManager
     public function getOnuTrafficGraphByExternalId(string $externalId, string $graphType = 'hourly'): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/get_onu_traffic_graph/' . $externalId . '/' . $graphType, [], false, 'get');
+
+        // Para imágenes, necesitamos manejar la respuesta binaria directamente
+        try {
+            $response = Http::withHeaders(['X-Token' => $this->token])
+                ->withOptions([
+                    'stream' => false, // No usar stream
+                    'decode_content' => true, // Decodificar contenido
+                ])
+                ->get($this->baseUrl . 'api/onu/get_onu_traffic_graph/' . $externalId . '/' . $graphType);
+
+            return $response;
+        } catch (ConnectionException $e) {
+            throw new \Exception("Error al conectar con SmartOLT: " . $e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -304,7 +330,7 @@ class ApiManager
     public function rebootOnuByExternalId(string $externalId): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/reboot', ['external_id' => $externalId]);
+        return $this->request('api/onu/reboot/' . $externalId);
     }
 
     /**
@@ -317,7 +343,7 @@ class ApiManager
     public function restoreOnuFactoryDefaultsByExternalId(string $externalId): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/restore_onu_factory_defaults_by_onu_external_id', ['external_id' => $externalId]);
+        return $this->request('api/onu/restore_factory_defaults/' . $externalId);
     }
 
     /**
@@ -331,8 +357,7 @@ class ApiManager
     public function updateOnuSpeedProfileByExternalId(string $externalId, int $speedProfileId): Response
     {
         $this->validateExternalId($externalId);
-        return $this->request('api/onu/update_onu_speed_profiles_by_onu_external_id', [
-            'external_id' => $externalId,
+        return $this->request('api/onu/update_onu_speed_profiles/' . $externalId, [
             'speed_profile_id' => $speedProfileId
         ]);
     }
@@ -449,6 +474,29 @@ class ApiManager
     }
 
     /**
+     * Configurar modo WAN DHCP con TR069 para ONU por external_id.
+     *
+     * @param string $externalId
+     * @param array $params Parámetros adicionales para sobrescribir los valores por defecto
+     * @return Response
+     * @throws \Exception
+     */
+    public function setOnuWanModeDhcp(string $externalId, array $params = []): Response
+    {
+        $this->validateExternalId($externalId);
+        $payload = array_merge([
+            'configuration_method'         => ProviderSmartOlt::getWanConfigurationMethod(),
+            'ip_protocol'                  => ProviderSmartOlt::getIpProtocol(),
+            'ipv6_address_mode'            => ProviderSmartOlt::getIpv6AddressMode(),
+            'ipv6_address'                 => '',
+            'ipv6_gateway'                 => '',
+            'ipv6_prefix_delegation_mode'  => ProviderSmartOlt::getIpv6PrefixDelegationMode(),
+            'ipv6_prefix_address'          => '',
+        ], $params);
+        return $this->request('api/onu/set_onu_wan_mode_dhcp/' . $externalId, $payload, true);
+    }
+
+    /**
      * Autorizar una ONU nueva.
      *
      * @param array $payload Datos de la ONU a autorizar
@@ -523,6 +571,19 @@ class ApiManager
     }
 
     /**
+     * Obtener ONUs no configuradas filtrando por número de serie.
+     *
+     * @param string $sn
+     * @return Response
+     * @throws \Exception
+     */
+    public function getUnconfiguredOnusBySn(string $sn): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/unconfigured_onus', ['sn' => $sn], false, 'get');
+    }
+
+    /**
      * Obtener detalles de ONU por número de serie.
      *
      * @param string $sn
@@ -587,7 +648,7 @@ class ApiManager
     public function rebootOnuBySn(string $sn): Response
     {
         $this->validateSerialNumber($sn);
-        return $this->request('api/onu/reboot', ['sn' => $sn]);
+        return $this->request('api/onu/reboot/' . $sn);
     }
 
     /**
@@ -603,5 +664,18 @@ class ApiManager
         return $this->request('api/onu/delete/' . $externalId, [], false, 'post');
     }
 
+    /**
+     * Habilitar TR069 para una ONU por número de serie.
+     *
+     * @param string $sn
+     * @param string $tr069Profile
+     * @return Response
+     * @throws \Exception
+     */
+    public function enableTr069(string $sn, string $tr069Profile): Response
+    {
+        $this->validateSerialNumber($sn);
+        return $this->request('api/onu/enable_tr069/' . $sn, ['tr069_profile' => $tr069Profile], true);
+    }
 
 }

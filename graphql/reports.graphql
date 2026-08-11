@@ -1,0 +1,54 @@
+type InvoiceReportSummary {
+    total_invoices: Int!
+    total_amount: Float!
+    total_paid: Float!
+    total_payments: Float!
+    total_outstanding: Float!
+    total_discount: Float!
+    total_tax: Float!
+    paid_count: Int!
+    unpaid_count: Int!
+    overdue_count: Int!
+    canceled_count: Int!
+}
+
+type InvoiceChartPoint {
+    label: String!
+    value: Float!
+    count: Int
+}
+
+type InvoiceChartData {
+    revenue_over_time: [InvoiceChartPoint!]!
+    paid_over_time: [InvoiceChartPoint!]!
+    unpaid_over_time: [InvoiceChartPoint!]!
+    status_distribution: [InvoiceChartPoint!]!
+    payment_method_distribution: [InvoiceChartPoint!]!
+}
+
+type InvoiceReport {
+    summary: InvoiceReportSummary!
+    charts: InvoiceChartData!
+    date_from: Date!
+    date_to: Date!
+    payment_date_from: Date
+    payment_date_to: Date
+    filter_status: [String!]
+    filter_payment_method: [String!]
+    filter_payment_registered_by: String
+    chart_frequency: String!
+}
+
+extend type Query {
+    invoiceReport(
+        date_from: Date
+        date_to: Date
+        payment_date_from: Date
+        payment_date_to: Date
+        status: [String!]
+        payment_method: [String!]
+        payment_registered_by: String
+        router_id: Int
+        chart_frequency: String = "daily"
+    ): InvoiceReport! @field(resolver: "App\\GraphQL\\Queries\\InvoiceReportQuery@resolve")
+}

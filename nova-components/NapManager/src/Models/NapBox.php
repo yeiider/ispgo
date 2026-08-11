@@ -33,6 +33,18 @@ class NapBox extends Model
         'longitude' => 'decimal:8',
         'distribution_order' => 'integer'
     ];
+
+    protected $appends = ['available_ports_count'];
+
+    /**
+     * Get the count of available ports for this NAP box.
+     * This is a calculated attribute that queries the ports relationship.
+     */
+    public function getAvailablePortsCountAttribute()
+    {
+        return $this->ports()->where('status', NapPort::STATUS_AVAILABLE)->count();
+    }
+
     // Relaciones
     public function ports(): HasMany
     {

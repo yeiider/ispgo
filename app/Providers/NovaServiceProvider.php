@@ -16,6 +16,7 @@ use App\Nova\Dashboards\Main;
 use App\Nova\EmailTemplate;
 use App\Nova\Finance\CashRegister;
 use App\Nova\Finance\Expense;
+use App\Nova\Finance\ExpenseCategory;
 use App\Nova\Finance\Income;
 use App\Nova\Finance\Transaction;
 use App\Nova\HtmlTemplate;
@@ -29,6 +30,7 @@ use App\Nova\Credit\CreditAccount;
 use App\Nova\Invoice\CreditNote;
 use App\Nova\Invoice\DailyInvoiceBalance;
 use App\Nova\Invoice\Invoice;
+use App\Nova\Invoice\InvoicePayment;
 use App\Nova\Invoice\PaymentPromise;
 use App\Nova\Lenses\InstallationsLens;
 use App\Nova\Lenses\TelephonicServiceLens;
@@ -107,6 +109,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('panel.invoices'), [
                     MenuItem::resource(Invoice::class)->name(__('panel.invoices')),
                     MenuItem::resource(CreditNote::class)->name(__('panel.credit_notes')),
+                    MenuItem::resource(InvoicePayment::class)->name(__('Abonos a Facturas')),
                     MenuItem::resource(PaymentPromise::class)->name(__('panel.payment_promises')),
                     MenuItem::resource(DailyInvoiceBalance::class)->name(__('panel.daily_invoice_balances')),
                     MenuItem::resource(BillingNovedad::class)->name(__('panel.billing_novedad')),
@@ -121,6 +124,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     }),
                     MenuItem::resource(Income::class)->name(__('panel.incomes')),
                     MenuItem::resource(Expense::class)->name(__('panel.expenses')),
+                    MenuItem::resource(ExpenseCategory::class)->name(__('panel.expense_categories')),
                     MenuItem::resource(Transaction::class)->name(__('panel.transactions')),
                     MenuItem::resource(Box::class)->name(__('panel.boxes')),
                     MenuItem::resource(DailyBox::class)->name(__('panel.daily_boxes')),

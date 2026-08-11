@@ -78,7 +78,9 @@ class ConfigSchema
         return match ($field) {
             'boolean-field' => 'boolean',
             'select-field' => 'select',
-            'text-field', 'textarea-field', 'password-field', 'image-field' => 'string',
+            'image-field' => 'image',
+            'time-field' => 'time',
+            'text-field', 'textarea-field', 'password-field' => 'string',
             default => 'string',
         };
     }

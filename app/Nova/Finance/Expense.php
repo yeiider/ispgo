@@ -4,6 +4,7 @@ namespace App\Nova\Finance;
 
 use App\Nova\Inventory\Supplier;
 use App\Nova\Resource;
+use App\Nova\User;
 use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
@@ -30,8 +31,9 @@ class Expense extends Resource
             Currency::make(__('expense.amount'), 'amount')->sortable(),
             Date::make(__('expense.date'), 'date')->sortable(),
             Text::make(__('attribute.payment_method'), 'payment_method')->sortable(),
-            Text::make(__('expense.category'), 'category')->sortable(),
+            BelongsTo::make(__('expense.category'), 'expenseCategory', ExpenseCategory::class)->sortable(),
             BelongsTo::make(__('expense.supplier'), 'supplier', Supplier::class)->sortable(),
+            BelongsTo::make('Registrado por', 'user', User::class)->sortable()->nullable(),
         ];
     }
 

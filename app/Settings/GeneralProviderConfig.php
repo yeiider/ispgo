@@ -44,15 +44,26 @@ class GeneralProviderConfig
         return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'company_email');
     }
 
-    public static function getBillingDate(): ?int
+    public static function getBillingMode($scope = 0): string
     {
-        $billingDate = ConfigHelper::getConfigValue(self::BILLING_PATH . 'billing_date');
+        $mode = ConfigHelper::getConfigValue(self::BILLING_PATH . 'billing_mode', $scope);
+        return in_array($mode, ['advance', 'arrears']) ? $mode : 'advance';
+    }
+
+    public static function getManageableBillingCycle($scope = 0): bool
+    {
+        return (bool) ConfigHelper::getConfigValue(self::BILLING_PATH . 'manageable_billing_cycle', $scope);
+    }
+
+    public static function getBillingDate($scope = 0): ?int
+    {
+        $billingDate = ConfigHelper::getConfigValue(self::BILLING_PATH . 'billing_date', $scope);
         return is_numeric($billingDate) && $billingDate >= 1 && $billingDate <= 31 ? (int)$billingDate : 1;
     }
 
-    public static function getCutOffDate(): ?int
+    public static function getCutOffDate($scope = 0): ?int
     {
-        $cutOffDate = ConfigHelper::getConfigValue(self::BILLING_PATH . 'cut_off_date');
+        $cutOffDate = ConfigHelper::getConfigValue(self::BILLING_PATH . 'cut_off_date', $scope);
         return is_numeric($cutOffDate) && $cutOffDate >= 1 && $cutOffDate <= 31 ? (int)$cutOffDate : 1;
     }
 

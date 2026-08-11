@@ -156,6 +156,34 @@ type MikrotikConfigStatus {
     router_host: String
 }
 
+"""
+Información de un servidor DHCP
+"""
+type MikrotikDhcpServer {
+    "Nombre del servidor"
+    name: String!
+    "Interfaz asociada"
+    interface: String!
+    "Tiempo de lease"
+    lease_time: String
+    "Pool de direcciones"
+    address_pool: String
+}
+
+"""
+Resultado de consulta de servidores DHCP
+"""
+type MikrotikDhcpServersResult {
+    "Si la consulta fue exitosa"
+    success: Boolean!
+    "Mensaje descriptivo"
+    message: String
+    "Cantidad de servidores"
+    count: Int
+    "Lista de servidores"
+    servers: [MikrotikDhcpServer!]!
+}
+
 # --------------- Inputs ---------------
 
 """
@@ -261,6 +289,13 @@ extend type Query {
     mikrotikServiceQueue(
         service_id: ID!
     ): MikrotikSimpleQueue @guard @field(resolver: "App\\GraphQL\\Queries\\MikrotikQuery@serviceQueue")
+
+    """
+    Obtener los servidores DHCP del router Mikrotik
+    """
+    mikrotikDhcpServers(
+        router_id: ID!
+    ): MikrotikDhcpServersResult! @guard @field(resolver: "App\\GraphQL\\Queries\\MikrotikQuery@dhcpServers")
 }
 
 # --------------- Extend Mutation ---------------

@@ -13,8 +13,14 @@ class AddServiceLines
      */
     public function handle(InvoiceCreated $event): void
     {
-        $services = $event->invoice->customer->activeServices;
         $inv = $event->invoice;
+
+        // No agregar líneas de servicio a facturas manuales
+        if ($inv->invoice_type === 'manual' || $inv->invoice_type === 'adjustment') {
+            return;
+        }
+
+        $services = $inv->customer->activeServices;
         $inv->recalcTotals();
         $inv->update(['state' => 'building']);
 

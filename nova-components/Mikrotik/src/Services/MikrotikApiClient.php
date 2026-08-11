@@ -9,7 +9,7 @@ use Ispgo\Mikrotik\Exceptions\MikrotikApiException;
 
 /**
  * Cliente HTTP para comunicarse con el microservicio de Mikrotik
- * 
+ *
  * Este cliente abstrae las llamadas HTTP al microservicio externo
  * que maneja la comunicación directa con los routers Mikrotik.
  */
@@ -31,11 +31,19 @@ class MikrotikApiClient
     }
 
     /**
+     * Obtener los DHCP servers del router
+     */
+    public function getDhcpServers(): array
+    {
+        return $this->post('/mikrotik/dhcp/servers', $this->credentials);
+    }
+
+    /**
      * Obtener los DHCP leases del router
      */
     public function getDhcpLeases(): array
     {
-        return $this->post('/dhcp/leases');
+        return $this->post('/mikrotik/dhcp/leases', $this->credentials);
     }
 
     /**
@@ -44,13 +52,13 @@ class MikrotikApiClient
     public function findLeaseByMac(string $macAddress): ?array
     {
         $leases = $this->getDhcpLeases();
-        
+
         if (!isset($leases['leases']) || !is_array($leases['leases'])) {
             return null;
         }
 
         foreach ($leases['leases'] as $lease) {
-            if (isset($lease['mac_address']) && 
+            if (isset($lease['mac_address']) &&
                 strtoupper($lease['mac_address']) === strtoupper($macAddress)) {
                 return $lease;
             }
@@ -65,7 +73,7 @@ class MikrotikApiClient
     public function findLeaseByIp(string $ipAddress): ?array
     {
         $leases = $this->getDhcpLeases();
-        
+
         if (!isset($leases['leases']) || !is_array($leases['leases'])) {
             return null;
         }
@@ -85,8 +93,8 @@ class MikrotikApiClient
     public function bindDhcpLease(string $macAddress, string $ipAddress, ?string $comment = null): array
     {
         $dhcpServer = MikrotikConfigProvider::getDhcpServer($this->routerId);
-        
-        return $this->post('/dhcp/bind', [
+
+        return $this->post('/mikrotik/dhcp/bind', [
             'mac_address' => $macAddress,
             'ip_address' => $ipAddress,
             'server' => $dhcpServer,
@@ -100,7 +108,7 @@ class MikrotikApiClient
      */
     public function unbindDhcpLease(string $macAddress): array
     {
-        return $this->post('/dhcp/unbind', [
+        return $this->post('/mikrotik/dhcp/unbind', [
             'mac_address' => $macAddress,
             'credentials' => $this->credentials,
         ]);
@@ -116,7 +124,7 @@ class MikrotikApiClient
         ?string $comment = null,
         bool $disabled = false
     ): array {
-        return $this->post('/queues/create', [
+        return $this->post('/mikrotik/queues/create', [
             'name' => $name,
             'target' => $target,
             'max_limit' => $maxLimit,
@@ -150,7 +158,7 @@ class MikrotikApiClient
             $data['disabled'] = $disabled;
         }
 
-        return $this->post('/queues/update', $data);
+        return $this->post('/mikrotik/queues/update', $data);
     }
 
     /**
@@ -158,7 +166,7 @@ class MikrotikApiClient
      */
     public function deleteSimpleQueue(string $name): array
     {
-        return $this->post('/queues/delete', [
+        return $this->post('/mikrotik/queues/delete', [
             'name' => $name,
             'credentials' => $this->credentials,
         ]);
@@ -185,7 +193,7 @@ class MikrotikApiClient
      */
     public function getSimpleQueues(): array
     {
-        return $this->post('/queues/list');
+        return $this->post('/mikrotik/queues/list');
     }
 
     /**
@@ -194,7 +202,7 @@ class MikrotikApiClient
     public function findQueueByName(string $name): ?array
     {
         $queues = $this->getSimpleQueues();
-        
+
         if (!isset($queues['queues']) || !is_array($queues['queues'])) {
             return null;
         }
@@ -214,27 +222,19 @@ class MikrotikApiClient
     public function provisionService(
         string $macAddress,
         string $ipAddress,
+        string $serverName,
         string $queueName,
         string $maxLimit,
         ?string $comment = null
     ): array {
-        $dhcpServer = MikrotikConfigProvider::getDhcpServer($this->routerId);
-
-        return $this->post('/provision/simple-flow', [
-            'lease_request' => [
-                'mac_address' => $macAddress,
-                'ip_address' => $ipAddress,
-                'server' => $dhcpServer,
-                'comment' => $comment,
-                'credentials' => $this->credentials,
-            ],
-            'queue_request' => [
-                'name' => $queueName,
-                'target' => $ipAddress,
-                'max_limit' => $maxLimit,
-                'comment' => $comment,
-                'credentials' => $this->credentials,
-            ],
+        return $this->post('/mikrotik/provision/simple-flow', [
+            'credentials' => $this->credentials,
+            'mac_address' => $macAddress,
+            'ip_address' => $ipAddress,
+            'server' => $serverName,
+            'queue_name' => $queueName,
+            'max_limit' => $maxLimit,
+            'comment' => $comment,
         ]);
     }
 
@@ -270,9 +270,6 @@ class MikrotikApiClient
         $url = $this->baseUrl . $endpoint;
 
         // Añadir credenciales si no están incluidas
-        if (!isset($data['credentials'])) {
-            $data['credentials'] = $this->credentials;
-        }
 
         $this->logDebug("Mikrotik API Request: POST {$url}", $data);
 
@@ -283,7 +280,6 @@ class MikrotikApiClient
                     'Content-Type' => 'application/json',
                 ])
                 ->post($url, $data);
-
             $responseData = $response->json() ?? [];
 
             $this->logDebug("Mikrotik API Response: {$response->status()}", $responseData);

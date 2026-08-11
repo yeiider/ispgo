@@ -18,7 +18,7 @@ class InventoryStockMutation
     public function createProduct($root, array $args)
     {
         $input = $args['input'];
-        
+
         return DB::transaction(function () use ($input) {
             $product = new Product();
             $product->fill($this->onlyProductFillable($input));
@@ -35,31 +35,31 @@ class InventoryStockMutation
 
     /**
      * Actualiza un producto existente.
-     * 
+     *
      * Si se proporciona image_temp_path, mueve la imagen temporal a ubicación permanente
      * y actualiza el campo image del producto.
      */
     public function updateProduct($root, array $args)
     {
         $input = $args['input'];
-        
+
         return DB::transaction(function () use ($args, $input) {
             $product = Product::findOrFail($args['id']);
-            
+
             // Si hay una imagen temporal, moverla a la carpeta permanente
             if (!empty($input['image_temp_path'])) {
                 $imageResult = FileUploadMutation::moveToPermanentStorage(
                     $input['image_temp_path'],
                     'products'
                 );
-                
+
                 if ($imageResult['success']) {
                     // Eliminar imagen anterior si existe y es diferente
                     $oldImage = $product->image;
                     if ($oldImage && !str_starts_with($oldImage, 'http')) {
                         \Illuminate\Support\Facades\Storage::disk('s3')->delete($oldImage);
                     }
-                    
+
                     // Asignar la nueva imagen permanente
                     $input['image'] = $imageResult['permanent_path'];
                 } else {
@@ -68,10 +68,10 @@ class InventoryStockMutation
                     ]);
                 }
             }
-            
+
             // Preparar datos del producto (excluyendo image_temp_path)
             $productData = $this->onlyProductFillable($input);
-            
+
             $product->fill($productData);
             $product->save();
 
@@ -98,7 +98,7 @@ class InventoryStockMutation
 
             // Eliminar registros de stock
             $product->stocks()->delete();
-            
+
             // Eliminar el producto
             $product->delete();
 
@@ -167,7 +167,7 @@ class InventoryStockMutation
 
             // Eliminar registros de stock
             $warehouse->stocks()->delete();
-            
+
             // Eliminar la bodega
             $warehouse->delete();
 
@@ -249,7 +249,7 @@ class InventoryStockMutation
         return DB::transaction(function () use ($input) {
             // Verificar que el producto existe
             $product = Product::findOrFail($input['product_id']);
-            
+
             // Verificar que la bodega existe
             $warehouse = Warehouse::findOrFail($input['warehouse_id']);
 
@@ -432,7 +432,7 @@ class InventoryStockMutation
     {
         return DB::transaction(function () use ($args) {
             $product = Product::findOrFail($args['product_id']);
-            
+
             $this->assignWarehousesStockToProduct($product, $args['warehouses']);
 
             return $product->fresh(['category', 'warehouse', 'stocks.warehouse']);
@@ -446,10 +446,10 @@ class InventoryStockMutation
     {
         return DB::transaction(function () use ($args) {
             $product = Product::findOrFail($args['product_id']);
-            
+
             // Eliminar todos los stocks existentes
             $product->stocks()->delete();
-            
+
             // Asignar nuevas bodegas
             $this->assignWarehousesStockToProduct($product, $args['warehouses']);
 
@@ -525,7 +525,7 @@ class InventoryStockMutation
             'name', 'sku', 'brand', 'image', 'price',
             'special_price', 'cost_price', 'description',
             'reference', 'taxes', 'status', 'url_key',
-            'warehouse_id', 'category_id', 'qty'
+            'warehouse_id', 'category_id', 'qty','assignable_to_service','unit_of_measure'
         ]));
     }
 
@@ -545,10 +545,10 @@ class InventoryStockMutation
 
     /**
      * Crea un nuevo producto con imagen temporal.
-     * 
+     *
      * Este método recibe un path temporal de imagen (obtenido de uploadTempFile)
      * y lo mueve automáticamente a la carpeta products/ antes de crear el producto.
-     * 
+     *
      * @param mixed $root
      * @param array $args
      * @return Product
@@ -556,7 +556,7 @@ class InventoryStockMutation
     public function createProductWithImage($root, array $args)
     {
         $input = $args['input'];
-        
+
         return DB::transaction(function () use ($input) {
             // Si hay una imagen temporal, moverla a la carpeta permanente
             $permanentImagePath = null;
@@ -565,7 +565,7 @@ class InventoryStockMutation
                     $input['image_temp_path'],
                     'products'
                 );
-                
+
                 if ($imageResult['success']) {
                     $permanentImagePath = $imageResult['permanent_path'];
                 } else {
@@ -574,15 +574,15 @@ class InventoryStockMutation
                     ]);
                 }
             }
-            
+
             // Preparar datos del producto
             $productData = $this->onlyProductFillable($input);
-            
+
             // Asignar la imagen permanente si se procesó
             if ($permanentImagePath) {
                 $productData['image'] = $permanentImagePath;
             }
-            
+
             // Crear el producto
             $product = new Product();
             $product->fill($productData);
@@ -594,6 +594,130 @@ class InventoryStockMutation
             }
 
             return $product->fresh(['category', 'warehouse', 'stocks.warehouse']);
+        });
+    }
+
+    /**
+     * Asigna un producto a un usuario, decrementando el stock de la bodega especificada.
+     */
+    public function assignProductToUser($root, array $args)
+    {
+        $userId = $args['user_id'];
+        $productId = $args['product_id'];
+        $warehouseId = $args['warehouse_id'];
+        $quantity = $args['quantity'];
+        $assignedAt = $args['assigned_at'] ?? now();
+        $conditionOnAssignment = $args['condition_on_assignment'] ?? null;
+        $notes = $args['notes'] ?? null;
+
+        return DB::transaction(function () use ($userId, $productId, $warehouseId, $quantity, $assignedAt, $conditionOnAssignment, $notes) {
+            // 1. Verificar stock en la bodega especificada
+            $stock = ProductStock::lockForUpdate()
+                ->where('product_id', $productId)
+                ->where('warehouse_id', $warehouseId)
+                ->first();
+
+            if (!$stock || $stock->quantity < $quantity) {
+                $available = $stock ? $stock->quantity : 0;
+                throw ValidationException::withMessages([
+                    'quantity' => ["Stock insuficiente en la bodega seleccionada. Disponible: {$available}, solicitado: {$quantity}."]
+                ]);
+            }
+
+            // 2. Decrementar stock
+            $stock->decrementStock($quantity);
+
+            // 3. Crear registro de asignación
+            $assignment = new \App\Models\Inventory\EquipmentAssignment();
+            $assignment->user_id = $userId;
+            $assignment->product_id = $productId;
+            $assignment->warehouse_id = $warehouseId;
+            $assignment->quantity = $quantity;
+            $assignment->assigned_at = $assignedAt;
+            $assignment->condition_on_assignment = $conditionOnAssignment;
+            $assignment->status = 'assigned';
+            $assignment->notes = $notes;
+            $assignment->save();
+
+            return $assignment->fresh(['user', 'product', 'warehouse']);
+        });
+    }
+
+    /**
+     * Registra la devolución (parcial o total) de un equipo asignado.
+     */
+    public function returnEquipmentAssignment($root, array $args)
+    {
+        $id = $args['id'];
+        $quantityToReturn = $args['quantity'];
+        $status = $args['status'];
+        $returnedAt = $args['returned_at'] ?? now();
+        $conditionOnReturn = $args['condition_on_return'] ?? null;
+        $notes = $args['notes'] ?? null;
+        $warehouseId = $args['warehouse_id'] ?? null;
+
+        return DB::transaction(function () use ($id, $quantityToReturn, $status, $returnedAt, $conditionOnReturn, $notes, $warehouseId) {
+            $assignment = \App\Models\Inventory\EquipmentAssignment::lockForUpdate()->findOrFail($id);
+
+            if ($quantityToReturn > $assignment->quantity) {
+                throw ValidationException::withMessages([
+                    'quantity' => ["La cantidad a devolver ({$quantityToReturn}) no puede ser mayor que la cantidad asignada ({$assignment->quantity})."]
+                ]);
+            }
+
+            // 1. Devolver el stock a la bodega seleccionada (si el estado es 'returned')
+            if ($status === 'returned') {
+                $warehouseIdToReturn = $warehouseId ?: $assignment->warehouse_id;
+                if (!$warehouseIdToReturn) {
+                    // Fallback para registros legacy: usar bodega principal del producto o la primera bodega existente
+                    $warehouseIdToReturn = $assignment->product->warehouse_id ?? Warehouse::first()?->id;
+                }
+
+                if ($warehouseIdToReturn) {
+                    $stock = ProductStock::lockForUpdate()->firstOrCreate(
+                        ['product_id' => $assignment->product_id, 'warehouse_id' => $warehouseIdToReturn],
+                        ['quantity' => 0.00]
+                    );
+                    $stock->incrementStock($quantityToReturn);
+                }
+            }
+
+            // 2. Actualizar o crear registros de asignación correspondientes
+            if ($quantityToReturn === $assignment->quantity) {
+                // Devolución completa: actualizar el registro existente
+                $assignment->status = $status;
+                $assignment->returned_at = $returnedAt;
+                $assignment->condition_on_return = $conditionOnReturn;
+                $assignment->notes = $notes;
+                if ($status === 'returned' && $warehouseId) {
+                    $assignment->warehouse_id = $warehouseId;
+                }
+                $assignment->save();
+            } else {
+                // Devolución parcial:
+                // 1. Decrementar cantidad en la asignación original
+                $assignment->quantity -= $quantityToReturn;
+                $assignment->save();
+
+                // 2. Crear un nuevo registro para la parte devuelta
+                $returnedAssignment = new \App\Models\Inventory\EquipmentAssignment();
+                $returnedAssignment->user_id = $assignment->user_id;
+                $returnedAssignment->product_id = $assignment->product_id;
+                $returnedAssignment->warehouse_id = ($status === 'returned' && $warehouseId) ? $warehouseId : $assignment->warehouse_id;
+                $returnedAssignment->assigned_at = $assignment->assigned_at;
+                $returnedAssignment->returned_at = $returnedAt;
+                $returnedAssignment->status = $status;
+                $returnedAssignment->quantity = $quantityToReturn;
+                $returnedAssignment->condition_on_assignment = $assignment->condition_on_assignment;
+                $returnedAssignment->condition_on_return = $conditionOnReturn;
+                $returnedAssignment->notes = $notes;
+                $returnedAssignment->save();
+            }
+
+            return [
+                'success' => true,
+                'message' => 'Devolución registrada exitosamente.'
+            ];
         });
     }
 }

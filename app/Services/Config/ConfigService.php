@@ -119,9 +119,18 @@ class ConfigService
                 $value = (int)$value;
                 break;
             case 'select':
-                $allowed = collect($meta['options'] ?? [])->pluck('value')->all();
-                if (!in_array($value, $allowed, true)) {
+                $allowed = collect($meta['options'] ?? [])->pluck('value')->map(function ($val) {
+                    return (string)$val;
+                })->all();
+                if (!in_array((string)$value, $allowed, true)) {
                     throw new \InvalidArgumentException('Invalid option for select');
+                }
+                $value = (string)$value;
+                break;
+            case 'time':
+                if ($value === null || $value === '') { $value = null; break; }
+                if (!preg_match('/^\d{2}:\d{2}$/', $value)) {
+                    throw new \InvalidArgumentException('Invalid time format (HH:mm)');
                 }
                 $value = (string)$value;
                 break;
@@ -142,6 +151,8 @@ class ConfigService
                 return in_array((string)$raw, ['1','true','yes','on'], true);
             case 'integer':
                 return (int)$raw;
+            case 'time':
+                return (string)$raw;
             default:
                 return $raw;
         }

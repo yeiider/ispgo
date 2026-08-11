@@ -1,0 +1,87 @@
+# Plantilla HTML (Usada para contratos)
+type HtmlTemplate {
+    id: ID!
+    name: String!
+    body: String!
+    styles: String
+    entity: String
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+# Plantilla de Correo Electrónico (Usada para notificaciones)
+type EmailTemplate {
+    id: ID!
+    name: String!
+    subject: String
+    body: String!
+    styles: String
+    entity: String
+    is_active: Boolean!
+    test_email: String
+    description: String
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+extend type Query {
+    htmlTemplates(
+        search: String
+    ): [HtmlTemplate!]! @paginate(defaultCount: 10, model: "App\\Models\\HtmlTemplate")
+    
+    htmlTemplate(id: ID! @eq): HtmlTemplate @find(model: "App\\Models\\HtmlTemplate")
+
+    emailTemplates(
+        search: String
+    ): [EmailTemplate!]! @paginate(defaultCount: 10, model: "App\\Models\\EmailTemplate")
+    
+    emailTemplate(id: ID! @eq): EmailTemplate @find(model: "App\\Models\\EmailTemplate")
+}
+
+extend type Mutation {
+    createHtmlTemplate(
+        name: String!
+        body: String!
+        styles: String
+        entity: String
+    ): HtmlTemplate! @create(model: "App\\Models\\HtmlTemplate")
+
+    updateHtmlTemplate(
+        id: ID!
+        name: String
+        body: String
+        styles: String
+        entity: String
+    ): HtmlTemplate! @update(model: "App\\Models\\HtmlTemplate")
+
+    deleteHtmlTemplate(
+        id: ID!
+    ): HtmlTemplate! @delete(model: "App\\Models\\HtmlTemplate")
+
+    createEmailTemplate(
+        name: String!
+        subject: String
+        body: String!
+        styles: String
+        entity: String
+        is_active: Boolean
+        description: String
+        test_email: String
+    ): EmailTemplate! @create(model: "App\\Models\\EmailTemplate")
+
+    updateEmailTemplate(
+        id: ID!
+        name: String
+        subject: String
+        body: String
+        styles: String
+        entity: String
+        is_active: Boolean
+        description: String
+        test_email: String
+    ): EmailTemplate! @update(model: "App\\Models\\EmailTemplate")
+
+    deleteEmailTemplate(
+        id: ID!
+    ): EmailTemplate! @delete(model: "App\\Models\\EmailTemplate")
+}

@@ -60,10 +60,15 @@ class OnePayHandler
 
     public function createPayment(Invoice $invoice): array
     {
-        $payload = $this->buildPaymentPayload($invoice);
-        $endpoint = $this->baseUrl . '/payments';
+        return $this->createInvoice($invoice);
+    }
 
-        Log::info('OnePay creating payment', [
+    public function createInvoice(Invoice $invoice): array
+    {
+        $payload = $this->buildInvoicePayload($invoice);
+        $endpoint = $this->baseUrl . '/invoices';
+
+        Log::info('OnePay creating invoice', [
             'invoice_id' => $invoice->id,
             'payload' => $payload,
         ]);
@@ -73,21 +78,143 @@ class OnePayHandler
             ->acceptJson()
             ->asJson()
             ->withHeaders([
-                'x-idempotency' => $this->idempotencyKey('payment_create', (string)$invoice->id),
+                'x-idempotency' => $this->idempotencyKey('invoice_create', (string)$invoice->id),
             ])
             ->post($endpoint, $payload);
 
         if (!$response->successful()) {
             $msg = $this->extractErrorMessage($response);
-            Log::warning('OnePay create payment failed', [
+            Log::warning('OnePay create invoice failed', [
                 'invoice_id' => $invoice->id,
                 'status' => $response->status(),
                 'error' => $msg,
             ]);
-            throw new \Exception("Error al crear cobro OnePay: {$msg}");
+            throw new \Exception("Error al crear factura OnePay: {$msg}");
         }
 
         return (array) $response->json();
+    }
+
+    public function getInvoice(string $invoiceId): array
+    {
+        $endpoint = $this->baseUrl . '/invoices/' . $invoiceId;
+        $response = Http::timeout(30)
+            ->withToken($this->token)
+            ->acceptJson()
+            ->get($endpoint);
+
+        if (!$response->successful()) {
+            $msg = $this->extractErrorMessage($response);
+            throw new \Exception("Error al consultar factura OnePay: {$msg}");
+        }
+
+        return (array) $response->json();
+    }
+
+    public function updateInvoice(string $invoiceId, array $data): array
+    {
+        $endpoint = $this->baseUrl . '/invoices/' . $invoiceId;
+        $response = Http::timeout(30)
+            ->withToken($this->token)
+            ->acceptJson()
+            ->asJson()
+            ->patch($endpoint, $data);
+
+        if (!$response->successful()) {
+            $msg = $this->extractErrorMessage($response);
+            throw new \Exception("Error al actualizar factura OnePay: {$msg}");
+        }
+
+        return (array) $response->json();
+    }
+
+    public function deleteInvoice(string $invoiceId): void
+    {
+        $endpoint = $this->baseUrl . '/invoices/' . $invoiceId;
+        $response = Http::timeout(30)
+            ->withToken($this->token)
+            ->acceptJson()
+            ->delete($endpoint);
+
+        if (!$response->successful() && $response->status() !== 204) {
+            $msg = $this->extractErrorMessage($response);
+            throw new \Exception("Error al eliminar factura OnePay: {$msg}");
+        }
+    }
+
+    public function buildInvoicePayload(Invoice $invoice): array
+    {
+        if (!$invoice->total || $invoice->total <= 0) {
+            throw new \Exception("La factura #{$invoice->increment_id} no tiene un monto válido");
+        }
+        if (!$invoice->customer) {
+            throw new \Exception("La factura #{$invoice->increment_id} no tiene cliente asociado");
+        }
+
+        $customer = $invoice->customer;
+        $amount = (int) $invoice->total;
+
+        return [
+            'reference' => (string) $invoice->increment_id,
+            'provider_id' => (string) ($customer->identity_document ?? $customer->document_number ?? $customer->id),
+            'provider' => \App\Settings\OnePaySettings::provider(),
+            'amount' => $amount,
+            'name' => 'Pago Factura #' . $invoice->increment_id,
+            'description' => 'Cobro de factura en ISPGo',
+            'phone' => $this->formatPhone($customer->phone_number),
+            'email' => $customer->email_address ?? $customer->email ?? null,
+            'due_date' => $invoice->due_date ? \Carbon\Carbon::parse($invoice->due_date)->format('Y-m-d') : null,
+            'document_url' => $invoice->url_preview,
+            'metadata' => [
+                'invoice_id' => (string) $invoice->id,
+                'customer_id' => (string) $customer->id,
+            ],
+        ];
+    }
+
+    public function createInvoicesParallel(array $invoices): array
+    {
+        $responses = Http::pool(function (\Illuminate\Http\Client\Pool $pool) use ($invoices) {
+            foreach ($invoices as $invoice) {
+                try {
+                    $payload = $this->buildInvoicePayload($invoice);
+                    $endpoint = $this->baseUrl . '/invoices';
+
+                    $pool->as((string) $invoice->id)->timeout(30)
+                        ->withToken($this->token)
+                        ->acceptJson()
+                        ->asJson()
+                        ->withHeaders([
+                            'x-idempotency' => $this->idempotencyKey('invoice_create', (string)$invoice->id),
+                        ])
+                        ->post($endpoint, $payload);
+                } catch (\Throwable $e) {
+                    Log::error('Error building payload for parallel OnePay invoice', [
+                        'invoice_id' => $invoice->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        });
+
+        $results = [];
+        foreach ($invoices as $invoice) {
+            $response = $responses[$invoice->id] ?? null;
+            if ($response && $response->successful()) {
+                $results[$invoice->id] = [
+                    'success' => true,
+                    'data' => $response->json(),
+                ];
+            } else {
+                $errorMsg = $response ? $this->extractErrorMessage($response) : 'No response from OnePay';
+                $results[$invoice->id] = [
+                    'success' => false,
+                    'error' => $errorMsg,
+                ];
+            }
+        }
+
+        return $results;
     }
 
     public function resendPayment(Invoice $invoice): void
@@ -158,7 +285,7 @@ class OnePayHandler
             'allows' => [
                 'cards' => true,
                 'accounts' => true,
-                'card_extra' => true,
+                'card_extra' => false,
                 'realtime' => true,
                 'pse' => true,
                 'transfiya' => true
@@ -207,5 +334,58 @@ class OnePayHandler
             return $body['message'] ?? $body['error'] ?? 'Error desconocido';
         }
         return $response->body() ?: 'Error desconocido';
+    }
+
+    public function getPayment(string $paymentId): array
+    {
+        $endpoint = $this->baseUrl . '/payments/' . $paymentId;
+        $response = Http::timeout(30)
+            ->withToken($this->token)
+            ->acceptJson()
+            ->get($endpoint);
+
+        if (!$response->successful()) {
+            $msg = $this->extractErrorMessage($response);
+            throw new \Exception("Error al consultar cobro OnePay: {$msg}");
+        }
+
+        return $response->json();
+    }
+
+    public function getPaymentIntents(string $paymentId): array
+    {
+        $endpoint = $this->baseUrl . '/payments/' . $paymentId . '/intents';
+        $response = Http::timeout(30)
+            ->withToken($this->token)
+            ->acceptJson()
+            ->get($endpoint);
+
+        if (!$response->successful()) {
+            $msg = $this->extractErrorMessage($response);
+            throw new \Exception("Error al consultar intentos de cobro OnePay: {$msg}");
+        }
+
+        return (array) $response->json();
+    }
+
+    public function getCustomerByDocument(string $documentNumber): ?array
+    {
+        $endpoint = $this->baseUrl . '/customers';
+        $response = Http::timeout(30)
+            ->withToken($this->token)
+            ->acceptJson()
+            ->get($endpoint, [
+                'document_number' => $documentNumber,
+                'limit' => 20,
+                'page' => 1
+            ]);
+
+        if (!$response->successful()) {
+            $msg = $this->extractErrorMessage($response);
+            throw new \Exception("Error al consultar cliente OnePay: {$msg}");
+        }
+
+        $data = $response->json('data');
+        return !empty($data) ? $data[0] : null;
     }
 }

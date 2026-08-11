@@ -73,8 +73,33 @@ class Contract extends Resource
             Date::make(__('contract.signed_date'), 'signed_at')->onlyOnIndex(),
 
             Boolean::make(__('contract.signed'), 'is_signed')
-                ->rules('required')
                 ->help(__('contract.signed_help')),
+
+            Select::make(__('contract.status'), 'status')->options([
+                'draft' => 'Draft',
+                'sent' => 'Sent',
+                'signed' => 'Signed',
+                'approved' => 'Approved',
+                'rejected' => 'Rejected',
+            ])->displayUsingLabels()->sortable(),
+
+            Text::make(__('Contract PDF'), function () {
+                return $this->contract_pdf_path 
+                    ? '<a href="'.$this->contract_pdf_url.'" target="_blank" class="no-underline dim text-primary font-bold">Download PDF</a>' 
+                    : 'Not uploaded';
+            })->asHtml()->onlyOnDetail(),
+
+            Text::make(__('Cédula (ID Document)'), function () {
+                return $this->cedula_path 
+                    ? '<a href="'.$this->cedula_url.'" target="_blank" class="no-underline dim text-primary font-bold">View Cédula</a>' 
+                    : 'Not uploaded';
+            })->asHtml()->onlyOnDetail(),
+
+            Text::make(__('Utility Bill'), function () {
+                return $this->utility_bill_path 
+                    ? '<a href="'.$this->utility_bill_url.'" target="_blank" class="no-underline dim text-primary font-bold">View Utility Bill</a>' 
+                    : 'Not uploaded';
+            })->asHtml()->onlyOnDetail(),
         ];
     }
 
@@ -89,12 +114,10 @@ class Contract extends Resource
             new \App\Nova\Actions\SendContractToCustomerAction(),
             Action::using(__('Ver PDF Contrato'), function (ActionFields $fields, Collection $models) {
                 foreach ($models as $contract) {
-                    $pdfPath = "public/contracts/contract_{$contract->id}_signed.pdf";
-                    if (!Storage::exists($pdfPath)) {
-                        return Action::danger("No se encontró el PDF para el contrato #{$contract->id}");
+                    if (empty($contract->contract_pdf_path)) {
+                        return Action::danger("No se encontró el PDF firmado para el contrato #{$contract->id}");
                     }
-                    $pdfUrl = Storage::url($pdfPath);
-                    return Action::redirect($pdfUrl);
+                    return Action::redirect($contract->contract_pdf_url);
                 }
 
                 return Action::danger('No se seleccionó ningún contrato.');

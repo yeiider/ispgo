@@ -14,6 +14,7 @@ class OnePaySettings
     public bool $onepay_enabled = false;
     public string $onepay_base_url = '';
     public string $onepay_api_token = '';
+    public string $onepay_provider = 'siigo';
     public ?int $onepay_auto_create_day = null; // 1-31
     public ?int $onepay_auto_remind_day = null; // 1-31
 
@@ -35,15 +36,22 @@ class OnePaySettings
         return ConfigHelper::getConfigValue(self::PATH . 'onepay_api_token');
     }
 
-    public static function autoCreateDay(): ?int
+    public static function provider(): string
     {
-        $day = ConfigHelper::getConfigValue(self::PATH . 'onepay_auto_create_day');
+        return ConfigHelper::getConfigValue(self::PATH . 'onepay_provider') ?: 'siigo';
+    }
+
+    public static function autoCreateDay(?int $routerId = null): ?int
+    {
+        $scopeId = $routerId ?? 0;
+        $day = ConfigHelper::getConfigValue(self::PATH . 'onepay_auto_create_day', $scopeId);
         return is_numeric($day) ? (int) $day : null;
     }
 
-    public static function autoRemindDay(): ?int
+    public static function autoRemindDay(?int $routerId = null): ?int
     {
-        $day = ConfigHelper::getConfigValue(self::PATH . 'onepay_auto_remind_day');
+        $scopeId = $routerId ?? 0;
+        $day = ConfigHelper::getConfigValue(self::PATH . 'onepay_auto_remind_day', $scopeId);
         return is_numeric($day) ? (int) $day : null;
     }
 }
