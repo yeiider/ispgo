@@ -81,6 +81,9 @@ class RegisterPaymentMutation
             if (!empty($args['transaction_date'])) {
                 $additional['transaction_date'] = $args['transaction_date'];
             }
+            if (!empty($args['siigo_payment_id'])) {
+                $additional['siigo_payment_id'] = (int) $args['siigo_payment_id'];
+            }
 
             $dailyBoxId = null;
             if (Auth::check()) {

@@ -151,6 +151,11 @@ type Query {
         sort_direction: String
     ): [Cotizacion!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\CotizacionQuery")
     cotizacion(id: ID! @eq): Cotizacion @find(model: "App\\Models\\Cotizacion")
+
+    siigoVoucherPaymentOptions(
+        payment_method: String!
+        router_id: Int
+    ): SiigoPaymentOptionsResult @field(resolver: "App\\GraphQL\\Queries\\SiigoPaymentOptionsQuery@resolve")
 }
 
 type Mutation @guard {
@@ -420,6 +425,7 @@ type Mutation @guard {
         transfer_reference: String
         notes: String
         transaction_date: String
+        siigo_payment_id: Int
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentMutation@resolve")
 
     applyDiscount(
@@ -442,6 +448,7 @@ type Mutation @guard {
         password: String! @rules(apply: ["required", "min:8"])
         telephone: String
         router_id: ID @rules(apply: ["nullable", "exists:routers,id"])
+        router_ids: [ID!]
     ): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@create")
 
     updateUser(
@@ -451,6 +458,7 @@ type Mutation @guard {
         password: String @rules(apply: ["min:8"])
         telephone: String
         router_id: ID @rules(apply: ["nullable", "exists:routers,id"])
+        router_ids: [ID!]
     ): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@update")
 
     deleteUser(
@@ -884,6 +892,16 @@ type PaymentPromiseResult {
     payment_promise: PaymentPromise
 }
 
+type SiigoPaymentOption {
+    label: String!
+    id: Int!
+}
+
+type SiigoPaymentOptionsResult {
+    is_siigo_enabled: Boolean!
+    options: [SiigoPaymentOption!]!
+}
+
 type User {
     id: ID!
     name: String!
@@ -894,6 +912,7 @@ type User {
     updated_at: DateTime!
 
     router: Router @belongsTo
+    routers: [Router!]! @belongsToMany(relation: "routers")
     tickets: [Ticket!]! @belongsToMany
     roles: [Role!]! @belongsToMany(relation: "roles")
     permissions: [Permission!]! @belongsToMany(relation: "permissions")

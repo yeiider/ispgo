@@ -336,7 +336,7 @@ class Invoice extends Model
         }
 
         $this->daily_box_id = $dailyBoxId;
-        $this->additional_information = $additional;
+        $this->additional_information = array_merge($this->additional_information ?? [], $additional);
         $this->save();
 
         event(new InvoicePaid($this));

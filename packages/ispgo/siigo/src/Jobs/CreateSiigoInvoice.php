@@ -69,9 +69,18 @@ class CreateSiigoInvoice implements ShouldQueue
             
             $id = $body['id'] ?? null;
             if ($id) {
+                $siigoPrefix = $body['prefix'] ?? 'FV';
+                if (!empty($body['name']) && !empty($body['number'])) {
+                    $suffix = '-' . $body['number'];
+                    if (str_ends_with($body['name'], $suffix)) {
+                        $siigoPrefix = substr($body['name'], 0, -strlen($suffix));
+                    }
+                }
+
                 // Save Siigo info
                 $info['siigo_invoice_id'] = $id;
-                $info['siigo_prefix'] = $body['prefix'] ?? 'FV';
+                $info['siigo_name'] = $body['name'] ?? null;
+                $info['siigo_prefix'] = $siigoPrefix;
                 $info['siigo_consecutive'] = $body['number'] ?? null;
                 $info['siigo_date'] = $body['date'] ?? null;
                 $this->invoice->additional_information = $info;

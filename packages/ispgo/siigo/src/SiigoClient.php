@@ -92,6 +92,11 @@ class SiigoClient
         return $this->req('POST', '/v1/invoices', ['json' => $payload]);
     }
 
+    public function getInvoiceByUuid(string $id): ResponseInterface
+    {
+        return $this->req('GET', "/v1/invoices/{$id}");
+    }
+
     public function stampInvoice(string $id): ResponseInterface
     {
         return $this->req('POST', "/v1/invoices/{$id}/stamp");
@@ -115,5 +120,11 @@ class SiigoClient
     public function getCostCenters(): ResponseInterface
     {
         return $this->req('GET', '/v1/cost-centers');
+    }
+
+    public function getDocumentTypes(?string $type = null): ResponseInterface
+    {
+        $query = $type ? ['type' => $type] : [];
+        return $this->req('GET', '/v1/document-types', ['query' => $query]);
     }
 }

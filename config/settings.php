@@ -610,7 +610,11 @@ return [
             "label" => "Siigo",
             "class" => "form-control",
         ],
-        "general" => SettingSiigo::getGeneralSettings(),
+        "general"  => SettingSiigo::getGeneralSettings(),
+        "api"      => SettingSiigo::getApiSettings(),
+        "invoices" => SettingSiigo::getInvoiceSettings(),
+        "vouchers" => SettingSiigo::getVoucherSettings(),
+        "others"   => SettingSiigo::getOtherSettings(),
     ],
 
     "iptv" => [
