@@ -25,7 +25,6 @@ class User extends Authenticatable
         'email',
         'password',
         'telephone',
-        'router_id',
         'created_by',
         'updated_by',
     ];

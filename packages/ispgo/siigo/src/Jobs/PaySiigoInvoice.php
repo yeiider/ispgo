@@ -43,6 +43,8 @@ class PaySiigoInvoice implements ShouldQueue
             
             $this->invoice->refresh();
             $info = $this->invoice->additional_information ?? [];
+            // Sleep 2 seconds to give Siigo API time to commit/index the invoice into cartera
+            sleep(2);
         }
 
         if (empty($info['siigo_invoice_id'])) {
