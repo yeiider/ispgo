@@ -34,6 +34,13 @@ class Ticket extends Model
         'labels' => 'array'
     ];
 
+    protected static function booted(): void
+    {
+        static::created(function (Ticket $ticket) {
+            event(new \App\Events\TicketCreated($ticket));
+        });
+    }
+
     /**
      * Get the labels attribute, ensuring it's always an array.
      */
