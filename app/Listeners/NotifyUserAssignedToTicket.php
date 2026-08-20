@@ -2,18 +2,35 @@
 
 namespace App\Listeners;
 
-use App\Models\Ticket;
+use App\Events\UserAssignedToTicket;
+use App\Helpers\Notify;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class NotifyUserAssignedToTicket
+class NotifyUserAssignedToTicket implements ShouldQueue
 {
+    use InteractsWithQueue;
+
+    public $queue = 'redis';
+
+    public $tries = 3;
 
     /**
-     * Handle the event.
+     * Notifica a los administradores cuando un ticket es asignado.
      */
-    public function handle(Ticket $ticket): void
+    public function handle(UserAssignedToTicket $event): void
     {
-        // Code
+        $ticket = $event->ticket;
+
+        if (!$ticket) {
+            return;
+        }
+
+        Notify::notifyInfo(
+            "Ticket asignado: {$ticket->title}",
+            'Ticket asignado',
+            null,
+            ['ticket_id' => $ticket->id]
+        );
     }
 }
