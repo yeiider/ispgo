@@ -156,9 +156,28 @@ type Query {
         payment_method: String!
         router_id: Int
     ): SiigoPaymentOptionsResult @field(resolver: "App\\GraphQL\\Queries\\SiigoPaymentOptionsQuery@resolve")
+
+    # Notificaciones in-app (fuera de Nova)
+    notifications(first: Int! = 20): [AppNotification!]! @field(resolver: "App\\GraphQL\\Queries\\NotificationsQuery") @guard
+    unreadNotificationsCount: Int! @field(resolver: "App\\GraphQL\\Queries\\UnreadNotificationsCount") @guard
+}
+
+type AppNotification {
+    id: ID!
+    type: String!
+    title: String!
+    message: String!
+    level: String!
+    action_url: String
+    read_at: DateTime
+    created_at: DateTime!
 }
 
 type Mutation @guard {
+    # Notificaciones in-app
+    markNotificationsRead(ids: [ID!]!): Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkNotificationsRead")
+    markAllNotificationsRead: Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkAllNotificationsRead")
+
     # Cotizaciones
     createCotizacion(
         nombre: String!
