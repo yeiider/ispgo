@@ -4,12 +4,16 @@ namespace App\Models\Finance;
 
 use App\Models\Inventory\Supplier;
 use App\Models\User;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Expense extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    protected $activityModule = 'gastos';
+    protected $activitySubjectLabelField = 'description';
 
     protected $fillable = [
         'description', 'amount', 'date', 'payment_method', 'expense_category_id', 'daily_box_id', 'supplier_id', 'user_id'

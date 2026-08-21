@@ -106,6 +106,30 @@ type CategoryPaginator {
     paginatorInfo: PaginatorInfo!
 }
 
+type StockTransfer {
+    id: ID!
+    product_id: ID!
+    from_warehouse_id: ID!
+    to_warehouse_id: ID!
+    user_id: ID
+    quantity: Float!
+    notes: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    product: InventoryProduct @belongsTo
+    from_warehouse: InventoryWarehouse @belongsTo(relation: "fromWarehouse")
+    to_warehouse: InventoryWarehouse @belongsTo(relation: "toWarehouse")
+    fromWarehouse: InventoryWarehouse @belongsTo
+    toWarehouse: InventoryWarehouse @belongsTo
+    user: User @belongsTo
+}
+
+type StockTransferPaginator {
+    data: [StockTransfer!]!
+    paginatorInfo: PaginatorInfo!
+}
+
 type EquipmentAssignment {
     id: ID!
     user_id: ID!
@@ -135,6 +159,7 @@ type ServiceMaterial {
     user: User @belongsTo
     quantity: Float!
     from_user_stock: Boolean!
+    type: String
     notes: String
     created_at: DateTime!
     updated_at: DateTime!
@@ -318,6 +343,16 @@ extend type Query {
         user_id: ID @eq
         from_user_stock: Boolean @eq
     ): [ServiceMaterial!]! @paginate(defaultCount: 15, model: "App\\Models\\Services\\ServiceMaterial")
+
+    # Traslados de Inventario
+    stockTransfers(
+        product_id: ID
+        from_warehouse_id: ID
+        to_warehouse_id: ID
+        user_id: ID
+        first: Int = 15
+        page: Int
+    ): StockTransferPaginator @field(resolver: "App\\GraphQL\\Queries\\InventoryQuery@stockTransfers")
 }
 
 extend type Mutation {
@@ -358,6 +393,7 @@ extend type Mutation {
         from_warehouse_id: ID!
         to_warehouse_id: ID!
         amount: Int!
+        notes: String
     ): TransferStockResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@transferStock")
 
     deleteProductStock(id: ID!): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\InventoryStockMutation@deleteProductStock")
@@ -416,6 +452,7 @@ extend type Mutation {
         from_user_stock: Boolean = false
         user_id: Int @rules(apply: ["nullable", "exists:users,id"])
         warehouse_id: Int @rules(apply: ["nullable", "exists:warehouses,id"])
+        type: String
         notes: String
     ): ServiceMaterial @field(resolver: "App\\GraphQL\\Mutations\\ServiceMaterialMutation@assign")
 }
