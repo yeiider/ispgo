@@ -259,4 +259,48 @@ class InventoryQuery
 
         return $query;
     }
+
+    /**
+     * Obtiene el historial de transferencias de stock entre bodegas con paginación.
+     */
+    public function stockTransfers($root, array $args)
+    {
+        $query = \App\Models\Inventory\StockTransfer::query()
+            ->with(['product', 'fromWarehouse', 'toWarehouse', 'user'])
+            ->orderBy('created_at', 'desc');
+
+        if (isset($args['product_id']) && !empty($args['product_id'])) {
+            $query->where('product_id', $args['product_id']);
+        }
+
+        if (isset($args['from_warehouse_id']) && !empty($args['from_warehouse_id'])) {
+            $query->where('from_warehouse_id', $args['from_warehouse_id']);
+        }
+
+        if (isset($args['to_warehouse_id']) && !empty($args['to_warehouse_id'])) {
+            $query->where('to_warehouse_id', $args['to_warehouse_id']);
+        }
+
+        if (isset($args['user_id']) && !empty($args['user_id'])) {
+            $query->where('user_id', $args['user_id']);
+        }
+
+        $first = $args['first'] ?? 15;
+        $page = $args['page'] ?? 1;
+        $paginator = $query->paginate($first, ['*'], 'page', $page);
+
+        return [
+            'data' => $paginator->items(),
+            'paginatorInfo' => [
+                'count' => $paginator->count(),
+                'currentPage' => $paginator->currentPage(),
+                'firstItem' => $paginator->firstItem(),
+                'hasMorePages' => $paginator->hasMorePages(),
+                'lastItem' => $paginator->lastItem(),
+                'lastPage' => $paginator->lastPage(),
+                'perPage' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]
+        ];
+    }
 }

@@ -537,6 +537,12 @@ type ExpensePayload {
     expense: Expense
 }
 
+"Payload de respuesta para eliminar gasto"
+type DeleteExpensePayload {
+    success: Boolean!
+    message: String!
+}
+
 
 
 
@@ -556,6 +562,7 @@ extend type Query @guard {
         date: Date
         expense_category_id: ID
         user_id: ID
+        payment_method: String
     ): [Expense!]! @field(resolver: "App\\GraphQL\\Queries\\CashierInvoicesQuery@myExpenses")
     suppliers: [Supplier!]! @all(model: "App\\Models\\Inventory\\Supplier")
     suppliersPaginator(
@@ -573,6 +580,20 @@ extend type Mutation @guard {
         supplier_id: ID
         daily_box_id: ID
     ): ExpensePayload @field(resolver: "App\\GraphQL\\Mutations\\ExpenseMutations@create")
+
+    updateExpense(
+        id: ID!
+        description: String
+        amount: Float
+        date: DateTime
+        payment_method: String
+        expense_category_id: ID
+        supplier_id: ID
+    ): ExpensePayload @field(resolver: "App\\GraphQL\\Mutations\\ExpenseMutations@update")
+
+    deleteExpense(
+        id: ID!
+    ): DeleteExpensePayload @field(resolver: "App\\GraphQL\\Mutations\\ExpenseMutations@delete")
 
     createCashTransfer(
         sender_cash_register_id: ID!

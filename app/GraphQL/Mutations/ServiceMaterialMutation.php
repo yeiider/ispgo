@@ -31,6 +31,7 @@ class ServiceMaterialMutation
         $fromUserStock = $args['from_user_stock'] ?? false;
         $userId = $args['user_id'] ?? auth()->id();
         $serviceId = $args['service_id'];
+        $type = $args['type'] ?? 'instalacion';
         $notes = $args['notes'] ?? null;
 
         // Validar que tengamos un usuario si es desde stock de usuario
@@ -40,7 +41,7 @@ class ServiceMaterialMutation
             ]);
         }
 
-        return DB::transaction(function () use ($args, $product, $quantity, $fromUserStock, $userId, $serviceId, $notes) {
+        return DB::transaction(function () use ($args, $product, $quantity, $fromUserStock, $userId, $serviceId, $type, $notes) {
             // Lógica para descontar del stock del usuario o bodega general
             if ($fromUserStock) {
                 $this->decrementUserStock($userId, $product->id, $quantity, $serviceId, $notes);
@@ -71,6 +72,7 @@ class ServiceMaterialMutation
                 'user_id' => $userId,
                 'quantity' => $quantity,
                 'from_user_stock' => $fromUserStock,
+                'type' => $type,
                 'notes' => $notes,
             ]);
         });

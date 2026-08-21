@@ -1,0 +1,37 @@
+
+# --------------- Activity Log types ---------------
+
+type ActivityLog {
+    id: ID!
+    user_id: ID
+    user_name: String
+    action: String!
+    module: String!
+    description: String!
+    subject_type: String
+    subject_id: ID
+    properties: JSON
+    ip_address: String
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    user: User @belongsTo
+}
+
+type ActivityLogPaginator {
+    data: [ActivityLog!]!
+    paginatorInfo: PaginatorInfo!
+}
+
+extend type Query {
+    activityLogs(
+        search: String
+        user_id: ID
+        module: String
+        action: String
+        sort_column: String
+        sort_direction: String
+        first: Int = 15
+        page: Int
+    ): ActivityLogPaginator @paginate(builder: "App\\GraphQL\\Queries\\ActivityLogQuery@paginate", defaultCount: 15)
+}
