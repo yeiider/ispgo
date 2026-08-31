@@ -28,4 +28,11 @@ class Cotizacion extends Model
     protected $casts = [
         'metadata' => 'array',
     ];
+
+    protected static function booted(): void
+    {
+        static::created(function (Cotizacion $cotizacion) {
+            event(new \App\Events\CotizacionCreated($cotizacion));
+        });
+    }
 }
