@@ -9,7 +9,7 @@ class YaneCatalogSeeder extends Seeder
 {
     /**
      * Seed the initial catalog values for the Yane AI assistant.
-     * These are editable afterwards from Nova → Asistente Yane (IA).
+     * These are editable afterwards from Nova → Asistente IA.
      */
     public function run()
     {

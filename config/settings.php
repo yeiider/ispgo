@@ -719,8 +719,19 @@ return [
 
     "asistente_yane" => [
         "setting" => [
-            "label" => "Asistente Yane (IA)",
+            "label" => "Asistente IA",
             "class" => "form-control",
+        ],
+        "general" => [
+            "setting" => [
+                "label" => "Identidad del Asistente",
+                "code" => "general"
+            ],
+            "nombre" => [
+                "field" => "text-field",
+                "label" => "Nombre del Asistente",
+                "placeholder" => "Ej. Lady",
+            ],
         ],
         "planes" => [
             "setting" => [

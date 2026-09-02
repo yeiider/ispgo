@@ -1,5 +1,5 @@
 # =============================================================================
-# Catálogo del Asistente Yane (IA) — datos editables desde el admin (Nova)
+# Catálogo del Asistente IA — datos editables desde el admin (Nova)
 # =============================================================================
 # Estos datos viven en core_config_data (sección `asistente_yane` de
 # config/settings.php) y se exponen aquí para que el MCP / agente IA los
