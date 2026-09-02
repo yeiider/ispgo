@@ -276,8 +276,9 @@ class Customer extends Authenticatable implements MustVerifyEmail
                 });
             }
 
-            // Identification or Email matching: the full search string
+            // Identification, phone or Email matching: the full search string
             $q->orWhere('identity_document', 'LIKE', "%{$search}%")
+              ->orWhere('phone_number', 'LIKE', "%{$search}%")
               ->orWhere('email_address', 'LIKE', "%{$search}%");
         });
     }
