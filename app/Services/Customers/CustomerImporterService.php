@@ -7,7 +7,8 @@ use App\Models\Customers\Customer;
 use App\Models\Customers\TaxDetail;
 use App\Models\Services\Service;
 use App\Models\Router;
-use App\Models\Plans\Plan;
+use App\Models\Services\Plan;
+use App\Models\BillingCycle;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -161,11 +162,19 @@ class CustomerImporterService
 
                     // Check service validation
                     if (!empty($serviceData)) {
+                        $cycleError = $this->resolveBillingCycle($serviceData);
+                        if ($cycleError) {
+                            $errors[] = ['row' => $rowNumber, 'name' => $clientName, 'error' => "[Servicio] {$cycleError}"];
+                            continue;
+                        }
+
                         $svcValidator = Validator::make($serviceData, [
                             'router_id' => 'required|exists:routers,id',
                             'service_ip' => 'required|ip',
                             'service_status' => 'required|in:active,inactive,suspended,pending,free',
                             'plan_id' => 'required|exists:plans,id',
+                            'billing_cycle_id' => 'nullable|exists:billing_cycles,id',
+                            'billing_cycle' => 'nullable|string|max:255',
                         ]);
                         if ($svcValidator->fails()) {
                             $msg = $this->formatValidationErrors('Servicio', $svcValidator->errors());
@@ -413,6 +422,11 @@ class CustomerImporterService
 
                 // Service handling
                 if (!empty($serviceData)) {
+                    $cycleError = $this->resolveBillingCycle($serviceData);
+                    if ($cycleError && $mode !== 'update_only') {
+                        throw new \RuntimeException("[Servicio] {$cycleError}");
+                    }
+
                     $serviceId = $serviceData['id'] ?? null;
                     $serviceModel = null;
 
@@ -444,6 +458,8 @@ class CustomerImporterService
                             'service_ip' => 'required|ip',
                             'service_status' => 'required|in:active,inactive,suspended,pending,free',
                             'plan_id' => 'required|exists:plans,id',
+                            'billing_cycle_id' => 'nullable|exists:billing_cycles,id',
+                            'billing_cycle' => 'nullable|string|max:255',
                         ]);
 
                         if ($svcValidator->fails()) {
@@ -532,6 +548,41 @@ class CustomerImporterService
         return ($v === '' || $v === null) ? null : $v;
     }
 
+    private function resolveBillingCycle(array &$serviceData): ?string
+    {
+        $cycleId = $serviceData['billing_cycle_id'] ?? null;
+        $cycleName = $serviceData['billing_cycle'] ?? null;
+
+        if ($cycleId !== null && trim((string)$cycleId) !== '') {
+            $cycle = BillingCycle::find($cycleId);
+            if (!$cycle) {
+                return "El ciclo de facturación con ID '{$cycleId}' no existe en el sistema.";
+            }
+            $serviceData['billing_cycle_id'] = $cycle->id;
+            if (empty($serviceData['billing_cycle'])) {
+                $serviceData['billing_cycle'] = $cycle->name;
+            }
+            return null;
+        }
+
+        if ($cycleName !== null && trim((string)$cycleName) !== '') {
+            $cycle = BillingCycle::where('name', $cycleName)
+                ->orWhere('id', $cycleName)
+                ->first();
+            if ($cycle) {
+                $serviceData['billing_cycle_id'] = $cycle->id;
+                $serviceData['billing_cycle'] = $cycle->name;
+                return null;
+            }
+
+            if (is_numeric($cycleName)) {
+                return "El ciclo de facturación '{$cycleName}' no existe en el sistema.";
+            }
+        }
+
+        return null;
+    }
+
     private function formatValidationErrors(string $section, $validatorErrors): string
     {
         $messages = [];
@@ -550,8 +601,8 @@ class CustomerImporterService
                 $msg = implode(', ', $msg);
             }
             $msg = str_replace(
-                ['first_name', 'last_name', 'email_address', 'document_type', 'identity_document', 'router_id', 'plan_id', 'service_ip', 'customer_status'],
-                ['Nombre', 'Apellido', 'Email', 'Tipo Documento', 'N° Documento', 'ID Zona (Router)', 'ID Plan', 'IP Servicio', 'Estado Cliente'],
+                ['first_name', 'last_name', 'email_address', 'document_type', 'identity_document', 'router_id', 'plan_id', 'service_ip', 'customer_status', 'billing_cycle_id', 'billing_cycle'],
+                ['Nombre', 'Apellido', 'Email', 'Tipo Documento', 'N° Documento', 'ID Zona (Router)', 'ID Plan', 'IP Servicio', 'Estado Cliente', 'ID Ciclo Facturación', 'Ciclo Facturación'],
                 (string)$msg
             );
             $messages[] = $msg;

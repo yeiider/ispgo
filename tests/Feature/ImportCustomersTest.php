@@ -72,4 +72,60 @@ class ImportCustomersTest extends TestCase
 
         @unlink($tempFile);
     }
+
+    public function test_import_customers_with_optional_billing_cycle()
+    {
+        $router = \App\Models\Router::create([
+            'code' => 'R02',
+            'name' => 'Test Router 2',
+        ]);
+
+        $plan = \App\Models\Services\Plan::create([
+            'name' => 'Plan 10MB',
+            'download_speed' => 10,
+            'upload_speed' => 10,
+            'monthly_price' => 50000,
+        ]);
+
+        $cycle = \App\Models\BillingCycle::create([
+            'name' => 'Ciclo 15',
+            'billing_day' => 15,
+            'suspension_day' => 20,
+            'payment_due_day' => 25,
+            'status' => 'active',
+        ]);
+
+        $csvContent = "customer.first_name,customer.last_name,customer.email_address,customer.phone_number,customer.document_type,customer.identity_document,customer.customer_status,customer.router_id,service.router_id,service.plan_id,service.service_ip,service.service_status,service.billing_cycle_id\n";
+        $csvContent .= "CicloUser,LastName,ciclo@example.com,3001112233,CC,555444333,active,{$router->id},{$router->id},{$plan->id},192.168.10.50,active,{$cycle->id}\n";
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'csv');
+        file_put_contents($tempFile, $csvContent);
+
+        $uploadedFile = new UploadedFile(
+            $tempFile,
+            'import.csv',
+            'text/csv',
+            null,
+            true
+        );
+
+        $action = new ImportCustomers();
+        $fields = new ActionFields(
+            collect([
+                'csv_file' => $uploadedFile,
+                'mode' => 'create_or_update',
+            ]),
+            collect()
+        );
+
+        $action->handle($fields, collect());
+
+        $this->assertDatabaseHas('services', [
+            'service_ip' => '192.168.10.50',
+            'billing_cycle_id' => $cycle->id,
+            'billing_cycle' => 'Ciclo 15',
+        ]);
+
+        @unlink($tempFile);
+    }
 }
