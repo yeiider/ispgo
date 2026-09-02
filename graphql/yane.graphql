@@ -1,0 +1,47 @@
+# =============================================================================
+# Catálogo del Asistente Yane (IA) — datos editables desde el admin (Nova)
+# =============================================================================
+# Estos datos viven en core_config_data (sección `asistente_yane` de
+# config/settings.php) y se exponen aquí para que el MCP / agente IA los
+# consulte en lugar de tenerlos hardcodeados en el prompt de n8n.
+# =============================================================================
+
+type YaneContact {
+    web_url: String
+    email: String
+    payment_url: String
+}
+
+type YaneZone {
+    city: String!
+    zones: [String!]!
+}
+
+type YaneOffice {
+    city: String!
+    address: String!
+}
+
+type YaneInstallationCost {
+    zone: String!
+    cost: String!
+}
+
+type YaneFaq {
+    question: String!
+    answer: String!
+}
+
+type YaneCatalog {
+    contacts: YaneContact!
+    coverage: [YaneZone!]!
+    synonyms: [YaneZone!]!
+    offices: [YaneOffice!]!
+    installation_costs: [YaneInstallationCost!]!
+    faqs: [YaneFaq!]!
+    tv_channels: [String!]!
+}
+
+extend type Query {
+    yaneCatalog: YaneCatalog! @field(resolver: "App\\GraphQL\\Queries\\YaneCatalogQuery@resolve")
+}

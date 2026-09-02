@@ -716,4 +716,92 @@ return [
             ],
         ],
     ],
+
+    "asistente_yane" => [
+        "setting" => [
+            "label" => "Asistente Yane (IA)",
+            "class" => "form-control",
+        ],
+        "contactos" => [
+            "setting" => [
+                "label" => "Contactos y Enlaces",
+                "code" => "contactos"
+            ],
+            "web_url" => [
+                "field" => "text-field",
+                "label" => "Sitio Web",
+                "placeholder" => "https://raicesc.net",
+            ],
+            "email" => [
+                "field" => "text-field",
+                "label" => "Correo de contacto",
+                "placeholder" => "contacto@raicesc.net",
+            ],
+            "payment_url" => [
+                "field" => "text-field",
+                "label" => "URL de pagos",
+                "placeholder" => "https://www.raicesc.net/pagos",
+            ],
+        ],
+        "cobertura" => [
+            "setting" => [
+                "label" => "Cobertura",
+                "code" => "cobertura"
+            ],
+            "ciudades" => [
+                "field" => "textarea-field",
+                "label" => "Ciudades y zonas de cobertura (una por línea: Ciudad: zona1, zona2)",
+                "placeholder" => "Cali: Ciudad Pacífica, Kachipay, Bochalema, Tierra Linda\nJamundí: Pangola, El Castillo\nSantander de Quilichao\nPuerto Tejada\nGuachené\nPadilla\nCaloto",
+            ],
+            "sinonimos" => [
+                "field" => "textarea-field",
+                "label" => "Barrios / sinónimos por ciudad (una por línea: Ciudad: barrio1, barrio2)",
+                "placeholder" => "Cali: ciudad pacifica, tierra linda, bochalema, kachipay\nGuachené: El llano, Llano de taula, El Guabal",
+            ],
+        ],
+        "oficinas" => [
+            "setting" => [
+                "label" => "Oficinas",
+                "code" => "oficinas"
+            ],
+            "listado" => [
+                "field" => "textarea-field",
+                "label" => "Oficinas (una por línea: Ciudad: dirección)",
+                "placeholder" => "Cali (Ciudad Pacífica): Carrera 121 # 42-93\nSantander de Quilichao: Calle 4 # 14-37",
+            ],
+        ],
+        "costos_instalacion" => [
+            "setting" => [
+                "label" => "Costos de Instalación",
+                "code" => "costos_instalacion"
+            ],
+            "listado" => [
+                "field" => "textarea-field",
+                "label" => "Costo de instalación por zona (una por línea: Zona: monto)",
+                "placeholder" => "Cali (Ciudad Pacífica) y Jamundí: Gratis\nPuerto Tejada, Ciudad Amiga: $50.000",
+            ],
+        ],
+        "faqs" => [
+            "setting" => [
+                "label" => "Preguntas Frecuentes",
+                "code" => "faqs"
+            ],
+            "listado" => [
+                "field" => "textarea-field",
+                "label" => "FAQs (una por línea: Pregunta => Respuesta)",
+                "placeholder" => "¿Cuánto tarda la instalación? => Menos de 48 horas\n¿Hay cláusula de permanencia? => No",
+            ],
+        ],
+        "canales_tv" => [
+            "setting" => [
+                "label" => "Canales de TV",
+                "code" => "canales_tv"
+            ],
+            "listado" => [
+                "field" => "textarea-field",
+                "label" => "Listado de canales (separados por coma)",
+                "placeholder" => "A&E, AMC HD, DISCOVERY, ESPN, ...",
+            ],
+        ],
+    ],
 ];
