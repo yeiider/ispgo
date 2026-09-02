@@ -722,6 +722,17 @@ return [
             "label" => "Asistente Yane (IA)",
             "class" => "form-control",
         ],
+        "planes" => [
+            "setting" => [
+                "label" => "Planes de Internet (públicos)",
+                "code" => "planes"
+            ],
+            "listado" => [
+                "field" => "textarea-field",
+                "label" => "Planes (uno por línea: nombre | download_mbps | upload_mbps | precio | tipo | descripción | beneficios)",
+                "placeholder" => "Plan Ultra | 200 | 200 | $65.000 | regular | Ideal para navegar, correos y redes sociales |\nPlan Platino | 900 | 900 | $105.000 | regular | Ideal para teletrabajo y estudio | Soporte prioritario 24/7",
+            ],
+        ],
         "contactos" => [
             "setting" => [
                 "label" => "Contactos y Enlaces",

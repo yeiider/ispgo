@@ -32,8 +32,19 @@ type YaneFaq {
     answer: String!
 }
 
+type YanePlan {
+    name: String!
+    download_mbps: String
+    upload_mbps: String
+    price: String
+    tipo: String
+    description: String
+    benefits: String
+}
+
 type YaneCatalog {
     contacts: YaneContact!
+    plans: [YanePlan!]!
     coverage: [YaneZone!]!
     synonyms: [YaneZone!]!
     offices: [YaneOffice!]!

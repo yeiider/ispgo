@@ -55,10 +55,19 @@ TXT;
 
         $canalesTv = 'A&E, AMC HD, DISCOVERY H&H, DISCOVERY, DISCOVERY KIDS HD, FOOD NETWORK HD, FOX SPORTS 3, HISTORY CHANNEL HS, MTV, MTV LIVE HD, PASIONES, STAR CHANNEL HD, ANIMAL PLANET, AXN, BABY TV, BETTEL, TRECE EN VIVO, CANAL CAPITAL, CANAL CONGRESO, CANAL DE LAS ESTRELLAS, CANAL DE PRUEBAS, CANAL INSTITUCIONAL, CANAL UNO, CARACOL TV HD, CARTOON NETWORK, CINE FAMILIAR, CINE PREMIUM, CINE CANAL, CINEMAX, CITY TV, COMEDY CENTRAL, CRISTO VISION, DE PELICULA, DHE, DISCOVERY WORLD, DISNEY CHANNEL, ENLACE, ESPN, ESPN 2, ESPN 3, ESPN EXTRA, EURO CHANNEL, EWTN, FOX SPORTS, FOX SPORTS 2, FX, GLITZ, GOLDEN, GOLDEN EDGE, GOLDEN PLUS, HISTORY 2, HOGAR TV, ID HD, INFANTIL, LA KALLE, LOVE NATURE, MORBIDO TV (SIN SEÑAL), MTV (CHANNEL 230), NATIONAL GEOGRAPHIC, NICK HD, NICK JR, PARAMOUNT, RAICES TV, RCN HD, RCN HD 2, RUMBA TV, SEÑAL COLOMBIA, SONY, SPACE, STUDIO UNIVERSAL, SUN CHANNEL, TBS, TELE ANTILLAS, TELEMUNDO, TELE NOSTALGIA, TELE ANTIOQUIA, TELE CAFÉ ®, TELE CARIBE ®, TELEPACIFICO, TELE SUR, TELENOVELAS, TNT, TNT SERIES, TOONCASK, TRO ®, TV AGRO, TV MAX (SIN SEÑAL), TVE, UNIVERSAL CHANNEL, UNIVISION, WARNER CHANNEL, WIN SPORT, ZOO MOOD, ZOOM';
 
+        $planes = <<<'TXT'
+Plan Ultra | 200 | 200 | $65.000 | regular | Ideal para navegar, correos y redes sociales |
+Plan Premium | 500 | 500 | $85.000 | regular | Ideal para streaming y videollamadas | Soporte prioritario
+Plan Platino | 900 | 900 | $105.000 | regular | Ideal para teletrabajo y estudio | Soporte prioritario 24/7. Entre los más vendidos
+Plan Mundialista 200 | 200 | 200 | $99.900 | temporada | 200 MB + Dgo Flex + plantilla del mundial | Oferta exclusiva por temporada
+Plan Mundialista 500 | 500 | 500 | $149.900 | temporada | 500 MB + Dgo Full + Win + plantilla del mundial | Oferta exclusiva por temporada
+TXT;
+
         $data = [
             'asistente_yane/contactos/web_url' => 'https://raicesc.net',
             'asistente_yane/contactos/email' => 'contacto@raicesc.net',
             'asistente_yane/contactos/payment_url' => 'https://www.raicesc.net/pagos',
+            'asistente_yane/planes/listado' => $planes,
             'asistente_yane/cobertura/ciudades' => $coberturaCiudades,
             'asistente_yane/cobertura/sinonimos' => $coberturaSinonimos,
             'asistente_yane/oficinas/listado' => $oficinas,

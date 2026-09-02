@@ -23,6 +23,7 @@ class YaneCatalogQuery
             'contactos.web_url' => 'asistente_yane/contactos/web_url',
             'contactos.email' => 'asistente_yane/contactos/email',
             'contactos.payment_url' => 'asistente_yane/contactos/payment_url',
+            'planes.listado' => 'asistente_yane/planes/listado',
             'cobertura.ciudades' => 'asistente_yane/cobertura/ciudades',
             'cobertura.sinonimos' => 'asistente_yane/cobertura/sinonimos',
             'oficinas.listado' => 'asistente_yane/oficinas/listado',
@@ -49,6 +50,7 @@ class YaneCatalogQuery
             'installation_costs' => $this->parsePairs($val('costos.listado'), ':', 'zone', 'cost'),
             'faqs' => $this->parsePairs($val('faqs.listado'), '=>', 'question', 'answer'),
             'tv_channels' => $this->parseChannels($val('canales.listado')),
+            'plans' => $this->parsePlans($val('planes.listado')),
         ];
     }
 
@@ -93,6 +95,31 @@ class YaneCatalogQuery
             return [];
         }
         return array_values(array_filter(array_map('trim', explode(',', $raw)), 'strlen'));
+    }
+
+    /**
+     * Parse "nombre | download | upload | precio | tipo | descripcion | beneficios"
+     * lines into [{name, download_mbps, upload_mbps, price, tipo, description, benefits}].
+     */
+    protected function parsePlans(?string $raw): array
+    {
+        $result = [];
+        foreach ($this->lines($raw) as $line) {
+            $parts = array_map('trim', explode('|', $line));
+            if (empty($parts[0])) {
+                continue;
+            }
+            $result[] = [
+                'name' => $parts[0],
+                'download_mbps' => $parts[1] ?? null,
+                'upload_mbps' => $parts[2] ?? null,
+                'price' => $parts[3] ?? null,
+                'tipo' => $parts[4] ?? null,
+                'description' => $parts[5] ?? null,
+                'benefits' => $parts[6] ?? null,
+            ];
+        }
+        return $result;
     }
 
     protected function lines(?string $raw): array
