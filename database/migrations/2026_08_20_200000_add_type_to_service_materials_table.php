@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('service_materials', 'type')) {
+            return;
+        }
         Schema::table('service_materials', function (Blueprint $table) {
             $table->string('type')->default('instalacion')->after('from_user_stock');
         });
