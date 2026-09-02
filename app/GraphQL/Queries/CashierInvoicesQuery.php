@@ -299,6 +299,11 @@ class CashierInvoicesQuery
             $query->where('user_id', $args['user_id']);
         }
 
+        // Filtro por método de pago
+        if (!empty($args['payment_method'])) {
+            $query->where('payment_method', $args['payment_method']);
+        }
+
         if (!empty($args['date'])) {
             $query->whereDate('date', $args['date']);
         }

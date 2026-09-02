@@ -29,6 +29,8 @@ class SuspendServicesMonthly extends Command
         $this->info("[EVERYDAY] Iniciando suspensión de servicios con facturas vencidas e impagas sin promesa vigente...");
         $this->info("[EVERYDAY] Fecha actual: {$today->toDateString()}");
 
+        $suspended = 0;
+
         if ($routerId) {
             $this->info("[EVERYDAY] Filtrando por Router ID: {$routerId}");
         }
@@ -38,7 +40,7 @@ class SuspendServicesMonthly extends Command
             $routersQuery->where('id', $routerId);
         }
 
-        $routersQuery->get()->each(function ($router) use ($isManageable, $currentDate, $today) {
+        $routersQuery->get()->each(function ($router) use ($isManageable, $currentDate, $today, &$suspended) {
             $cutOffDate = GeneralProviderConfig::getCutOffDate($router->id);
 
             // Si los ciclos no son administrables y hoy no es el día de corte por defecto del router, omitir todo el router
@@ -78,10 +80,10 @@ class SuspendServicesMonthly extends Command
 
                     if ($customer->usesPerServiceBilling()) {
                         // ── Modo per_service: verificar facturas propias del servicio ──
-                        $this->suspendIfServiceHasUnpaidInvoices($service, $customer, $today, $router);
+                        $this->suspendIfServiceHasUnpaidInvoices($service, $customer, $today, $router, $suspended);
                     } else {
                         // ── Modo total (default): verificar facturas del cliente completo ──
-                        $this->suspendIfCustomerHasUnpaidInvoices($service, $customer, $today, $router);
+                        $this->suspendIfCustomerHasUnpaidInvoices($service, $customer, $today, $router, $suspended);
                     }
                 } catch (\Exception $e) {
                     Log::error("[EVERYDAY] Error al procesar servicio ID: {$service->id} del router {$router->id} - {$e->getMessage()}");
@@ -91,6 +93,15 @@ class SuspendServicesMonthly extends Command
         });
 
         $this->info("[EVERYDAY] Proceso de suspensión completado.");
+
+        if ($suspended > 0) {
+            \App\Helpers\Notify::notifyWarning(
+                "{$suspended} servicios suspendidos por facturas vencidas",
+                'Suspensiones de servicio',
+                null,
+                ['suspended' => $suspended]
+            );
+        }
     }
 
     /**
@@ -98,7 +109,7 @@ class SuspendServicesMonthly extends Command
      * Suspende el servicio si el CLIENTE tiene alguna factura general (sin service_id
      * obligatorio) vencida, unpaid y sin promesa de pago vigente.
      */
-    protected function suspendIfCustomerHasUnpaidInvoices(Service $service, $customer, Carbon $today, $router): void
+    protected function suspendIfCustomerHasUnpaidInvoices(Service $service, $customer, Carbon $today, $router, int &$suspended): void
     {
         $hasUnpaid = $customer->invoices()
             ->where('status', 'unpaid')
@@ -112,6 +123,7 @@ class SuspendServicesMonthly extends Command
 
         if ($hasUnpaid) {
             $service->suspend();
+            $suspended++;
             Log::info("[EVERYDAY] [MODO TOTAL] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido - Cliente ID: {$customer->id} - Router: {$router->id}");
             $this->info("[EVERYDAY] [MODO TOTAL] Servicio ID: {$service->id} suspendido (cliente {$customer->id} con facturas vencidas).");
         }
@@ -124,7 +136,7 @@ class SuspendServicesMonthly extends Command
      * Si el servicio no tiene factura vencida, aunque otros servicios del cliente
      * sí la tengan, este servicio NO se suspende.
      */
-    protected function suspendIfServiceHasUnpaidInvoices(Service $service, $customer, Carbon $today, $router): void
+    protected function suspendIfServiceHasUnpaidInvoices(Service $service, $customer, Carbon $today, $router, int &$suspended): void
     {
         $hasUnpaid = $service->invoices()
             ->where('status', 'unpaid')
@@ -138,6 +150,7 @@ class SuspendServicesMonthly extends Command
 
         if ($hasUnpaid) {
             $service->suspend();
+            $suspended++;
             Log::info("[EVERYDAY] [MODO PER-SERVICE] Servicio ID: {$service->id} (SN: {$service->sn}) suspendido - Cliente ID: {$customer->id} - Router: {$router->id}");
             $this->info("[EVERYDAY] [MODO PER-SERVICE] Servicio ID: {$service->id} suspendido (factura vencida propia del servicio).");
         }
