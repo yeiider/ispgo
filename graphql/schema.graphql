@@ -1207,3 +1207,4 @@ extend type Mutation {
 #import onepay.graphql
 #import tickets.graphql
 #import iptv.graphql
+#import yane.graphql
