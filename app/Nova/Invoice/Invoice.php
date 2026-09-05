@@ -201,6 +201,10 @@ class Invoice extends Resource
                     return (bool) optional($this->resource)->onepay_charge_id;
                 })
                 ->showInline(),
+            (new \App\Nova\Actions\Invoice\SyncInvoicesToSiigo())
+                ->canSee(function () {
+                    return \Ispgo\Siigo\Settings\ConfigProviderSiigo::getEnabled();
+                }),
         ];
     }
 

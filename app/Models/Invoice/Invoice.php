@@ -387,7 +387,7 @@ class Invoice extends Model
         event(new \App\Events\InvoiceCanceled($this));
     }
 
-    public function applyDiscountWithoutTax(float $discount)
+    public function applyDiscountWithoutTax(float $discount, string $description = '')
     {
         $this->discount = $discount;
         // El descuento se aplica solo al subtotal, el impuesto existente NO cambia
@@ -399,9 +399,19 @@ class Invoice extends Model
         $this->total    = $total;
         $this->outstanding_balance = $total - $this->amount;
         $this->save();
+
+        \App\Models\InvoiceAdjustment::create([
+            'invoice_id' => $this->id,
+            'kind'       => 'discount',
+            'amount'     => $discount,
+            'label'      => $description ?: 'Descuento manual',
+            'created_by' => \Illuminate\Support\Facades\Auth::id(),
+        ]);
+
+        event(new \App\Events\InvoiceDiscountApplied($this, $discount, $description));
     }
 
-    public function applyDiscountWithTax(float $discount)
+    public function applyDiscountWithTax(float $discount, string $description = '')
     {
         $this->discount = $discount;
         $total = $this->total - $discount;
@@ -413,6 +423,16 @@ class Invoice extends Model
         $this->total = $total;
         $this->outstanding_balance = $total - $this->amount;
         $this->save();
+
+        \App\Models\InvoiceAdjustment::create([
+            'invoice_id' => $this->id,
+            'kind'       => 'discount',
+            'amount'     => $discount,
+            'label'      => $description ?: 'Descuento manual',
+            'created_by' => \Illuminate\Support\Facades\Auth::id(),
+        ]);
+
+        event(new \App\Events\InvoiceDiscountApplied($this, $discount, $description));
     }
 
     protected static function boot(): void

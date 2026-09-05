@@ -438,6 +438,73 @@ class SiigoHelper
         return $payload;
     }
 
+    public static function buildDiscountCreditNotePayload(\App\Models\Invoice\Invoice $invoice, float $discountAmount, string $reasonNote = ''): array
+    {
+        $customer = $invoice->customer;
+        $identification = self::getCustomerIdentification($customer);
+        $scopeId = (int) ($invoice->router_id ?? $customer?->router_id ?? 0);
+
+        $info = $invoice->additional_information ?? [];
+        $invoiceUuid = $info['siigo_invoice_id'] ?? '';
+
+        $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
+        $itemTax = [];
+        if ($taxId) {
+            $itemTax[] = ['id' => $taxId];
+        }
+
+        $items = [
+            [
+                'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01',
+                'description' => 'Descuento / Rebaja: ' . ($reasonNote ?: ('Factura ' . $invoice->increment_id)),
+                'quantity' => 1,
+                'price' => round($discountAmount, 2),
+                'discount' => 0.0,
+                'tax' => $itemTax
+            ]
+        ];
+
+        $paymentId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getPaymentId($scopeId) ?: 12;
+
+        $obsText = 'Nota crédito por descuento parcial en factura ' . $invoice->increment_id;
+        if (!empty($reasonNote)) {
+            $obsText .= ': ' . $reasonNote;
+        }
+
+        $payload = [
+            'document' => [
+                'id' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getCreditNoteDocumentId($scopeId) ?: 24447
+            ],
+            'date' => now()->format('Y-m-d'),
+            'invoice' => $invoiceUuid,
+            'reason' => 3, // Motivo 3 en Siigo/DIAN: Rebaja o descuento parcial/total
+            'observations' => $obsText,
+            'items' => $items,
+            'payments' => [
+                [
+                    'id' => $paymentId,
+                    'value' => round($discountAmount, 2),
+                    'due_date' => $invoice->due_date ? $invoice->due_date->format('Y-m-d') : now()->format('Y-m-d')
+                ]
+            ],
+            'stamp' => [
+                'send' => false
+            ]
+        ];
+
+        $costCenter = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getCostCenter($scopeId);
+        if ($costCenter) {
+            $payload['cost_center'] = $costCenter;
+        }
+
+        $sellerId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getSellerId($scopeId);
+        if ($sellerId) {
+            $payload['seller'] = $sellerId;
+        }
+
+        return $payload;
+    }
+
     public static function mapStateAndCity(?string $stateName, ?string $cityName, int $scopeId = 0): array
     {
         $defaultCityCode = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getDefaultCityCode($scopeId);

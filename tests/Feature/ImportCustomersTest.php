@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Models\Customers\Customer;
 use App\Models\Customers\TaxDetail;
 use App\Nova\Actions\Customers\ImportCustomers;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Fields\ActionFields;
@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class ImportCustomersTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     public function test_import_customers_with_tax_details()
     {
@@ -128,4 +128,63 @@ class ImportCustomersTest extends TestCase
 
         @unlink($tempFile);
     }
+
+    public function test_import_customers_with_sn_and_fiscal_regime()
+    {
+        $router = \App\Models\Router::create([
+            'code' => 'R03',
+            'name' => 'Test Router 3',
+        ]);
+
+        $plan = \App\Models\Services\Plan::create([
+            'name' => 'Plan 20MB',
+            'download_speed' => 20,
+            'upload_speed' => 20,
+            'monthly_price' => 70000,
+        ]);
+
+        $csvContent = "customer.first_name,customer.last_name,customer.email_address,customer.phone_number,customer.document_type,customer.identity_document,customer.customer_status,customer.router_id,service.router_id,service.plan_id,service.service_ip,service.service_status,service.sn,tax.fiscal_regime,tax.business_name\n";
+        $csvContent .= "SnUser,LastName,snuser@example.com,3009998877,CC,777888999,active,{$router->id},{$router->id},{$plan->id},192.168.20.10,active,ONU-SN-9999,comun,Empresa SnUser SAS\n";
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'csv');
+        file_put_contents($tempFile, $csvContent);
+
+        $uploadedFile = new UploadedFile(
+            $tempFile,
+            'import.csv',
+            'text/csv',
+            null,
+            true
+        );
+
+        $action = new ImportCustomers();
+        $fields = new ActionFields(
+            collect([
+                'csv_file' => $uploadedFile,
+                'mode' => 'create_or_update',
+            ]),
+            collect()
+        );
+
+        $action->handle($fields, collect());
+
+        $customer = Customer::where('identity_document', '777888999')->first();
+        $this->assertNotNull($customer);
+
+        $this->assertDatabaseHas('services', [
+            'customer_id' => $customer->id,
+            'service_ip' => '192.168.20.10',
+            'sn' => 'ONU-SN-9999',
+        ]);
+
+        $this->assertDatabaseHas('tax_details', [
+            'customer_id' => $customer->id,
+            'fiscal_regime' => 'comun',
+            'business_name' => 'Empresa SnUser SAS',
+            'tax_identification_number' => '777888999',
+        ]);
+
+        @unlink($tempFile);
+    }
 }
+

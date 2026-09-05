@@ -544,7 +544,7 @@ class InventoryStockMutation
     private function onlyWarehouseFillable(array $input): array
     {
         return array_intersect_key($input, array_flip([
-            'name', 'address', 'code'
+            'name', 'address', 'code', 'router_id'
         ]));
     }
 
