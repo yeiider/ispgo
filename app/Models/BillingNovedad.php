@@ -202,14 +202,18 @@ class BillingNovedad extends Model
             });
         });
 
-        // Para entregas de producto: calcular automáticamente el monto
         static::creating(function (self $nov) {
-            $nov->customer_id = $nov->service->customer->id;
-            $nov->created_by = Auth::id();
-            $registry = app(\App\Services\Billing\Calculators\NovedadCalculatorRegistry::class);
-            $calculator = $registry->for($nov->type);
-            $nov->amount = $calculator->calculate($nov ?? [], $nov->service);
-
+            if (!$nov->customer_id && $nov->service) {
+                $nov->customer_id = $nov->service->customer_id;
+            }
+            if (!$nov->created_by) {
+                $nov->created_by = Auth::id() ?? \App\Models\User::value('id') ?? 1;
+            }
+            if ($nov->amount === null || (float)$nov->amount === 0.0) {
+                $registry = app(\App\Services\Billing\Calculators\NovedadCalculatorRegistry::class);
+                $calculator = $registry->for($nov->type);
+                $nov->amount = $calculator->calculate($nov, $nov->service);
+            }
         });
         static::created(function (self $nov) {
             if ($nov->type === self::T_ENTREGA_PRODUCTO) {

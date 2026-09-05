@@ -452,6 +452,7 @@ type Mutation @guard {
         discount: Float! @rules(apply: ["required", "numeric", "min:0"])
         is_percentage: Boolean! @rules(apply: ["required"])
         include_tax: Boolean! @rules(apply: ["required"])
+        description: String! @rules(apply: ["required", "min:5"])
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ApplyDiscountMutation@resolve")
 
     registerPaymentPromise(
@@ -459,6 +460,14 @@ type Mutation @guard {
         promise_date: Date! @rules(apply: ["required"])
         notes: String
     ): PaymentPromiseResult @field(resolver: "App\\GraphQL\\Mutations\\RegisterPaymentPromiseMutation@resolve")
+
+    bulkSyncCustomersToSiigo(
+        customer_ids: [ID!]! @rules(apply: ["required"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\BulkSyncCustomersToSiigoMutation@resolve")
+
+    bulkSyncInvoicesToSiigo(
+        invoice_ids: [ID!]! @rules(apply: ["required"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\BulkSyncInvoicesToSiigoMutation@resolve")
 
     # User Mutations
     createUser(

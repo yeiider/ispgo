@@ -37,5 +37,6 @@ class SiigoServiceProvider extends ServiceProvider
         Event::listen(\App\Events\InvoiceCreated::class, [SyncInvoice::class, 'onCreated']);
         Event::listen(\App\Events\InvoicePaid::class, [SyncInvoice::class, 'onPaid']);
         Event::listen(\App\Events\InvoiceCanceled::class, [SyncInvoice::class, 'onCanceled']);
+        Event::listen(\App\Events\InvoiceDiscountApplied::class, [SyncInvoice::class, 'onDiscountApplied']);
     }
 }

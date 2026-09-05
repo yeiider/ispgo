@@ -160,7 +160,7 @@ class InventoryQuery
 
         if (isset($args['low_stock']) && $args['low_stock']) {
             $query->whereNotNull('min_stock')
-                ->whereRaw('quantity < min_stock');
+                ->whereColumn('quantity', '<', 'min_stock');
         }
 
         $first = $args['first'] ?? 15;

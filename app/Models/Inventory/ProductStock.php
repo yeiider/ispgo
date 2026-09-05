@@ -82,4 +82,26 @@ class ProductStock extends Model
         $this->decrement('quantity', $amount);
         return $this;
     }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('router_filter', function (\Illuminate\Database\Eloquent\Builder $builder) {
+            /** @var \App\Models\User|null $user */
+            $user = \Illuminate\Support\Facades\Auth::user();
+
+            if (!$user) {
+                return;
+            }
+
+            $routerIds = $user->getRouterIds();
+
+            if (empty($routerIds)) {
+                return;
+            }
+
+            $builder->whereHas('warehouse', function ($query) use ($routerIds) {
+                $query->whereIn('router_id', $routerIds);
+            });
+        });
+    }
 }

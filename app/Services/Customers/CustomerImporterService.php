@@ -148,15 +148,29 @@ class CustomerImporterService
                     }
 
                     // Check tax validation
-                    if (!empty($taxData) && isset($taxData['tax_identification_number']) && trim($taxData['tax_identification_number']) !== '') {
-                        $existingTax = TaxDetail::where('tax_identification_number', $taxData['tax_identification_number'])->first();
-                        if ($existingTax) {
-                            $errors[] = [
-                                'row' => $rowNumber,
-                                'name' => $clientName,
-                                'error' => "El NIT/Identificación fiscal {$taxData['tax_identification_number']} ya pertenece a otro cliente registrado."
-                            ];
-                            continue;
+                    $hasTaxData = false;
+                    foreach ($taxData as $val) {
+                        if ($val !== null && trim((string)$val) !== '') {
+                            $hasTaxData = true;
+                            break;
+                        }
+                    }
+
+                    if ($hasTaxData) {
+                        $taxIdNum = $taxData['tax_identification_number'] ?? $customerData['identity_document'] ?? ($customer ? $customer->identity_document : null);
+                        if ($taxIdNum) {
+                            $existingTaxQuery = TaxDetail::where('tax_identification_number', $taxIdNum);
+                            if ($customer) {
+                                $existingTaxQuery->where('customer_id', '!=', $customer->id);
+                            }
+                            if ($existingTaxQuery->exists()) {
+                                $errors[] = [
+                                    'row' => $rowNumber,
+                                    'name' => $clientName,
+                                    'error' => "El NIT/Identificación fiscal {$taxIdNum} ya pertenece a otro cliente registrado."
+                                ];
+                                continue;
+                            }
                         }
                     }
 
@@ -376,7 +390,15 @@ class CustomerImporterService
                 }
 
                 // TaxDetail handling
-                if (!empty($taxData) && isset($taxData['tax_identification_number']) && trim($taxData['tax_identification_number']) !== '') {
+                $hasTaxData = false;
+                foreach ($taxData as $val) {
+                    if ($val !== null && trim((string)$val) !== '') {
+                        $hasTaxData = true;
+                        break;
+                    }
+                }
+
+                if ($hasTaxData) {
                     $taxModel = TaxDetail::where('customer_id', $customer->id)->first();
 
                     foreach (['enable_billing', 'send_notifications', 'send_invoice'] as $boolField) {
@@ -388,16 +410,19 @@ class CustomerImporterService
                         }
                     }
 
-                    if (!isset($taxData['tax_identification_type']) || trim($taxData['tax_identification_type']) === '') {
-                        $taxData['tax_identification_type'] = 'NIT';
+                    if (!isset($taxData['tax_identification_type']) || trim((string)$taxData['tax_identification_type']) === '') {
+                        $taxData['tax_identification_type'] = $customerData['document_type'] ?? $customer->document_type ?? 'NIT';
                     }
-                    if (!isset($taxData['taxpayer_type']) || trim($taxData['taxpayer_type']) === '') {
+                    if (!isset($taxData['tax_identification_number']) || trim((string)$taxData['tax_identification_number']) === '') {
+                        $taxData['tax_identification_number'] = $customerData['identity_document'] ?? $customer->identity_document;
+                    }
+                    if (!isset($taxData['taxpayer_type']) || trim((string)$taxData['taxpayer_type']) === '') {
                         $taxData['taxpayer_type'] = 'personas_naturales';
                     }
-                    if (!isset($taxData['fiscal_regime']) || trim($taxData['fiscal_regime']) === '') {
+                    if (!isset($taxData['fiscal_regime']) || trim((string)$taxData['fiscal_regime']) === '') {
                         $taxData['fiscal_regime'] = 'simplified';
                     }
-                    if (!isset($taxData['business_name']) || trim($taxData['business_name']) === '') {
+                    if (!isset($taxData['business_name']) || trim((string)$taxData['business_name']) === '') {
                         $taxData['business_name'] = ucwords(($customerData['first_name'] ?? $customer->first_name) . ' ' . ($customerData['last_name'] ?? $customer->last_name));
                     }
 
@@ -408,7 +433,9 @@ class CustomerImporterService
                             $rowUpdated = true;
                         }
                     } else {
-                        $existingTax = TaxDetail::where('tax_identification_number', $taxData['tax_identification_number'])->first();
+                        $existingTax = TaxDetail::where('tax_identification_number', $taxData['tax_identification_number'])
+                            ->where('customer_id', '!=', $customer->id)
+                            ->first();
                         if ($existingTax) {
                             throw new \RuntimeException("El NIT/Identificación fiscal {$taxData['tax_identification_number']} ya pertenece a otro cliente.");
                         }

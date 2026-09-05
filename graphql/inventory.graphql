@@ -37,9 +37,11 @@ type InventoryWarehouse {
     name: String!
     address: String
     code: String
+    router_id: ID
     created_at: DateTime!
     updated_at: DateTime!
 
+    router: Router @belongsTo
     products: [InventoryProduct!]! @hasMany
     stocks: [ProductStock!]! @hasMany
     total_stock: Int
@@ -221,12 +223,14 @@ input CreateWarehouseInput {
     name: String!
     address: String
     code: String
+    router_id: ID
 }
 
 input UpdateWarehouseInput {
     name: String
     address: String
     code: String
+    router_id: ID
 }
 
 input CreateCategoryInput {

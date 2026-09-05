@@ -29,6 +29,14 @@ class ApplyDiscountMutation
             $discount = $args['discount'];
             $isPercentage = $args['is_percentage'];
             $includeTax = $args['include_tax'];
+            $description = trim($args['description'] ?? '');
+
+            if (empty($description)) {
+                return [
+                    'success' => false,
+                    'message' => __('A description or reason for the discount is required.'),
+                ];
+            }
 
             // Calculate discount amount
             if ($isPercentage) {
@@ -45,9 +53,9 @@ class ApplyDiscountMutation
 
             // Aplicar el descuento respetando el flag include_tax
             if ($includeTax) {
-                $invoice->applyDiscountWithTax($discountAmount);
+                $invoice->applyDiscountWithTax($discountAmount, $description);
             } else {
-                $invoice->applyDiscountWithoutTax($discountAmount);
+                $invoice->applyDiscountWithoutTax($discountAmount, $description);
             }
 
             return [
