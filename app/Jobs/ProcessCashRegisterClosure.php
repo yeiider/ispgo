@@ -119,8 +119,9 @@ class ProcessCashRegisterClosure implements ShouldQueue
                 ->whereDate('date', $this->closureDate)
                 ->get();
 
-            // Obtener entregas a administradores (salidas)
+            // Obtener entregas a administradores (salidas activas: pending o accepted)
             $transfersOut = \App\Models\Finance\CashTransfer::where('sender_cash_register_id', $this->cashRegisterId)
+                ->whereIn('status', ['pending', 'accepted'])
                 ->whereDate('created_at', $this->closureDate)
                 ->get();
 
