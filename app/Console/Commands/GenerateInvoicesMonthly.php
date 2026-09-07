@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 class GenerateInvoicesMonthly extends Command
 {
     protected $signature = 'invoice:generate_everyday';
-    protected $description = 'Generate invoices every day based on configuration (supports per-customer billing mode)';
+    protected $description = 'Generate invoices every day based on configuration (supports per-customer billing mode and manageable billing cycles)';
 
     public function __construct()
     {
@@ -23,10 +23,11 @@ class GenerateInvoicesMonthly extends Command
 
     public function handle(): void
     {
-        $billingDate = GeneralProviderConfig::getBillingDate();
-        $currentDate = Carbon::now();
+        $isManageable = GeneralProviderConfig::getManageableBillingCycle();
+        $billingDate  = GeneralProviderConfig::getBillingDate();
+        $currentDate  = Carbon::now();
 
-        if ($currentDate->day != $billingDate) {
+        if (!$isManageable && $currentDate->day != $billingDate) {
             $this->info("[EVERYDAY] Hoy no es el día configurado para generar facturas ({$billingDate}). No se realizó ninguna acción.");
             return;
         }
@@ -44,17 +45,17 @@ class GenerateInvoicesMonthly extends Command
             ->with(['services' => function ($q) {
                 $q->withoutGlobalScope('router_filter')
                   ->whereNotIn('service_status', ['free', 'pending', 'inactive'])
-                  ->with('plan');
+                  ->with(['plan', 'billingCycle']);
             }])
-            ->chunk(50, function ($customers) {
+            ->chunk(50, function ($customers) use ($isManageable, $billingDate, $currentDate) {
                 foreach ($customers as $customer) {
                     try {
                         if ($customer->usesPerServiceBilling()) {
                             // ── Modo per_service: una factura por servicio ──
-                            $this->generatePerServiceInvoices($customer);
+                            $this->generatePerServiceInvoices($customer, $isManageable, $billingDate, $currentDate);
                         } else {
                             // ── Modo total (default): una factura por cliente ──
-                            $this->generateTotalInvoice($customer);
+                            $this->generateTotalInvoice($customer, $isManageable, $billingDate, $currentDate);
                         }
                     } catch (\Exception $e) {
                         Log::error("[EVERYDAY] Error al generar factura para cliente ID: {$customer->id} - {$e->getMessage()}");
@@ -68,11 +69,25 @@ class GenerateInvoicesMonthly extends Command
 
     /**
      * Modo por defecto: genera UNA sola factura por cliente
-     * con el total de todos sus servicios activos. No se vincula service_id.
+     * con el total de todos sus servicios activos que correspondan al ciclo de hoy.
      */
-    protected function generateTotalInvoice(Customer $customer): void
+    protected function generateTotalInvoice(Customer $customer, bool $isManageable, int $defaultBillingDate, Carbon $currentDate): void
     {
         $services = $customer->services;
+
+        if ($services->isEmpty()) {
+            return;
+        }
+
+        // Si los ciclos de facturación son administrables, filtrar servicios cuyo día de facturación coincida con hoy
+        if ($isManageable) {
+            $services = $services->filter(function ($service) use ($defaultBillingDate, $currentDate) {
+                if ($service->billingCycle && $service->billingCycle->status === 'active') {
+                    return (int)$service->billingCycle->billing_day === (int)$currentDate->day;
+                }
+                return (int)$defaultBillingDate === (int)$currentDate->day;
+            });
+        }
 
         if ($services->isEmpty()) {
             return;
@@ -84,26 +99,32 @@ class GenerateInvoicesMonthly extends Command
             return;
         }
 
-        $period       = Carbon::now()->format('Y-m');
-        $defaultUser  = GeneralProviderConfig::getDefaultUser();
-        $dueDate      = $this->calculateDueDate();
+        $billingMode = GeneralProviderConfig::getBillingMode();
+        $period      = ($billingMode === 'arrears')
+            ? $currentDate->copy()->subMonth()->format('Y-m')
+            : $currentDate->format('Y-m');
+        $defaultUser = GeneralProviderConfig::getDefaultUser();
+
+        // Determinar fecha de vencimiento según el primer ciclo de servicio o por defecto
+        $firstCycle = $services->first(fn($s) => $s->billingCycle && $s->billingCycle->status === 'active')?->billingCycle;
+        $dueDate    = $firstCycle ? $firstCycle->calculateDueDate($currentDate) : $this->calculateDueDate();
 
         $invoice = new Invoice();
-        $invoice->service_id         = null; // Sin service_id en modo total
-        $invoice->customer_id        = $customer->id;
-        $invoice->user_id            = $defaultUser;
-        $invoice->router_id          = $customer->router_id;
-        $invoice->billing_period     = $period;
-        $invoice->subtotal           = $totalPrice;
-        $invoice->tax                = 0;
-        $invoice->total              = $totalPrice;
-        $invoice->amount             = 0;
-        $invoice->discount           = 0;
+        $invoice->service_id          = null; // Sin service_id en modo total
+        $invoice->customer_id         = $customer->id;
+        $invoice->user_id             = $defaultUser;
+        $invoice->router_id           = $customer->router_id;
+        $invoice->billing_period      = $period;
+        $invoice->subtotal            = $totalPrice;
+        $invoice->tax                 = 0;
+        $invoice->total               = $totalPrice;
+        $invoice->amount              = 0;
+        $invoice->discount            = 0;
         $invoice->outstanding_balance = $totalPrice;
-        $invoice->issue_date         = now();
-        $invoice->due_date           = $dueDate;
-        $invoice->status             = 'unpaid';
-        $invoice->payment_method     = null;
+        $invoice->issue_date          = now();
+        $invoice->due_date            = $dueDate;
+        $invoice->status              = 'unpaid';
+        $invoice->payment_method      = null;
         $invoice->save();
 
         Log::info("[EVERYDAY] Factura total generada para cliente ID: {$customer->id} - Total: {$totalPrice}");
@@ -112,9 +133,9 @@ class GenerateInvoicesMonthly extends Command
 
     /**
      * Modo per_service: genera una factura individual por cada servicio activo
-     * del cliente. Cada factura incluye el service_id correspondiente.
+     * del cliente cuya fecha de facturación corresponda al día de hoy.
      */
-    protected function generatePerServiceInvoices(Customer $customer): void
+    protected function generatePerServiceInvoices(Customer $customer, bool $isManageable, int $defaultBillingDate, Carbon $currentDate): void
     {
         $services = $customer->services;
 
@@ -122,17 +143,35 @@ class GenerateInvoicesMonthly extends Command
             return;
         }
 
-        $period      = Carbon::now()->format('Y-m');
+        $billingMode = GeneralProviderConfig::getBillingMode();
+        $period      = ($billingMode === 'arrears')
+            ? $currentDate->copy()->subMonth()->format('Y-m')
+            : $currentDate->format('Y-m');
         $defaultUser = GeneralProviderConfig::getDefaultUser();
-        $dueDate     = $this->calculateDueDate();
 
         foreach ($services as $service) {
             try {
+                if ($isManageable) {
+                    if ($service->billingCycle && $service->billingCycle->status === 'active') {
+                        if ((int)$service->billingCycle->billing_day !== (int)$currentDate->day) {
+                            continue;
+                        }
+                    } else {
+                        if ((int)$defaultBillingDate !== (int)$currentDate->day) {
+                            continue;
+                        }
+                    }
+                }
+
                 $price = $service->total_price;
 
                 if ($price <= 0) {
                     continue;
                 }
+
+                $dueDate = ($service->billingCycle && $service->billingCycle->status === 'active')
+                    ? $service->billingCycle->calculateDueDate($currentDate)
+                    : $this->calculateDueDate();
 
                 $invoice = new Invoice();
                 $invoice->service_id          = $service->id; // Vincula el service_id
@@ -165,7 +204,7 @@ class GenerateInvoicesMonthly extends Command
      */
     protected function calculateDueDate(): Carbon
     {
-        $dueDay      = GeneralProviderConfig::getPaymentDueDate();
+        $dueDay       = GeneralProviderConfig::getPaymentDueDate();
         $currentMonth = now()->month;
         $currentYear  = now()->year;
 

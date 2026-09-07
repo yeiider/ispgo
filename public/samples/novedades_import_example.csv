@@ -1,0 +1,14 @@
+service_id,type,amount,description,effective_period,discount_type,discount_value,start_day,end_day,mora_type,mora_value
+1,cargo_adicional,15000.00,Cargo adicional por soporte tecnico presencial,2026-09-01,,,,,,
+1,saldo_favor,10000.00,Saldo a favor por abono anticipado,2026-09-01,,,,,,
+1,descuento_promocional,,Descuento 15% por pronto pago,2026-09-01,percentage,15,,,,
+1,descuento_promocional,,Descuento fijo $20.000 por fidelizacion,2026-09-01,fixed,20000,,,,
+1,prorrateo_inicial,,Prorrateo ingreso dia 10 del mes,2026-09-01,,,10,,,
+1,prorrateo_cancelacion,,Prorrateo retiro dia 20 del mes,2026-09-01,,,,20,,
+1,cargo_reconexion,12000.00,Cargo por reconexion de servicio,2026-09-01,,,,,,
+1,mora,,Recargo fijo por mora en pago tardio,2026-09-01,,,,,fixed,5000.00
+1,mora,,Recargo 5% por mora en pago tardio,2026-09-01,,,,,percentage,5
+1,nota_credito,8000.00,Ajuste a favor por nota credito,2026-09-01,,,,,,
+1,compensacion,15000.00,Compensacion por falla en servicio,2026-09-01,,,,,,
+1,exceso_consumo,25000.00,Consumo excedente de datos,2026-09-01,,,,,,
+1,impuesto,3500.00,Tasa o impuesto adicional,2026-09-01,,,,,,

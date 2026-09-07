@@ -15,7 +15,10 @@ class CancelSiigoInvoice implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(private Invoice $invoice) {}
+    public $tries = 5;
+    public $backoff = 30;
+
+    public function __construct(private Invoice $invoice, private bool $force = false) {}
 
     public function handle(SiigoClient $siigo)
     {
@@ -27,12 +30,21 @@ class CancelSiigoInvoice implements ShouldQueue
             return;
         }
         $taxDetails = $customer->taxDetails;
-        if (!$taxDetails || !$taxDetails->enable_billing) {
+        if (!$this->force && (!$taxDetails || !$taxDetails->enable_billing)) {
             Log::info("Skipping Siigo Credit Note creation because billing (enable_billing) is not enabled for customer #{$customer->id}");
             return;
         }
 
         $info = $this->invoice->additional_information ?? [];
+        if (empty($info['siigo_invoice_id'])) {
+            // Create invoice in Siigo first so a credit note can be created against it
+            $createJob = new CreateSiigoInvoice($this->invoice, $this->force);
+            $createJob->handle($siigo);
+
+            $this->invoice->refresh();
+            $info = $this->invoice->additional_information ?? [];
+        }
+
         if (empty($info['siigo_invoice_id'])) {
             Log::info('Skipping Siigo Credit Note creation because invoice has not been synced to Siigo.', [
                 'invoice_id' => $this->invoice->id
@@ -40,8 +52,8 @@ class CancelSiigoInvoice implements ShouldQueue
             return;
         }
 
-        // Prevent double sync
-        if (!empty($info['siigo_credit_note_id'])) {
+        // Prevent double sync unless forced
+        if (!empty($info['siigo_credit_note_id']) && !$this->force) {
             return;
         }
 
@@ -51,8 +63,16 @@ class CancelSiigoInvoice implements ShouldQueue
             $body = json_decode((string) $response->getBody(), true);
             
             $id = $body['id'] ?? null;
+            $name = $body['name'] ?? null;
+            $number = $body['number'] ?? null;
             if ($id) {
                 $info['siigo_credit_note_id'] = $id;
+                if ($name) {
+                    $info['siigo_credit_note_name'] = $name;
+                }
+                if ($number) {
+                    $info['siigo_credit_note_number'] = $number;
+                }
                 $this->invoice->additional_information = $info;
                 $this->invoice->save();
 

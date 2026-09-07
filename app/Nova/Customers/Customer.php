@@ -135,7 +135,10 @@ class Customer extends Resource
             }),
 
             new GenerateInvoice,
-            new \App\Nova\Actions\Customers\ImportCustomers
+            new \App\Nova\Actions\Customers\ImportCustomers,
+            (new \App\Nova\Actions\Customer\SyncCustomersToSiigo)->canSee(function () {
+                return \Ispgo\Siigo\Settings\ConfigProviderSiigo::getEnabled();
+            }),
         ];
     }
 

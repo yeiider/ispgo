@@ -13,7 +13,13 @@ class SyncWithTaxCustomer
             return;
 
         if (ConfigProviderSiigo::getSyncCustomer()) {
-            $customer = $event->taxDetail->customer;
+            $taxDetail = $event->taxDetail ?? null;
+            // Ignore events triggered only by updating Siigo sync metadata
+            if ($taxDetail && $taxDetail->wasChanged(['siigo_customer_id', 'siigo_synced_at']) && count($taxDetail->getChanges()) <= 2) {
+                return;
+            }
+
+            $customer = $taxDetail?->customer;
             if ($customer && ($customer->taxDetails && $customer->taxDetails->enable_billing)) {
                 $job = new CreateSiigoCustomer($customer);
                 dispatch($job)->delay(now()->addSeconds(10))->onQueue('redis');

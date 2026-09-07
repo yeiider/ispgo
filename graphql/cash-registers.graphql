@@ -537,6 +537,18 @@ type ExpensePayload {
     expense: Expense
 }
 
+"Payload de respuesta para eliminar gasto"
+type DeleteExpensePayload {
+    success: Boolean!
+    message: String!
+}
+
+"Payload de respuesta para eliminar entrega de caja"
+type DeleteCashTransferPayload {
+    success: Boolean!
+    message: String!
+}
+
 
 
 
@@ -548,6 +560,7 @@ extend type Query @guard {
         status: String @eq
         created_at: Date @where(clause: "whereDate")
         updated_at: Date @where(clause: "whereDate")
+        orderBy: _ @orderBy
     ): [CashTransfer!]! @paginate(defaultCount: 20, model: "App\\Models\\Finance\\CashTransfer")
 
     expenseCategories: [ExpenseCategory!]! @all(model: "App\\Models\\Finance\\ExpenseCategory")
@@ -556,6 +569,7 @@ extend type Query @guard {
         date: Date
         expense_category_id: ID
         user_id: ID
+        payment_method: String
     ): [Expense!]! @field(resolver: "App\\GraphQL\\Queries\\CashierInvoicesQuery@myExpenses")
     suppliers: [Supplier!]! @all(model: "App\\Models\\Inventory\\Supplier")
     suppliersPaginator(
@@ -574,6 +588,20 @@ extend type Mutation @guard {
         daily_box_id: ID
     ): ExpensePayload @field(resolver: "App\\GraphQL\\Mutations\\ExpenseMutations@create")
 
+    updateExpense(
+        id: ID!
+        description: String
+        amount: Float
+        date: DateTime
+        payment_method: String
+        expense_category_id: ID
+        supplier_id: ID
+    ): ExpensePayload @field(resolver: "App\\GraphQL\\Mutations\\ExpenseMutations@update")
+
+    deleteExpense(
+        id: ID!
+    ): DeleteExpensePayload @field(resolver: "App\\GraphQL\\Mutations\\ExpenseMutations@delete")
+
     createCashTransfer(
         sender_cash_register_id: ID!
         receiver_cash_register_id: ID!
@@ -584,6 +612,24 @@ extend type Mutation @guard {
     acceptCashTransfer(id: ID!): CashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@accept")
     
     rejectCashTransfer(id: ID!): CashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@reject")
+
+    updateCashTransfer(
+        id: ID!
+        sender_cash_register_id: ID
+        receiver_cash_register_id: ID
+        amount: Float
+        notes: String
+        status: String
+    ): CashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@update")
+
+    deleteCashTransfer(
+        id: ID!
+    ): DeleteCashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@delete")
+
+    cancelCashTransfer(
+        id: ID!
+        reason: String!
+    ): CashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@cancel")
 
     createExpenseCategory(
         name: String!

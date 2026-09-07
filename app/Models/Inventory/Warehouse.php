@@ -2,16 +2,28 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\Router;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Auth;
 
 class Warehouse extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'address', 'code'];
+    protected $fillable = ['name', 'address', 'code', 'router_id'];
+
+    /**
+     * Relación con la zona (Router).
+     */
+    public function router(): BelongsTo
+    {
+        return $this->belongsTo(Router::class);
+    }
 
     /**
      * Relación legacy con productos (mantener por compatibilidad).
@@ -63,8 +75,28 @@ class Warehouse extends Model
     {
         return $this->stocks()
             ->whereNotNull('min_stock')
-            ->whereRaw('quantity < min_stock')
+            ->whereColumn('quantity', '<', 'min_stock')
             ->with('product')
             ->get();
+    }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('router_filter', function (Builder $builder) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+
+            if (!$user) {
+                return;
+            }
+
+            $routerIds = $user->getRouterIds();
+
+            if (empty($routerIds)) {
+                return;
+            }
+
+            $builder->whereIn('router_id', $routerIds);
+        });
     }
 }

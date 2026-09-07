@@ -15,7 +15,10 @@ class PaySiigoInvoice implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(private Invoice $invoice, private float $amount) {}
+    public $tries = 5;
+    public $backoff = 30;
+
+    public function __construct(private Invoice $invoice, private float $amount, private bool $force = false) {}
 
     public function handle(SiigoClient $siigo)
     {
@@ -27,7 +30,7 @@ class PaySiigoInvoice implements ShouldQueue
             return;
         }
         $taxDetails = $customer->taxDetails;
-        if (!$taxDetails || !$taxDetails->enable_billing) {
+        if (!$this->force && (!$taxDetails || !$taxDetails->enable_billing)) {
             Log::info("Skipping Siigo Voucher creation because billing (enable_billing) is not enabled for customer #{$customer->id}");
             return;
         }
@@ -35,11 +38,13 @@ class PaySiigoInvoice implements ShouldQueue
         // Check if invoice has been synced to Siigo, if not sync it first!
         $info = $this->invoice->additional_information ?? [];
         if (empty($info['siigo_invoice_id'])) {
-            $createJob = new CreateSiigoInvoice($this->invoice);
+            $createJob = new CreateSiigoInvoice($this->invoice, $this->force);
             $createJob->handle($siigo);
             
             $this->invoice->refresh();
             $info = $this->invoice->additional_information ?? [];
+            // Sleep 2 seconds to give Siigo API time to commit/index the invoice into cartera
+            sleep(2);
         }
 
         if (empty($info['siigo_invoice_id'])) {
@@ -49,8 +54,8 @@ class PaySiigoInvoice implements ShouldQueue
             return;
         }
 
-        // Prevent double sync of the voucher
-        if (!empty($info['siigo_voucher_id'])) {
+        // Prevent double sync of the voucher unless forced
+        if (!empty($info['siigo_voucher_id']) && !$this->force) {
             return;
         }
 
@@ -60,8 +65,16 @@ class PaySiigoInvoice implements ShouldQueue
             $body = json_decode((string) $response->getBody(), true);
             
             $id = $body['id'] ?? null;
+            $name = $body['name'] ?? null;
+            $number = $body['number'] ?? null;
             if ($id) {
                 $info['siigo_voucher_id'] = $id;
+                if ($name) {
+                    $info['siigo_voucher_name'] = $name;
+                }
+                if ($number) {
+                    $info['siigo_voucher_number'] = $number;
+                }
                 $this->invoice->additional_information = $info;
                 $this->invoice->save();
             }

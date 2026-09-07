@@ -208,7 +208,7 @@ class CashierInvoicesQuery
 
         // ---- Entregas a Administrador (Transfers Out) ----
         $transfersOutQuery = \App\Models\Finance\CashTransfer::query()
-            ->where('status', '!=', 'rejected'); // Only pending or accepted
+            ->whereIn('status', ['pending', 'accepted']); // Only pending or accepted (exclude rejected and cancelled)
 
         if ($dailyBoxId) {
             $transfersOutQuery->where('sender_cash_register_id', $dailyBoxId);
@@ -297,6 +297,11 @@ class CashierInvoicesQuery
         // Filtro por usuario que registró el gasto
         if (!empty($args['user_id'])) {
             $query->where('user_id', $args['user_id']);
+        }
+
+        // Filtro por método de pago
+        if (!empty($args['payment_method'])) {
+            $query->where('payment_method', $args['payment_method']);
         }
 
         if (!empty($args['date'])) {

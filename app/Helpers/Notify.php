@@ -2,44 +2,54 @@
 
 namespace App\Helpers;
 
+use App\Models\User;
+use App\Notifications\AppNotification;
 use Illuminate\Support\Facades\Log;
-use Laravel\Nova\Notifications\NovaNotification;
 
+/**
+ * Helper de notificaciones in-app (tabla notifications, canal database).
+ *
+ * Reemplaza el sistema de notificaciones de Laravel Nova. Mantiene la misma
+ * API pública (notifyError/Success/Info/Warning) para no romper los callers
+ * existentes. Las notificaciones se entregan a los usuarios con rol
+ * super-admin y technician y son consumidas por el frontend vía GraphQL.
+ */
 class Notify
 {
-    public static function notifyError($message): void
+    public static function notifyError(string $message, ?string $title = null, ?string $actionUrl = null, array $metadata = []): void
     {
-        self::sendNotification($message, 'error', 'exclamation-circle');
+        self::notifyAdmins($title ?? 'Error', $message, 'danger', $actionUrl, $metadata);
     }
 
-    public static function notifySuccess($message): void
+    public static function notifySuccess(string $message, ?string $title = null, ?string $actionUrl = null, array $metadata = []): void
     {
-        self::sendNotification($message, 'success', 'check-circle');
+        self::notifyAdmins($title ?? 'Éxito', $message, 'success', $actionUrl, $metadata);
     }
 
-    public static function notifyInfo($message): void
+    public static function notifyInfo(string $message, ?string $title = null, ?string $actionUrl = null, array $metadata = []): void
     {
-        self::sendNotification($message, 'info', 'info-circle');
+        self::notifyAdmins($title ?? 'Información', $message, 'info', $actionUrl, $metadata);
     }
 
-    public static function notifyWarning($message): void
+    public static function notifyWarning(string $message, ?string $title = null, ?string $actionUrl = null, array $metadata = []): void
     {
-        self::sendNotification($message, 'warning', 'exclamation-triangle');
+        self::notifyAdmins($title ?? 'Advertencia', $message, 'warning', $actionUrl, $metadata);
     }
 
-    private static function sendNotification($message, $type, $icon): void
+    /**
+     * Envía una notificación in-app a todos los usuarios con rol super-admin o technician.
+     */
+    public static function notifyAdmins(string $title, string $message, string $level = 'info', ?string $actionUrl = null, array $metadata = []): void
     {
-        $admin = \App\Models\User::where('role', 'super-admin')->first();
+        $admins = User::role(['super-admin', 'technician'])->get();
 
-        if ($admin) {
-            $notification = NovaNotification::make()
-                ->message($message)
-                ->type($type)
-                ->icon($icon);
+        if ($admins->isEmpty()) {
+            Log::error('Notify: no se encontraron usuarios con rol super-admin/technician.');
+            return;
+        }
 
-            $admin->notify($notification);
-        } else {
-            Log::error("Admin user with role 'super-admin' not found.");
+        foreach ($admins as $admin) {
+            $admin->notify(new AppNotification($title, $message, $level, $actionUrl, $metadata));
         }
     }
 }

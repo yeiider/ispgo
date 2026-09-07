@@ -16,7 +16,7 @@ class InvoiceQuery
      */
     public function __invoke($root, array $args): Builder
     {
-        $query = Invoice::query();
+        $query = Invoice::query()->with(['customer', 'service', 'payments']);
 
         // Apply increment_id filter if provided
         if (!empty($args['increment_id'])) {

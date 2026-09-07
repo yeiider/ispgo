@@ -37,6 +37,11 @@ class ApplyDiscount extends Action
             $discount = $fields->discount;
             $isPercentage = $fields->is_percentage;
             $includeTax = $fields->include_tax;
+            $description = $fields->description ?? '';
+
+            if (empty(trim($description))) {
+                return Action::danger("A description or reason for the discount is required.");
+            }
 
             // Calcular el monto del descuento
             if ($isPercentage) {
@@ -50,9 +55,9 @@ class ApplyDiscount extends Action
 
             // Aplicar el descuento
             if ($includeTax) {
-                $invoice->applyDiscountWithTax($discountAmount);
+                $invoice->applyDiscountWithTax($discountAmount, $description);
             } else {
-                $invoice->applyDiscountWithoutTax($discountAmount);
+                $invoice->applyDiscountWithoutTax($discountAmount, $description);
             }
         }
 
@@ -76,6 +81,10 @@ class ApplyDiscount extends Action
 
             Boolean::make('Include Tax')
                 ->rules('required', 'boolean'),
+
+            \Laravel\Nova\Fields\Textarea::make('Description', 'description')
+                ->rules('required', 'min:5')
+                ->help('Describe la razón o motivo del descuento (Requerido para auditoría y Siigo/DIAN)'),
         ];
     }
 

@@ -251,7 +251,7 @@ return [
          * Limit the maximum amount of items that clients can request from paginated lists.
          * Setting this to `null` means the count is unrestricted.
          */
-        'max_count' => 100,
+        'max_count' => null,
     ],
 
     /*

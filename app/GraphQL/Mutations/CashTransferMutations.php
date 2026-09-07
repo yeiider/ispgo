@@ -104,4 +104,114 @@ class CashTransferMutations
             ];
         }
     }
+
+    /**
+     * Update an existing cash transfer
+     */
+    public function update($_, array $args)
+    {
+        try {
+            $transfer = CashTransfer::findOrFail($args['id']);
+
+            $updateData = [];
+            if (isset($args['amount'])) {
+                $updateData['amount'] = $args['amount'];
+            }
+            if (isset($args['notes'])) {
+                $updateData['notes'] = $args['notes'];
+            }
+            if (isset($args['sender_cash_register_id'])) {
+                $updateData['sender_cash_register_id'] = $args['sender_cash_register_id'];
+            }
+            if (isset($args['receiver_cash_register_id'])) {
+                $updateData['receiver_cash_register_id'] = $args['receiver_cash_register_id'];
+            }
+            if (isset($args['status'])) {
+                $updateData['status'] = $args['status'];
+            }
+
+            $transfer->update($updateData);
+
+            return [
+                'success' => true,
+                'message' => 'Entrega de dinero actualizada exitosamente.',
+                'cashTransfer' => $transfer->fresh()
+            ];
+        } catch (Exception $e) {
+            Log::error('Error updating cash transfer: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error al actualizar la entrega: ' . $e->getMessage(),
+                'cashTransfer' => null
+            ];
+        }
+    }
+
+    /**
+     * Cancel / Anular a cash transfer (reverts balances and records reason)
+     */
+    public function cancel($_, array $args)
+    {
+        try {
+            $transfer = CashTransfer::findOrFail($args['id']);
+
+            if ($transfer->status === 'cancelled') {
+                return [
+                    'success' => false,
+                    'message' => 'Esta entrega ya se encuentra anulada.',
+                    'cashTransfer' => $transfer
+                ];
+            }
+
+            $reason = trim($args['reason'] ?? '');
+            if (empty($reason)) {
+                return [
+                    'success' => false,
+                    'message' => 'Debes proporcionar un motivo de anulación.',
+                    'cashTransfer' => null
+                ];
+            }
+
+            $notes = $transfer->notes ? $transfer->notes . "\n[MOTIVO ANULACIÓN]: " . $reason : "[MOTIVO ANULACIÓN]: " . $reason;
+
+            $transfer->status = 'cancelled';
+            $transfer->notes = $notes;
+            $transfer->save();
+
+            return [
+                'success' => true,
+                'message' => 'Entrega anulada exitosamente y saldos devueltos a las cajas correspondientes.',
+                'cashTransfer' => $transfer
+            ];
+        } catch (Exception $e) {
+            Log::error('Error cancelling cash transfer: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error al anular la entrega: ' . $e->getMessage(),
+                'cashTransfer' => null
+            ];
+        }
+    }
+
+    /**
+     * Delete a cash transfer (reverts balances)
+     */
+    public function delete($_, array $args)
+    {
+        try {
+            $transfer = CashTransfer::findOrFail($args['id']);
+            $transfer->delete();
+
+            return [
+                'success' => true,
+                'message' => 'Entrega eliminada exitosamente y saldos devueltos a las cajas correspondientes.'
+            ];
+        } catch (Exception $e) {
+            Log::error('Error deleting cash transfer: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error al eliminar la entrega: ' . $e->getMessage()
+            ];
+        }
+    }
 }

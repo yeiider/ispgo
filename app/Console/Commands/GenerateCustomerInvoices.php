@@ -28,8 +28,11 @@ class GenerateCustomerInvoices extends Command
 
         $this->info("Generando facturas para {$period->format('F Y')} …");
 
+        $errors = 0;
+        $invoicesBefore = \App\Models\Invoice\Invoice::whereDate('created_at', now()->toDateString())->count();
+
         // Recorrer todos los routers
-        \App\Models\Router::all()->each(function ($router) use ($billing, $period, $currentDate) {
+        \App\Models\Router::all()->each(function ($router) use ($billing, $period, $currentDate, &$errors) {
             // Obtener la fecha de facturación configurada para este router
             $billingDate = GeneralProviderConfig::getBillingDate($router->id);
 
@@ -40,7 +43,7 @@ class GenerateCustomerInvoices extends Command
                 // Obtener los clientes activos de este router
                 Customer::active()
                     ->where('router_id', $router->id)
-                    ->chunk(200, function ($customers) use ($billing, $period, $router) {
+                    ->chunk(200, function ($customers) use ($billing, $period, $router, &$errors) {
                         foreach ($customers as $customer) {
                             try {
                                 $billing->generateForPeriod($customer, $period);
@@ -48,6 +51,8 @@ class GenerateCustomerInvoices extends Command
                             } catch (\Exception $e) {
                                 // Registrar el error en los logs
                                 Log::error("Error al generar factura para el cliente {$customer->id} del router {$router->id}: {$e->getMessage()}");
+
+                                $errors++;
 
                                 // Enviar notificación al administrador
                                 try {
@@ -67,5 +72,17 @@ class GenerateCustomerInvoices extends Command
         });
 
         $this->info('Proceso de generación completado ✔');
+
+        $invoicesAfter = \App\Models\Invoice\Invoice::whereDate('created_at', now()->toDateString())->count();
+        $generated = max(0, $invoicesAfter - $invoicesBefore);
+
+        if ($generated > 0 || $errors > 0) {
+            Notify::notifySuccess(
+                "Facturación completada: {$generated} facturas generadas, {$errors} errores",
+                'Facturación',
+                null,
+                ['generated' => $generated, 'errors' => $errors, 'period' => $period->format('Y-m')]
+            );
+        }
     }
 }

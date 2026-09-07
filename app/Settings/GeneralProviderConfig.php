@@ -44,6 +44,17 @@ class GeneralProviderConfig
         return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'company_email');
     }
 
+    public static function getBillingMode($scope = 0): string
+    {
+        $mode = ConfigHelper::getConfigValue(self::BILLING_PATH . 'billing_mode', $scope);
+        return in_array($mode, ['advance', 'arrears']) ? $mode : 'advance';
+    }
+
+    public static function getManageableBillingCycle($scope = 0): bool
+    {
+        return (bool) ConfigHelper::getConfigValue(self::BILLING_PATH . 'manageable_billing_cycle', $scope);
+    }
+
     public static function getBillingDate($scope = 0): ?int
     {
         $billingDate = ConfigHelper::getConfigValue(self::BILLING_PATH . 'billing_date', $scope);

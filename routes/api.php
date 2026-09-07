@@ -121,6 +121,28 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/verify-otp', [CaptivePortalController::class, 'verifyOtp']);
         Route::post('/check-access', [CaptivePortalController::class, 'checkAccess']);
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Customer Import Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('customers')->group(function () {
+        Route::post('/import-validate', [\App\Http\Controllers\Api\CustomerImportController::class, 'validateImport']);
+        Route::post('/import', [\App\Http\Controllers\Api\CustomerImportController::class, 'executeImport']);
+        Route::get('/import-template', [\App\Http\Controllers\Api\CustomerImportController::class, 'downloadTemplate']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Billing Novedades Import Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('billing/novedades')->group(function () {
+        Route::post('/import-validate', [\App\Http\Controllers\Api\BillingNovedadImportController::class, 'validateImport']);
+        Route::post('/import', [\App\Http\Controllers\Api\BillingNovedadImportController::class, 'executeImport']);
+        Route::get('/import-template', [\App\Http\Controllers\Api\BillingNovedadImportController::class, 'downloadTemplate']);
+    });
 });
 
 /*
@@ -130,6 +152,8 @@ Route::middleware('auth:api')->group(function () {
 */
 
 Route::post('/login', [\App\Http\Controllers\API\AuthController::class, 'login']);
+Route::get('/customers/import-template', [\App\Http\Controllers\Api\CustomerImportController::class, 'downloadTemplate']);
+Route::get('/billing/novedades/import-template', [\App\Http\Controllers\Api\BillingNovedadImportController::class, 'downloadTemplate']);
 Route::prefix('v1')
     ->as('v1.')
     ->middleware('auth:api')

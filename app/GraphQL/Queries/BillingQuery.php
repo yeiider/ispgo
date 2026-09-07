@@ -20,7 +20,7 @@ class BillingQuery
      */
     public function serviceRules($root, array $args): array
     {
-        $query = ServiceRule::query()->with(['service']);
+        $query = ServiceRule::query()->with(['service', 'service.plan', 'service.customer']);
 
         if (!empty($args['service_id'])) {
             $query->where('service_id', $args['service_id']);
@@ -63,7 +63,7 @@ class BillingQuery
      */
     public function serviceRule($root, array $args): ?ServiceRule
     {
-        return ServiceRule::with(['service'])->find($args['id']);
+        return ServiceRule::with(['service', 'service.plan', 'service.customer'])->find($args['id']);
     }
 
     /**
@@ -77,7 +77,7 @@ class BillingQuery
     {
         return ServiceRule::where('service_id', $args['service_id'])
             ->active()
-            ->with(['service'])
+            ->with(['service', 'service.plan', 'service.customer'])
             ->orderBy('created_at', 'desc')
             ->get();
     }

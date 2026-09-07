@@ -1,3 +1,0 @@
-[phases.setup]
-
-nixpkgs = ["php", "php-fpm", "nginx", "mysql-client"]

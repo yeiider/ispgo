@@ -13,24 +13,30 @@ class SyncInvoice
 {
     public function onCreated(InvoiceCreated $event): void
     {
-        if (!ConfigProviderSiigo::getEnabled() || !ConfigProviderSiigo::getSyncInvoice()) {
+        $invoice = $event->invoice;
+        $customer = $invoice->customer;
+        $scopeId = (int) ($invoice->router_id ?? $customer?->router_id ?? 0);
+
+        if (!ConfigProviderSiigo::getEnabled($scopeId) || !ConfigProviderSiigo::getSyncInvoice($scopeId)) {
             return;
         }
 
-        $invoice = $event->invoice;
-        $customer = $invoice->customer;
         if (!$customer || !$customer->taxDetails || !$customer->taxDetails->enable_billing) {
             return;
         }
 
-        if (ConfigProviderSiigo::getSyncInvoiceTrigger() === 'all') {
+        if (ConfigProviderSiigo::getSyncInvoiceTrigger($scopeId) === 'all') {
             CreateSiigoInvoice::dispatch($invoice)->delay(now()->addSeconds(10))->onQueue('redis');
         }
     }
 
     public function onPaid(InvoicePaid $event): void
     {
-        if (!ConfigProviderSiigo::getEnabled() || !ConfigProviderSiigo::getSyncInvoice()) {
+        $invoice = $event->invoice;
+        $customer = $invoice->customer;
+        $scopeId = (int) ($invoice->router_id ?? $customer?->router_id ?? 0);
+
+        if (!ConfigProviderSiigo::getEnabled($scopeId) || !ConfigProviderSiigo::getSyncInvoice($scopeId)) {
             return;
         }
 
@@ -38,8 +44,6 @@ class SyncInvoice
             return;
         }
 
-        $invoice = $event->invoice;
-        $customer = $invoice->customer;
         if (!$customer || !$customer->taxDetails || !$customer->taxDetails->enable_billing) {
             return;
         }
@@ -49,16 +53,42 @@ class SyncInvoice
 
     public function onCanceled(InvoiceCanceled $event): void
     {
-        if (!ConfigProviderSiigo::getEnabled() || !ConfigProviderSiigo::getSyncInvoice()) {
+        $invoice = $event->invoice;
+        $customer = $invoice->customer;
+        $scopeId = (int) ($invoice->router_id ?? $customer?->router_id ?? 0);
+
+        if (!ConfigProviderSiigo::getEnabled($scopeId) || !ConfigProviderSiigo::getSyncInvoice($scopeId)) {
             return;
         }
 
-        $invoice = $event->invoice;
-        $customer = $invoice->customer;
         if (!$customer || !$customer->taxDetails || !$customer->taxDetails->enable_billing) {
             return;
         }
 
         CancelSiigoInvoice::dispatch($invoice)->delay(now()->addSeconds(5))->onQueue('redis');
+    }
+
+    public function onDiscountApplied(\App\Events\InvoiceDiscountApplied $event): void
+    {
+        $invoice = $event->invoice;
+        $customer = $invoice->customer;
+        $scopeId = (int) ($invoice->router_id ?? $customer?->router_id ?? 0);
+
+        if (!ConfigProviderSiigo::getEnabled($scopeId) || !ConfigProviderSiigo::getSyncInvoice($scopeId)) {
+            return;
+        }
+
+        if (!$customer || !$customer->taxDetails || !$customer->taxDetails->enable_billing) {
+            return;
+        }
+
+        $info = $invoice->additional_information ?? [];
+        if (!empty($info['siigo_invoice_id'])) {
+            \Ispgo\Siigo\Jobs\CreateSiigoDiscountCreditNote::dispatch(
+                $invoice,
+                (float) $event->discountAmount,
+                (string) $event->description
+            )->delay(now()->addSeconds(5))->onQueue('redis');
+        }
     }
 }

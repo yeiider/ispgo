@@ -107,15 +107,15 @@ class AfterPayingInvoice implements ShouldQueue
                 $hasUnpaidInvoices = $this->hasUnpaidInvoicesForCustomer($customerId, $invoice->id);
 
                 if (!$hasUnpaidInvoices) {
-                    // Activar el servicio solo si no está activo
-                    if ($service->service_status !== 'active') {
+                    // Activar el servicio solo si estaba suspendido
+                    if ($service->service_status === 'suspended') {
                         $service->activate();
 
-                        Log::info("Servicio activado después del pago", [
+                        Log::info("Servicio suspendido activado después del pago", [
                             'service_id' => $service->id,
                             'customer_id' => $customerId,
                             'invoice_id' => $invoice->id,
-                            'previous_status' => $service->getOriginal('service_status'),
+                            'previous_status' => 'suspended',
                             'new_status' => 'active'
                         ]);
                     }

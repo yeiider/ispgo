@@ -17,8 +17,8 @@ class CreateFiscalRegimesTable extends Migration
         });
 
         DB::table('fiscal_regimes')->insert([
-            ['code' => 'general', 'name' => 'Regimen común'],
-            ['code' => 'simplified', 'name' => 'Regimen simplificado'],
+            ['code' => 'general', 'name' => 'Responsable de IVA'],
+            ['code' => 'simplified', 'name' => 'No responsable de IVA'],
         ]);
 
     }

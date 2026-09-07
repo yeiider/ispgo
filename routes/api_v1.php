@@ -43,6 +43,7 @@ Route::apiResource('/credit-notes', \App\Http\Controllers\API\Invoice\CreditNote
 Route::apiResource('/daily-invoice-balances', \App\Http\Controllers\API\Invoice\DailyInvoiceBalanceController::class);
 
 Route::apiResource('/invoices', \App\Http\Controllers\API\Invoice\InvoiceController::class);
+Route::post('/invoices/{id}/sync-siigo', [\App\Http\Controllers\API\Invoice\InvoiceController::class, 'syncToSiigo']);
 
 Route::apiResource('/payment-promises', \App\Http\Controllers\API\Invoice\PaymentPromiseController::class);
 

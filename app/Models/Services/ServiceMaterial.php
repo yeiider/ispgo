@@ -12,6 +12,7 @@ class ServiceMaterial extends Model
         'user_id',
         'quantity',
         'from_user_stock',
+        'type',
         'notes',
     ];
 

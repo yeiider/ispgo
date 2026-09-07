@@ -5,6 +5,7 @@ namespace App\GraphQL\Mutations;
 use App\Models\Inventory\Category;
 use App\Models\Inventory\Product;
 use App\Models\Inventory\ProductStock;
+use App\Models\Inventory\StockTransfer;
 use App\Models\Inventory\Warehouse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -387,6 +388,17 @@ class InventoryStockMutation
                 $toStock->incrementStock($amount);
             }
 
+            // Registrar la transferencia en el historial
+            $user = auth()->user();
+            StockTransfer::create([
+                'product_id' => $productId,
+                'from_warehouse_id' => $fromWarehouseId,
+                'to_warehouse_id' => $toWarehouseId,
+                'user_id' => $user ? $user->id : null,
+                'quantity' => $amount,
+                'notes' => $args['notes'] ?? null,
+            ]);
+
             return [
                 'success' => true,
                 'message' => "Se transfirieron {$amount} unidades exitosamente.",
@@ -532,7 +544,7 @@ class InventoryStockMutation
     private function onlyWarehouseFillable(array $input): array
     {
         return array_intersect_key($input, array_flip([
-            'name', 'address', 'code'
+            'name', 'address', 'code', 'router_id'
         ]));
     }
 

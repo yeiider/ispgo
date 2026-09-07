@@ -9,12 +9,14 @@ class SyncCustomer
 {
     public function handle($event): void
     {
-        if (!ConfigProviderSiigo::getEnabled())
+        $customer = $event->customer;
+        $scopeId = (int) ($customer->router_id ?? 0);
+
+        if (!ConfigProviderSiigo::getEnabled($scopeId))
             return;
 
-        if (ConfigProviderSiigo::getSyncCustomer()) {
-            $customer = $event->customer;
-            $trigger = ConfigProviderSiigo::getSyncCustomersTrigger();
+        if (ConfigProviderSiigo::getSyncCustomer($scopeId)) {
+            $trigger = ConfigProviderSiigo::getSyncCustomersTrigger($scopeId);
 
             $shouldSync = ($trigger === 'all') || ($customer->taxDetails && $customer->taxDetails->enable_billing);
 
