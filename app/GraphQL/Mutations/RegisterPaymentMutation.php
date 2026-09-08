@@ -82,7 +82,18 @@ class RegisterPaymentMutation
                 $additional['transaction_date'] = $args['transaction_date'];
             }
             if (!empty($args['siigo_payment_id'])) {
-                $additional['siigo_payment_id'] = (int) $args['siigo_payment_id'];
+                $siigoId = (int) $args['siigo_payment_id'];
+                $additional['siigo_payment_id'] = $siigoId;
+                if (class_exists('\Ispgo\Siigo\Settings\ConfigProviderSiigo')) {
+                    $scopeId = (int) ($invoice->router_id ?? $invoice->customer?->router_id ?? 0);
+                    $siigoOpts = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getVoucherPaymentOptions($paymentMethod, $scopeId);
+                    foreach ($siigoOpts as $opt) {
+                        if (($opt['id'] ?? null) === $siigoId && !empty($opt['label'])) {
+                            $additional['siigo_payment_name'] = $opt['label'];
+                            break;
+                        }
+                    }
+                }
             }
 
             $dailyBoxId = null;

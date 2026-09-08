@@ -196,6 +196,9 @@ input UpdateCashRegisterInput {
     "Nombre de la caja"
     name: String @rules(apply: ["string", "max:255"])
 
+    "ID de la ubicación (router)"
+    routerId: ID @rename(attribute: "router_id") @rules(apply: ["exists:routers,id"])
+
     "ID del usuario asignado"
     userId: ID @rename(attribute: "user_id") @rules(apply: ["exists:users,id"])
 
