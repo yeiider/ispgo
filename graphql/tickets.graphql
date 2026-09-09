@@ -210,12 +210,13 @@ extend type Mutation {
         port: Int! @rules(apply: ["required"])
         sn: String! @rules(apply: ["required"])
         vlan: Int! @rules(apply: ["required"])
-        vlan_mgmt: Int! @rules(apply: ["required"])
+        vlan_mgmt: Int
         onu_type: String! @rules(apply: ["required"])
         zone: String! @rules(apply: ["required"])
         onu_mode: String! @rules(apply: ["required"])
         name: String
         odb: String
         resolution_notes: String
+        speed_profile: String
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\CompleteInstallationMutation@handle") @guard
 }
