@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Inventory\EquipmentAssignment;
 use App\Models\Ticket;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use OpenApi\Annotations as OA;
 
 /**
@@ -366,6 +368,80 @@ class MobileAppController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener las asignaciones de equipo',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Cambiar la contraseña del técnico autenticado.
+     *
+     * @OA\Post(
+     *     path="/api/v1/app-movil/change-password",
+     *     summary="Cambiar contraseña del técnico",
+     *     tags={"Mobile App"},
+     *     security={{"BearerAuth": {}}},
+     *     @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              required={"current_password","new_password","new_password_confirmation"},
+     *              @OA\Property(property="current_password", type="string", format="password", example="actual1234"),
+     *              @OA\Property(property="new_password", type="string", format="password", example="nueva1234"),
+     *              @OA\Property(property="new_password_confirmation", type="string", format="password", example="nueva1234")
+     *          )
+     *     ),
+     *     @OA\Response(response=200, description="Contraseña actualizada correctamente"),
+     *     @OA\Response(response=422, description="Error de validación o contraseña actual incorrecta"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=500, description="Error interno del servidor")
+     * )
+     */
+    public function changePassword(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'current_password' => ['required', 'string'],
+                'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+            ], [
+                'current_password.required' => 'La contraseña actual es requerida.',
+                'new_password.required' => 'La nueva contraseña es requerida.',
+                'new_password.min' => 'La nueva contraseña debe tener al menos 8 caracteres.',
+                'new_password.confirmed' => 'La confirmación de la nueva contraseña no coincide.',
+            ]);
+
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no autenticado'
+                ], 401);
+            }
+
+            if (!Hash::check($validated['current_password'], $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La contraseña actual no coincide.'
+                ], 422);
+            }
+
+            $user->password = Hash::make($validated['new_password']);
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Contraseña actualizada correctamente'
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cambiar la contraseña',
                 'error' => $e->getMessage()
             ], 500);
         }

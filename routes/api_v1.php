@@ -104,6 +104,7 @@ Route::get('/app-movil/tickets-data', [App\Http\Controllers\API\AppMovil\MobileA
 Route::get('/app-movil/services', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'getServices']);
 Route::get('/app-movil/customers', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'getCustomers']);
 Route::get('/app-movil/equipment-assignments', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'getEquipmentAssignments']);
+Route::post('/app-movil/change-password', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'changePassword']);
 
 Route::patch('/app-movil/{service_id}/update-service', [App\Http\Controllers\API\AppMovil\MobileAppController::class, 'updateServiceFields']);
 

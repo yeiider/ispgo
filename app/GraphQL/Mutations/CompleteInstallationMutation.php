@@ -21,18 +21,48 @@ class CompleteInstallationMutation
                 return ['success' => false, 'message' => 'Ticket no encontrado'];
             }
 
-            if ($ticket->issue_type !== 'installation') {
-                return ['success' => false, 'message' => 'El ticket no es de tipo instalación'];
-            }
+            // Aceptar variantes de instalación: 'installation', 'instalacion', 'instalación', 'Instalación', etc.
+            $issueTypeNorm = mb_strtolower(str_replace(['á','é','í','ó','ú'], ['a','e','i','o','u'], $ticket->issue_type ?? ''));
+            $isInstallation = in_array($issueTypeNorm, ['installation', 'instalacion', 'activacion', 'cambio de equipo', 'falla tecnica']);
 
             $service = $ticket->service;
             if (!$service) {
                 return ['success' => false, 'message' => 'No hay servicio asociado al ticket'];
             }
 
+            // Si el servicio no tiene SN o está pendiente de activación, permitir autorizar la ONU
+            if (!$isInstallation && empty($service->sn)) {
+                $isInstallation = true;
+            }
+
+            if (!$isInstallation) {
+                return ['success' => false, 'message' => "El ticket es de tipo '{$ticket->issue_type}'. Se requiere un ticket de instalación o servicio sin ONU asignada."];
+            }
+
             $customer = $service->customer;
             if (!$customer) {
                 return ['success' => false, 'message' => 'No hay cliente asociado al servicio'];
+            }
+
+            // Obtener dirección de forma 100% segura contra nulos
+            $rawAddress = null;
+            if ($customer->relationLoaded('addresses') && $customer->addresses && $customer->addresses->isNotEmpty()) {
+                $rawAddress = $customer->addresses->first()->address;
+            } elseif (method_exists($customer, 'addresses') && $customer->addresses()->exists()) {
+                $rawAddress = $customer->addresses()->first()?->address;
+            }
+            $cleanAddress = preg_replace('/[^a-zA-Z0-9\s@#$&()\-.\',\/_]/', ' ', str_replace(['ñ', 'Ñ'], ['n', 'N'], $rawAddress ?? 'N/A'));
+            $cleanAddress = trim(preg_replace('/\s+/', ' ', $cleanAddress ?? ''));
+            if (empty($cleanAddress)) {
+                $cleanAddress = 'N/A';
+            }
+
+            // Obtener nombre del cliente de forma segura
+            $customerName = $args['name'] ?? $customer->full_name ?? ($customer->first_name . ' ' . $customer->last_name);
+            $cleanName = preg_replace('/[^a-zA-Z0-9\s@#$&()\-.\',\/_]/', '', $this->limpiarCadena($customerName));
+            $cleanName = strtoupper(trim(preg_replace('/\s+/', ' ', $cleanName ?? '')));
+            if (empty($cleanName)) {
+                $cleanName = 'CLIENTE ' . $service->id;
             }
 
             $payload = [
@@ -45,31 +75,44 @@ class CompleteInstallationMutation
                 'onu_type'           => $args['onu_type'],
                 'zone'               => $args['zone'],
                 'onu_mode'           => $args['onu_mode'],
-                'name'               => strtoupper($this->limpiarCadena($customer->full_name)),
-                'address_or_comment' => preg_replace(
-                    '/[^a-zA-Z0-9]/',
-                    ' ',
-                    str_replace('ñ', 'n', str_replace('Ñ', 'N', $customer->addresses()->first()->address ?? 'N/A'))
-                ),
+                'name'               => $cleanName,
+                'address_or_comment' => $cleanAddress,
             ];
 
             if (!empty($args['odb'])) {
                 $payload['odb'] = $args['odb'];
             }
 
+            // Perfil de velocidad opcional
+            $speedProfile = $args['speed_profile'] ?? null;
+            if (empty($speedProfile) && $service->plan) {
+                $speedProfile = $service->plan->name;
+            }
+            if (!empty($speedProfile)) {
+                $payload['download_speed_profile_name'] = $speedProfile;
+                $payload['upload_speed_profile_name'] = $speedProfile;
+            }
+
             Log::info('CompleteInstallationMutation: autorizando ONU', [
                 'ticket_id' => $args['ticket_id'],
                 'sn'        => $args['sn'],
+                'payload'   => $payload,
             ]);
 
             // Paso 1: Autorizar ONU (sincrónico)
             $response = $this->apiManager->authorizeOnu($payload);
             $data = $response->json();
 
+            Log::info('CompleteInstallationMutation: respuesta SmartOLT', [
+                'status' => $response->status(),
+                'data'   => $data,
+            ]);
+
             if (($data['status'] ?? false) !== true) {
+                $errorMsg = $data['error'] ?? $data['message'] ?? (is_string($data['response'] ?? null) ? $data['response'] : 'Error al autorizar la ONU en SmartOLT');
                 return [
                     'success' => false,
-                    'message' => $data['error'] ?? 'Error al autorizar la ONU',
+                    'message' => $errorMsg,
                 ];
             }
 
@@ -78,38 +121,46 @@ class CompleteInstallationMutation
             $service->service_status = 'active';
             $service->save();
 
-            // Pasos 2-4: mgmt IP DHCP → TR069 → WAN mode DHCP (30 segundos)
-            CompleteOnuActivationJob::dispatch($args['sn'], $args['vlan_mgmt'])
-                ->delay(now()->addSeconds(30))
-                ->onQueue('redis');
+            // Pasos 2-4: Jobs de activación y provisionamiento en segundo plano (protegidos contra fallos de cola)
+            try {
+                $vlanMgmt = !empty($args['vlan_mgmt']) ? (int) $args['vlan_mgmt'] : 0;
+                if ($vlanMgmt > 0) {
+                    CompleteOnuActivationJob::dispatch($args['sn'], $vlanMgmt)
+                        ->delay(now()->addSeconds(30));
+                }
 
-            // Provisionamiento Mikrotik (4 minutos, después de la activación)
-            ProcessOnuAuthorization::dispatch($service->id, $args['sn'], $args['vlan'], $args['olt_id'])
-                ->delay(now()->addMinutes(4))
-                ->onQueue('redis');
+                // Provisionamiento Mikrotik (4 minutos, después de la activación)
+                ProcessOnuAuthorization::dispatch($service->id, $args['sn'], (int) $args['vlan'], (int) $args['olt_id'])
+                    ->delay(now()->addMinutes(4));
+            } catch (\Throwable $queueError) {
+                Log::warning('CompleteInstallationMutation: error al encolar jobs de fondo', [
+                    'error' => $queueError->getMessage()
+                ]);
+            }
 
             // Cerrar el ticket
             $ticket->status = 'resolved';
             $ticket->resolution_notes = $args['resolution_notes'] ?? 'Instalación completada y ONU activada correctamente.';
             $ticket->save();
 
-            Log::info('CompleteInstallationMutation: completado', [
+            Log::info('CompleteInstallationMutation: completado con éxito', [
                 'ticket_id' => $args['ticket_id'],
                 'sn'        => $args['sn'],
             ]);
 
             return [
                 'success' => true,
-                'message' => 'Instalación completada. La ONU se está configurando en segundo plano.',
+                'message' => 'Instalación completada. La ONU se ha autorizado exitosamente.',
             ];
 
-        } catch (\Exception $e) {
-            Log::error('CompleteInstallationMutation: error', [
+        } catch (\Throwable $e) {
+            Log::error('CompleteInstallationMutation: error fatal', [
                 'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
                 'args'    => $args,
             ]);
 
-            return ['success' => false, 'message' => $e->getMessage()];
+            return ['success' => false, 'message' => 'Error al procesar instalación: ' . $e->getMessage()];
         }
     }
 
