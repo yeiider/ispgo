@@ -91,7 +91,7 @@ class CompleteInstallationMutation
             }
             if (!empty($speedProfile)) {
                 $cleanSpeedProfile = $this->limpiarCadena($speedProfile);
-                $cleanSpeedProfile = preg_replace('/[^a-zA-Z0-9_\-\.\s]/', '', $cleanSpeedProfile);
+                $cleanSpeedProfile = preg_replace('~[^a-zA-Z0-9_\-\.\s]~', '', $cleanSpeedProfile);
                 $cleanSpeedProfile = trim($cleanSpeedProfile);
                 if (!empty($cleanSpeedProfile)) {
                     $payload['download_speed_profile_name'] = $cleanSpeedProfile;
@@ -191,10 +191,11 @@ class CompleteInstallationMutation
 
         // 3. Filtrar estrictamente según la regla de SmartOLT:
         // Letras a-z, A-Z, dígitos 0-9, espacios y los caracteres @ $ & ( ) - . + , / _ : ;
-        $clean = preg_replace('/[^a-zA-Z0-9\s@$&()\-.\+,/_:;]/', ' ', $clean);
+        // Usamos delimitador ~ para no entrar en conflicto con la barra diagonal /
+        $clean = preg_replace('~[^a-zA-Z0-9\s@$&()\-.\+,/_:;]~', ' ', $clean);
 
         // 4. Normalizar espacios en blanco múltiples
-        $clean = trim(preg_replace('/\s+/', ' ', $clean));
+        $clean = trim(preg_replace('~\s+~', ' ', $clean));
 
         // 5. Limitar longitud máxima de seguridad (SmartOLT suele permitir hasta 100 caracteres)
         if (strlen($clean) > 100) {
@@ -216,8 +217,8 @@ class CompleteInstallationMutation
 
         $clean = strtoupper($this->limpiarCadena($name));
         $clean = str_replace(['#', '№', '°', 'º', "'", '"', '`'], ' ', $clean);
-        $clean = preg_replace('/[^a-zA-Z0-9\s@$&()\-.\+,/_]/', ' ', $clean);
-        $clean = trim(preg_replace('/\s+/', ' ', $clean));
+        $clean = preg_replace('~[^a-zA-Z0-9\s@$&()\-.\+,/_]~', ' ', $clean);
+        $clean = trim(preg_replace('~\s+~', ' ', $clean));
 
         if (strlen($clean) > 60) {
             $clean = substr($clean, 0, 60);
@@ -233,8 +234,8 @@ class CompleteInstallationMutation
     private function sanitizeSmartOltZone(string $zone): string
     {
         $clean = $this->limpiarCadena($zone);
-        $clean = preg_replace('/[^a-zA-Z0-9\s_\-]/', ' ', $clean);
-        $clean = trim(preg_replace('/\s+/', ' ', $clean));
+        $clean = preg_replace('~[^a-zA-Z0-9\s_\-]~', ' ', $clean);
+        $clean = trim(preg_replace('~\s+~', ' ', $clean));
         return empty($clean) ? $zone : $clean;
     }
 
@@ -250,8 +251,8 @@ class CompleteInstallationMutation
 
         $clean = $this->limpiarCadena($odb);
         $clean = str_replace(['#', '№'], 'No ', $clean);
-        $clean = preg_replace('/[^a-zA-Z0-9\s_\-]/', ' ', $clean);
-        $clean = trim(preg_replace('/\s+/', ' ', $clean));
+        $clean = preg_replace('~[^a-zA-Z0-9\s_\-]~', ' ', $clean);
+        $clean = trim(preg_replace('~\s+~', ' ', $clean));
 
         return empty($clean) ? null : substr($clean, 0, 50);
     }
