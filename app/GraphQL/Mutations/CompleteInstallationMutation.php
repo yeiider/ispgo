@@ -44,26 +44,26 @@ class CompleteInstallationMutation
                 return ['success' => false, 'message' => 'No hay cliente asociado al servicio'];
             }
 
-            // Obtener dirección de forma 100% segura contra nulos
-            $rawAddress = null;
-            if ($customer->relationLoaded('addresses') && $customer->addresses && $customer->addresses->isNotEmpty()) {
-                $rawAddress = $customer->addresses->first()->address;
-            } elseif (method_exists($customer, 'addresses') && $customer->addresses()->exists()) {
-                $rawAddress = $customer->addresses()->first()?->address;
+            // Obtener dirección / comentario para SmartOLT de forma 100% segura
+            $rawAddress = $args['address_or_comment'] ?? null;
+            if (empty($rawAddress)) {
+                if ($customer->relationLoaded('addresses') && $customer->addresses && $customer->addresses->isNotEmpty()) {
+                    $rawAddress = $customer->addresses->first()->address;
+                } elseif (method_exists($customer, 'addresses') && $customer->addresses()->exists()) {
+                    $rawAddress = $customer->addresses()->first()?->address;
+                }
+                if (empty($rawAddress) && !empty($service->service_location)) {
+                    $rawAddress = $service->service_location;
+                }
             }
-            $cleanAddress = preg_replace('/[^a-zA-Z0-9\s@#$&()\-.\',\/_]/', ' ', str_replace(['ñ', 'Ñ'], ['n', 'N'], $rawAddress ?? 'N/A'));
-            $cleanAddress = trim(preg_replace('/\s+/', ' ', $cleanAddress ?? ''));
-            if (empty($cleanAddress)) {
-                $cleanAddress = 'N/A';
-            }
+            $cleanAddress = $this->sanitizeSmartOltAddress($rawAddress);
 
-            // Obtener nombre del cliente de forma segura
+            // Obtener y sanitizar nombre del cliente
             $customerName = $args['name'] ?? $customer->full_name ?? ($customer->first_name . ' ' . $customer->last_name);
-            $cleanName = preg_replace('/[^a-zA-Z0-9\s@#$&()\-.\',\/_]/', '', $this->limpiarCadena($customerName));
-            $cleanName = strtoupper(trim(preg_replace('/\s+/', ' ', $cleanName ?? '')));
-            if (empty($cleanName)) {
-                $cleanName = 'CLIENTE ' . $service->id;
-            }
+            $cleanName = $this->sanitizeSmartOltName($customerName, $service->id);
+
+            // Obtener y sanitizar zona
+            $cleanZone = $this->sanitizeSmartOltZone($args['zone'] ?? '');
 
             $payload = [
                 'olt_id'             => $args['olt_id'],
@@ -73,14 +73,15 @@ class CompleteInstallationMutation
                 'sn'                 => $args['sn'],
                 'vlan'               => $args['vlan'],
                 'onu_type'           => $args['onu_type'],
-                'zone'               => $args['zone'],
-                'onu_mode'           => $args['onu_mode'],
+                'zone'               => $cleanZone,
+                'onu_mode'           => $this->normalizeSmartOltOnuMode($args['onu_mode'] ?? 'Routing'),
                 'name'               => $cleanName,
                 'address_or_comment' => $cleanAddress,
             ];
 
-            if (!empty($args['odb'])) {
-                $payload['odb'] = $args['odb'];
+            $cleanOdb = $this->sanitizeSmartOltOdb($args['odb'] ?? null);
+            if (!empty($cleanOdb)) {
+                $payload['odb'] = $cleanOdb;
             }
 
             // Perfil de velocidad opcional
@@ -89,8 +90,13 @@ class CompleteInstallationMutation
                 $speedProfile = $service->plan->name;
             }
             if (!empty($speedProfile)) {
-                $payload['download_speed_profile_name'] = $speedProfile;
-                $payload['upload_speed_profile_name'] = $speedProfile;
+                $cleanSpeedProfile = $this->limpiarCadena($speedProfile);
+                $cleanSpeedProfile = preg_replace('/[^a-zA-Z0-9_\-\.\s]/', '', $cleanSpeedProfile);
+                $cleanSpeedProfile = trim($cleanSpeedProfile);
+                if (!empty($cleanSpeedProfile)) {
+                    $payload['download_speed_profile_name'] = $cleanSpeedProfile;
+                    $payload['upload_speed_profile_name'] = $cleanSpeedProfile;
+                }
             }
 
             Log::info('CompleteInstallationMutation: autorizando ONU', [
@@ -162,6 +168,104 @@ class CompleteInstallationMutation
 
             return ['success' => false, 'message' => 'Error al procesar instalación: ' . $e->getMessage()];
         }
+    }
+
+    /**
+     * Sanitiza la dirección o comentario para SmartOLT.
+     * Regla oficial SmartOLT:
+     * "Address or comment can contain only alphanumeric characters, spaces and the following characters: @$&()-.+,/_:;"
+     * IMPORTANTE: No se permiten '#' ni comillas ni acentos UTF-8.
+     */
+    private function sanitizeSmartOltAddress(?string $address): string
+    {
+        if (empty($address)) {
+            return 'N/A';
+        }
+
+        // 1. Convertir letras con tildes y caracteres especiales a ASCII
+        $clean = $this->limpiarCadena($address);
+
+        // 2. Convertir numerales y símbolos de dirección hispanos
+        $clean = str_replace(['#', '№'], 'No. ', $clean);
+        $clean = str_replace(['°', 'º'], '.', $clean);
+
+        // 3. Filtrar estrictamente según la regla de SmartOLT:
+        // Letras a-z, A-Z, dígitos 0-9, espacios y los caracteres @ $ & ( ) - . + , / _ : ;
+        $clean = preg_replace('/[^a-zA-Z0-9\s@$&()\-.\+,/_:;]/', ' ', $clean);
+
+        // 4. Normalizar espacios en blanco múltiples
+        $clean = trim(preg_replace('/\s+/', ' ', $clean));
+
+        // 5. Limitar longitud máxima de seguridad (SmartOLT suele permitir hasta 100 caracteres)
+        if (strlen($clean) > 100) {
+            $clean = substr($clean, 0, 100);
+        }
+
+        return empty($clean) ? 'N/A' : $clean;
+    }
+
+    /**
+     * Sanitiza el nombre para SmartOLT:
+     * "Name can contain only alphanumeric characters, spaces and the following characters: @$&()-.+,/_"
+     */
+    private function sanitizeSmartOltName(?string $name, $fallbackId = ''): string
+    {
+        if (empty($name)) {
+            return 'CLIENTE ' . $fallbackId;
+        }
+
+        $clean = strtoupper($this->limpiarCadena($name));
+        $clean = str_replace(['#', '№', '°', 'º', "'", '"', '`'], ' ', $clean);
+        $clean = preg_replace('/[^a-zA-Z0-9\s@$&()\-.\+,/_]/', ' ', $clean);
+        $clean = trim(preg_replace('/\s+/', ' ', $clean));
+
+        if (strlen($clean) > 60) {
+            $clean = substr($clean, 0, 60);
+        }
+
+        return empty($clean) ? ('CLIENTE ' . $fallbackId) : $clean;
+    }
+
+    /**
+     * Sanitiza la zona para SmartOLT:
+     * "The Zone can contain only alphanumeric characters, spaces, underscore and the dash (-) character"
+     */
+    private function sanitizeSmartOltZone(string $zone): string
+    {
+        $clean = $this->limpiarCadena($zone);
+        $clean = preg_replace('/[^a-zA-Z0-9\s_\-]/', ' ', $clean);
+        $clean = trim(preg_replace('/\s+/', ' ', $clean));
+        return empty($clean) ? $zone : $clean;
+    }
+
+    /**
+     * Sanitiza la caja ODB para SmartOLT:
+     * "The ODB can contain only alphanumeric characters, spaces, underscore and the dash (-) character"
+     */
+    private function sanitizeSmartOltOdb(?string $odb): ?string
+    {
+        if (empty($odb)) {
+            return null;
+        }
+
+        $clean = $this->limpiarCadena($odb);
+        $clean = str_replace(['#', '№'], 'No ', $clean);
+        $clean = preg_replace('/[^a-zA-Z0-9\s_\-]/', ' ', $clean);
+        $clean = trim(preg_replace('/\s+/', ' ', $clean));
+
+        return empty($clean) ? null : substr($clean, 0, 50);
+    }
+
+    /**
+     * Normaliza el modo de la ONU para SmartOLT ('Routing' o 'Bridging')
+     */
+    private function normalizeSmartOltOnuMode(?string $mode): string
+    {
+        $m = strtolower(trim($mode ?? ''));
+        if (str_contains($m, 'bridge') || str_contains($m, 'bridging')) {
+            return 'Bridging';
+        }
+        return 'Routing';
     }
 
     private function limpiarCadena(string $str): string

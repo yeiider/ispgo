@@ -218,5 +218,6 @@ extend type Mutation {
         odb: String
         resolution_notes: String
         speed_profile: String
+        address_or_comment: String
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\CompleteInstallationMutation@handle") @guard
 }
