@@ -80,7 +80,8 @@ class ConfigSchema
             'select-field' => 'select',
             'image-field' => 'image',
             'time-field' => 'time',
-            'text-field', 'textarea-field', 'password-field' => 'string',
+            'textarea-field' => 'textarea',
+            'password-field' => 'password',
             default => 'string',
         };
     }
