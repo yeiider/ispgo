@@ -9,6 +9,7 @@ use App\Models\Services\Service;
 use App\Models\Router;
 use App\Models\Services\Plan;
 use App\Models\BillingCycle;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -122,6 +123,7 @@ class CustomerImporterService
                         'identity_document' => 'required|max:12',
                         'customer_status' => 'required|in:active,inactive',
                         'router_id' => 'required|exists:routers,id',
+                        'created_at' => 'nullable|date',
                     ]);
 
                     if ($validator->fails()) {
@@ -324,6 +326,7 @@ class CustomerImporterService
                         'identity_document' => 'required|max:12',
                         'customer_status' => 'required|in:active,inactive',
                         'router_id' => 'required|exists:routers,id',
+                        'created_at' => 'nullable|date',
                     ]);
 
                     if ($validator->fails()) {
@@ -563,6 +566,15 @@ class CustomerImporterService
         if (!isset($customer['router_id']) || empty($customer['router_id'])) {
             if (isset($service['router_id']) && !empty($service['router_id'])) {
                 $customer['router_id'] = $service['router_id'];
+            }
+        }
+
+        $createdAt = $customer['created_at'] ?? $customer['creation_date'] ?? $customer['fecha_creacion'] ?? null;
+        if ($createdAt) {
+            try {
+                $customer['created_at'] = Carbon::parse($createdAt)->format('Y-m-d H:i:s');
+            } catch (\Throwable $e) {
+                // Keep original if string parsing fails
             }
         }
 

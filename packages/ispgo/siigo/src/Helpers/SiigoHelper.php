@@ -47,11 +47,11 @@ class SiigoHelper
         $name = [];
         if ($personType === 'Company') {
             $name[] = ($taxDetails && !empty($taxDetails->business_name))
-                ? $taxDetails->business_name
-                : trim($customer->first_name . ' ' . $customer->last_name);
+                ? mb_strtoupper($taxDetails->business_name, 'UTF-8')
+                : mb_strtoupper(trim($customer->first_name . ' ' . $customer->last_name), 'UTF-8');
         } else {
-            $name[] = $customer->first_name ?: 'N/A';
-            $name[] = $customer->last_name ?: 'N/A';
+            $name[] = mb_strtoupper($customer->first_name ?: 'N/A', 'UTF-8');
+            $name[] = mb_strtoupper($customer->last_name ?: 'N/A', 'UTF-8');
         }
 
         // Mapping Fiscal Regime and VAT Responsibility according to Siigo API rules
@@ -135,8 +135,8 @@ class SiigoHelper
             ],
             "contacts" => [
                 [
-                    "first_name" => $customer->first_name ?: 'N/A',
-                    "last_name" => $customer->last_name ?: 'N/A',
+                    "first_name" => mb_strtoupper($customer->first_name ?: 'N/A', 'UTF-8'),
+                    "last_name" => mb_strtoupper($customer->last_name ?: 'N/A', 'UTF-8'),
                     "email" => $customer->email_address ?: 'correo@temporal.com',
                     "phone" => [
                         "indicative" => "57",
@@ -152,7 +152,7 @@ class SiigoHelper
         }
 
         if ($taxDetails && !empty($taxDetails->business_name)) {
-            $payload['commercial_name'] = $taxDetails->business_name;
+            $payload['commercial_name'] = mb_strtoupper($taxDetails->business_name, 'UTF-8');
         }
 
         return $payload;

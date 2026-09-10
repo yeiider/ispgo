@@ -4,6 +4,7 @@ namespace App\GraphQL\Queries;
 
 use App\Models\Services\Service;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class ServiceQuery
 {
@@ -48,6 +49,17 @@ class ServiceQuery
 
         if (!empty($args['sn'])) {
             $query->where('sn', 'like', '%' . $args['sn'] . '%');
+        }
+
+        if (!empty($args['sn_duplicated'])) {
+            $duplicateSns = Service::query()
+                ->select('sn')
+                ->whereNotNull('sn')
+                ->where('sn', '!=', '')
+                ->groupBy('sn')
+                ->having(\DB::raw('COUNT(*)'), '>', 1);
+
+            $query->whereIn('sn', $duplicateSns);
         }
 
         if (!empty($args['plan_id']) && $args['plan_id'] !== 'all') {
