@@ -90,6 +90,7 @@ type Query {
         mac_address: String
         service_type: String
         sn: String
+        sn_duplicated: Boolean
         plan_id: ID
         additional_plans: [ID!]
         sort_column: String

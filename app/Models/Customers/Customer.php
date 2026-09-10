@@ -46,6 +46,7 @@ class Customer extends Authenticatable implements MustVerifyEmail
         'onepay_customer_id',
         'router_id',
         'billing_mode',
+        'created_at',
     ];
 
     /**
