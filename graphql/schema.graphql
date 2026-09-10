@@ -133,7 +133,9 @@ type Query {
     routers: [Router!]! @paginate(defaultCount: 10, model: "App\\Models\\Router")
     router(id: ID! @eq): Router @find(model: "App\\Models\\Router")
 
-    plans: [Plan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Plan")
+    plans(
+        is_dedicated: Boolean @eq
+    ): [Plan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\Plan")
     plan(id: ID! @eq): Plan @find(model: "App\\Models\\Services\\Plan")
 
     additionalPlans: [AdditionalPlan!]! @paginate(defaultCount: 10, model: "App\\Models\\Services\\AdditionalPlan")
@@ -365,6 +367,7 @@ type Mutation @guard {
         connection_type: String
         plan_type: String @rules(apply: ["in:internet,television,telephonic"])
         modality_type: String @rules(apply: ["in:prepaid,postpaid"])
+        is_dedicated: Boolean
     ): Plan @create(model: "App\\Models\\Services\\Plan")
 
     updatePlan(
@@ -395,6 +398,7 @@ type Mutation @guard {
         connection_type: String
         plan_type: String @rules(apply: ["in:internet,television,telephonic"])
         modality_type: String @rules(apply: ["in:prepaid,postpaid"])
+        is_dedicated: Boolean
     ): Plan @update(model: "App\\Models\\Services\\Plan")
 
     deletePlan(
@@ -802,6 +806,7 @@ type Plan {
     status: String!
     plan_type: String
     modality_type: String
+    is_dedicated: Boolean
     created_by: Int
     updated_by: Int
     created_at: DateTime!

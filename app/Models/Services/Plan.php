@@ -15,11 +15,13 @@ class Plan extends Model
         'data_limit', 'unlimited_data', 'contract_period', 'promotions', 'extras_included',
         'geographic_availability', 'promotion_start_date', 'promotion_end_date', 'plan_image',
         'customer_rating', 'customer_reviews', 'service_compatibility', 'network_priority','profile_smart_olt',
-        'technical_support', 'additional_benefits', 'connection_type', 'status','created_by', 'updated_by','modality_type','plan_type'
+        'technical_support', 'additional_benefits', 'connection_type', 'status','created_by', 'updated_by','modality_type','plan_type',
+        'is_dedicated'
     ];
     protected $casts = [
         'promotion_end_date' => 'datetime',
-        'promotion_start_date' => 'datetime'
+        'promotion_start_date' => 'datetime',
+        'is_dedicated' => 'boolean'
     ];
 
     protected static function boot()
