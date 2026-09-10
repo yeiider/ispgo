@@ -135,6 +135,17 @@ Route::middleware('auth:api')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Service Import Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('services')->group(function () {
+        Route::post('/import-validate', [\App\Http\Controllers\Api\ServiceImportController::class, 'validateImport']);
+        Route::post('/import', [\App\Http\Controllers\Api\ServiceImportController::class, 'executeImport']);
+        Route::get('/import-template', [\App\Http\Controllers\Api\ServiceImportController::class, 'downloadTemplate']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
     | Billing Novedades Import Routes
     |--------------------------------------------------------------------------
     */
@@ -153,6 +164,7 @@ Route::middleware('auth:api')->group(function () {
 
 Route::post('/login', [\App\Http\Controllers\API\AuthController::class, 'login']);
 Route::get('/customers/import-template', [\App\Http\Controllers\Api\CustomerImportController::class, 'downloadTemplate']);
+Route::get('/services/import-template', [\App\Http\Controllers\Api\ServiceImportController::class, 'downloadTemplate']);
 Route::get('/billing/novedades/import-template', [\App\Http\Controllers\Api\BillingNovedadImportController::class, 'downloadTemplate']);
 Route::prefix('v1')
     ->as('v1.')

@@ -1,0 +1,3 @@
+id,sn,service_ip,mac_address,service_status,service_type,plan_id,router_id,billing_cycle_id,activation_date,installation_date,service_notes,username_router,password_router,unu_latitude,unu_longitude
+1,ZTEGC1234567,192.168.1.50,00:11:22:33:44:55,active,ftth,1,1,1,2026-01-01,2026-01-01,Nota de servicio 1,user_r1,pass_r1,4.7110,-74.0721
+2,HWTC98765432,192.168.1.51,AA:BB:CC:DD:EE:FF,active,ftth,1,1,1,2026-01-01,2026-01-01,Nota de servicio 2,user_r2,pass_r2,4.7110,-74.0721
