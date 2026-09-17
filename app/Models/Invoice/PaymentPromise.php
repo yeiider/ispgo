@@ -67,7 +67,7 @@ class PaymentPromise extends Model
             return;
         }
 
-        $promise->loadMissing('invoice.service', 'invoice.customer');
+        $promise->loadMissing('invoice.service', 'invoice.customer.services');
 
         $invoice = $promise->invoice;
 
@@ -75,9 +75,11 @@ class PaymentPromise extends Model
             return;
         }
 
-        $service = $invoice->service;
+        $services = $invoice->service_id && $invoice->service
+            ? collect([$invoice->service])
+            : ($invoice->customer ? $invoice->customer->services : collect());
 
-        if (!$service) {
+        if ($services->isEmpty()) {
             return;
         }
 
@@ -85,8 +87,10 @@ class PaymentPromise extends Model
         $promiseDate = optional($promise->promise_date)?->copy()->startOfDay();
 
         if ($promiseDate && $promiseDate->lt($today)) {
-            if ($service->service_status !== 'suspended') {
-                $service->suspend();
+            foreach ($services as $service) {
+                if ($service->service_status !== 'suspended') {
+                    $service->suspend();
+                }
             }
             return;
         }
@@ -95,15 +99,17 @@ class PaymentPromise extends Model
             return;
         }
 
-        if ($service->service_status !== 'suspended') {
-            return;
-        }
+        foreach ($services as $service) {
+            if ($service->service_status !== 'suspended') {
+                continue;
+            }
 
-        if (static::hasBlockingUnpaidInvoices($invoice, $service)) {
-            return;
-        }
+            if (static::hasBlockingUnpaidInvoices($invoice, $service)) {
+                continue;
+            }
 
-        $service->activate();
+            $service->activate();
+        }
     }
 
     protected static function evaluateServiceAfterDeletion(PaymentPromise $promise): void
@@ -112,7 +118,7 @@ class PaymentPromise extends Model
             return;
         }
 
-        $promise->loadMissing('invoice.service');
+        $promise->loadMissing('invoice.service', 'invoice.customer.services');
 
         $invoice = $promise->invoice;
 
@@ -120,9 +126,11 @@ class PaymentPromise extends Model
             return;
         }
 
-        $service = $invoice->service;
+        $services = $invoice->service_id && $invoice->service
+            ? collect([$invoice->service])
+            : ($invoice->customer ? $invoice->customer->services : collect());
 
-        if (!$service) {
+        if ($services->isEmpty()) {
             return;
         }
 
@@ -138,8 +146,10 @@ class PaymentPromise extends Model
         }
 
         if ($invoice->due_date && $invoice->due_date->lt($today) && $invoice->outstanding_balance > 0) {
-            if ($service->service_status !== 'suspended') {
-                $service->suspend();
+            foreach ($services as $service) {
+                if ($service->service_status !== 'suspended') {
+                    $service->suspend();
+                }
             }
         }
     }

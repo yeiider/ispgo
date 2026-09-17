@@ -126,7 +126,7 @@ class CustomerBillingService
 
                     // Si no debemos omitir el servicio, crear el item
                     if (!$shouldSkipService) {
-                        $planPrice = $service->plan->monthly_price;
+                        $planPrice = $service->custom_price !== null ? (float) $service->custom_price : $service->plan->monthly_price;
                         $servicePrice = $planPrice;
 
                         // Si el arrendamiento está activo y el cliente está al día, descontar el arrendo del servicio
@@ -136,8 +136,9 @@ class CustomerBillingService
 
                         // 1. Crear el ítem del plan base
                         if ($servicePrice > 0) {
+                            $planItemName = !empty(trim($service->plan->description ?? '')) ? $service->plan->description : $service->plan->name;
                             $item = $invoice->items()->create([
-                                'description' => "Suscripción {$service->plan->name}",
+                                'description' => "Suscripción {$planItemName}",
                                 'invoice_id' => $invoice->id,
                                 'unit_price' => $servicePrice,
                                 'service_id' => $service->id,

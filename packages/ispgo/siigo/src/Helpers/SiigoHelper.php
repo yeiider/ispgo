@@ -209,9 +209,19 @@ class SiigoHelper
 
                 $pricePerUnit = round($itemTotalAmount / $qty, 2);
 
+                $itemDescription = null;
+                if ($item->service && $item->service->plan) {
+                    $plan = $item->service->plan;
+                    $itemDescription = !empty(trim($plan->description ?? '')) ? $plan->description : $plan->name;
+                } elseif (!empty($item->description)) {
+                    $itemDescription = $item->description;
+                } else {
+                    $itemDescription = 'Servicio de Internet';
+                }
+
                 $items[] = [
                     'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01',
-                    'description' => $item->description ?: 'Servicio de Internet',
+                    'description' => $itemDescription,
                     'quantity' => $qty,
                     'price' => $pricePerUnit,
                     'discount' => 0.0,

@@ -17,7 +17,7 @@ class HandleExpiredPaymentPromises extends Command
     {
         $now = Carbon::now()->startOfDay();
 
-        $promises = PaymentPromise::with(['invoice.service'])
+        $promises = PaymentPromise::with(['invoice.service', 'invoice.customer.services'])
             ->where('status', 'pending')
             ->whereDate('promise_date', '<', $now)
             ->get();
@@ -41,10 +41,14 @@ class HandleExpiredPaymentPromises extends Command
                 continue;
             }
 
-            $service = $invoice->service;
+            $services = $invoice->service_id && $invoice->service
+                ? collect([$invoice->service])
+                : ($invoice->customer ? $invoice->customer->services : collect());
 
-            if ($service && $service->service_status !== 'suspended') {
-                $service->suspend();
+            foreach ($services as $service) {
+                if ($service && $service->service_status !== 'suspended') {
+                    $service->suspend();
+                }
             }
 
             $promise->status = 'expired';

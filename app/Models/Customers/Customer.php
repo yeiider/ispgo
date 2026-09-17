@@ -17,12 +17,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\ValidationException;
 
 class Customer extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory;
     use Notifiable;
+    use SoftDeletes;
 
     protected $casts = [
         'date_of_birth' => 'date',
@@ -245,6 +247,17 @@ class Customer extends Authenticatable implements MustVerifyEmail
 
         static::updated(function ($customer) {
             event(new \App\Events\CustomerUpdated($customer));
+        });
+
+        static::deleting(function ($customer) {
+            // Soft delete related entities in cascade
+            $customer->services()->delete();
+            $customer->addresses()->delete();
+            $customer->invoices()->delete();
+            $customer->contracts()->delete();
+            if ($customer->taxDetails) {
+                $customer->taxDetails->delete();
+            }
         });
     }
 

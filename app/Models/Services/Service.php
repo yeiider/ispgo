@@ -15,6 +15,7 @@ use App\Settings\GeneralProviderConfig;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Ispgo\NapManager\Models\NapPort;
 use Ispgo\NapManager\Models\NapBox;
@@ -27,9 +28,10 @@ use Ispgo\NapManager\Models\NapBox;
 class Service extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
-        'router_id', 'customer_id', 'internet_plan_id', 'service_ip', 'plan_id', 'username_router',
+        'router_id', 'customer_id', 'internet_plan_id', 'service_ip', 'plan_id', 'custom_price', 'username_router',
         'password_router', 'service_status', 'activation_date', 'deactivation_date',
         'bandwidth', 'mac_address', 'installation_date', 'service_notes', 'contract_id',
         'support_contact', 'service_location', 'service_type', 'static_ip', 'data_limit',
@@ -42,6 +44,7 @@ class Service extends Model
         'activation_date' => 'datetime',
         'installation_date' => 'date',
         'last_maintenance' => 'date',
+        'custom_price' => 'float',
     ];
 
     public function customer()
@@ -113,7 +116,7 @@ class Service extends Model
      */
     public function getTotalPriceAttribute(): float
     {
-        $planPrice = $this->plan?->monthly_price ?? 0;
+        $planPrice = $this->custom_price !== null ? (float) $this->custom_price : ($this->plan?->monthly_price ?? 0);
         $additionalPrice = $this->additionalPlans()->where('status', 'active')->sum('monthly_price');
 
         return (float) ($planPrice + $additionalPrice);
