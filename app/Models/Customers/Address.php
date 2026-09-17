@@ -4,12 +4,14 @@ namespace App\Models\Customers;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class Address extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'customer_id',

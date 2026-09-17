@@ -268,6 +268,7 @@ type Mutation @guard {
     createService(
         customer_id: Int! @rules(apply: ["required", "exists:customers,id"])
         plan_id: Int! @rules(apply: ["required", "exists:plans,id"])
+        custom_price: Float
         router_id: Int! @rules(apply: ["required", "exists:routers,id"])
         service_ip: String @rules(apply: ["ip"])
         service_location: Int! @rules(apply: ["required", "exists:addresses,id"])
@@ -302,6 +303,7 @@ type Mutation @guard {
         service_location: Int @rules(apply: ["exists:addresses,id"])
         service_status: String @rules(apply: ["in:active,inactive,suspended,pending,free"])
         plan_id: Int @rules(apply: ["exists:plans,id"])
+        custom_price: Float
         router_id: Int @rules(apply: ["exists:routers,id"])
         username_router: String
         password_router: String
@@ -404,6 +406,24 @@ type Mutation @guard {
     deletePlan(
         id: ID! @rules(apply: ["required", "exists:plans,id"]) @eq
     ): Plan @delete(model: "App\\Models\\Services\\Plan")
+
+    validatePlansImport(
+        file_base64: String!
+        mode: String
+    ): ImportValidationResult @field(resolver: "App\\GraphQL\\Mutations\\ValidatePlansImportMutation@resolve")
+
+    executePlansImport(
+        file_base64: String!
+        mode: String
+    ): ImportExecutionResult @field(resolver: "App\\GraphQL\\Mutations\\ExecutePlansImportMutation@resolve")
+
+    exportPlansCsv(
+        status: String
+        plan_type: String
+        modality_type: String
+    ): ExportCsvResult @field(resolver: "App\\GraphQL\\Mutations\\ExportPlansCsvMutation@export")
+
+    downloadPlansTemplateCsv: ExportCsvResult @field(resolver: "App\\GraphQL\\Mutations\\ExportPlansCsvMutation@downloadTemplate")
 
     generateInvoice(
         customer_id: ID! @rules(apply: ["required", "exists:customers,id"])
@@ -688,6 +708,7 @@ type Service {
     router_id: Int!
     customer_id: Int!
     plan_id: Int!
+    custom_price: Float
     service_ip: String
     username_router: String
     password_router: String
@@ -1211,7 +1232,51 @@ extend type Mutation {
 
 }
 
+type ImportValidationSummary {
+    total_rows: Int
+    created: Int
+    updated: Int
+    skipped: Int
+    errors_count: Int
+}
 
+type ImportErrorDetail {
+    row: Int
+    name: String
+    error: String
+}
+
+type ImportValidationResult {
+    valid: Boolean!
+    message: String!
+    summary: ImportValidationSummary
+    created_records: [JSON]
+    updated_records: [JSON]
+    skipped_records: [JSON]
+    errors: [ImportErrorDetail]
+}
+
+type ImportExecutionStats {
+    created: Int
+    updated: Int
+    skipped: Int
+    total: Int
+}
+
+type ImportExecutionResult {
+    success: Boolean!
+    message: String!
+    stats: ImportExecutionStats
+    created_records: [JSON]
+    updated_records: [JSON]
+    errors: [ImportErrorDetail]
+}
+
+type ExportCsvResult {
+    success: Boolean!
+    filename: String!
+    content_base64: String!
+}
 
 #import service_actions.graphql
 #import billing.graphql

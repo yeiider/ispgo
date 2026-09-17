@@ -20,45 +20,15 @@ class DeleteCustomerMutation
         try {
             DB::beginTransaction();
 
-            // Verificar si tiene facturas pagadas o servicios activos
-            $hasActiveServices = $customer->services()
-                ->whereIn('service_status', ['active', 'suspended'])
-                ->exists();
+            // Actualizar estado a inactivo
+            $customer->update(['customer_status' => 'inactive']);
 
-            $hasPaidInvoices = $customer->invoices()
-                ->where('status', 'paid')
-                ->exists();
-
-            if ($hasActiveServices) {
-                throw new \Exception('No se puede eliminar el cliente porque tiene servicios activos. Por favor, desactiva los servicios primero.');
-            }
-
-            if ($hasPaidInvoices) {
-                throw new \Exception('No se puede eliminar el cliente porque tiene facturas pagadas en el historial. Considera desactivar el cliente en lugar de eliminarlo.');
-            }
-
-            // Eliminar relaciones en orden
-            // Primero eliminar servicios y sus facturas (los servicios referencian addresses)
+            // Actualizar estado de servicios asociados a inactivo
             foreach ($customer->services as $service) {
-                $service->invoices()->where('service_id', $service->id)->delete();
-                $service->delete();
+                $service->update(['service_status' => 'inactive']);
             }
 
-            // Ahora sí podemos eliminar las direcciones
-            $customer->addresses()->where('customer_id', $customer->id)->delete();
-
-            // Eliminar contratos
-            $customer->contracts()->where('customer_id', $customer->id)->delete();
-
-            // Eliminar facturas restantes
-            $customer->invoices()->where('customer_id', $customer->id)->delete();
-
-            // Eliminar detalles fiscales si existen
-            if ($customer->taxDetails) {
-                $customer->taxDetails->delete();
-            }
-
-            // Finalmente eliminar el cliente
+            // Ejecutar borrado lógico en cascada (SoftDelete)
             $customer->delete();
 
             DB::commit();

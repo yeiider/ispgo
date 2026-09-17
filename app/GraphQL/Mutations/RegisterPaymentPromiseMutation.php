@@ -55,9 +55,15 @@ class RegisterPaymentPromiseMutation
                 }
 
                 if ($shouldActivate) {
-                    $invoice->loadMissing('service');
-                    if ($invoice->service && $invoice->service->service_status === 'suspended') {
-                        $invoice->service->activate();
+                    $invoice->loadMissing(['service', 'customer.services']);
+                    $services = $invoice->service_id && $invoice->service
+                        ? collect([$invoice->service])
+                        : ($invoice->customer ? $invoice->customer->services : collect());
+
+                    foreach ($services as $service) {
+                        if ($service && $service->service_status === 'suspended') {
+                            $service->activate();
+                        }
                     }
                 }
             }

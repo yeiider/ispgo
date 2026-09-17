@@ -5,13 +5,14 @@ namespace App\Models;
 use App\Models\Customers\Customer;
 use App\Models\Services\Service;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
 class Contract extends Model
 {
-    use HasFactory, \App\Traits\HasSignedUrls;
+    use HasFactory, SoftDeletes, \App\Traits\HasSignedUrls;
 
     /**
      * The table associated with the model.

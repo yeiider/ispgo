@@ -5,11 +5,13 @@ namespace App\Models\Customers;
 use App\Events\TaxCustomerCreated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 
 class TaxDetail extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $casts = [
         'siigo_synced_at' => 'datetime',
