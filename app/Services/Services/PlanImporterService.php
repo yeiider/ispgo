@@ -17,7 +17,7 @@ class PlanImporterService
     /**
      * Modalidades válidas.
      */
-    const VALID_MODALITIES = ['residential', 'corporate'];
+    const VALID_MODALITIES = ['prepaid', 'postpaid'];
 
     /**
      * Tipos de plan válidos.
@@ -29,6 +29,7 @@ class PlanImporterService
      */
     public function validateCsv(string $path, string $mode = 'create_or_update'): array
     {
+
         if (!file_exists($path)) {
             return [
                 'valid' => false,
@@ -69,7 +70,8 @@ class PlanImporterService
         }
 
         $headers = array_map(function ($h) {
-            return trim(mb_strtolower($h));
+            $clean = preg_replace('/^\xEF\xBB\xBF/', '', trim($h));
+            return trim(mb_strtolower($clean));
         }, $headers);
 
         $rowNumber = 1;
@@ -119,7 +121,7 @@ class PlanImporterService
                         'upload_speed' => 'nullable|numeric|min:0',
                         'monthly_price' => 'required|numeric|min:0',
                         'status' => 'nullable|in:active,inactive',
-                        'modality_type' => 'nullable|in:residential,corporate',
+                        'modality_type' => 'nullable|in:prepaid,postpaid',
                         'plan_type' => 'nullable|in:internet,television,telephonic',
                     ]);
 
@@ -144,7 +146,7 @@ class PlanImporterService
                         'upload_speed' => 'nullable|numeric|min:0',
                         'monthly_price' => 'nullable|numeric|min:0',
                         'status' => 'nullable|in:active,inactive',
-                        'modality_type' => 'nullable|in:residential,corporate',
+                        'modality_type' => 'nullable|in:prepaid,postpaid',
                         'plan_type' => 'nullable|in:internet,television,telephonic',
                     ]);
 
@@ -189,6 +191,7 @@ class PlanImporterService
      */
     public function importCsv(string $path, string $mode = 'create_or_update'): array
     {
+
         if (!file_exists($path)) {
             return [
                 'success' => false,
@@ -220,7 +223,8 @@ class PlanImporterService
         }
 
         $headers = array_map(function ($h) {
-            return trim(mb_strtolower($h));
+            $clean = preg_replace('/^\xEF\xBB\xBF/', '', trim($h));
+            return trim(mb_strtolower($clean));
         }, $headers);
 
         $rowNumber = 1;
@@ -269,7 +273,7 @@ class PlanImporterService
                         'upload_speed' => 'nullable|numeric|min:0',
                         'monthly_price' => 'required|numeric|min:0',
                         'status' => 'nullable|in:active,inactive',
-                        'modality_type' => 'nullable|in:residential,corporate',
+                        'modality_type' => 'nullable|in:prepaid,postpaid',
                         'plan_type' => 'nullable|in:internet,television,telephonic',
                     ]);
 
@@ -384,10 +388,10 @@ class PlanImporterService
         }
 
         if (isset($parsed['modality_type'])) {
-            $mod = strtolower($parsed['modality_type']);
-            $parsed['modality_type'] = in_array($mod, ['corporate', 'corporativo', 'empresa']) ? 'corporate' : 'residential';
+            $mod = strtolower(trim($parsed['modality_type']));
+            $parsed['modality_type'] = in_array($mod, ['prepaid', 'prepago']) ? 'prepaid' : 'postpaid';
         } else {
-            $parsed['modality_type'] = 'residential';
+            $parsed['modality_type'] = 'postpaid';
         }
 
         if (isset($parsed['plan_type'])) {
