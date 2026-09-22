@@ -515,6 +515,8 @@ class Invoice extends Model
                     ]);
                 }
             }
+
+            event(new \App\Events\InvoiceDeleted($model));
         });
     }
 

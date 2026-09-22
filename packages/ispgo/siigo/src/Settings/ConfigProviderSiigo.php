@@ -51,6 +51,11 @@ class ConfigProviderSiigo
         return self::getValue('sync_invoice_trigger', 'invoices', $scopeId);
     }
 
+    public static function getStampInvoiceTrigger(?int $scopeId = 0): string
+    {
+        return self::getValue('stamp_invoice_trigger', 'invoices', $scopeId) ?? 'none';
+    }
+
     public static function getSyncCustomersTrigger(?int $scopeId = 0): ?string
     {
         return self::getValue('sync_customers_trigger', 'general', $scopeId);

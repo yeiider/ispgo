@@ -50,8 +50,12 @@ class CreateSiigoInvoice implements ShouldQueue
             Log::warning("Customer sync prior to invoice creation warning: " . $custEx->getMessage());
         }
 
+        $scopeId = (int) ($this->invoice->router_id ?? $customer?->router_id ?? 0);
+        $stampTrigger = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getStampInvoiceTrigger($scopeId);
+        $shouldStamp = ($stampTrigger === 'all');
+
         try {
-            $payload = SiigoHelper::buildInvoicePayload($this->invoice);
+            $payload = SiigoHelper::buildInvoicePayload($this->invoice, $shouldStamp);
             
             try {
                 $response = $siigo->createInvoice($payload);
@@ -86,14 +90,16 @@ class CreateSiigoInvoice implements ShouldQueue
                 $this->invoice->additional_information = $info;
                 $this->invoice->save();
 
-                // Stamp it
-                try {
-                    $siigo->stampInvoice($id);
-                } catch (\Exception $stampEx) {
-                    Log::warning('Siigo Invoice created but stamping failed: ' . $stampEx->getMessage(), [
-                        'invoice_id' => $this->invoice->id,
-                        'siigo_invoice_id' => $id
-                    ]);
+                // Stamp if configured as 'all'
+                if ($shouldStamp) {
+                    try {
+                        $siigo->stampInvoice($id);
+                    } catch (\Exception $stampEx) {
+                        Log::warning('Siigo Invoice created but stamping failed: ' . $stampEx->getMessage(), [
+                            'invoice_id' => $this->invoice->id,
+                            'siigo_invoice_id' => $id
+                        ]);
+                    }
                 }
             }
         } catch (\Exception $e) {

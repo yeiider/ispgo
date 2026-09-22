@@ -171,7 +171,7 @@ class SiigoHelper
         return $customer->identity_document ?: '';
     }
 
-    public static function buildInvoicePayload(\App\Models\Invoice\Invoice $invoice): array
+    public static function buildInvoicePayload(\App\Models\Invoice\Invoice $invoice, bool $sendStamp = false): array
     {
         $customer = $invoice->customer;
         $identification = self::getCustomerIdentification($customer);
@@ -267,7 +267,7 @@ class SiigoHelper
                 ]
             ],
             'stamp' => [
-                'send' => false
+                'send' => $sendStamp
             ]
         ];
 

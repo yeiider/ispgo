@@ -213,6 +213,16 @@ class BillingNovedad extends Model
                 $registry = app(\App\Services\Billing\Calculators\NovedadCalculatorRegistry::class);
                 $calculator = $registry->for($nov->type);
                 $nov->amount = $calculator->calculate($nov, $nov->service);
+            } elseif (in_array($nov->type, [self::T_SALDO_FAVOR, self::T_DESCUENTO_PROMO, self::T_NOTA_CREDITO, self::T_COMPENSACION])) {
+                $nov->amount = -abs((float)$nov->amount);
+            }
+        });
+
+        static::updating(function (self $nov) {
+            if ($nov->isDirty('amount') && $nov->amount !== null) {
+                if (in_array($nov->type, [self::T_SALDO_FAVOR, self::T_DESCUENTO_PROMO, self::T_NOTA_CREDITO, self::T_COMPENSACION])) {
+                    $nov->amount = -abs((float)$nov->amount);
+                }
             }
         });
         static::created(function (self $nov) {
