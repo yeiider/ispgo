@@ -95,6 +95,8 @@ type Query {
         plan_id: ID
         plan_ids: [ID!]
         additional_plans: [ID!]
+        billing_cycle_id: ID
+        billing_cycle_ids: [ID!]
         sort_column: String
         sort_direction: String
     ): [Service!]! @paginate(defaultCount: 10, builder: "App\\GraphQL\\Queries\\ServiceQuery")
