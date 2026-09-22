@@ -14,7 +14,7 @@ class ServiceQuery
      */
     public function __invoke($_, array $args): Builder
     {
-        $query = Service::query()->with(['customer', 'customer.addresses', 'plan', 'router', 'additionalPlans']);
+        $query = Service::query()->with(['customer', 'customer.addresses', 'plan', 'router', 'additionalPlans', 'billingCycle']);
 
         // Generic search: SN or customer name (first_name + last_name)
         if (!empty($args['search'])) {
@@ -76,11 +76,17 @@ class ServiceQuery
             });
         }
 
+        if (!empty($args['billing_cycle_ids'])) {
+            $query->whereIn('billing_cycle_id', $args['billing_cycle_ids']);
+        } elseif (!empty($args['billing_cycle_id']) && $args['billing_cycle_id'] !== 'all') {
+            $query->where('billing_cycle_id', $args['billing_cycle_id']);
+        }
+
         // Apply sorting
         $sortColumn = $args['sort_column'] ?? 'id';
         $sortDirection = isset($args['sort_direction']) && strtolower($args['sort_direction']) === 'asc' ? 'asc' : 'desc';
 
-        $allowedSortColumns = ['id', 'service_ip', 'service_status', 'mac_address', 'service_type', 'sn', 'created_at'];
+        $allowedSortColumns = ['id', 'service_ip', 'service_status', 'mac_address', 'service_type', 'sn', 'created_at', 'billing_cycle_id'];
         if (in_array($sortColumn, $allowedSortColumns)) {
             $query->orderBy($sortColumn, $sortDirection);
         } else {
