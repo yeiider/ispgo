@@ -92,6 +92,11 @@ class SiigoClient
         return $this->req('POST', '/v1/invoices', ['json' => $payload]);
     }
 
+    public function updateInvoice(string $id, array $payload): ResponseInterface
+    {
+        return $this->req('PUT', "/v1/invoices/{$id}", ['json' => $payload]);
+    }
+
     public function getInvoiceByUuid(string $id): ResponseInterface
     {
         return $this->req('GET', "/v1/invoices/{$id}");
@@ -100,6 +105,16 @@ class SiigoClient
     public function stampInvoice(string $id): ResponseInterface
     {
         return $this->req('POST', "/v1/invoices/{$id}/stamp");
+    }
+
+    public function annulInvoice(string $id): ResponseInterface
+    {
+        return $this->req('POST', "/v1/invoices/{$id}/annul");
+    }
+
+    public function deleteInvoice(string $id): ResponseInterface
+    {
+        return $this->req('DELETE', "/v1/invoices/{$id}");
     }
 
     public function createVoucher(array $payload): ResponseInterface

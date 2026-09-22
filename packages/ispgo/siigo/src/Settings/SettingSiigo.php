@@ -76,6 +76,11 @@ class SettingSiigo
                 "label" => "Cuando sincronizar facturas",
                 "options" => \Ispgo\Siigo\Settings\Sources\SyncInvoiceOptions::class,
             ],
+            "stamp_invoice_trigger" => [
+                "field" => "select-field",
+                "label" => "Facturas que se presentan electrónicamente a la DIAN (Stamp)",
+                "options" => \Ispgo\Siigo\Settings\Sources\StampInvoiceOptions::class,
+            ],
             "document_id" => [
                 "field" => "text-field",
                 "label" => "ID del Tipo de Documento de Factura (FV)",

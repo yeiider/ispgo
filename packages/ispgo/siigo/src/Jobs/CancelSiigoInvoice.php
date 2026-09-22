@@ -53,10 +53,53 @@ class CancelSiigoInvoice implements ShouldQueue
         }
 
         // Prevent double sync unless forced
-        if (!empty($info['siigo_credit_note_id']) && !$this->force) {
+        if ((!empty($info['siigo_credit_note_id']) || !empty($info['siigo_annulled'])) && !$this->force) {
             return;
         }
 
+        $siigoInvoiceId = $info['siigo_invoice_id'];
+
+        // Check if invoice in Siigo is stamped/electronic or draft
+        $isStamped = false;
+        try {
+            $invRes = $siigo->getInvoiceByUuid($siigoInvoiceId);
+            $invData = json_decode((string) $invRes->getBody(), true);
+            $stampStatus = $invData['stamp']['status'] ?? null;
+            $cufe = $invData['stamp']['cufe'] ?? null;
+            if ($stampStatus === 'stamped' || !empty($cufe)) {
+                $isStamped = true;
+            }
+        } catch (\Exception $getEx) {
+            Log::warning("Could not fetch Siigo invoice status prior to cancellation, assuming credit note needed: " . $getEx->getMessage(), [
+                'invoice_id' => $this->invoice->id,
+                'siigo_invoice_id' => $siigoInvoiceId
+            ]);
+            // Default to credit note if status check fails
+            $isStamped = true;
+        }
+
+        // 1. If invoice is draft (not stamped in DIAN), annul directly via POST /v1/invoices/{id}/annul
+        if (!$isStamped) {
+            try {
+                $siigo->annulInvoice($siigoInvoiceId);
+                $info['siigo_annulled'] = true;
+                $info['siigo_annulled_at'] = now()->toIso8601String();
+                $this->invoice->additional_information = $info;
+                $this->invoice->save();
+
+                Log::info("Siigo Invoice #{$siigoInvoiceId} annulled directly as draft.", [
+                    'invoice_id' => $this->invoice->id
+                ]);
+                return;
+            } catch (\Exception $annulEx) {
+                Log::warning("Siigo annulInvoice failed for draft invoice #{$siigoInvoiceId}, falling back to Credit Note: " . $annulEx->getMessage(), [
+                    'invoice_id' => $this->invoice->id
+                ]);
+                // Fallback to Credit Note if annulment fails
+            }
+        }
+
+        // 2. If invoice is stamped/electronic or annulment failed, create and stamp a Credit Note
         try {
             $payload = SiigoHelper::buildCreditNotePayload($this->invoice);
             $response = $siigo->createCreditNote($payload);

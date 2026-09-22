@@ -86,12 +86,14 @@ type Query {
         search: String
         service_ip: String
         service_status: String
+        service_statuses: [String!]
         customer_id: ID
         mac_address: String
         service_type: String
         sn: String
         sn_duplicated: Boolean
         plan_id: ID
+        plan_ids: [ID!]
         additional_plans: [ID!]
         sort_column: String
         sort_direction: String

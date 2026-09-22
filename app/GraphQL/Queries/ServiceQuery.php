@@ -31,7 +31,9 @@ class ServiceQuery
             $query->where('service_ip', 'like', '%' . $args['service_ip'] . '%');
         }
 
-        if (!empty($args['service_status'])) {
+        if (!empty($args['service_statuses'])) {
+            $query->whereIn('service_status', $args['service_statuses']);
+        } elseif (!empty($args['service_status']) && $args['service_status'] !== 'all') {
             $query->where('service_status', $args['service_status']);
         }
 
@@ -57,12 +59,14 @@ class ServiceQuery
                 ->whereNotNull('sn')
                 ->where('sn', '!=', '')
                 ->groupBy('sn')
-                ->having(\DB::raw('COUNT(*)'), '>', 1);
+                ->having(DB::raw('COUNT(*)'), '>', 1);
 
             $query->whereIn('sn', $duplicateSns);
         }
 
-        if (!empty($args['plan_id']) && $args['plan_id'] !== 'all') {
+        if (!empty($args['plan_ids'])) {
+            $query->whereIn('plan_id', $args['plan_ids']);
+        } elseif (!empty($args['plan_id']) && $args['plan_id'] !== 'all') {
             $query->where('plan_id', $args['plan_id']);
         }
 

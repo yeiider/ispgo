@@ -94,4 +94,63 @@ class ImportBillingNovedadesTest extends TestCase
 
         @unlink($tempFile);
     }
+
+    public function test_saldo_favor_novedad_saves_negative_amount_and_deducts_from_invoice()
+    {
+        /** @var \App\Models\User $user */
+        $user = \App\Models\User::factory()->create();
+        $this->actingAs($user);
+
+        $router = Router::create([
+            'code' => 'R_NOV_SALDO',
+            'name' => 'Router Saldo',
+        ]);
+
+        $customer = Customer::create([
+            'first_name' => 'Juan',
+            'last_name' => 'Perez',
+            'email_address' => 'saldo@example.com',
+            'phone_number' => '3000002222',
+            'document_type' => 'CC',
+            'identity_document' => '999888777',
+            'customer_status' => 'active',
+            'router_id' => $router->id,
+        ]);
+
+        $plan = Plan::create([
+            'name' => 'Plan 50MB',
+            'download_speed' => 50,
+            'upload_speed' => 50,
+            'monthly_price' => 50000,
+        ]);
+
+        $service = Service::create([
+            'customer_id' => $customer->id,
+            'router_id' => $router->id,
+            'plan_id' => $plan->id,
+            'service_ip' => '192.168.99.20',
+            'service_status' => 'active',
+        ]);
+
+        // Create a positive 10,000 "saldo_favor" novelty (as a user would enter in UI)
+        $nov = BillingNovedad::create([
+            'service_id' => $service->id,
+            'customer_id' => $customer->id,
+            'type' => BillingNovedad::T_SALDO_FAVOR,
+            'amount' => 10000.00,
+            'description' => 'Saldo a favor cliente',
+            'effective_period' => '2026-09-01',
+        ]);
+
+        // 1. Verify model saves it as negative -10000.00
+        $this->assertEquals(-10000.00, (float)$nov->fresh()->amount);
+
+        // 2. Generate invoice for customer
+        $billingService = app(\App\Services\Billing\CustomerBillingService::class);
+        $invoice = $billingService->generateForPeriod($customer, \Carbon\Carbon::parse('2026-09-01'));
+
+        $this->assertNotNull($invoice);
+        // Total should be 50,000 - 10,000 = 40,000
+        $this->assertEquals(40000.00, (float)$invoice->fresh()->total);
+    }
 }

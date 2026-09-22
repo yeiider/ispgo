@@ -4,9 +4,11 @@ namespace Ispgo\Siigo\Listeners;
 use App\Events\InvoiceCreated;
 use App\Events\InvoicePaid;
 use App\Events\InvoiceCanceled;
+use App\Events\InvoiceDeleted;
 use Ispgo\Siigo\Jobs\CreateSiigoInvoice;
 use Ispgo\Siigo\Jobs\PaySiigoInvoice;
 use Ispgo\Siigo\Jobs\CancelSiigoInvoice;
+use Ispgo\Siigo\Jobs\DeleteSiigoInvoice;
 use Ispgo\Siigo\Settings\ConfigProviderSiigo;
 
 class SyncInvoice
@@ -66,6 +68,23 @@ class SyncInvoice
         }
 
         CancelSiigoInvoice::dispatch($invoice)->delay(now()->addSeconds(5))->onQueue('redis');
+    }
+
+    public function onDeleted(InvoiceDeleted $event): void
+    {
+        $invoice = $event->invoice;
+        $customer = $invoice->customer;
+        $scopeId = (int) ($invoice->router_id ?? $customer?->router_id ?? 0);
+
+        if (!ConfigProviderSiigo::getEnabled($scopeId) || !ConfigProviderSiigo::getSyncInvoice($scopeId)) {
+            return;
+        }
+
+        if (!$customer || !$customer->taxDetails || !$customer->taxDetails->enable_billing) {
+            return;
+        }
+
+        DeleteSiigoInvoice::dispatch($invoice)->delay(now()->addSeconds(2))->onQueue('redis');
     }
 
     public function onDiscountApplied(\App\Events\InvoiceDiscountApplied $event): void

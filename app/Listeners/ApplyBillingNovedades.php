@@ -83,17 +83,27 @@ class ApplyBillingNovedades
 
                         // ———————————————— B) Otras novedades (cargos o descuentos) ————————————————
                     } else {
+                        $amount = (float) $nov->amount;
+                        if (in_array($nov->type, [
+                            BillingNovedad::T_SALDO_FAVOR,
+                            BillingNovedad::T_DESCUENTO_PROMO,
+                            BillingNovedad::T_NOTA_CREDITO,
+                            BillingNovedad::T_COMPENSACION,
+                        ])) {
+                            $amount = -abs($amount);
+                        }
+
                         $item = $invoice->items()->create([
                             'description' => $nov->description ?? ucfirst(str_replace('_', ' ', $nov->type)),
                             'invoice_id'  => $invoice->id,
                             'service_id'  => $service->id,
                             'quantity'    => 1,
-                            'unit_price'  => $nov->amount,
-                            'subtotal'    => $nov->amount,
+                            'unit_price'  => $amount,
+                            'subtotal'    => $amount,
                         ]);
 
-                        $kind = $nov->amount < 0 ? 'discount' : 'charge';
-                        $this->createAdjustment($invoice, $nov, $item, $kind, $nov->amount, $service);
+                        $kind = $amount < 0 ? 'discount' : 'charge';
+                        $this->createAdjustment($invoice, $nov, $item, $kind, $amount, $service);
                     }
 
                     // 3) Marcar novedad como aplicada

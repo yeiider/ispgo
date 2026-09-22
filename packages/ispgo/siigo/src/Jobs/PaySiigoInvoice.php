@@ -54,6 +54,30 @@ class PaySiigoInvoice implements ShouldQueue
             return;
         }
 
+        $siigoInvoiceId = $info['siigo_invoice_id'];
+
+        // Stamp invoice upon payment if configured as 'paid_only'
+        $scopeId = (int) ($this->invoice->router_id ?? $customer?->router_id ?? 0);
+        $stampTrigger = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getStampInvoiceTrigger($scopeId);
+        if ($stampTrigger === 'paid_only' && empty($info['siigo_stamped'])) {
+            try {
+                $siigo->stampInvoice($siigoInvoiceId);
+                $info['siigo_stamped'] = true;
+                $info['siigo_stamped_at'] = now()->toIso8601String();
+                $this->invoice->additional_information = $info;
+                $this->invoice->save();
+
+                Log::info("Siigo Invoice #{$siigoInvoiceId} stamped upon payment.", [
+                    'invoice_id' => $this->invoice->id
+                ]);
+                sleep(2);
+            } catch (\Exception $stampEx) {
+                Log::warning("Stamping Siigo Invoice #{$siigoInvoiceId} upon payment failed: " . $stampEx->getMessage(), [
+                    'invoice_id' => $this->invoice->id
+                ]);
+            }
+        }
+
         // Prevent double sync of the voucher unless forced
         if (!empty($info['siigo_voucher_id']) && !$this->force) {
             return;
