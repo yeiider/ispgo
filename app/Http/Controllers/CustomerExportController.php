@@ -96,8 +96,8 @@ class CustomerExportController extends Controller
 
     public function exportServiceCsv()
     {
-        // Obtenemos todos los servicios con sus relaciones (ajusta las relaciones si es necesario)
-        $services = Service::with([])->get(); // Agregar relaciones necesarias en el array
+        // Obtenemos todos los servicios con la relación de planes adicionales
+        $services = Service::with(['additionalPlans'])->get();
 
         // Definimos el nombre del archivo CSV
         $fileName = 'services_export_' . now()->format('Y_m_d_H_i_s') . '.csv';
@@ -110,81 +110,67 @@ class CustomerExportController extends Controller
 
         // Generamos el contenido del CSV
         $callback = function () use ($services) {
-            // Abrimos un archivo para escritura en memoria temporal
             $file = fopen('php://output', 'w');
 
-            // Escribimos los encabezados en el archivo CSV
+            // Escribimos los encabezados en el archivo CSV compatibles con ServiceImporterService
             fputcsv($file, [
-                'Router ID',
-                'Customer ID',
-                'Internet Plan ID',
-                'Service IP',
-                'Plan ID',
-                'Username Router',
-                'Password Router',
-                'Service Status',
-                'Activation Date',
-                'Deactivation Date',
-                'Bandwidth',
-                'MAC Address',
-                'Installation Date',
-                'Service Notes',
-                'Contract ID',
-                'Support Contact',
-                'Service Location',
-                'Service Type',
-                'Static IP',
-                'Data Limit',
-                'Last Maintenance',
-                'Billing Cycle',
-                'Service Priority',
-                'SN',
-                'Assigned Technician',
-                'Service Contract',
-                'Created By',
-                'Updated By',
+                'id',
+                'sn',
+                'service_ip',
+                'mac_address',
+                'service_status',
+                'service_type',
+                'plan_id',
+                'additional_plans',
+                'router_id',
+                'billing_cycle_id',
+                'activation_date',
+                'installation_date',
+                'service_notes',
+                'username_router',
+                'password_router',
+                'unu_latitude',
+                'unu_longitude',
             ]);
 
-            // Iteramos sobre los servicios para escribir cada registro
             foreach ($services as $service) {
+                $apIds = $service->additionalPlans->pluck('id')->toArray();
+                $additionalPlansStr = empty($apIds)
+                    ? ''
+                    : (count($apIds) === 1 ? (string) $apIds[0] : '[' . implode(', ', $apIds) . ']');
+
+                $actDate = $service->activation_date
+                    ? (is_string($service->activation_date) ? $service->activation_date : $service->activation_date->format('Y-m-d'))
+                    : '';
+                $instDate = $service->installation_date
+                    ? (is_string($service->installation_date) ? $service->installation_date : $service->installation_date->format('Y-m-d'))
+                    : '';
+
                 fputcsv($file, [
-                    $service->router_id,
-                    $service->customer_id,
-                    $service->internet_plan_id,
+                    $service->id,
+                    $service->sn,
                     $service->service_ip,
+                    $service->mac_address,
+                    $service->service_status,
+                    $service->service_type,
                     $service->plan_id,
+                    $additionalPlansStr,
+                    $service->router_id,
+                    $service->billing_cycle_id,
+                    $actDate,
+                    $instDate,
+                    $service->service_notes,
                     $service->username_router,
                     $service->password_router,
-                    $service->service_status,
-                    $service->activation_date,
-                    $service->deactivation_date,
-                    $service->bandwidth,
-                    $service->mac_address,
-                    $service->installation_date,
-                    $service->service_notes,
-                    $service->contract_id,
-                    $service->support_contact,
-                    $service->service_location,
-                    $service->service_type,
-                    $service->static_ip,
-                    $service->data_limit,
-                    $service->last_maintenance,
-                    $service->billing_cycle,
-                    $service->service_priority,
-                    $service->sn,
-                    $service->assigned_technician,
-                    $service->service_contract,
-                    $service->created_by,
-                    $service->updated_by,
+                    $service->unu_latitude,
+                    $service->unu_longitude,
                 ]);
             }
 
-            // Cerramos el archivo
             fclose($file);
         };
 
         // Retornamos la respuesta para descargar el archivo
         return Response::stream($callback, 200, $headers);
     }
-
 }

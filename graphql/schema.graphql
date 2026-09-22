@@ -448,6 +448,7 @@ type Mutation @guard {
         monthly_price: Float! @rules(apply: ["required", "numeric", "min:0"])
         status: String! @rules(apply: ["required", "in:active,inactive"])
         description: String
+        is_taxable: Boolean
     ): AdditionalPlan @create(model: "App\\Models\\Services\\AdditionalPlan")
 
     updateAdditionalPlan(
@@ -456,6 +457,7 @@ type Mutation @guard {
         monthly_price: Float @rules(apply: ["numeric", "min:0"])
         status: String @rules(apply: ["in:active,inactive"])
         description: String
+        is_taxable: Boolean
     ): AdditionalPlan @update(model: "App\\Models\\Services\\AdditionalPlan")
 
     deleteAdditionalPlan(
@@ -910,6 +912,7 @@ type AdditionalPlan {
     monthly_price: Float!
     status: String!
     description: String
+    is_taxable: Boolean
     created_at: DateTime!
     updated_at: DateTime!
 

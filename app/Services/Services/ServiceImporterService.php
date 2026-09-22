@@ -4,6 +4,7 @@ namespace App\Services\Services;
 
 use App\Models\Services\Service;
 use App\Models\Services\Plan;
+use App\Models\Services\AdditionalPlan;
 use App\Models\Router;
 use App\Models\BillingCycle;
 use Illuminate\Support\Facades\DB;
@@ -162,6 +163,24 @@ class ServiceImporterService
                         'error' => "El ciclo de facturación con ID '{$parsed['billing_cycle_id']}' no existe."
                     ];
                     continue;
+                }
+
+                if (array_key_exists('additional_plans', $parsed) && !empty($parsed['additional_plans'])) {
+                    $apHasError = false;
+                    foreach ($parsed['additional_plans'] as $apId) {
+                        if (!is_numeric($apId) || !AdditionalPlan::find($apId)) {
+                            $errors[] = [
+                                'row' => $rowNumber,
+                                'name' => "{$clientName} (ID: {$service->id})",
+                                'error' => "El plan adicional con ID '{$apId}' no existe en la base de datos."
+                            ];
+                            $apHasError = true;
+                            break;
+                        }
+                    }
+                    if ($apHasError) {
+                        continue;
+                    }
                 }
 
                 $updated++;
@@ -323,6 +342,10 @@ class ServiceImporterService
                     $service->update($updateData);
                 }
 
+                if (array_key_exists('additional_plans', $parsed) && $parsed['additional_plans'] !== null) {
+                    $service->additionalPlans()->sync($parsed['additional_plans']);
+                }
+
                 $updated++;
                 $updatedRecords[] = [
                     'row' => $rowNumber,
@@ -384,6 +407,7 @@ class ServiceImporterService
         $notesKeys = ['service_notes', 'notas', 'observaciones'];
         $userRouterKeys = ['username_router', 'usuario_router'];
         $passRouterKeys = ['password_router', 'clave_router'];
+        $additionalPlanKeys = ['additional_plans', 'planes_adicionales', 'additional_plan_ids', 'id_planes_adicionales', 'planes_adicionales_ids'];
 
         $parsed = [];
 
@@ -420,9 +444,49 @@ class ServiceImporterService
                 $parsed['username_router'] = $value;
             } elseif (in_array($key, $passRouterKeys, true)) {
                 $parsed['password_router'] = $value;
+            } elseif (in_array($key, $additionalPlanKeys, true)) {
+                $parsed['additional_plans'] = $this->parseAdditionalPlanIds($value);
             }
         }
 
         return $parsed;
+    }
+
+    /**
+     * Parse additional plan IDs from single ID (1 or "1") or bracket array ([1, 2] or "[1, 2]").
+     */
+    protected function parseAdditionalPlanIds($value): array
+    {
+        if (is_null($value) || trim((string) $value) === '') {
+            return [];
+        }
+
+        $str = trim((string) $value);
+
+        if (str_starts_with($str, '[') && str_ends_with($str, ']')) {
+            $str = substr($str, 1, -1);
+            if (trim($str) === '') {
+                return [];
+            }
+            $parts = explode(',', $str);
+        } else {
+            $parts = [$str];
+        }
+
+        $ids = [];
+        foreach ($parts as $part) {
+            $clean = trim($part, " \t\n\r\0\x0B'\"");
+            if ($clean === '') {
+                continue;
+            }
+
+            if (is_numeric($clean)) {
+                $ids[] = (int) $clean;
+            } else {
+                $ids[] = $clean;
+            }
+        }
+
+        return array_values(array_unique($ids));
     }
 }

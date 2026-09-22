@@ -363,6 +363,8 @@ class PlanImporterService
             'perfil_smart_olt' => 'profile_smart_olt',
             'is_dedicated' => 'is_dedicated',
             'es_dedicado' => 'is_dedicated',
+            'is_promotional' => 'is_dedicated',
+            'es_promocional' => 'is_dedicated',
             'is_synchronized' => 'is_synchronized',
             'es_sincronizado' => 'is_synchronized',
             'data_limit' => 'data_limit',

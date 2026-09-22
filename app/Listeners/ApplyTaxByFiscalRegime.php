@@ -70,11 +70,6 @@ class ApplyTaxByFiscalRegime implements ShouldQueue
 
         // Recalcular subtotal fresco desde la base de datos
         $invoice->load('adjustments');
-        $subtotal = $invoice->subtotal ?? 0;
-
-        if ($subtotal <= 0) {
-            return;
-        }
 
         // Verificar que no se haya aplicado ya un ajuste de impuesto automático
         $alreadyApplied = $invoice->adjustments()
@@ -87,7 +82,40 @@ class ApplyTaxByFiscalRegime implements ShouldQueue
             return;
         }
 
-        $ivaAmount = round($subtotal * self::IVA_RATE, 2);
+        // Calcular la base gravable sumando los cargos gravables
+        $taxableSubtotal = 0;
+        foreach ($invoice->adjustments->where('kind', 'charge') as $adj) {
+            $isTaxable = true;
+            $meta = $adj->metadata ?? [];
+
+            if (isset($meta['is_taxable'])) {
+                $isTaxable = (bool) $meta['is_taxable'];
+            } elseif (!empty($meta['additional_plan_id'])) {
+                $ap = \App\Models\Services\AdditionalPlan::find($meta['additional_plan_id']);
+                if ($ap) {
+                    $isTaxable = (bool) $ap->is_taxable;
+                }
+            } elseif ($adj->source_type === \App\Models\Services\AdditionalPlan::class && $adj->source_id) {
+                $ap = \App\Models\Services\AdditionalPlan::find($adj->source_id);
+                if ($ap) {
+                    $isTaxable = (bool) $ap->is_taxable;
+                }
+            }
+
+            if ($isTaxable) {
+                $taxableSubtotal += $adj->amount;
+            }
+        }
+
+        // Restar descuentos si aplican
+        $discounts = $invoice->adjustments->where('kind', 'discount')->sum('amount');
+        $taxableSubtotal = max(0, $taxableSubtotal + $discounts);
+
+        if ($taxableSubtotal <= 0) {
+            return;
+        }
+
+        $ivaAmount = round($taxableSubtotal * self::IVA_RATE, 2);
 
         if ($ivaAmount <= 0) {
             return;
