@@ -14,11 +14,13 @@ class AdditionalPlan extends Model
         'name',
         'monthly_price',
         'status',
-        'description'
+        'description',
+        'is_taxable'
     ];
 
     protected $casts = [
         'monthly_price' => 'float',
+        'is_taxable' => 'boolean',
     ];
 
     /**

@@ -185,6 +185,7 @@ class CustomerBillingService
                                     'service_id' => $service->id,
                                     'additional_plan_id' => $ap->id,
                                     'invoice_item_id' => $apItem->id,
+                                    'is_taxable' => (bool) ($ap->is_taxable ?? true),
                                 ],
                                 'created_by' => auth()->id(),
                             ]);
