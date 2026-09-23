@@ -8,6 +8,7 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 #import templates.graphql
 #import contracts.graphql
 #import billing_cycles.graphql
+#import tickets.graphql
 
 "A date string with format 'Y-m-d', e.g. '2011-05-23'."
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
@@ -332,6 +333,10 @@ type Mutation @guard {
         service_contract: String
         additional_plans: [ID!]
     ): Service @field(resolver: "App\\GraphQL\\Mutations\\ServiceMutation@update")
+
+    deleteService(
+        id: ID! @rules(apply: ["required", "exists:services,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ServiceMutation@delete")
 
     createRouter(
         name: String! @rules(apply: ["required", "max:255"])

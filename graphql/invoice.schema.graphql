@@ -175,6 +175,13 @@ extend type Mutation {
     ): ManualInvoiceResult
         @field(resolver: "App\\GraphQL\\Mutations\\CancelInvoiceMutation@resolve")
         @guard
+
+    "Eliminar una factura (soft delete, solo si no está pagada)"
+    deleteInvoice(
+        id: ID! @rules(apply: ["required", "exists:invoices,id"])
+    ): ActionResult
+        @field(resolver: "App\\GraphQL\\Mutations\\DeleteInvoiceMutation@resolve")
+        @guard
 }
 
 extend type Query {

@@ -1,0 +1,5 @@
+extend type Mutation {
+    deleteTicket(
+        id: ID! @rules(apply: ["required", "exists:tickets,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\TicketMutation@delete")
+}

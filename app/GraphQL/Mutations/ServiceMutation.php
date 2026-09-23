@@ -45,4 +45,18 @@ class ServiceMutation
         
         return $service->fresh(['additionalPlans', 'customer', 'plan', 'router', 'address']);
     }
+
+    /**
+     * Delete a service (Soft Delete)
+     */
+    public function delete($_, array $args)
+    {
+        $service = Service::findOrFail($args['id']);
+        $service->delete();
+
+        return [
+            'success' => true,
+            'message' => 'Servicio eliminado exitosamente.',
+        ];
+    }
 }
