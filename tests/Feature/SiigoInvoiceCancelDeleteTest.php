@@ -20,16 +20,28 @@ class SiigoInvoiceCancelDeleteTest extends TestCase
 
     public function test_cancel_siigo_invoice_annuls_draft_invoice()
     {
+        $user = \App\Models\User::factory()->create();
         $router = Router::factory()->create();
-        $customer = Customer::factory()->create(['router_id' => $router->id]);
+        $customer = Customer::factory()->create(['router_id' => $router->id, 'date_of_birth' => '1990-01-01']);
         TaxDetail::factory()->create([
             'customer_id' => $customer->id,
             'enable_billing' => true,
         ]);
 
-        $invoice = Invoice::factory()->create([
+        $invoice = Invoice::create([
+            'user_id' => $user->id,
             'customer_id' => $customer->id,
             'router_id' => $router->id,
+            'issue_date' => now(),
+            'due_date' => now()->addDays(30),
+            'billing_period' => now()->format('Y-m'),
+            'subtotal' => 50000,
+            'tax' => 0,
+            'total' => 50000,
+            'amount' => 0,
+            'outstanding_balance' => 50000,
+            'status' => 'unpaid',
+            'increment_id' => '0000000010',
             'additional_information' => [
                 'siigo_invoice_id' => 'siigo-uuid-123',
             ],
@@ -61,16 +73,28 @@ class SiigoInvoiceCancelDeleteTest extends TestCase
 
     public function test_cancel_siigo_invoice_creates_credit_note_for_stamped_invoice()
     {
+        $user = \App\Models\User::factory()->create();
         $router = Router::factory()->create();
-        $customer = Customer::factory()->create(['router_id' => $router->id]);
+        $customer = Customer::factory()->create(['router_id' => $router->id, 'date_of_birth' => '1990-01-01']);
         TaxDetail::factory()->create([
             'customer_id' => $customer->id,
             'enable_billing' => true,
         ]);
 
-        $invoice = Invoice::factory()->create([
+        $invoice = Invoice::create([
+            'user_id' => $user->id,
             'customer_id' => $customer->id,
             'router_id' => $router->id,
+            'issue_date' => now(),
+            'due_date' => now()->addDays(30),
+            'billing_period' => now()->format('Y-m'),
+            'subtotal' => 50000,
+            'tax' => 0,
+            'total' => 50000,
+            'amount' => 0,
+            'outstanding_balance' => 50000,
+            'status' => 'unpaid',
+            'increment_id' => '0000000011',
             'additional_information' => [
                 'siigo_invoice_id' => 'siigo-uuid-stamped',
             ],
@@ -110,16 +134,28 @@ class SiigoInvoiceCancelDeleteTest extends TestCase
 
     public function test_delete_siigo_invoice_deletes_draft_invoice()
     {
+        $user = \App\Models\User::factory()->create();
         $router = Router::factory()->create();
-        $customer = Customer::factory()->create(['router_id' => $router->id]);
+        $customer = Customer::factory()->create(['router_id' => $router->id, 'date_of_birth' => '1990-01-01']);
         TaxDetail::factory()->create([
             'customer_id' => $customer->id,
             'enable_billing' => true,
         ]);
 
-        $invoice = Invoice::factory()->create([
+        $invoice = Invoice::create([
+            'user_id' => $user->id,
             'customer_id' => $customer->id,
             'router_id' => $router->id,
+            'issue_date' => now(),
+            'due_date' => now()->addDays(30),
+            'billing_period' => now()->format('Y-m'),
+            'subtotal' => 50000,
+            'tax' => 0,
+            'total' => 50000,
+            'amount' => 0,
+            'outstanding_balance' => 50000,
+            'status' => 'unpaid',
+            'increment_id' => '0000000012',
             'additional_information' => [
                 'siigo_invoice_id' => 'siigo-uuid-draft',
             ],

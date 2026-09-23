@@ -36,9 +36,27 @@ class CreateSiigoInvoice implements ShouldQueue
             return;
         }
 
-        // Prevent double sync unless forced
+        $scopeId = (int) ($this->invoice->router_id ?? $customer?->router_id ?? 0);
+        $stampTrigger = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getStampInvoiceTrigger($scopeId);
+        $shouldStamp = ($stampTrigger === 'all');
+
+        // Prevent double sync: if invoice already exists in Siigo, do not re-create it
         $info = $this->invoice->additional_information ?? [];
-        if (!empty($info['siigo_invoice_id']) && !$this->force) {
+        if (!empty($info['siigo_invoice_id'])) {
+            if ($shouldStamp && empty($info['siigo_stamped'])) {
+                try {
+                    $siigo->stampInvoice($info['siigo_invoice_id']);
+                    $info['siigo_stamped'] = true;
+                    $info['siigo_stamped_at'] = now()->toIso8601String();
+                    $this->invoice->additional_information = $info;
+                    $this->invoice->save();
+                } catch (\Exception $stampEx) {
+                    Log::warning('Siigo Invoice already exists, stamp attempt failed: ' . $stampEx->getMessage(), [
+                        'invoice_id' => $this->invoice->id,
+                        'siigo_invoice_id' => $info['siigo_invoice_id']
+                    ]);
+                }
+            }
             return;
         }
 
@@ -50,10 +68,6 @@ class CreateSiigoInvoice implements ShouldQueue
             Log::warning("Customer sync prior to invoice creation warning: " . $custEx->getMessage());
         }
 
-        $scopeId = (int) ($this->invoice->router_id ?? $customer?->router_id ?? 0);
-        $stampTrigger = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getStampInvoiceTrigger($scopeId);
-        $shouldStamp = ($stampTrigger === 'all');
-
         try {
             $payload = SiigoHelper::buildInvoicePayload($this->invoice, $shouldStamp);
             
@@ -64,6 +78,9 @@ class CreateSiigoInvoice implements ShouldQueue
                 if (isset($payload['stamp']) && (str_contains($createEx->getMessage(), 'The send cannot be used') || str_contains($createEx->getMessage(), 'document_settings'))) {
                     unset($payload['stamp']);
                     $response = $siigo->createInvoice($payload);
+                } elseif (str_contains($createEx->getMessage(), '409 Conflict') || str_contains($createEx->getMessage(), 'duplicated_document')) {
+                    Log::warning("Siigo invoice creation returned duplicated_document (409) for invoice #{$this->invoice->id}. It may already exist in Siigo.");
+                    return;
                 } else {
                     throw $createEx;
                 }

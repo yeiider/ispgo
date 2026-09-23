@@ -52,8 +52,8 @@ class CancelSiigoInvoice implements ShouldQueue
             return;
         }
 
-        // Prevent double sync unless forced
-        if ((!empty($info['siigo_credit_note_id']) || !empty($info['siigo_annulled'])) && !$this->force) {
+        // Prevent double sync if credit note or annulment was already processed
+        if (!empty($info['siigo_credit_note_id']) || !empty($info['siigo_annulled'])) {
             return;
         }
 
