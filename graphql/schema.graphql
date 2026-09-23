@@ -8,7 +8,6 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 #import templates.graphql
 #import contracts.graphql
 #import billing_cycles.graphql
-#import tickets.graphql
 
 "A date string with format 'Y-m-d', e.g. '2011-05-23'."
 scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
@@ -183,8 +182,8 @@ type AppNotification {
 
 type Mutation @guard {
     # Notificaciones in-app
-    markNotificationsRead(ids: [ID!]!): Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkNotificationsRead")
-    markAllNotificationsRead: Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkAllNotificationsRead")
+    markNotificationsRead(ids: [ID!]!): Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkNotificationsRead@resolve")
+    markAllNotificationsRead: Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkAllNotificationsRead@resolve")
 
     # Cotizaciones
     createCotizacion(
