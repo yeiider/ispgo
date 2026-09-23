@@ -182,8 +182,8 @@ type AppNotification {
 
 type Mutation @guard {
     # Notificaciones in-app
-    markNotificationsRead(ids: [ID!]!): Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkNotificationsRead")
-    markAllNotificationsRead: Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkAllNotificationsRead")
+    markNotificationsRead(ids: [ID!]!): Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkNotificationsRead@resolve")
+    markAllNotificationsRead: Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkAllNotificationsRead@resolve")
 
     # Cotizaciones
     createCotizacion(
@@ -332,6 +332,10 @@ type Mutation @guard {
         service_contract: String
         additional_plans: [ID!]
     ): Service @field(resolver: "App\\GraphQL\\Mutations\\ServiceMutation@update")
+
+    deleteService(
+        id: ID! @rules(apply: ["required", "exists:services,id"])
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ServiceMutation@delete")
 
     createRouter(
         name: String! @rules(apply: ["required", "max:255"])

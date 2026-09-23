@@ -261,11 +261,13 @@ class InvoiceController extends Controller
                 return response()->json(['error' => 'La integración con Siigo no está activa en la configuración.'], Response::HTTP_BAD_REQUEST);
             }
 
-            // 1. Sync invoice creation
-            $job = new \Ispgo\Siigo\Jobs\CreateSiigoInvoice($invoice, true);
-            dispatch_sync($job);
-
-            $invoice->refresh();
+            // 1. Sync invoice creation (only if not already created in Siigo)
+            $info = $invoice->additional_information ?? [];
+            if (empty($info['siigo_invoice_id'])) {
+                $job = new \Ispgo\Siigo\Jobs\CreateSiigoInvoice($invoice, true);
+                dispatch_sync($job);
+                $invoice->refresh();
+            }
 
             // 2. If status is paid, sync payment voucher as well
             if ($invoice->status === 'paid') {
@@ -273,7 +275,7 @@ class InvoiceController extends Controller
                 dispatch_sync($payJob);
             }
 
-            // 3. If status is canceled, sync credit note as well
+            // 3. If status is canceled, sync credit note / annulment as well
             if ($invoice->status === 'canceled') {
                 $cancelJob = new \Ispgo\Siigo\Jobs\CancelSiigoInvoice($invoice, true);
                 dispatch_sync($cancelJob);
