@@ -190,3 +190,15 @@ Route::prefix('public/contract')->group(function () {
     Route::get('/{id}/preview-pdf', [\App\Http\Controllers\Api\PublicContractController::class, 'previewPdf']);
 });
 Route::post('/public/upload/temp', [\App\Http\Controllers\Api\PublicContractController::class, 'uploadTemp']);
+
+/*
+|--------------------------------------------------------------------------
+| Public Payment Portal Routes (no authentication required)
+|--------------------------------------------------------------------------
+| Used by the client-facing /pagar page. Exposes only invoice totals and
+| customer name (no address/phone/email).
+|*/
+Route::prefix('public/payment')->group(function () {
+    Route::get('/search', [\App\Http\Controllers\Api\PublicPaymentController::class, 'search']);
+    Route::post('/link', [\App\Http\Controllers\Api\PublicPaymentController::class, 'link'])->middleware('throttle:20,1');
+});
