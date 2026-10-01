@@ -477,6 +477,38 @@ return [
                 'placeholder' => 'URL de Confirmación',
             ],
         ],
+        'onepay' => [
+            'setting' => [
+                'label' => 'Configuración de OnePay',
+                'class' => 'form-control',
+                'code' => 'onepay',
+            ],
+            'onepay_enabled' => [
+                'field' => 'boolean-field',
+                'label' => 'Habilitar OnePay',
+                'placeholder' => 'Habilitar OnePay',
+            ],
+            'onepay_base_url' => [
+                'field' => 'text-field',
+                'label' => 'URL Base de OnePay',
+                'placeholder' => 'https://api.onepay.la/v1',
+            ],
+            'onepay_api_token' => [
+                'field' => 'password-field',
+                'label' => 'Token API de OnePay',
+                'placeholder' => 'Token Secreto',
+            ],
+            'onepay_auto_create_day' => [
+                'field' => 'select-field',
+                'label' => 'Día del mes para generar cargos automáticamente',
+                'options' => \App\Settings\Config\Sources\DaysOfMonth::class,
+            ],
+            'onepay_auto_remind_day' => [
+                'field' => 'select-field',
+                'label' => 'Día del mes para enviar recordatorios automáticamente',
+                'options' => \App\Settings\Config\Sources\DaysOfMonth::class,
+            ],
+        ],
     ],
 
     "notifications" => [
@@ -626,43 +658,6 @@ return [
         "activation" => \App\Settings\Iptv\SettingIptv::getActivationSettings(),
     ],
 
-    // OnePay integration settings
-    "onepay" => [
-        "setting" => [
-            "label" => "OnePay",
-            "class" => "form-control",
-        ],
-        "general" => [
-            "setting" => [
-                "label" => "Ajustes de OnePay",
-                "code" => "general"
-            ],
-            "onepay_enabled" => [
-                "field" => "boolean-field",
-                "label" => "Habilitar OnePay",
-            ],
-            "onepay_base_url" => [
-                "field" => "text-field",
-                "label" => "URL Base de OnePay",
-                "placeholder" => "https://api.onepay.la/v1"
-            ],
-            "onepay_api_token" => [
-                "field" => "password-field",
-                "label" => "Token API de OnePay",
-                "placeholder" => "Token Secreto"
-            ],
-            "onepay_auto_create_day" => [
-                "field" => "select-field",
-                "label" => "Día del mes para generar cargos automáticamente",
-                "options" => \App\Settings\Config\Sources\DaysOfMonth::class
-            ],
-            "onepay_auto_remind_day" => [
-                "field" => "select-field",
-                "label" => "Día del mes para enviar recordatorios automáticamente",
-                "options" => \App\Settings\Config\Sources\DaysOfMonth::class
-            ],
-        ],
-    ],
     "finance" => [
         "setting" => [
             "label" => "Finanzas",
