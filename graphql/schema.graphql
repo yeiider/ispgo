@@ -789,6 +789,9 @@ type Invoice {
     additional_information: JSON
     onepay_charge_id: String
     onepay_payment_link: String
+    onepay_status: String
+    payment_link: String
+    expiration_date: DateTime
     created_at: DateTime!
     updated_at: DateTime!
 
@@ -1296,5 +1299,6 @@ type ExportCsvResult {
 #import inventory.graphql
 #import cash-registers.graphql
 #import onepay.graphql
+#import wompi.graphql
 #import tickets.graphql
 #import iptv.graphql

@@ -19,7 +19,7 @@ class OnePaySettings
     public ?int $onepay_auto_remind_day = null; // 1-31
 
     // Internal path for settings stored via Settings Manager
-    public const PATH = 'onepay/general/';
+    public const PATH = 'payment/onepay/';
 
     public static function enabled(): bool
     {

@@ -1,0 +1,11 @@
+type WompiPaymentLinkResult {
+    success: Boolean!
+    message: String!
+    payment_link: String
+    reference: String
+}
+
+extend type Mutation @guard {
+    "Genera (o reutiliza si sigue vigente) el enlace de pago de Wompi para una factura"
+    generateWompiPaymentLink(invoice_id: ID!): WompiPaymentLinkResult! @field(resolver: "App\\GraphQL\\Mutations\\WompiMutation@generatePaymentLink")
+}
