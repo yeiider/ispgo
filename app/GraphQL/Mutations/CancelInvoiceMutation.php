@@ -27,12 +27,8 @@ class CancelInvoiceMutation
                 ];
             }
 
-            if ($invoice->status === 'paid') {
-                return [
-                    'success' => false,
-                    'message' => __('No se puede cancelar una factura que ya ha sido pagada.'),
-                ];
-            }
+            // Se permite cancelar facturas pagadas. La lógica de contrapartida (Invoice::canceled())
+            // se encargará de restar el balance a la caja actual del responsable.
 
             if ($invoice->status === 'canceled') {
                 return [

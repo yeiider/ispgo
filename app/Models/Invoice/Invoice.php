@@ -386,6 +386,28 @@ class Invoice extends Model
             }
         }
 
+        // Lógica de Contrapartida para Anulaciones
+        // Si la factura estaba pagada, el dinero ingresó a una caja.
+        // Al anularse, debemos retirar ese "dinero fantasma" de la caja ABIERTA actual del cajero responsable.
+        if ($this->amount > 0) {
+            $payment = $this->payments()->orderBy('id', 'desc')->first();
+            $responsibleUserId = $this->payment_registered_by ?? ($payment ? $payment->payment_registered_by ?? $payment->user_id : null);
+
+            if ($responsibleUserId) {
+                // Buscar la caja ABIERTA actual de este usuario
+                $openRegister = \App\Models\Finance\CashRegister::where('user_id', $responsibleUserId)
+                    ->where('status', 'open')
+                    ->first();
+
+                if ($openRegister) {
+                    // Restar el monto (Contrapartida) de la caja abierta de HOY
+                    $openRegister->decrement('current_balance', $this->amount);
+                    
+                    // Nota: Si existiera una tabla de Ledger, se registraría aquí una "Salida por Anulación"
+                }
+            }
+        }
+
         event(new \App\Events\InvoiceCanceled($this));
     }
 

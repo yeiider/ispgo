@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * CashRegister Model
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Auth;
  */
 class CashRegister extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     const STATUS_OPEN = 'open';
     const STATUS_CLOSED = 'closed';
@@ -168,10 +169,18 @@ class CashRegister extends Model
     {
         $this->status = self::STATUS_OPEN;
         
-        // Si no tiene fecha de apertura, o si la fecha de apertura es de un día distinto a hoy,
-        // actualizamos la fecha de apertura a hoy. Si ya fue abierta hoy (reapertura), la conservamos.
         if (!$this->opened_at || !$this->opened_at->isToday()) {
             $this->opened_at = now();
+            
+            // Arrastre Automático de Saldos
+            $lastClosure = $this->closures()->completed()->first();
+            if ($lastClosure) {
+                // Asumimos el balance esperado con el que cerró (después de entregas/pagos)
+                // como base para el nuevo día.
+                $this->initial_balance = $lastClosure->expected_balance;
+                // Reiniciamos current_balance a lo que arrastramos
+                $this->current_balance = $this->initial_balance;
+            }
         }
         
         $this->closed_at = null;

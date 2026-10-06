@@ -677,6 +677,10 @@ return [
                 "label" => "Hora de Cierre",
                 "placeholder" => "23:59",
             ],
+            "search_by_cedula_only" => [
+                "field" => "boolean-field",
+                "label" => "Búsqueda estricta solo por cédula (Punto de Recaudo)",
+            ],
         ],
     ],
     "tables" => [

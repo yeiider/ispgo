@@ -74,6 +74,15 @@ class ExpenseMutations
             ];
         }
 
+        $box = CashRegister::find($expense->daily_box_id);
+        if ($box && $box->status !== CashRegister::STATUS_OPEN) {
+            return [
+                'success' => false,
+                'message' => 'No puedes editar un gasto de una caja que ya está cerrada.',
+                'expense' => null,
+            ];
+        }
+
         $input = $args['input'] ?? $args;
         unset($input['id']);
 

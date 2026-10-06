@@ -3,24 +3,46 @@
 namespace App\GraphQL\Mutations;
 
 use App\Models\Finance\CashTransfer;
+use App\Models\Finance\CashRegister;
+use App\Models\Finance\Vault;
+use App\Services\Finance\CashTransferService;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
 class CashTransferMutations
 {
+    protected $transferService;
+
+    public function __construct(CashTransferService $transferService)
+    {
+        $this->transferService = $transferService;
+    }
     /**
      * Create a new cash transfer (delivery to admin)
      */
     public function create($_, array $args)
     {
         try {
-            $transfer = CashTransfer::create([
-                'sender_cash_register_id' => $args['sender_cash_register_id'],
-                'receiver_cash_register_id' => $args['receiver_cash_register_id'],
-                'amount' => $args['amount'],
-                'notes' => $args['notes'] ?? null,
-                'status' => 'pending',
-            ]);
+            // Resolver Sender
+            $sender = null;
+            if (!empty($args['sender_type']) && !empty($args['sender_id'])) {
+                $senderClass = $args['sender_type'] === 'Vault' ? Vault::class : CashRegister::class;
+                $sender = $senderClass::findOrFail($args['sender_id']);
+            } else {
+                $sender = CashRegister::findOrFail($args['sender_cash_register_id']);
+            }
+
+            // Resolver Receiver
+            $receiver = null;
+            if (!empty($args['receiver_type']) && !empty($args['receiver_id'])) {
+                $receiverClass = $args['receiver_type'] === 'Vault' ? Vault::class : CashRegister::class;
+                $receiver = $receiverClass::findOrFail($args['receiver_id']);
+            } else {
+                $receiver = CashRegister::findOrFail($args['receiver_cash_register_id']);
+            }
+
+            $notes = $args['notes'] ?? null;
+            $transfer = $this->transferService->sendMoney($sender, $receiver, $args['amount'], $notes);
 
             return [
                 'success' => true,
@@ -44,17 +66,10 @@ class CashTransferMutations
     {
         try {
             $transfer = CashTransfer::findOrFail($args['id']);
-            
-            if ($transfer->status !== 'pending') {
-                return [
-                    'success' => false,
-                    'message' => 'Esta entrega ya fue procesada anteriormente.',
-                    'cashTransfer' => null
-                ];
-            }
+            $receivedAmount = $args['received_amount'] ?? $transfer->amount;
+            $note = $args['discrepancy_note'] ?? null;
 
-            $transfer->status = 'accepted';
-            $transfer->save();
+            $this->transferService->acceptTransfer($transfer, $receivedAmount, $note);
 
             return [
                 'success' => true,
@@ -78,17 +93,9 @@ class CashTransferMutations
     {
         try {
             $transfer = CashTransfer::findOrFail($args['id']);
-            
-            if ($transfer->status !== 'pending') {
-                return [
-                    'success' => false,
-                    'message' => 'Esta entrega ya fue procesada anteriormente.',
-                    'cashTransfer' => null
-                ];
-            }
+            $reason = $args['reason'] ?? 'Rechazado por el administrador.';
 
-            $transfer->status = 'rejected';
-            $transfer->save();
+            $this->transferService->rejectTransfer($transfer, $reason);
 
             return [
                 'success' => true,
@@ -113,24 +120,7 @@ class CashTransferMutations
         try {
             $transfer = CashTransfer::findOrFail($args['id']);
 
-            $updateData = [];
-            if (isset($args['amount'])) {
-                $updateData['amount'] = $args['amount'];
-            }
-            if (isset($args['notes'])) {
-                $updateData['notes'] = $args['notes'];
-            }
-            if (isset($args['sender_cash_register_id'])) {
-                $updateData['sender_cash_register_id'] = $args['sender_cash_register_id'];
-            }
-            if (isset($args['receiver_cash_register_id'])) {
-                $updateData['receiver_cash_register_id'] = $args['receiver_cash_register_id'];
-            }
-            if (isset($args['status'])) {
-                $updateData['status'] = $args['status'];
-            }
-
-            $transfer->update($updateData);
+            $transfer = $this->transferService->updateTransfer($transfer, $args);
 
             return [
                 'success' => true,
@@ -172,10 +162,10 @@ class CashTransferMutations
                 ];
             }
 
-            $notes = $transfer->notes ? $transfer->notes . "\n[MOTIVO ANULACIÓN]: " . $reason : "[MOTIVO ANULACIÓN]: " . $reason;
-
+            // Usamos el servicio de anulación/rechazo para devolver el saldo correctamente
+            $this->transferService->rejectTransfer($transfer, "[MOTIVO ANULACIÓN]: " . $reason);
+            // El servicio lo marca como 'rejected'. Lo actualizamos a 'cancelled'
             $transfer->status = 'cancelled';
-            $transfer->notes = $notes;
             $transfer->save();
 
             return [
