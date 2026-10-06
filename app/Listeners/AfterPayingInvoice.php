@@ -150,7 +150,8 @@ class AfterPayingInvoice implements ShouldQueue
         return Invoice::withoutGlobalScope('router_filter')
             ->where('customer_id', $customerId)
             ->where('id', '!=', $excludeInvoiceId)
-            ->where('status', '!=', 'paid')
+            ->whereIn('status', ['unpaid', 'overdue'])
+            ->where('outstanding_balance', '>', 0)
             ->exists();
     }
 }
