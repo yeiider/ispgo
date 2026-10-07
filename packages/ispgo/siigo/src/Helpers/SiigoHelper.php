@@ -171,6 +171,38 @@ class SiigoHelper
         return $customer->identity_document ?: '';
     }
 
+    public static function isCustomerVatResponsible(?Customer $customer): bool
+    {
+        if (!$customer) {
+            return false;
+        }
+        $taxDetails = $customer->taxDetails;
+        if (!$taxDetails || empty($taxDetails->fiscal_regime)) {
+            return false;
+        }
+        $regimeRaw = strtolower((string) $taxDetails->fiscal_regime);
+        if (in_array($regimeRaw, ['general', 'responsible', 'responsable', 'responsable_iva', 'comun', 'gran_contribuyente', 'gran contribuyente', 'o-13', 'autorretenedor', 'o-15', 'agente_retencion', 'o-23'])) {
+            return true;
+        }
+        if (in_array(strtoupper($taxDetails->fiscal_regime), ['O-13', 'O-15', 'O-23'])) {
+            return true;
+        }
+        return false;
+    }
+
+    public static function getInvoiceTaxId(\App\Models\Invoice\Invoice $invoice, int $scopeId): ?int
+    {
+        $customer = $invoice->customer;
+        $hasInvoiceTax = ((float) ($invoice->tax ?? 0) > 0) || ((float) ($invoice->tax_total ?? 0) > 0);
+        $isResponsible = self::isCustomerVatResponsible($customer);
+
+        if ($isResponsible || $hasInvoiceTax) {
+            return \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
+        }
+
+        return null;
+    }
+
     public static function buildInvoicePayload(\App\Models\Invoice\Invoice $invoice, bool $sendStamp = false): array
     {
         $customer = $invoice->customer;
@@ -183,26 +215,28 @@ class SiigoHelper
         $invoiceItems = $invoice->items;
         $itemCount = count($invoiceItems);
 
+        $taxId = self::getInvoiceTaxId($invoice, $scopeId);
+        $itemTax = [];
+        if ($taxId) {
+            $itemTax[] = ['id' => $taxId];
+        }
+
+        $targetBase = ($taxId && $subtotalTotal > 0) ? $subtotalTotal : $invoiceTotal;
+
         if ($itemCount > 0) {
             $currentSum = 0;
             foreach ($invoiceItems as $index => $item) {
-                $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
-                $itemTax = [];
-                if ($taxId) {
-                    $itemTax[] = ['id' => $taxId];
-                }
-
                 $qty = max(1, (int) ($item->quantity ?: 1));
                 $itemSubtotal = (float) ($item->subtotal ?: ($item->unit_price * $qty));
 
                 if ($subtotalTotal > 0) {
-                    $itemTotalAmount = round(($itemSubtotal / $subtotalTotal) * $invoiceTotal, 2);
+                    $itemTotalAmount = round(($itemSubtotal / $subtotalTotal) * $targetBase, 2);
                 } else {
-                    $itemTotalAmount = round($invoiceTotal / $itemCount, 2);
+                    $itemTotalAmount = round($targetBase / $itemCount, 2);
                 }
 
                 if ($index === $itemCount - 1) {
-                    $itemTotalAmount = round($invoiceTotal - $currentSum, 2);
+                    $itemTotalAmount = round($targetBase - $currentSum, 2);
                 } else {
                     $currentSum += $itemTotalAmount;
                 }
@@ -231,16 +265,11 @@ class SiigoHelper
         }
 
         if (empty($items)) {
-            $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
-            $itemTax = [];
-            if ($taxId) {
-                $itemTax[] = ['id' => $taxId];
-            }
             $items[] = [
                 'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01',
                 'description' => 'Servicios de Internet - Factura ' . $invoice->increment_id,
                 'quantity' => 1,
-                'price' => $invoiceTotal,
+                'price' => $targetBase,
                 'discount' => 0.0,
                 'tax' => $itemTax
             ];
@@ -359,26 +388,28 @@ class SiigoHelper
         $invoiceItems = $invoice->items;
         $itemCount = count($invoiceItems);
 
+        $taxId = self::getInvoiceTaxId($invoice, $scopeId);
+        $itemTax = [];
+        if ($taxId) {
+            $itemTax[] = ['id' => $taxId];
+        }
+
+        $targetBase = ($taxId && $subtotalTotal > 0) ? $subtotalTotal : $invoiceTotal;
+
         if ($itemCount > 0) {
             $currentSum = 0;
             foreach ($invoiceItems as $index => $item) {
-                $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
-                $itemTax = [];
-                if ($taxId) {
-                    $itemTax[] = ['id' => $taxId];
-                }
-
                 $qty = max(1, (int) ($item->quantity ?: 1));
                 $itemSubtotal = (float) ($item->subtotal ?: ($item->unit_price * $qty));
 
                 if ($subtotalTotal > 0) {
-                    $itemTotalAmount = round(($itemSubtotal / $subtotalTotal) * $invoiceTotal, 2);
+                    $itemTotalAmount = round(($itemSubtotal / $subtotalTotal) * $targetBase, 2);
                 } else {
-                    $itemTotalAmount = round($invoiceTotal / $itemCount, 2);
+                    $itemTotalAmount = round($targetBase / $itemCount, 2);
                 }
 
                 if ($index === $itemCount - 1) {
-                    $itemTotalAmount = round($invoiceTotal - $currentSum, 2);
+                    $itemTotalAmount = round($targetBase - $currentSum, 2);
                 } else {
                     $currentSum += $itemTotalAmount;
                 }
@@ -397,16 +428,11 @@ class SiigoHelper
         }
 
         if (empty($items)) {
-            $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
-            $itemTax = [];
-            if ($taxId) {
-                $itemTax[] = ['id' => $taxId];
-            }
             $items[] = [
                 'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01',
                 'description' => 'Anulación Factura ' . $invoice->increment_id,
                 'quantity' => 1,
-                'price' => $invoiceTotal,
+                'price' => $targetBase,
                 'discount' => 0.0,
                 'tax' => $itemTax
             ];
@@ -457,7 +483,7 @@ class SiigoHelper
         $info = $invoice->additional_information ?? [];
         $invoiceUuid = $info['siigo_invoice_id'] ?? '';
 
-        $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
+        $taxId = self::getInvoiceTaxId($invoice, $scopeId);
         $itemTax = [];
         if ($taxId) {
             $itemTax[] = ['id' => $taxId];
