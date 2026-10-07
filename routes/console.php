@@ -32,6 +32,11 @@ Schedule::command('payment-promises:handle-expired')->dailyAt('04:30');
 // OnePay: run daily; the command itself checks the configured day in OnePaySettings
 Schedule::command('onepay:auto-create-charges')->daily();
 
+// Red de seguridad: borra los cobros/facturas OnePay de facturas ya pagadas por
+// otro medio (efectivo/transferencia/...). Corre después del job de suspensión
+// para alcanzar los pagos del día anterior.
+Schedule::command('onepay:cleanup-paid-cobros')->dailyAt('05:00');
+
 // Cierre automático de cajas
 //Schedule::command('ispgo:auto-close-cash-registers')->dailyAt(\App\Settings\FinanceProviderConfig::getAutoCloseTime());
 Schedule::command('backup:run')->dailyAt('23:00');

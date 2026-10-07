@@ -128,18 +128,93 @@ class OnePayHandler
         return (array) $response->json();
     }
 
-    public function deleteInvoice(string $invoiceId): void
+    /**
+     * Elimina la factura en OnePay.
+     *
+     * @param string $invoiceId  ID de la factura (/invoices) en OnePay.
+     * @param string $reason     DELETE_FROM_PROVIDER | PAID_FROM_PROVIDER.
+     */
+    public function deleteInvoice(string $invoiceId, string $reason = 'DELETE_FROM_PROVIDER'): void
     {
         $endpoint = $this->baseUrl . '/invoices/' . $invoiceId;
         $response = Http::timeout(30)
             ->withToken($this->token)
             ->acceptJson()
-            ->delete($endpoint);
+            ->asJson()
+            ->delete($endpoint, [
+                'reason' => $reason,
+            ]);
 
         if (!$response->successful() && $response->status() !== 204) {
             $msg = $this->extractErrorMessage($response);
             throw new \Exception("Error al eliminar factura OnePay: {$msg}");
         }
+    }
+
+    /**
+     * Busca el id de la factura (/invoices) en OnePay por su `reference`
+     * (= increment_id de la factura en ISPGo).
+     */
+    public function findInvoiceIdByReference(string $reference): ?string
+    {
+        $response = Http::timeout(30)
+            ->withToken($this->token)
+            ->acceptJson()
+            ->get($this->baseUrl . '/invoices', [
+                'filter[reference]' => $reference,
+            ]);
+
+        if (!$response->successful()) {
+            $msg = $this->extractErrorMessage($response);
+            throw new \Exception("Error consultando factura OnePay por reference: {$msg}");
+        }
+
+        foreach (($response->json('data') ?? []) as $row) {
+            if (!empty($row['id'])) {
+                return $row['id'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Limpia en OnePay la factura/cobro de una factura de ISPGo que se pagó
+     * por un medio distinto a OnePay (efectivo, transferencia, Nequi, PSE...).
+     *
+     * Elimina la FACTURA de OnePay —que es la que genera los recordatorios— y
+     * con ella su cobro asociado. Si no se puede resolver el id de la factura,
+     * cae al borrado del cobro directo.
+     *
+     * @return bool true si la factura de OnePay quedó eliminada,
+     *              false si solo se pudo cancelar el cobro (o nada).
+     */
+    public function deleteInvoiceForExternalPayment(Invoice $invoice): bool
+    {
+        $invoiceId = $invoice->onepay_invoice_id;
+
+        if (!$invoiceId && $invoice->increment_id) {
+            try {
+                $invoiceId = $this->findInvoiceIdByReference((string) $invoice->increment_id);
+            } catch (\Throwable $e) {
+                Log::error('Error buscando factura OnePay por reference: ' . $e->getMessage(), [
+                    'invoice_id' => $invoice->id,
+                    'increment_id' => $invoice->increment_id,
+                ]);
+            }
+        }
+
+        if ($invoiceId) {
+            $this->deleteInvoice($invoiceId, 'DELETE_FROM_PROVIDER');
+            return true;
+        }
+
+        // Fallback: al menos cancelar el cobro directo.
+        if ($invoice->onepay_charge_id) {
+            $this->deletePayment($invoice->onepay_charge_id);
+        }
+
+        return false;
     }
 
     public function buildInvoicePayload(Invoice $invoice): array
