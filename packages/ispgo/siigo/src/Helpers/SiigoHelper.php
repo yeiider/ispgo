@@ -192,11 +192,9 @@ class SiigoHelper
 
     public static function getInvoiceTaxId(\App\Models\Invoice\Invoice $invoice, int $scopeId): ?int
     {
-        $customer = $invoice->customer;
         $hasInvoiceTax = ((float) ($invoice->tax ?? 0) > 0) || ((float) ($invoice->tax_total ?? 0) > 0);
-        $isResponsible = self::isCustomerVatResponsible($customer);
 
-        if ($isResponsible || $hasInvoiceTax) {
+        if ($hasInvoiceTax) {
             return \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
         }
 
