@@ -120,8 +120,15 @@ class CreateSiigoInvoice implements ShouldQueue
                 }
             }
         } catch (\Exception $e) {
+            $siigoBody = null;
+            if ($e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse()) {
+                $e->getResponse()->getBody()->rewind();
+                $siigoBody = json_decode((string) $e->getResponse()->getBody(), true);
+            }
             Log::error('Error creating Siigo Invoice: ' . $e->getMessage(), [
-                'invoice_id' => $this->invoice->id
+                'invoice_id' => $this->invoice->id,
+                'siigo_errors' => $siigoBody['Errors'] ?? $siigoBody,
+                'payload' => $payload ?? null,
             ]);
             throw $e;
         }

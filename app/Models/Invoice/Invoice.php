@@ -389,52 +389,22 @@ class Invoice extends Model
         event(new \App\Events\InvoiceCanceled($this));
     }
 
-    public function applyDiscountWithoutTax(float $discount, string $description = '')
+    /**
+     * Discount expressed as taxable base; VAT (if any) is recalculated on top.
+     * @see \App\Services\Invoice\InvoiceDiscountService
+     */
+    public function applyDiscountWithoutTax(float $discount, string $description = ''): array
     {
-        $this->discount = $discount;
-        // El descuento se aplica solo al subtotal, el impuesto existente NO cambia
-        $subtotal = $this->subtotal - $discount;
-        $total    = $subtotal + $this->tax; // tax se conserva tal cual
-
-        $this->subtotal = $subtotal;
-        // $this->tax permanece sin cambios
-        $this->total    = $total;
-        $this->outstanding_balance = $total - $this->amount;
-        $this->save();
-
-        \App\Models\InvoiceAdjustment::create([
-            'invoice_id' => $this->id,
-            'kind'       => 'discount',
-            'amount'     => $discount,
-            'label'      => $description ?: 'Descuento manual',
-            'created_by' => \Illuminate\Support\Facades\Auth::id(),
-        ]);
-
-        event(new \App\Events\InvoiceDiscountApplied($this, $discount, $description));
+        return app(\App\Services\Invoice\InvoiceDiscountService::class)->apply($this, $discount, false, $description);
     }
 
-    public function applyDiscountWithTax(float $discount, string $description = '')
+    /**
+     * Discount expressed as gross amount (base + VAT).
+     * @see \App\Services\Invoice\InvoiceDiscountService
+     */
+    public function applyDiscountWithTax(float $discount, string $description = ''): array
     {
-        $this->discount = $discount;
-        $total = $this->total - $discount;
-        $subtotal = $total / 1.19;
-        $tax = $total - $subtotal;
-
-        $this->subtotal = $subtotal;
-        $this->tax = $tax;
-        $this->total = $total;
-        $this->outstanding_balance = $total - $this->amount;
-        $this->save();
-
-        \App\Models\InvoiceAdjustment::create([
-            'invoice_id' => $this->id,
-            'kind'       => 'discount',
-            'amount'     => $discount,
-            'label'      => $description ?: 'Descuento manual',
-            'created_by' => \Illuminate\Support\Facades\Auth::id(),
-        ]);
-
-        event(new \App\Events\InvoiceDiscountApplied($this, $discount, $description));
+        return app(\App\Services\Invoice\InvoiceDiscountService::class)->apply($this, $discount, true, $description);
     }
 
     protected static function boot(): void

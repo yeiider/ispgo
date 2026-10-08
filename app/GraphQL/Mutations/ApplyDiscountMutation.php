@@ -3,6 +3,7 @@
 namespace App\GraphQL\Mutations;
 
 use App\Models\Invoice\Invoice;
+use App\Services\Invoice\InvoiceDiscountService;
 use Illuminate\Support\Facades\Log;
 
 class ApplyDiscountMutation
@@ -38,31 +39,28 @@ class ApplyDiscountMutation
                 ];
             }
 
-            // Calculate discount amount
-            if ($isPercentage) {
-                $discountAmount = $invoice->total * ($discount / 100);
-            } else {
-                if ($discount > $invoice->total) {
-                    return [
-                        'success' => false,
-                        'message' => __('Discount cannot be greater than the total amount of the invoice.'),
-                    ];
-                }
-                $discountAmount = $discount;
+            $service = app(InvoiceDiscountService::class);
+            $discountAmount = $service->resolveAmount($invoice, (float) $discount, (bool) $isPercentage, (bool) $includeTax);
+
+            if (!$isPercentage && $discountAmount > (float) $invoice->total) {
+                return [
+                    'success' => false,
+                    'message' => __('Discount cannot be greater than the total amount of the invoice.'),
+                ];
             }
 
-            // Aplicar el descuento respetando el flag include_tax
-            if ($includeTax) {
-                $invoice->applyDiscountWithTax($discountAmount, $description);
-            } else {
-                $invoice->applyDiscountWithoutTax($discountAmount, $description);
-            }
+            $service->apply($invoice, $discountAmount, (bool) $includeTax, $description);
 
             return [
                 'success' => true,
                 'message' => __('Discount applied successfully!'),
             ];
 
+        } catch (\InvalidArgumentException|\DomainException $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+            ];
         } catch (\Exception $e) {
             Log::error('Error in ApplyDiscountMutation', [
                 'invoice_id' => $args['invoice_id'] ?? null,

@@ -4,13 +4,14 @@ namespace App\Listeners;
 
 use App\Events\InvoiceItemsCreated;
 use App\Models\InvoiceAdjustment;
+use App\Services\Billing\Tax\VatPolicy;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Aplica automáticamente el IVA (19%) a facturas de clientes que
- * tienen detalle de impuesto con régimen fiscal "general" (Régimen Común).
+ * son responsables de IVA según VatPolicy (la misma regla que usa Siigo).
  *
  * Este listener se dispara tras el evento InvoiceItemsCreated, lo que
  * garantiza que el subtotal ya esté calculado antes de aplicar el impuesto.
@@ -31,14 +32,9 @@ class ApplyTaxByFiscalRegime implements ShouldQueue
 
     /**
      * Tasa de IVA colombiana estándar (19%).
+     * @deprecated Usa VatPolicy::RATE.
      */
-    const IVA_RATE = 0.19;
-
-    /**
-     * Código del régimen fiscal que aplica IVA (Régimen Común / General).
-     * Ajusta este valor según el `code` que tenga tu tabla `fiscal_regimes`.
-     */
-    const TAXABLE_REGIME_CODE = 'general';
+    const IVA_RATE = VatPolicy::RATE;
 
     /**
      * Handle the event.
@@ -63,7 +59,7 @@ class ApplyTaxByFiscalRegime implements ShouldQueue
         if (
             !$taxDetail ||
             !$taxDetail->enable_billing ||
-            strtolower($taxDetail->fiscal_regime) !== self::TAXABLE_REGIME_CODE
+            !VatPolicy::isTaxDetailVatResponsible($taxDetail)
         ) {
             return;
         }
@@ -74,7 +70,7 @@ class ApplyTaxByFiscalRegime implements ShouldQueue
         // Verificar que no se haya aplicado ya un ajuste de impuesto automático
         $alreadyApplied = $invoice->adjustments()
             ->where('kind', 'tax')
-            ->where('label', 'IVA 19%')
+            ->where('label', VatPolicy::ADJUSTMENT_LABEL)
             ->exists();
 
         if ($alreadyApplied) {
@@ -115,7 +111,7 @@ class ApplyTaxByFiscalRegime implements ShouldQueue
             return;
         }
 
-        $ivaAmount = round($taxableSubtotal * self::IVA_RATE, 2);
+        $ivaAmount = VatPolicy::taxFor($taxableSubtotal);
 
         if ($ivaAmount <= 0) {
             return;
@@ -125,11 +121,11 @@ class ApplyTaxByFiscalRegime implements ShouldQueue
         $invoice->adjustments()->create([
             'kind'       => 'tax',
             'amount'     => $ivaAmount,
-            'label'      => 'IVA 19%',
+            'label'      => VatPolicy::ADJUSTMENT_LABEL,
             'metadata'   => [
                 'auto_generated' => true,
                 'fiscal_regime'  => $taxDetail->fiscal_regime,
-                'tax_rate'       => self::IVA_RATE,
+                'tax_rate'       => VatPolicy::RATE,
             ],
             'created_by' => null,
         ]);
