@@ -70,6 +70,11 @@ class CreateSiigoInvoice implements ShouldQueue
 
         try {
             $payload = SiigoHelper::buildInvoicePayload($this->invoice, $shouldStamp);
+
+            Log::info("Sending Siigo Invoice payload for invoice #{$this->invoice->id}:", [
+                'invoice_id' => $this->invoice->id,
+                'payload' => $payload,
+            ]);
             
             try {
                 $response = $siigo->createInvoice($payload);
@@ -87,6 +92,11 @@ class CreateSiigoInvoice implements ShouldQueue
             }
 
             $body = json_decode((string) $response->getBody(), true);
+
+            Log::info("Siigo Invoice created successfully for invoice #{$this->invoice->id}", [
+                'invoice_id' => $this->invoice->id,
+                'siigo_response' => $body,
+            ]);
             
             $id = $body['id'] ?? null;
             if ($id) {
