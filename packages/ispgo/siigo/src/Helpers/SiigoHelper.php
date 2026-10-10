@@ -169,15 +169,24 @@ class SiigoHelper
 
     /**
      * Description shown in Siigo for an invoice item.
+     *
+     * Cada ítem lleva SU propia descripción (igual que en ISP Go): el plan base
+     * guarda "Suscripción {plan}" y cada plan adicional guarda su propio nombre.
+     * No se debe reutilizar el plan del servicio, porque los planes adicionales
+     * comparten el mismo servicio y saldrían con la descripción del plan base.
      */
     private static function describeItem($item): string
     {
+        if (!empty(trim((string) ($item->description ?? '')))) {
+            return $item->description;
+        }
+
         if ($item->service && $item->service->plan) {
             $plan = $item->service->plan;
             return !empty(trim($plan->description ?? '')) ? $plan->description : $plan->name;
         }
 
-        return !empty($item->description) ? $item->description : 'Servicio de Internet';
+        return 'Servicio de Internet';
     }
 
     public static function getInvoiceTaxId(\App\Models\Invoice\Invoice $invoice, int $scopeId): ?int
@@ -189,6 +198,66 @@ class SiigoHelper
         }
 
         return null;
+    }
+
+    /**
+     * Impuesto que se envía en una línea concreta de Siigo.
+     *
+     * Un ítem exento (p. ej. un plan adicional con is_taxable = false) NO lleva
+     * impuesto aunque la factura sí lo traiga en otros ítems. Si no se conoce el
+     * ítem (línea de respaldo) se asume gravado.
+     *
+     * @param array<int,bool> $taxableItems Mapa invoice_item_id => is_taxable
+     */
+    private static function resolveItemTax(?int $taxId, array $taxableItems, $item): array
+    {
+        if (!$taxId) {
+            return [];
+        }
+
+        $itemId = $item->id ?? null;
+        $isTaxable = $itemId !== null ? ($taxableItems[(int) $itemId] ?? true) : true;
+
+        return $isTaxable ? [['id' => $taxId]] : [];
+    }
+
+    /**
+     * Mapa invoice_item_id => is_taxable, derivado de los ajustes de tipo 'charge'.
+     * Usa exactamente la misma regla que ApplyTaxByFiscalRegime para calcular la
+     * base gravable, de modo que lo que se envía a Siigo coincide con lo local.
+     *
+     * @return array<int,bool>
+     */
+    public static function taxableItemMap(\App\Models\Invoice\Invoice $invoice): array
+    {
+        $map = [];
+
+        foreach ($invoice->adjustments->where('kind', 'charge') as $adj) {
+            $meta = $adj->metadata ?? [];
+            $itemId = $meta['invoice_item_id'] ?? null;
+            if (!$itemId) {
+                continue;
+            }
+
+            $isTaxable = true;
+            if (array_key_exists('is_taxable', $meta)) {
+                $isTaxable = (bool) $meta['is_taxable'];
+            } elseif (!empty($meta['additional_plan_id'])) {
+                $ap = \App\Models\Services\AdditionalPlan::find($meta['additional_plan_id']);
+                if ($ap) {
+                    $isTaxable = (bool) $ap->is_taxable;
+                }
+            } elseif ($adj->source_type === \App\Models\Services\AdditionalPlan::class && $adj->source_id) {
+                $ap = \App\Models\Services\AdditionalPlan::find($adj->source_id);
+                if ($ap) {
+                    $isTaxable = (bool) $ap->is_taxable;
+                }
+            }
+
+            $map[(int) $itemId] = $isTaxable;
+        }
+
+        return $map;
     }
 
     /**
@@ -206,10 +275,7 @@ class SiigoHelper
         $invoiceTotal = (float) $invoice->total;
 
         $taxId = self::getInvoiceTaxId($invoice, $scopeId);
-        $itemTax = [];
-        if ($taxId) {
-            $itemTax[] = ['id' => $taxId];
-        }
+        $taxableItems = self::taxableItemMap($invoice);
 
         $targetBase = ($taxId && $subtotalTotal > 0) ? $subtotalTotal : $invoiceTotal;
         $productCode = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01';
@@ -228,7 +294,7 @@ class SiigoHelper
                 'quantity' => $line['quantity'],
                 'price' => $line['price'],
                 'discount' => $line['discount'],
-                'taxes' => $itemTax
+                'taxes' => self::resolveItemTax($taxId, $taxableItems, $line['item'] ?? null)
             ];
         }
 
@@ -239,7 +305,7 @@ class SiigoHelper
                 'quantity' => 1,
                 'price' => $targetBase,
                 'discount' => 0.0,
-                'taxes' => $itemTax
+                'taxes' => self::resolveItemTax($taxId, $taxableItems, null)
             ];
         }
 
@@ -355,10 +421,7 @@ class SiigoHelper
         $invoiceTotal = (float) $invoice->total;
 
         $taxId = self::getInvoiceTaxId($invoice, $scopeId);
-        $itemTax = [];
-        if ($taxId) {
-            $itemTax[] = ['id' => $taxId];
-        }
+        $taxableItems = self::taxableItemMap($invoice);
 
         $targetBase = ($taxId && $subtotalTotal > 0) ? $subtotalTotal : $invoiceTotal;
         $productCode = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01';
@@ -377,7 +440,7 @@ class SiigoHelper
                 'quantity' => $line['quantity'],
                 'price' => $line['price'],
                 'discount' => $line['discount'],
-                'taxes' => $itemTax
+                'taxes' => self::resolveItemTax($taxId, $taxableItems, $line['item'] ?? null)
             ];
         }
 
@@ -388,7 +451,7 @@ class SiigoHelper
                 'quantity' => 1,
                 'price' => $targetBase,
                 'discount' => 0.0,
-                'taxes' => $itemTax
+                'taxes' => self::resolveItemTax($taxId, $taxableItems, null)
             ];
         }
 

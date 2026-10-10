@@ -23,7 +23,7 @@ final class InvoiceLineBuilder
      * @param float         $targetBase   Net base Siigo must compute after discounts.
      * @param callable      $describe     fn($item): string
      * @param string|null   $discountType Document discount type ('Value'|'Percentage'); null = unknown.
-     * @return array<int, array{description: string, quantity: int, price: float, discount: float}>
+     * @return array<int, array{item: object, description: string, quantity: int, price: float, discount: float}>
      */
     public static function build(iterable $items, float $targetBase, callable $describe, ?string $discountType = null): array
     {
@@ -60,6 +60,10 @@ final class InvoiceLineBuilder
         foreach ($positives as $i => $p) {
             $lineGross = $scaledGross[$i];
             $lines[] = [
+                // Reference to the source item so callers can resolve per-line
+                // values such as taxes (a line may be tax-exempt even if the
+                // invoice as a whole is taxable).
+                'item'        => $p['item'],
                 'description' => (string) $describe($p['item']),
                 'qty'         => $p['qty'],
                 'gross'       => $lineGross,
@@ -74,6 +78,7 @@ final class InvoiceLineBuilder
             if ($useDiscountField) {
                 // Discounted lines use quantity 1 to avoid unit/line ambiguity in Siigo.
                 return [
+                    'item'        => $line['item'],
                     'description' => $line['description'],
                     'quantity'    => 1,
                     'price'       => $line['gross'],
@@ -83,7 +88,7 @@ final class InvoiceLineBuilder
                 ];
             }
 
-            return self::netLine($line['description'], $line['qty'], $line['net']);
+            return ['item' => $line['item']] + self::netLine($line['description'], $line['qty'], $line['net']);
         }, $lines);
     }
 

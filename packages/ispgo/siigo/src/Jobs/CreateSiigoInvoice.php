@@ -23,7 +23,7 @@ class CreateSiigoInvoice implements ShouldQueue
     public function handle(SiigoClient $siigo)
     {
         // Reload relations if needed
-        $this->invoice->load(['customer.taxDetails', 'items']);
+        $this->invoice->load(['customer.taxDetails', 'items', 'adjustments']);
 
         // Check if customer has billing enabled
         $customer = $this->invoice->customer;

@@ -22,7 +22,7 @@ class CancelSiigoInvoice implements ShouldQueue
 
     public function handle(SiigoClient $siigo)
     {
-        $this->invoice->load(['customer.taxDetails', 'items']);
+        $this->invoice->load(['customer.taxDetails', 'items', 'adjustments']);
 
         // Check if customer has billing enabled
         $customer = $this->invoice->customer;
