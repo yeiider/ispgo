@@ -140,6 +140,28 @@ class CreateSiigoInvoice implements ShouldQueue
                 'siigo_errors' => $siigoBody['Errors'] ?? $siigoBody,
                 'payload' => $payload ?? null,
             ]);
+
+            $isInvalidDate = false;
+            if (!empty($siigoBody['Errors']) && is_array($siigoBody['Errors'])) {
+                foreach ($siigoBody['Errors'] as $err) {
+                    if (($err['Code'] ?? '') === 'invalid_date') {
+                        $isInvalidDate = true;
+                        break;
+                    }
+                }
+            }
+            if (!$isInvalidDate && (str_contains($e->getMessage(), 'invalid_date') || str_contains($e->getMessage(), 'Invalid date'))) {
+                $isInvalidDate = true;
+            }
+
+            if ($isInvalidDate) {
+                $customEx = new \RuntimeException('Siigo no puede sincronizar una factura de fechas anteriores.', 400, $e);
+                if (method_exists($this, 'fail')) {
+                    $this->fail($customEx);
+                }
+                throw $customEx;
+            }
+
             throw $e;
         }
     }

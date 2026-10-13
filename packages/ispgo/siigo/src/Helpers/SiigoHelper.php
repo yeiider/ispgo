@@ -311,22 +311,54 @@ class SiigoHelper
 
         $paymentId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getPaymentId($scopeId) ?: 12;
 
+        $allowSyncPastDates = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getAllowSyncPastDateInvoices($scopeId);
+
+        $today = now()->startOfDay();
+        $issueDate = $invoice->issue_date ? $invoice->issue_date->copy()->startOfDay() : $today;
+
+        $isPastDate = $issueDate->lt($today);
+        $useCurrentDate = $allowSyncPastDates && $isPastDate;
+
+        $effectiveDate = $useCurrentDate
+            ? now()->format('Y-m-d')
+            : ($invoice->issue_date ? $invoice->issue_date->format('Y-m-d') : now()->format('Y-m-d'));
+
+        $observations = $invoice->notes ?: 'Factura generada por ISP Go';
+        if ($useCurrentDate && $invoice->issue_date) {
+            $traceNote = "Fecha original de emisión: " . $invoice->issue_date->format('Y-m-d');
+            if (!empty($invoice->billing_period)) {
+                $traceNote .= " | Periodo: " . $invoice->billing_period;
+            }
+            $observations = trim($observations . " (" . $traceNote . ")");
+        }
+        $observations = mb_substr($observations, 0, 500, 'UTF-8');
+
+        $effectiveDateCarbon = \Carbon\Carbon::parse($effectiveDate)->startOfDay();
+        if ($invoice->due_date) {
+            $dueDateCarbon = $invoice->due_date->copy()->startOfDay();
+            $effectiveDueDate = $dueDateCarbon->gte($effectiveDateCarbon)
+                ? $invoice->due_date->format('Y-m-d')
+                : $effectiveDateCarbon->format('Y-m-d');
+        } else {
+            $effectiveDueDate = $effectiveDateCarbon->copy()->addDays(30)->format('Y-m-d');
+        }
+
         $payload = [
             'document' => [
                 'id' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getDocumentId($scopeId) ?: 24445
             ],
-            'date' => $invoice->issue_date ? $invoice->issue_date->format('Y-m-d') : now()->format('Y-m-d'),
+            'date' => $effectiveDate,
             'customer' => [
                 'identification' => $identification,
                 'branch_office' => 0
             ],
-            'observations' => $invoice->notes ?: 'Factura generada por ISP Go',
+            'observations' => $observations,
             'items' => $items,
             'payments' => [
                 [
                     'id' => $paymentId,
                     'value' => $invoiceTotal,
-                    'due_date' => $invoice->due_date ? $invoice->due_date->format('Y-m-d') : now()->addDays(30)->format('Y-m-d')
+                    'due_date' => $effectiveDueDate
                 ]
             ],
             'stamp' => [

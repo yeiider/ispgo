@@ -81,6 +81,11 @@ class SettingSiigo
                 "label" => "Facturas que se presentan electrónicamente a la DIAN (Stamp)",
                 "options" => \Ispgo\Siigo\Settings\Sources\StampInvoiceOptions::class,
             ],
+            "allow_sync_past_date_invoices" => [
+                "field" => "boolean-field",
+                "label" => "Permitir sincronizar facturas de días anteriores",
+                "description" => "Si la factura tiene fecha anterior a hoy, se creará en Siigo con la fecha actual y se registrará la fecha original en las observaciones."
+            ],
             "document_id" => [
                 "field" => "text-field",
                 "label" => "ID del Tipo de Documento de Factura (FV)",

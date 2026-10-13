@@ -300,7 +300,14 @@ class InvoiceController extends Controller
             ], Response::HTTP_OK);
         } catch (\Exception $exception) {
             report($exception);
-            return response()->json(['error' => 'Error al sincronizar factura con Siigo: ' . $exception->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $msg = $exception->getMessage();
+            if (str_contains($msg, 'invalid_date') || str_contains($msg, 'Invalid date') || str_contains($msg, 'fechas anteriores')) {
+                return response()->json([
+                    'error' => 'Siigo no puede sincronizar una factura de fechas anteriores.'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            return response()->json(['error' => 'Error al sincronizar factura con Siigo: ' . $msg], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
