@@ -9,4 +9,9 @@ extend type Mutation @guard {
         service_ids: [ID!]!
         dhcp_server: String!
     ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ServiceActionsMutation@provisionDhcp")
+
+    "Generar facturas masivas en segundo plano para una lista de servicios."
+    generateServicesInvoices(
+        service_ids: [ID!]!
+    ): ActionResult @field(resolver: "App\\GraphQL\\Mutations\\ServiceActionsMutation@generateInvoices")
 }
