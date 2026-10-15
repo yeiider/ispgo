@@ -208,36 +208,47 @@ class CashierInvoicesQuery
 
         // ---- Entregas a Administrador (Transfers Out) ----
         $transfersOutQuery = \App\Models\Finance\CashTransfer::query()
-            ->whereIn('status', ['pending', 'accepted']); // Only pending or accepted (exclude rejected and cancelled)
+            ->where('status', 'accepted'); // Solo aceptadas por mutuo consentimiento
 
         if ($dailyBoxId) {
-            $transfersOutQuery->where('sender_cash_register_id', $dailyBoxId);
+            $transfersOutQuery->sentFromCashRegister($dailyBoxId);
         } else {
-            $transfersOutQuery->whereHas('senderCashRegister', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
+            $userRegisterIds = \App\Models\Finance\CashRegister::where('user_id', $userId)->pluck('id');
+            $transfersOutQuery->where(function ($q) use ($userRegisterIds) {
+                $q->whereIn('sender_cash_register_id', $userRegisterIds)
+                  ->orWhere(function ($q2) use ($userRegisterIds) {
+                      $q2->where('sender_type', \App\Models\Finance\CashRegister::class)
+                         ->whereIn('sender_id', $userRegisterIds);
+                  });
             });
         }
-        $transfersOutQuery->whereBetween('created_at', [$dateFrom, $dateTo]);
+        $transfersOutQuery->whereBetween('updated_at', [$dateFrom, $dateTo]);
 
         $transfersOut = $transfersOutQuery->get();
-        $totalTransfersOut = $transfersOut->sum('amount');
+        // Aceptadas: cuenta lo recibido por el destino (monto efectivo)
+        $totalTransfersOut = $transfersOut->sum(fn ($t) => $t->effective_amount);
 
         // ---- Recepciones del Administrador (Transfers In) ----
         $transfersInQuery = \App\Models\Finance\CashTransfer::query()
             ->where('status', 'accepted'); // Only accepted
 
         if ($dailyBoxId) {
-            $transfersInQuery->where('receiver_cash_register_id', $dailyBoxId);
+            $transfersInQuery->receivedByCashRegister($dailyBoxId);
         } else {
-            $transfersInQuery->whereHas('receiverCashRegister', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
+            $userRegisterIds = $userRegisterIds ?? \App\Models\Finance\CashRegister::where('user_id', $userId)->pluck('id');
+            $transfersInQuery->where(function ($q) use ($userRegisterIds) {
+                $q->whereIn('receiver_cash_register_id', $userRegisterIds)
+                  ->orWhere(function ($q2) use ($userRegisterIds) {
+                      $q2->where('receiver_type', \App\Models\Finance\CashRegister::class)
+                         ->whereIn('receiver_id', $userRegisterIds);
+                  });
             });
         }
         $transfersInQuery->whereBetween('updated_at', [$dateFrom, $dateTo]);
 
         $transfersIn = $transfersInQuery->get();
-        // sumamos amount de las transferencias entrantes aceptadas
-        $totalTransfersIn = $transfersIn->sum('amount');
+        // sumamos lo realmente recibido de las transferencias entrantes aceptadas
+        $totalTransfersIn = $transfersIn->sum(fn ($t) => $t->effective_amount);
 
         // ---- Totales combinados ----
         $totalCash      = $totalCashInvoices + $totalCashPayments;
@@ -246,12 +257,14 @@ class CashierInvoicesQuery
         $totalItems     = $totalInvoicesCount + $totalPaymentsCount;
 
         $initialBalance = $cashRegister ? (float) $cashRegister->initial_balance : 0;
+        $initialBalanceNotes = $cashRegister ? $cashRegister->notes : null;
 
         return [
-            'date_from'       => $dateFrom ? $dateFrom->toDateString() : null,
-            'date_to'         => $dateTo   ? $dateTo->toDateString()   : null,
-            'initial_balance' => $initialBalance,
-            'total_cash'      => $totalCash,
+            'date_from'             => $dateFrom ? $dateFrom->toDateString() : null,
+            'date_to'               => $dateTo   ? $dateTo->toDateString()   : null,
+            'initial_balance'       => $initialBalance,
+            'initial_balance_notes' => $initialBalanceNotes,
+            'total_cash'            => $totalCash,
             'total_transfer'  => $totalTransfer,
             'total_collected' => $totalCollected,
             'total_invoices'          => $totalItems,

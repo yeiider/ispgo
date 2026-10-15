@@ -119,14 +119,14 @@ class ProcessCashRegisterClosure implements ShouldQueue
                 ->whereDate('date', $this->closureDate)
                 ->get();
 
-            // Obtener entregas a administradores (salidas activas: pending o accepted)
-            $transfersOut = \App\Models\Finance\CashTransfer::where('sender_cash_register_id', $this->cashRegisterId)
-                ->whereIn('status', ['pending', 'accepted'])
-                ->whereDate('created_at', $this->closureDate)
+            // Obtener entregas a administradores (salidas aceptadas en la fecha del cierre)
+            $transfersOut = \App\Models\Finance\CashTransfer::sentFromCashRegister($this->cashRegisterId)
+                ->where('status', 'accepted')
+                ->whereDate('updated_at', $this->closureDate)
                 ->get();
 
             // Obtener entregas recibidas de cajeros (entradas)
-            $transfersIn = \App\Models\Finance\CashTransfer::where('receiver_cash_register_id', $this->cashRegisterId)
+            $transfersIn = \App\Models\Finance\CashTransfer::receivedByCashRegister($this->cashRegisterId)
                 ->where('status', 'accepted')
                 ->whereDate('updated_at', $this->closureDate)
                 ->get();
@@ -166,8 +166,8 @@ class ProcessCashRegisterClosure implements ShouldQueue
             // Generar resumen de facturas
             $totalCashExpenses = $expenses->where('payment_method', 'cash')->sum('amount');
             $totalExpenses = $expenses->sum('amount');
-            $totalTransfersOut = $transfersOut->sum('amount');
-            $totalTransfersIn = $transfersIn->sum('amount');
+            $totalTransfersOut = $transfersOut->sum(fn ($t) => $t->effective_amount);
+            $totalTransfersIn = $transfersIn->sum(fn ($t) => $t->effective_amount);
             $totalAbonos   = $invoicePayments->sum('amount');
             $invoiceSummary = $this->generateInvoiceSummary($invoices, $invoicePayments, $totalCollected);
             $invoiceSummary['total_expenses'] = $totalExpenses;

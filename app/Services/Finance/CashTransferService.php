@@ -146,9 +146,21 @@ class CashTransferService
                 $receiver->increment('current_balance', $receivedAmount);
             }
 
+            // Regla de negocio: el origen solo pierde lo que realmente se recibió.
+            // Al enviar se descontó `amount`; la diferencia vuelve al saldo del origen
+            // (queda como faltante a justificar en su caja).
+            if ($diff != 0) {
+                $sender = $transfer->sender;
+                if ($sender instanceof CashRegister || $sender instanceof Vault) {
+                    $diff > 0
+                        ? $sender->increment('current_balance', $diff)
+                        : $sender->decrement('current_balance', abs($diff));
+                }
+            }
+
             $transfer->received_amount = $receivedAmount;
             $transfer->discrepancy_note = $discrepancyNote;
-            $transfer->status = 'accepted';
+            $transfer->status = CashTransfer::STATUS_ACCEPTED;
             $transfer->save();
 
             DB::commit();

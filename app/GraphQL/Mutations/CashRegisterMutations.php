@@ -218,6 +218,11 @@ class CashRegisterMutations
                 $cashRegister->initial_balance = $cashRegister->current_balance;
             }
 
+            // Nota u observación opcional relacionada al balance inicial o apertura
+            if (array_key_exists('notes', $args)) {
+                $cashRegister->notes = !empty(trim((string) $args['notes'])) ? trim((string) $args['notes']) : null;
+            }
+
             $cashRegister->save();
 
             DB::commit();

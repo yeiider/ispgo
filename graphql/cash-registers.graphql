@@ -431,6 +431,9 @@ extend type Mutation @guard {
 
         "Balance inicial opcional"
         initial_balance: Float
+
+        "Observación o nota opcional sobre la apertura o balance inicial"
+        notes: String
     ): CashRegister!
         @field(resolver: "App\\GraphQL\\Mutations\\CashRegisterMutations@open")
 
@@ -548,6 +551,21 @@ type CashTransfer {
     created_at: DateTime!
     updated_at: DateTime!
 
+    "Monto que impacta saldos: recibido si fue aceptada, enviado si está pendiente"
+    effective_amount: Float!
+    "Nombre de la caja o Caja General que envía"
+    sender_name: String
+    "Cajero asignado a la caja que envía (null si es Caja General)"
+    sender_user_name: String
+    "CashRegister | Vault"
+    sender_kind: String
+    "Nombre de la caja o Caja General que recibe"
+    receiver_name: String
+    "Cajero asignado a la caja que recibe (null si es Caja General)"
+    receiver_user_name: String
+    "CashRegister | Vault"
+    receiver_kind: String
+
     senderCashRegister: CashRegister @belongsTo
     receiverCashRegister: CashRegister @belongsTo
     creator: User @belongsTo
@@ -605,6 +623,14 @@ extend type Query @guard {
     vaults: [Vault!]! @all(model: "App\\Models\\Finance\\Vault")
     vault(id: ID! @eq): Vault @find(model: "App\\Models\\Finance\\Vault")
 
+    "Histórico de movimientos (entradas y salidas) de una Caja General"
+    vaultTransactions(
+        vault_id: ID!
+        "Búsqueda en servidor: #id, notas, estado, caja o cajero de la contraparte"
+        search: String
+        status: String
+    ): [CashTransfer!]! @paginate(defaultCount: 15, maxCount: 500, builder: "App\\GraphQL\\Queries\\VaultTransactionsQuery@builder")
+
     suppliers: [Supplier!]! @all(model: "App\\Models\\Inventory\\Supplier")
     suppliersPaginator(
         name: String @where(operator: "like")
@@ -651,8 +677,11 @@ extend type Mutation @guard {
         id: ID!
         receiver_type: String
         receiver_id: ID
+        sender_cash_register_id: ID
+        receiver_cash_register_id: ID
         amount: Float
         notes: String
+        status: String
     ): CashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@update")
 
     acceptCashTransfer(
@@ -681,15 +710,6 @@ extend type Mutation @guard {
     deleteVault(
         id: ID!
     ): VaultPayload @field(resolver: "App\\GraphQL\\Mutations\\VaultMutations@delete")
-
-    updateCashTransfer(
-        id: ID!
-        sender_cash_register_id: ID
-        receiver_cash_register_id: ID
-        amount: Float
-        notes: String
-        status: String
-    ): CashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@update")
 
     deleteCashTransfer(
         id: ID!
