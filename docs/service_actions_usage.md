@@ -137,3 +137,41 @@ query GetDhcpServers($routerId: ID!) {
   }
 }
 ```
+
+---
+
+## 4. Bulk Generate Invoices
+
+This mutation triggers a background job for each provided Service ID. The job generates an invoice for the service for the current billing period and finalizes it.
+
+### Mutation
+
+```graphql
+mutation GenerateServicesInvoices($ids: [ID!]!) {
+  generateServicesInvoices(service_ids: $ids) {
+    success
+    message
+  }
+}
+```
+
+### Variables
+
+```json
+{
+  "ids": [101, 102, 105]
+}
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "generateServicesInvoices": {
+      "success": true,
+      "message": "Se han encolado 3 servicio(s) para la generación de factura en segundo plano."
+    }
+  }
+}
+```

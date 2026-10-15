@@ -22,6 +22,7 @@ class CreateSiigoDiscountCreditNote implements ShouldQueue
         private Invoice $invoice,
         private float $discountAmount,
         private string $description = '',
+        private float $taxAmount = 0.0,
         private bool $force = false
     ) {}
 
@@ -48,7 +49,7 @@ class CreateSiigoDiscountCreditNote implements ShouldQueue
         }
 
         try {
-            $payload = SiigoHelper::buildDiscountCreditNotePayload($this->invoice, $this->discountAmount, $this->description);
+            $payload = SiigoHelper::buildDiscountCreditNotePayload($this->invoice, $this->discountAmount, $this->description, $this->taxAmount);
             $response = $siigo->createCreditNote($payload);
             $body = json_decode((string) $response->getBody(), true);
             

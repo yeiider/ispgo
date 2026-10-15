@@ -56,6 +56,11 @@ class ConfigProviderSiigo
         return self::getValue('stamp_invoice_trigger', 'invoices', $scopeId) ?? 'none';
     }
 
+    public static function getAllowSyncPastDateInvoices(?int $scopeId = 0): bool
+    {
+        return self::getBoolValue('allow_sync_past_date_invoices', 'invoices', $scopeId) ?? false;
+    }
+
     public static function getSyncCustomersTrigger(?int $scopeId = 0): ?string
     {
         return self::getValue('sync_customers_trigger', 'general', $scopeId);

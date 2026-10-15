@@ -3,6 +3,8 @@
 namespace Ispgo\Siigo\Helpers;
 
 use App\Models\Customers\Customer;
+use App\Services\Billing\Tax\VatPolicy;
+use Ispgo\Siigo\Support\InvoiceLineBuilder;
 
 class SiigoHelper
 {
@@ -54,33 +56,22 @@ class SiigoHelper
             $name[] = mb_strtoupper($customer->last_name ?: 'N/A', 'UTF-8');
         }
 
-        // Mapping Fiscal Regime and VAT Responsibility according to Siigo API rules
-        $vatResponsible = false;
-        $fiscalRegimeCode = $personType === 'Company' ? 'O-99' : 'R-99-PN'; // Default
+        // VAT responsibility: single rule shared with local invoicing (VatPolicy).
+        $vatResponsible = VatPolicy::isTaxDetailVatResponsible($taxDetails);
+
+        // Fiscal responsibility code accepted by Siigo/DIAN.
+        $fiscalRegimeCode = 'R-99-PN'; // Default: "No aplica - Otros"
 
         if ($taxDetails && !empty($taxDetails->fiscal_regime)) {
-            $regimeRaw = strtolower((string)$taxDetails->fiscal_regime);
-            if (in_array($regimeRaw, ['general', 'responsible', 'responsable', 'responsable_iva', 'comun'])) {
-                $vatResponsible = true;
-                $fiscalRegimeCode = $personType === 'Company' ? 'O-99' : 'R-99-PN';
-            } elseif (in_array($regimeRaw, ['gran_contribuyente', 'gran contribuyente', 'o-13'])) {
-                $vatResponsible = true;
-                $fiscalRegimeCode = "O-13";
+            $regimeRaw = strtolower(trim((string) $taxDetails->fiscal_regime));
+            if (in_array($regimeRaw, ['gran_contribuyente', 'gran contribuyente', 'o-13'])) {
+                $fiscalRegimeCode = 'O-13';
             } elseif (in_array($regimeRaw, ['autorretenedor', 'o-15'])) {
-                $vatResponsible = true;
-                $fiscalRegimeCode = "O-15";
+                $fiscalRegimeCode = 'O-15';
             } elseif (in_array($regimeRaw, ['agente_retencion', 'o-23'])) {
-                $vatResponsible = true;
-                $fiscalRegimeCode = "O-23";
+                $fiscalRegimeCode = 'O-23';
             } elseif (in_array($regimeRaw, ['regimen_simple', 'simple', 'o-47'])) {
-                $vatResponsible = false;
-                $fiscalRegimeCode = "O-47";
-            } elseif (in_array($regimeRaw, ['simplified', 'nonresponsible', 'no_responsable', 'no_responsable_iva', 'r-99-pn', 'simplificado'])) {
-                $vatResponsible = false;
-                $fiscalRegimeCode = $personType === 'Company' ? 'O-99' : 'R-99-PN';
-            } elseif (in_array(strtoupper($taxDetails->fiscal_regime), ['O-13', 'O-15', 'O-23', 'O-47', 'R-99-PN', 'O-99'])) {
-                $fiscalRegimeCode = strtoupper($taxDetails->fiscal_regime);
-                $vatResponsible = in_array($fiscalRegimeCode, ['O-13', 'O-15', 'O-23']);
+                $fiscalRegimeCode = 'O-47';
             }
         }
 
@@ -171,7 +162,109 @@ class SiigoHelper
         return $customer->identity_document ?: '';
     }
 
-    public static function buildInvoicePayload(\App\Models\Invoice\Invoice $invoice, bool $sendStamp = false): array
+    public static function isCustomerVatResponsible(?Customer $customer): bool
+    {
+        return $customer !== null && VatPolicy::isTaxDetailVatResponsible($customer->taxDetails);
+    }
+
+    /**
+     * Description shown in Siigo for an invoice item.
+     *
+     * Cada ítem lleva SU propia descripción (igual que en ISP Go): el plan base
+     * guarda "Suscripción {plan}" y cada plan adicional guarda su propio nombre.
+     * No se debe reutilizar el plan del servicio, porque los planes adicionales
+     * comparten el mismo servicio y saldrían con la descripción del plan base.
+     */
+    private static function describeItem($item): string
+    {
+        if (!empty(trim((string) ($item->description ?? '')))) {
+            return $item->description;
+        }
+
+        if ($item->service && $item->service->plan) {
+            $plan = $item->service->plan;
+            return !empty(trim($plan->description ?? '')) ? $plan->description : $plan->name;
+        }
+
+        return 'Servicio de Internet';
+    }
+
+    public static function getInvoiceTaxId(\App\Models\Invoice\Invoice $invoice, int $scopeId): ?int
+    {
+        $hasInvoiceTax = ((float) ($invoice->tax ?? 0) > 0) || ((float) ($invoice->tax_total ?? 0) > 0);
+
+        if ($hasInvoiceTax) {
+            return \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
+        }
+
+        return null;
+    }
+
+    /**
+     * Impuesto que se envía en una línea concreta de Siigo.
+     *
+     * Un ítem exento (p. ej. un plan adicional con is_taxable = false) NO lleva
+     * impuesto aunque la factura sí lo traiga en otros ítems. Si no se conoce el
+     * ítem (línea de respaldo) se asume gravado.
+     *
+     * @param array<int,bool> $taxableItems Mapa invoice_item_id => is_taxable
+     */
+    private static function resolveItemTax(?int $taxId, array $taxableItems, $item): array
+    {
+        if (!$taxId) {
+            return [];
+        }
+
+        $itemId = $item->id ?? null;
+        $isTaxable = $itemId !== null ? ($taxableItems[(int) $itemId] ?? true) : true;
+
+        return $isTaxable ? [['id' => $taxId]] : [];
+    }
+
+    /**
+     * Mapa invoice_item_id => is_taxable, derivado de los ajustes de tipo 'charge'.
+     * Usa exactamente la misma regla que ApplyTaxByFiscalRegime para calcular la
+     * base gravable, de modo que lo que se envía a Siigo coincide con lo local.
+     *
+     * @return array<int,bool>
+     */
+    public static function taxableItemMap(\App\Models\Invoice\Invoice $invoice): array
+    {
+        $map = [];
+
+        foreach ($invoice->adjustments->where('kind', 'charge') as $adj) {
+            $meta = $adj->metadata ?? [];
+            $itemId = $meta['invoice_item_id'] ?? null;
+            if (!$itemId) {
+                continue;
+            }
+
+            $isTaxable = true;
+            if (array_key_exists('is_taxable', $meta)) {
+                $isTaxable = (bool) $meta['is_taxable'];
+            } elseif (!empty($meta['additional_plan_id'])) {
+                $ap = \App\Models\Services\AdditionalPlan::find($meta['additional_plan_id']);
+                if ($ap) {
+                    $isTaxable = (bool) $ap->is_taxable;
+                }
+            } elseif ($adj->source_type === \App\Models\Services\AdditionalPlan::class && $adj->source_id) {
+                $ap = \App\Models\Services\AdditionalPlan::find($adj->source_id);
+                if ($ap) {
+                    $isTaxable = (bool) $ap->is_taxable;
+                }
+            }
+
+            $map[(int) $itemId] = $isTaxable;
+        }
+
+        return $map;
+    }
+
+    /**
+     * @param string|null $discountType Siigo document discount type ('Value'|'Percentage').
+     *                                  null = unknown: discounts are folded into net prices.
+     */
+    public static function buildInvoicePayload(\App\Models\Invoice\Invoice $invoice, bool $sendStamp = false, ?string $discountType = null): array
     {
         $customer = $invoice->customer;
         $identification = self::getCustomerIdentification($customer);
@@ -180,90 +273,92 @@ class SiigoHelper
         $items = [];
         $subtotalTotal = (float) $invoice->subtotal;
         $invoiceTotal = (float) $invoice->total;
-        $invoiceItems = $invoice->items;
-        $itemCount = count($invoiceItems);
 
-        if ($itemCount > 0) {
-            $currentSum = 0;
-            foreach ($invoiceItems as $index => $item) {
-                $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
-                $itemTax = [];
-                if ($taxId) {
-                    $itemTax[] = ['id' => $taxId];
-                }
+        $taxId = self::getInvoiceTaxId($invoice, $scopeId);
+        $taxableItems = self::taxableItemMap($invoice);
 
-                $qty = max(1, (int) ($item->quantity ?: 1));
-                $itemSubtotal = (float) ($item->subtotal ?: ($item->unit_price * $qty));
+        $targetBase = ($taxId && $subtotalTotal > 0) ? $subtotalTotal : $invoiceTotal;
+        $productCode = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01';
 
-                if ($subtotalTotal > 0) {
-                    $itemTotalAmount = round(($itemSubtotal / $subtotalTotal) * $invoiceTotal, 2);
-                } else {
-                    $itemTotalAmount = round($invoiceTotal / $itemCount, 2);
-                }
+        $lines = InvoiceLineBuilder::build(
+            $invoice->items,
+            $targetBase,
+            fn ($item) => self::describeItem($item),
+            $discountType
+        );
 
-                if ($index === $itemCount - 1) {
-                    $itemTotalAmount = round($invoiceTotal - $currentSum, 2);
-                } else {
-                    $currentSum += $itemTotalAmount;
-                }
-
-                $pricePerUnit = round($itemTotalAmount / $qty, 2);
-
-                $itemDescription = null;
-                if ($item->service && $item->service->plan) {
-                    $plan = $item->service->plan;
-                    $itemDescription = !empty(trim($plan->description ?? '')) ? $plan->description : $plan->name;
-                } elseif (!empty($item->description)) {
-                    $itemDescription = $item->description;
-                } else {
-                    $itemDescription = 'Servicio de Internet';
-                }
-
-                $items[] = [
-                    'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01',
-                    'description' => $itemDescription,
-                    'quantity' => $qty,
-                    'price' => $pricePerUnit,
-                    'discount' => 0.0,
-                    'tax' => $itemTax
-                ];
-            }
+        foreach ($lines as $line) {
+            $items[] = [
+                'code' => $productCode,
+                'description' => $line['description'],
+                'quantity' => $line['quantity'],
+                'price' => $line['price'],
+                'discount' => $line['discount'],
+                'taxes' => self::resolveItemTax($taxId, $taxableItems, $line['item'] ?? null)
+            ];
         }
 
         if (empty($items)) {
-            $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
-            $itemTax = [];
-            if ($taxId) {
-                $itemTax[] = ['id' => $taxId];
-            }
             $items[] = [
                 'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01',
                 'description' => 'Servicios de Internet - Factura ' . $invoice->increment_id,
                 'quantity' => 1,
-                'price' => $invoiceTotal,
+                'price' => $targetBase,
                 'discount' => 0.0,
-                'tax' => $itemTax
+                'taxes' => self::resolveItemTax($taxId, $taxableItems, null)
             ];
         }
 
         $paymentId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getPaymentId($scopeId) ?: 12;
 
+        $allowSyncPastDates = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getAllowSyncPastDateInvoices($scopeId);
+
+        $today = now()->startOfDay();
+        $issueDate = $invoice->issue_date ? $invoice->issue_date->copy()->startOfDay() : $today;
+
+        $isPastDate = $issueDate->lt($today);
+        $useCurrentDate = $allowSyncPastDates && $isPastDate;
+
+        $effectiveDate = $useCurrentDate
+            ? now()->format('Y-m-d')
+            : ($invoice->issue_date ? $invoice->issue_date->format('Y-m-d') : now()->format('Y-m-d'));
+
+        $observations = $invoice->notes ?: 'Factura generada por ISP Go';
+        if ($useCurrentDate && $invoice->issue_date) {
+            $traceNote = "Fecha original de emisión: " . $invoice->issue_date->format('Y-m-d');
+            if (!empty($invoice->billing_period)) {
+                $traceNote .= " | Periodo: " . $invoice->billing_period;
+            }
+            $observations = trim($observations . " (" . $traceNote . ")");
+        }
+        $observations = mb_substr($observations, 0, 500, 'UTF-8');
+
+        $effectiveDateCarbon = \Carbon\Carbon::parse($effectiveDate)->startOfDay();
+        if ($invoice->due_date) {
+            $dueDateCarbon = $invoice->due_date->copy()->startOfDay();
+            $effectiveDueDate = $dueDateCarbon->gte($effectiveDateCarbon)
+                ? $invoice->due_date->format('Y-m-d')
+                : $effectiveDateCarbon->format('Y-m-d');
+        } else {
+            $effectiveDueDate = $effectiveDateCarbon->copy()->addDays(30)->format('Y-m-d');
+        }
+
         $payload = [
             'document' => [
                 'id' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getDocumentId($scopeId) ?: 24445
             ],
-            'date' => $invoice->issue_date ? $invoice->issue_date->format('Y-m-d') : now()->format('Y-m-d'),
+            'date' => $effectiveDate,
             'customer' => [
                 'identification' => $identification,
                 'branch_office' => 0
             ],
-            'observations' => $invoice->notes ?: 'Factura generada por ISP Go',
+            'observations' => $observations,
             'items' => $items,
             'payments' => [
                 [
                     'id' => $paymentId,
                     'value' => $invoiceTotal,
-                    'due_date' => $invoice->due_date ? $invoice->due_date->format('Y-m-d') : now()->addDays(30)->format('Y-m-d')
+                    'due_date' => $effectiveDueDate
                 ]
             ],
             'stamp' => [
@@ -356,59 +451,39 @@ class SiigoHelper
         $items = [];
         $subtotalTotal = (float) $invoice->subtotal;
         $invoiceTotal = (float) $invoice->total;
-        $invoiceItems = $invoice->items;
-        $itemCount = count($invoiceItems);
 
-        if ($itemCount > 0) {
-            $currentSum = 0;
-            foreach ($invoiceItems as $index => $item) {
-                $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
-                $itemTax = [];
-                if ($taxId) {
-                    $itemTax[] = ['id' => $taxId];
-                }
+        $taxId = self::getInvoiceTaxId($invoice, $scopeId);
+        $taxableItems = self::taxableItemMap($invoice);
 
-                $qty = max(1, (int) ($item->quantity ?: 1));
-                $itemSubtotal = (float) ($item->subtotal ?: ($item->unit_price * $qty));
+        $targetBase = ($taxId && $subtotalTotal > 0) ? $subtotalTotal : $invoiceTotal;
+        $productCode = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01';
 
-                if ($subtotalTotal > 0) {
-                    $itemTotalAmount = round(($itemSubtotal / $subtotalTotal) * $invoiceTotal, 2);
-                } else {
-                    $itemTotalAmount = round($invoiceTotal / $itemCount, 2);
-                }
+        // Credit-note document config is unknown here: fold discounts into net prices.
+        $lines = InvoiceLineBuilder::build(
+            $invoice->items,
+            $targetBase,
+            fn ($item) => 'Anulación: ' . ($item->description ?: 'Servicio de Internet')
+        );
 
-                if ($index === $itemCount - 1) {
-                    $itemTotalAmount = round($invoiceTotal - $currentSum, 2);
-                } else {
-                    $currentSum += $itemTotalAmount;
-                }
-
-                $pricePerUnit = round($itemTotalAmount / $qty, 2);
-
-                $items[] = [
-                    'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01',
-                    'description' => 'Anulación: ' . ($item->description ?: 'Servicio de Internet'),
-                    'quantity' => $qty,
-                    'price' => $pricePerUnit,
-                    'discount' => 0.0,
-                    'tax' => $itemTax
-                ];
-            }
+        foreach ($lines as $line) {
+            $items[] = [
+                'code' => $productCode,
+                'description' => $line['description'],
+                'quantity' => $line['quantity'],
+                'price' => $line['price'],
+                'discount' => $line['discount'],
+                'taxes' => self::resolveItemTax($taxId, $taxableItems, $line['item'] ?? null)
+            ];
         }
 
         if (empty($items)) {
-            $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
-            $itemTax = [];
-            if ($taxId) {
-                $itemTax[] = ['id' => $taxId];
-            }
             $items[] = [
                 'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01',
                 'description' => 'Anulación Factura ' . $invoice->increment_id,
                 'quantity' => 1,
-                'price' => $invoiceTotal,
+                'price' => $targetBase,
                 'discount' => 0.0,
-                'tax' => $itemTax
+                'taxes' => self::resolveItemTax($taxId, $taxableItems, null)
             ];
         }
 
@@ -448,7 +523,11 @@ class SiigoHelper
         return $payload;
     }
 
-    public static function buildDiscountCreditNotePayload(\App\Models\Invoice\Invoice $invoice, float $discountAmount, string $reasonNote = ''): array
+    /**
+     * @param float $discountBase Taxable base reduced by the discount.
+     * @param float $taxAmount    VAT reduced with it (0 = untaxed discount).
+     */
+    public static function buildDiscountCreditNotePayload(\App\Models\Invoice\Invoice $invoice, float $discountBase, string $reasonNote = '', float $taxAmount = 0.0): array
     {
         $customer = $invoice->customer;
         $identification = self::getCustomerIdentification($customer);
@@ -457,20 +536,26 @@ class SiigoHelper
         $info = $invoice->additional_information ?? [];
         $invoiceUuid = $info['siigo_invoice_id'] ?? '';
 
-        $taxId = \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId);
+        $discountBase = round($discountBase, 2);
+        $taxId = $taxAmount > 0 ? \Ispgo\Siigo\Settings\ConfigProviderSiigo::getTaxId($scopeId) : null;
         $itemTax = [];
         if ($taxId) {
             $itemTax[] = ['id' => $taxId];
         }
+
+        // Must equal what Siigo computes: base + VAT(base) with the same rounding.
+        $paymentValue = $taxId
+            ? round($discountBase + VatPolicy::taxFor($discountBase), 2)
+            : $discountBase;
 
         $items = [
             [
                 'code' => \Ispgo\Siigo\Settings\ConfigProviderSiigo::getProductCode($scopeId) ?: 'ISP01',
                 'description' => 'Descuento / Rebaja: ' . ($reasonNote ?: ('Factura ' . $invoice->increment_id)),
                 'quantity' => 1,
-                'price' => round($discountAmount, 2),
+                'price' => $discountBase,
                 'discount' => 0.0,
-                'tax' => $itemTax
+                'taxes' => $itemTax
             ]
         ];
 
@@ -493,7 +578,7 @@ class SiigoHelper
             'payments' => [
                 [
                     'id' => $paymentId,
-                    'value' => round($discountAmount, 2),
+                    'value' => $paymentValue,
                     'due_date' => $invoice->due_date ? $invoice->due_date->format('Y-m-d') : now()->format('Y-m-d')
                 ]
             ],

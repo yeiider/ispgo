@@ -21,15 +21,24 @@ class SiigoInvoiceStampTest extends TestCase
     public function test_create_siigo_invoice_mode_none_does_not_stamp()
     {
         $router = Router::factory()->create();
-        $customer = Customer::factory()->create(['router_id' => $router->id]);
+        $customer = Customer::factory()->create(['router_id' => $router->id, 'date_of_birth' => '1990-01-01']);
         TaxDetail::factory()->create([
             'customer_id' => $customer->id,
             'enable_billing' => true,
         ]);
 
-        $invoice = Invoice::factory()->create([
+        $user = \App\Models\User::factory()->create();
+        $invoice = Invoice::create([
+            'user_id' => $user->id,
             'customer_id' => $customer->id,
             'router_id' => $router->id,
+            'issue_date' => now(),
+            'due_date' => now()->addDays(30),
+            'billing_period' => now()->format('Y-m'),
+            'subtotal' => 50000,
+            'tax' => 0,
+            'total' => 50000,
+            'outstanding_balance' => 50000,
         ]);
 
         // Config: stamp_invoice_trigger = none
@@ -64,17 +73,25 @@ class SiigoInvoiceStampTest extends TestCase
 
     public function test_pay_siigo_invoice_mode_paid_only_stamps_on_payment()
     {
+        $user = \App\Models\User::factory()->create();
         $router = Router::factory()->create();
-        $customer = Customer::factory()->create(['router_id' => $router->id]);
+        $customer = Customer::factory()->create(['router_id' => $router->id, 'date_of_birth' => '1990-01-01']);
         TaxDetail::factory()->create([
             'customer_id' => $customer->id,
             'enable_billing' => true,
         ]);
 
-        $invoice = Invoice::factory()->create([
+        $invoice = Invoice::create([
+            'user_id' => $user->id,
             'customer_id' => $customer->id,
             'router_id' => $router->id,
+            'issue_date' => now(),
+            'due_date' => now()->addDays(30),
+            'billing_period' => now()->format('Y-m'),
+            'subtotal' => 50000,
+            'tax' => 0,
             'total' => 50000,
+            'outstanding_balance' => 50000,
             'additional_information' => [
                 'siigo_invoice_id' => 'siigo-inv-456',
             ],

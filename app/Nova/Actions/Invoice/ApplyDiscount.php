@@ -3,6 +3,7 @@
 namespace App\Nova\Actions\Invoice;
 
 use App\Models\Invoice\Invoice;
+use App\Services\Invoice\InvoiceDiscountService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -43,21 +44,17 @@ class ApplyDiscount extends Action
                 return Action::danger("A description or reason for the discount is required.");
             }
 
-            // Calcular el monto del descuento
-            if ($isPercentage) {
-                $discountAmount = $invoice->total * ($discount / 100);
-            } else {
-                if ($discount > $invoice->total) {
-                    return Action::danger("Discount cannot be greater than the total amount of the invoice.");
-                }
-                $discountAmount = $discount;
+            $service = app(InvoiceDiscountService::class);
+            $discountAmount = $service->resolveAmount($invoice, (float) $discount, (bool) $isPercentage, (bool) $includeTax);
+
+            if (!$isPercentage && $discountAmount > (float) $invoice->total) {
+                return Action::danger("Discount cannot be greater than the total amount of the invoice.");
             }
 
-            // Aplicar el descuento
-            if ($includeTax) {
-                $invoice->applyDiscountWithTax($discountAmount, $description);
-            } else {
-                $invoice->applyDiscountWithoutTax($discountAmount, $description);
+            try {
+                $service->apply($invoice, $discountAmount, (bool) $includeTax, $description);
+            } catch (\InvalidArgumentException|\DomainException $e) {
+                return Action::danger($e->getMessage());
             }
         }
 

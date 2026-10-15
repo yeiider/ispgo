@@ -23,7 +23,7 @@ class CreateSiigoInvoice implements ShouldQueue
     public function handle(SiigoClient $siigo)
     {
         // Reload relations if needed
-        $this->invoice->load(['customer.taxDetails', 'items']);
+        $this->invoice->load(['customer.taxDetails', 'items', 'adjustments']);
 
         // Check if customer has billing enabled
         $customer = $this->invoice->customer;
@@ -70,6 +70,11 @@ class CreateSiigoInvoice implements ShouldQueue
 
         try {
             $payload = SiigoHelper::buildInvoicePayload($this->invoice, $shouldStamp);
+
+            Log::info("Sending Siigo Invoice payload for invoice #{$this->invoice->id}:", [
+                'invoice_id' => $this->invoice->id,
+                'payload' => $payload,
+            ]);
             
             try {
                 $response = $siigo->createInvoice($payload);
@@ -87,6 +92,11 @@ class CreateSiigoInvoice implements ShouldQueue
             }
 
             $body = json_decode((string) $response->getBody(), true);
+
+            Log::info("Siigo Invoice created successfully for invoice #{$this->invoice->id}", [
+                'invoice_id' => $this->invoice->id,
+                'siigo_response' => $body,
+            ]);
             
             $id = $body['id'] ?? null;
             if ($id) {
@@ -120,9 +130,38 @@ class CreateSiigoInvoice implements ShouldQueue
                 }
             }
         } catch (\Exception $e) {
+            $siigoBody = null;
+            if ($e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse()) {
+                $e->getResponse()->getBody()->rewind();
+                $siigoBody = json_decode((string) $e->getResponse()->getBody(), true);
+            }
             Log::error('Error creating Siigo Invoice: ' . $e->getMessage(), [
-                'invoice_id' => $this->invoice->id
+                'invoice_id' => $this->invoice->id,
+                'siigo_errors' => $siigoBody['Errors'] ?? $siigoBody,
+                'payload' => $payload ?? null,
             ]);
+
+            $isInvalidDate = false;
+            if (!empty($siigoBody['Errors']) && is_array($siigoBody['Errors'])) {
+                foreach ($siigoBody['Errors'] as $err) {
+                    if (($err['Code'] ?? '') === 'invalid_date') {
+                        $isInvalidDate = true;
+                        break;
+                    }
+                }
+            }
+            if (!$isInvalidDate && (str_contains($e->getMessage(), 'invalid_date') || str_contains($e->getMessage(), 'Invalid date'))) {
+                $isInvalidDate = true;
+            }
+
+            if ($isInvalidDate) {
+                $customEx = new \RuntimeException('Siigo no puede sincronizar una factura de fechas anteriores.', 400, $e);
+                if (method_exists($this, 'fail')) {
+                    $this->fail($customEx);
+                }
+                throw $customEx;
+            }
+
             throw $e;
         }
     }

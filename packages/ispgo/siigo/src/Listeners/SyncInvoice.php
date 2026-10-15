@@ -106,7 +106,8 @@ class SyncInvoice
             \Ispgo\Siigo\Jobs\CreateSiigoDiscountCreditNote::dispatch(
                 $invoice,
                 (float) $event->discountAmount,
-                (string) $event->description
+                (string) $event->description,
+                (float) ($event->taxAmount ?? 0.0)
             )->delay(now()->addSeconds(5))->onQueue('redis');
         }
     }
