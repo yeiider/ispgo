@@ -203,4 +203,92 @@ class CashTransferService
             throw $e;
         }
     }
+
+    /**
+     * Deposit money from a Vault into a bank account.
+     */
+    public function depositVaultToBank(
+        Vault $vault,
+        float $amount,
+        string $bankName,
+        ?string $accountNumber = null,
+        ?string $referenceNumber = null,
+        ?string $depositDate = null,
+        ?string $notes = null
+    ): CashTransfer {
+        if ($amount <= 0) {
+            throw new Exception("El monto a consignar debe ser mayor a cero.");
+        }
+
+        DB::beginTransaction();
+        try {
+            if ($vault->current_balance < $amount) {
+                throw new Exception("Saldo insuficiente en la Caja General para realizar la consignación.");
+            }
+
+            $vault->decrement('current_balance', $amount);
+
+            $transfer = new CashTransfer();
+            $transfer->sender()->associate($vault);
+            $transfer->bank_name = trim($bankName);
+            $transfer->account_number = $accountNumber ? trim($accountNumber) : null;
+            $transfer->reference_number = $referenceNumber ? trim($referenceNumber) : null;
+            $transfer->deposit_date = $depositDate ?? now()->toDateString();
+            $transfer->amount = $amount;
+            $transfer->received_amount = $amount;
+            $transfer->status = CashTransfer::STATUS_ACCEPTED;
+            $transfer->notes = $notes;
+            $transfer->save();
+
+            DB::commit();
+            return $transfer;
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Cancel an existing transfer (pending or accepted), reverting balances.
+     */
+    public function cancelTransfer(CashTransfer $transfer, string $reason): CashTransfer
+    {
+        DB::beginTransaction();
+        try {
+            if ($transfer->status === CashTransfer::STATUS_CANCELLED) {
+                throw new Exception("La transferencia ya se encuentra anulada.");
+            }
+
+            $sender = $transfer->sender;
+            $receiver = $transfer->receiver;
+
+            if ($transfer->status === CashTransfer::STATUS_ACCEPTED) {
+                // Devolver dinero al remitente
+                if ($sender instanceof CashRegister || $sender instanceof Vault) {
+                    $sender->increment('current_balance', $transfer->effective_amount);
+                }
+                // Deducir del receptor si es una caja/bóveda del sistema (no banco externo)
+                if ($receiver instanceof CashRegister || $receiver instanceof Vault) {
+                    $receiver->decrement('current_balance', $transfer->effective_amount);
+                }
+            } elseif ($transfer->status === CashTransfer::STATUS_PENDING) {
+                // Se descontó del remitente al enviar; se le devuelve
+                if ($sender instanceof CashRegister || $sender instanceof Vault) {
+                    $sender->increment('current_balance', $transfer->amount);
+                }
+            }
+
+            $transfer->status = CashTransfer::STATUS_CANCELLED;
+            $transfer->discrepancy_note = $reason;
+            $transfer->save();
+
+            DB::commit();
+            return $transfer;
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
 }

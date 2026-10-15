@@ -543,6 +543,10 @@ type CashTransfer {
     receiver_id: ID
     sender_cash_register_id: ID
     receiver_cash_register_id: ID
+    bank_name: String
+    account_number: String
+    reference_number: String
+    deposit_date: Date
     amount: Float!
     received_amount: Float
     status: String!
@@ -728,4 +732,21 @@ extend type Mutation @guard {
     createSupplier(
         input: CreateSupplierInput!
     ): SupplierPayload @field(resolver: "App\\GraphQL\\Mutations\\SupplierMutations@create")
+
+    "Registrar una consignación bancaria para vaciar/descargar dinero de una Caja General"
+    depositVaultToBank(
+        input: DepositVaultToBankInput!
+    ): CashTransferPayload @field(resolver: "App\\GraphQL\\Mutations\\CashTransferMutations@depositVaultToBank")
 }
+
+"Input para registrar una consignación bancaria desde Caja General"
+input DepositVaultToBankInput {
+    vault_id: ID!
+    amount: Float!
+    bank_name: String!
+    account_number: String
+    reference_number: String
+    deposit_date: Date
+    notes: String
+}
+

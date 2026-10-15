@@ -22,6 +22,10 @@ class CashTransfer extends Model
         'sender_id',
         'receiver_type',
         'receiver_id',
+        'bank_name',
+        'account_number',
+        'reference_number',
+        'deposit_date',
         'sender_cash_register_id',
         'receiver_cash_register_id',
         'amount',
@@ -36,6 +40,7 @@ class CashTransfer extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'received_amount' => 'decimal:2',
+        'deposit_date' => 'date',
     ];
 
     public function sender()
@@ -134,6 +139,11 @@ class CashTransfer extends Model
 
     public function getReceiverNameAttribute(): ?string
     {
+        if ($this->bank_name) {
+            $account = $this->account_number ? " - Cta. {$this->account_number}" : '';
+            return "Banco: {$this->bank_name}{$account}";
+        }
+
         return $this->resolvePartyName($this->receiver, $this->receiverCashRegister);
     }
 
@@ -144,6 +154,10 @@ class CashTransfer extends Model
 
     public function getReceiverUserNameAttribute(): ?string
     {
+        if ($this->bank_name) {
+            return 'Entidad Bancaria';
+        }
+
         return $this->resolvePartyUserName($this->receiver, $this->receiverCashRegister);
     }
 
@@ -154,6 +168,10 @@ class CashTransfer extends Model
 
     public function getReceiverKindAttribute(): ?string
     {
+        if ($this->bank_name) {
+            return 'Bank';
+        }
+
         return $this->resolvePartyKind($this->receiver_type, $this->receiver_cash_register_id);
     }
 

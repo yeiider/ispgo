@@ -7,6 +7,7 @@ use App\Models\Finance\CashRegister;
 use App\Models\Finance\Vault;
 use App\Services\Finance\CashTransferService;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class CashTransferMutations
@@ -162,11 +163,7 @@ class CashTransferMutations
                 ];
             }
 
-            // Usamos el servicio de anulación/rechazo para devolver el saldo correctamente
-            $this->transferService->rejectTransfer($transfer, "[MOTIVO ANULACIÓN]: " . $reason);
-            // El servicio lo marca como 'rejected'. Lo actualizamos a 'cancelled'
-            $transfer->status = 'cancelled';
-            $transfer->save();
+            $transfer = $this->transferService->cancelTransfer($transfer, "[MOTIVO ANULACIÓN]: " . $reason);
 
             return [
                 'success' => true,
@@ -178,6 +175,48 @@ class CashTransferMutations
             return [
                 'success' => false,
                 'message' => 'Error al anular la entrega: ' . $e->getMessage(),
+                'cashTransfer' => null
+            ];
+        }
+    }
+
+    /**
+     * Deposit money from Vault to bank
+     */
+    public function depositVaultToBank($_, array $args)
+    {
+        try {
+            $input = $args['input'];
+            $vault = Vault::findOrFail($input['vault_id']);
+
+            // Validar autorización
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $isVaultAdmin = $vault->admins()->where('users.id', $user->id)->exists();
+            if (!$isVaultAdmin && !$user->canSeeAllData()) {
+                throw new Exception('No tienes permisos de administrador sobre esta Caja General.');
+            }
+
+            $transfer = $this->transferService->depositVaultToBank(
+                $vault,
+                (float) $input['amount'],
+                $input['bank_name'],
+                $input['account_number'] ?? null,
+                $input['reference_number'] ?? null,
+                $input['deposit_date'] ?? null,
+                $input['notes'] ?? null
+            );
+
+            return [
+                'success' => true,
+                'message' => 'Consignación bancaria registrada exitosamente. El saldo de la Caja General ha sido actualizado.',
+                'cashTransfer' => $transfer
+            ];
+        } catch (Exception $e) {
+            Log::error('Error depositing from vault to bank: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error al registrar la consignación: ' . $e->getMessage(),
                 'cashTransfer' => null
             ];
         }
