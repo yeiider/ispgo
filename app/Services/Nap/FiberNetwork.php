@@ -42,7 +42,7 @@ class FiberNetwork
         $cables = FiberCable::query()->get()->keyBy('id');
         $nodePaths = $this->nodePaths($nodes, $cables);
 
-        [$onus, $live, $liveError] = $this->onuStates($olts->where('is_active', true)->keys()->all());
+        [$onus, $live, $liveError, $okOlts] = $this->onuStates($olts->where('is_active', true)->keys()->all());
 
         $ports = $boxes->flatMap(fn (NapBox $b) => $b->ports)->filter(fn (NapPort $p) => $p->service_id);
         $services = Service::with(['customer.addresses', 'address'])
@@ -80,7 +80,8 @@ class FiberNetwork
                 'port_number' => $port->port_number,
                 'sn' => $service->sn,
                 'service_status' => $service->service_status,
-                'onu_state' => $onu['state'] ?? ($live && $serial !== '' ? 'not_found' : 'unknown'),
+                // "No está en la OLT" solo si se pudo leer la OLT de esa caja
+                'onu_state' => $onu['state'] ?? ($serial !== '' && in_array($resolved[$box->id]['olt_id'], $okOlts) ? 'not_found' : 'unknown'),
                 'rx_power_dbm' => $onu['rx_power_dbm'] ?? null,
                 'onu_port' => $onu['port'] ?? null,
                 'onu_olt_id' => $onu['olt_id'] ?? null,
@@ -233,21 +234,32 @@ class FiberNetwork
     /**
      * Estado de cada ONU de las OLTs indicadas, indexado por serial.
      *
-     * @return array{0: array<string, array>, 1: bool, 2: ?string}
+     * @return array{0: array<string, array>, 1: bool, 2: ?string, 3: int[]}
      */
     private function onuStates(array $oltIds): array
     {
         if (!$oltIds) {
-            return [[], false, 'No hay OLTs activas configuradas'];
+            return [[], false, 'No hay OLTs activas configuradas', []];
         }
 
         $states = [];
         $errors = [];
         $okCount = 0;
+        $okOlts = [];
         foreach ($oltIds as $oltId) {
             try {
-                $list = Cache::remember("nap-network:onus:{$oltId}", self::ONU_CACHE_SECONDS, fn () => $this->oltgo->onus((int) $oltId));
+                // Una OLT que no responde no debe frenar cada carga del mapa: se recuerda el fallo un rato
+                if ($failed = Cache::get("nap-network:onus-failed:{$oltId}")) {
+                    throw new \RuntimeException($failed);
+                }
+                try {
+                    $list = Cache::remember("nap-network:onus:{$oltId}", self::ONU_CACHE_SECONDS, fn () => $this->oltgo->onus((int) $oltId));
+                } catch (Throwable $e) {
+                    Cache::put("nap-network:onus-failed:{$oltId}", $e->getMessage(), 120);
+                    throw $e;
+                }
                 $okCount++;
+                $okOlts[] = (int) $oltId;
                 foreach ($list['onus'] ?? [] as $onu) {
                     $serial = strtoupper(trim((string) ($onu['serial'] ?? '')));
                     if ($serial !== '') {
@@ -262,11 +274,11 @@ class FiberNetwork
             } catch (Throwable $e) {
                 $errors[] = str_contains($e->getMessage(), 'cURL error')
                     ? 'OLTGO no responde en ' . \App\Settings\Oltgo\ProviderOltgo::url()
-                    : $e->getMessage();
+                    : (Olt::find($oltId)?->name ?? "OLT {$oltId}") . ': ' . $e->getMessage();
             }
         }
 
-        return [$states, $okCount > 0, $errors ? $errors[0] : null];
+        return [$states, $okCount > 0, $errors ? $errors[0] : null, $okOlts];
     }
 
     /**
