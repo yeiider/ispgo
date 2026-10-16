@@ -38,9 +38,6 @@ Schedule::command('onepay:auto-create-charges')->daily();
 // Log de GraphQL: elimina a diario los registros con más de GRAPHQL_LOG_RETENTION_DAYS (4 por defecto)
 Schedule::command('model:prune', ['--model' => [\App\Models\GraphqlLog::class]])->dailyAt('02:15');
 
-// Alertas de red de OLTGO (cortes, puertos, OLT, saturación)
-Schedule::command('oltgo:alerts')->everyMinute()->withoutOverlapping();
-
 Schedule::command('backup:run')->dailyAt('23:00');
 Schedule::command('backup:clean')->dailyAt('23:30');
 //Schedule::call(function () {

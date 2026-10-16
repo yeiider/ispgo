@@ -1,34 +1,25 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Services\Oltgo;
 
 use App\Helpers\ConfigHelper;
 use App\Helpers\Notify;
 use App\Models\Olt;
-use App\Services\Oltgo\OltgoMetricsClient;
 use App\Services\Telegram\SystemNotifier;
-use App\Settings\Oltgo\ProviderOltgo;
 use App\Settings\Oltgo\SettingOltgo;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Ispgo\Wiivo\ServiceWiivo;
 use Throwable;
 
 /**
- * Lee los eventos nuevos que detectó OLTGO y avisa al equipo: campana de
- * ISPGO, Telegram y, si está configurado, WhatsApp. Corre cada minuto.
+ * Convierte las alertas que envía OLTGO en avisos para el equipo técnico:
+ * campana de ISPGO, Telegram y, si está configurado, WhatsApp.
  */
-class OltgoAlerts extends Command
+class OltgoAlertDispatcher
 {
-    protected $signature = 'oltgo:alerts';
-
-    protected $description = 'Avisa las alertas de red detectadas por OLTGO (cortes, puertos, OLT, saturación)';
-
-    private const CURSOR = 'oltgo:alerts:cursor';
-
-    /** Tipo de evento => [título, nivel de la campana]. Las caídas de ONUs sueltas no se avisan. */
-    private const KINDS = [
+    /** Tipo de evento => [título, nivel]. Las caídas de ONUs sueltas no se avisan. */
+    public const KINDS = [
         'port_mass_los' => ['Corte masivo de fibra', 'danger'],
         'mass_power_loss' => ['Corte de energía en la zona', 'warning'],
         'interface_down' => ['Puerto caído', 'danger'],
@@ -44,32 +35,24 @@ class OltgoAlerts extends Command
         'onus_signal_degrading' => ['ONUs perdiendo señal', 'warning'],
     ];
 
-    public function handle(OltgoMetricsClient $client): int
+    /**
+     * @param array<int, array<string, mixed>> $events
+     */
+    public function dispatch(array $events): void
     {
-        // Sin nada guardado, las alertas en la campana están activas.
+        $events = array_values(array_filter($events, fn ($e) => isset(self::KINDS[$e['kind'] ?? ''])));
+        if (!$events) {
+            return;
+        }
+
         $inApp = $this->setting('enabled') !== '0';
-        if (!ProviderOltgo::enabled()) {
-            return self::SUCCESS;
-        }
-
-        // La primera vez arranca desde ahora para no avisar eventos viejos.
-        $since = Cache::get(self::CURSOR) ?? now()->toIso8601String();
-
-        try {
-            $events = $client->eventsSince($since, array_keys(self::KINDS));
-        } catch (Throwable $e) {
-            Log::warning('OLTGO alertas: ' . $e->getMessage());
-
-            return self::FAILURE;
-        }
-
         $olts = Olt::pluck('name', 'id');
-        $whatsapp = [];
         $telegram = [];
+        $whatsapp = [];
+        $worst = 'success';
         foreach ($events as $e) {
-            [$title, $level] = self::KINDS[$e['kind']] ?? [$e['kind'], 'info'];
-            $olt = $olts[$e['olt_id']] ?? "OLT {$e['olt_id']}";
-            $message = $this->message($e, $olt);
+            [$title, $level] = self::KINDS[$e['kind']];
+            $message = $this->message($e, $olts[$e['olt_id']] ?? "OLT {$e['olt_id']}");
 
             if ($inApp) {
                 Notify::notifyAdmins($title, $message, $level, "/olts/{$e['olt_id']}/reports", [
@@ -81,33 +64,36 @@ class OltgoAlerts extends Command
                 ]);
             }
             $telegram[] = "• {$title}: {$message}";
-            if (in_array($e['severity'], ['warning', 'critical'], true)) {
+            if (in_array($e['severity'] ?? '', ['warning', 'critical'], true)) {
                 $whatsapp[] = "*{$title}*\n{$message}";
             }
-            $since = $e['at'];
+            $worst = $this->worse($worst, $level);
         }
-        Cache::forever(self::CURSOR, $since);
 
-        // Un solo mensaje por corrida aunque un corte genere muchos eventos a la vez.
-        if ($telegram) {
-            $n = count($telegram);
-            SystemNotifier::send('oltgo', $n === 1 ? 'Alerta de red' : "{$n} alertas de red", implode("\n", array_slice($telegram, 0, 30))
-                . ($n > 30 ? "\n… y " . ($n - 30) . ' más' : ''), 'warning');
-        }
+        // Un solo mensaje por lote aunque un corte genere muchos eventos a la vez.
+        $n = count($telegram);
+        SystemNotifier::send(
+            'oltgo',
+            $n === 1 ? 'Alerta de red' : "{$n} alertas de red",
+            implode("\n", array_slice($telegram, 0, 30)) . ($n > 30 ? "\n… y " . ($n - 30) . ' más' : ''),
+            $worst,
+        );
 
         if ($whatsapp && $this->setting('whatsapp_enabled')) {
             $this->sendWhatsapp(implode("\n\n", $whatsapp));
         }
-        if ($events) {
-            $this->info(count($events) . ' alertas avisadas');
-        }
+    }
 
-        return self::SUCCESS;
+    private function worse(string $a, string $b): string
+    {
+        $rank = ['success' => 0, 'info' => 1, 'warning' => 2, 'danger' => 3];
+
+        return ($rank[$b] ?? 0) > ($rank[$a] ?? 0) ? $b : $a;
     }
 
     private function message(array $e, string $olt): string
     {
-        $when = \Carbon\Carbon::parse($e['at'])->timezone('America/Bogota')->format('d/m H:i');
+        $when = Carbon::parse($e['at'])->timezone('America/Bogota')->format('d/m H:i');
         $parts = [$olt];
         if (!empty($e['port'])) {
             $parts[] = $e['port'];

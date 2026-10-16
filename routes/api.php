@@ -175,6 +175,8 @@ Route::prefix('v1')
 
 // OnePay webhook endpoint
 Route::post('/webhooks/onepay', [OnePayWebhookController::class, 'handle']);
+// OLTGO avisa alertas de red (firmado con OLTGO_SECRET_KEY)
+Route::post('/webhooks/oltgo', \App\Http\Controllers\Webhooks\OltgoWebhookController::class)->middleware('throttle:120,1');
 
 /*
 |--------------------------------------------------------------------------
