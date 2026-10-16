@@ -5,6 +5,8 @@ namespace Ispgo\NapManager\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\FiberCable;
+use App\Models\FiberNode;
 use App\Models\Olt;
 use App\Models\Router;
 
@@ -28,6 +30,9 @@ class NapBox extends Model
         'olt_id',
         'pon_port',
         'splitter_ratio',
+        'fiber_node_id',
+        'fiber_cable_id',
+        'fiber_strand',
         'fiber_color',
         'route',
         'cable_length_m',
@@ -40,6 +45,7 @@ class NapBox extends Model
         'distribution_order' => 'integer',
         'route' => 'array',
         'cable_length_m' => 'integer',
+        'fiber_strand' => 'integer',
     ];
 
     protected $appends = ['available_ports_count'];
@@ -84,6 +90,18 @@ class NapBox extends Model
         return $this->belongsTo(Olt::class, 'olt_id');
     }
 
+    /** Mufla (u otro nodo) donde se empalma esta caja con el troncal */
+    public function fiberNode(): BelongsTo
+    {
+        return $this->belongsTo(FiberNode::class, 'fiber_node_id');
+    }
+
+    /** Cable troncal del que sale el hilo que alimenta la caja */
+    public function fiberCable(): BelongsTo
+    {
+        return $this->belongsTo(FiberCable::class, 'fiber_cable_id');
+    }
+
     /**
      * OLT de la que sale la fibra: la propia o, en cascada, la de la primera caja con OLT.
      */
@@ -94,6 +112,9 @@ class NapBox extends Model
         while ($box && !in_array($box->id, $seen)) {
             if ($box->olt_id) {
                 return (int) $box->olt_id;
+            }
+            if (!$box->parent_nap_id && $box->fiberNode) {
+                return $box->fiberNode->upstreamOltId();
             }
             $seen[] = $box->id;
             $box = $box->parentNap;

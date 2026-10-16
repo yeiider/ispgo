@@ -2,6 +2,8 @@
 
 namespace App\Services\Nap;
 
+use App\Models\FiberCable;
+use App\Models\FiberNode;
 use App\Models\Olt;
 use App\Models\Services\Service;
 use App\Services\Oltgo\OltgoClient;
@@ -29,16 +31,16 @@ class FiberNetwork
 
     public function build(?int $routerId = null): array
     {
+        // Se arma la red completa (los troncales cruzan zonas) y al final se filtra por zona
         $boxes = NapBox::query()
-            ->when($routerId, fn ($q) => $q->where('router_id', $routerId))
             ->with(['ports' => fn ($q) => $q->orderBy('port_number')])
             ->get()
             ->keyBy('id');
 
-        $olts = Olt::query()
-            ->when($routerId, fn ($q) => $q->where('router_id', $routerId))
-            ->get()
-            ->keyBy('id');
+        $olts = Olt::query()->get()->keyBy('id');
+        $nodes = FiberNode::query()->get()->keyBy('id');
+        $cables = FiberCable::query()->get()->keyBy('id');
+        $nodePaths = $this->nodePaths($nodes, $cables);
 
         [$onus, $live, $liveError] = $this->onuStates($olts->where('is_active', true)->keys()->all());
 
@@ -51,7 +53,7 @@ class FiberNetwork
         // Datos de cada caja resueltos a partir de su cadena de padres
         $resolved = [];
         foreach ($boxes as $box) {
-            $resolved[$box->id] = $this->resolveChain($box, $boxes);
+            $resolved[$box->id] = $this->resolveChain($box, $boxes, $nodePaths);
         }
 
         $clients = [];
@@ -137,12 +139,75 @@ class FiberNetwork
                 'path' => $resolved[$box->id]['path'],
                 'route' => $box->route,
                 'cable_length_m' => $box->cable_length_m,
+                'fiber_node_id' => $box->fiber_node_id,
+                'fiber_cable_id' => $box->fiber_cable_id,
+                'fiber_strand' => $box->fiber_strand,
+                'cable_path' => $resolved[$box->id]['cable_path'],
+                'node_path' => $resolved[$box->id]['node_path'],
                 'children_count' => $children->get($box->id, collect())->count(),
                 'direct' => $direct[$box->id],
                 'subtree' => $tree,
                 'health' => $this->health($tree),
                 'direct_health' => $this->health($direct[$box->id]),
             ];
+        }
+
+        // Lo que cuelga de cada cable y de cada nodo (sumando las cajas raíz)
+        $roots = collect($boxRows)->where('depth', 0);
+        $cableRows = [];
+        foreach ($cables as $cable) {
+            $down = $roots->filter(fn ($b) => in_array($cable->id, $b['cable_path']));
+            $counts = $down->reduce(fn ($acc, $b) => $this->addCounts($acc, $b['subtree']), $this->count(collect()));
+            $used = $down->filter(fn ($b) => $b['fiber_cable_id'] == $cable->id && $b['fiber_strand'])
+                ->map(fn ($b) => ['strand' => $b['fiber_strand'], 'nap_box_id' => $b['id']])->values()->all();
+            $cableRows[$cable->id] = [
+                'id' => $cable->id,
+                'name' => $cable->name,
+                'code' => $cable->code,
+                'kind' => $cable->kind,
+                'fiber_count' => $cable->fiber_count,
+                'from_node_id' => $cable->from_node_id,
+                'to_node_id' => $cable->to_node_id,
+                'route' => $cable->route,
+                'length_m' => $cable->length_m,
+                'status' => $cable->status,
+                'notes' => $cable->notes,
+                'box_ids' => $down->pluck('id')->values()->all(),
+                'strands' => $used,
+                'downstream' => $counts,
+                'health' => $this->health($counts),
+            ];
+        }
+        $nodeRows = [];
+        foreach ($nodes as $node) {
+            $down = $roots->filter(fn ($b) => in_array($node->id, $b['node_path']));
+            $counts = $down->reduce(fn ($acc, $b) => $this->addCounts($acc, $b['subtree']), $this->count(collect()));
+            $nodeRows[$node->id] = [
+                'id' => $node->id,
+                'name' => $node->name,
+                'code' => $node->code,
+                'type' => $node->type,
+                'latitude' => $node->latitude,
+                'longitude' => $node->longitude,
+                'address' => $node->address,
+                'olt_id' => $nodePaths[$node->id]['olt_id'],
+                'own_olt_id' => $node->olt_id,
+                'notes' => $node->notes,
+                'cable_path' => $nodePaths[$node->id]['cables'],
+                'box_ids' => $down->pluck('id')->values()->all(),
+                'downstream' => $counts,
+                'health' => $this->health($counts),
+            ];
+        }
+
+        $incidents = $this->incidents($boxRows, $clients, $olts, $cableRows, $nodeRows);
+
+        // Filtro por zona: cajas y clientes de la zona; troncales y nodos siempre (son generales)
+        if ($routerId) {
+            $inZone = collect($boxRows)->where('router_id', $routerId)->pluck('id')->all();
+            $boxRows = array_filter($boxRows, fn ($b) => in_array($b['id'], $inZone));
+            $clients = array_values(array_filter($clients, fn ($c) => in_array($c['nap_box_id'], $inZone)));
+            $incidents = array_values(array_filter($incidents, fn ($i) => array_intersect($i['box_ids'], $inZone)));
         }
 
         return [
@@ -157,9 +222,11 @@ class FiberNetwork
                 'address' => $o->address,
                 'is_active' => $o->is_active,
             ])->values()->all(),
+            'nodes' => array_values($nodeRows),
+            'cables' => array_values($cableRows),
             'boxes' => array_values($boxRows),
             'clients' => $clients,
-            'incidents' => $this->incidents($boxRows, $clients, $olts),
+            'incidents' => $incidents,
         ];
     }
 
@@ -205,7 +272,7 @@ class FiberNetwork
     /**
      * OLT, puerto PON, profundidad y camino (ids desde la raíz) de una caja.
      */
-    private function resolveChain(NapBox $box, Collection $boxes): array
+    private function resolveChain(NapBox $box, Collection $boxes, array $nodePaths): array
     {
         $path = [];
         $oltId = null;
@@ -220,7 +287,58 @@ class FiberNetwork
             $current = $current->parent_nap_id ? $boxes->get($current->parent_nap_id) : null;
         }
 
-        return ['olt_id' => $oltId, 'pon_port' => $pon, 'depth' => count($path) - 1, 'path' => $path];
+        // La caja raíz se empalma en una mufla: la OLT y los cables vienen de ahí hacia arriba
+        $root = $boxes->get($path[0]);
+        $cablePath = [];
+        $nodePath = [];
+        if ($root?->fiber_node_id && isset($nodePaths[$root->fiber_node_id])) {
+            $np = $nodePaths[$root->fiber_node_id];
+            $oltId ??= $np['olt_id'];
+            $cablePath = $np['cables'];
+            $nodePath = $np['nodes'];
+        }
+        if ($root?->fiber_cable_id && !in_array($root->fiber_cable_id, $cablePath)) {
+            $cablePath[] = $root->fiber_cable_id;
+        }
+
+        return [
+            'olt_id' => $oltId,
+            'pon_port' => $pon,
+            'depth' => count($path) - 1,
+            'path' => $path,
+            'cable_path' => $cablePath,
+            'node_path' => $nodePath,
+        ];
+    }
+
+    /**
+     * Para cada nodo: los cables y nodos desde la central hasta él, y la OLT de esa central.
+     */
+    private function nodePaths(Collection $nodes, Collection $cables): array
+    {
+        $incoming = $cables->groupBy('to_node_id');
+        $paths = [];
+        foreach ($nodes as $node) {
+            $cablePath = [];
+            $nodePath = [$node->id];
+            $oltId = $node->olt_id;
+            $current = $node;
+            $seen = [$node->id];
+            while (!$oltId && ($cable = $incoming->get($current->id)?->first())) {
+                $from = $nodes->get($cable->from_node_id);
+                array_unshift($cablePath, $cable->id);
+                if (!$from || in_array($from->id, $seen)) {
+                    break;
+                }
+                array_unshift($nodePath, $from->id);
+                $seen[] = $from->id;
+                $oltId = $from->olt_id;
+                $current = $from;
+            }
+            $paths[$node->id] = ['cables' => $cablePath, 'nodes' => $nodePath, 'olt_id' => $oltId];
+        }
+
+        return $paths;
     }
 
     /**
@@ -304,15 +422,54 @@ class FiberNetwork
         return $c['offline'] > 0 ? 'warning' : 'ok';
     }
 
-    private function incidents(array $boxes, array $clients, Collection $olts): array
+    private function incidents(array $boxes, array $clients, Collection $olts, array $cables = [], array $nodes = []): array
     {
         $incidents = [];
+
+        // Cable troncal cortado: todo lo que cuelga del cable está caído y el cable anterior no
+        $covered = [];
+        $zones = \App\Models\Router::pluck('name', 'id');
+        foreach ($cables as $cable) {
+            if ($cable['health'] !== 'down' || $cable['downstream']['offline'] < 2) {
+                continue;
+            }
+            $upstream = $nodes[$cable['from_node_id']]['cable_path'] ?? [];
+            $parentCable = $upstream ? ($cables[end($upstream)] ?? null) : null;
+            if ($parentCable && $parentCable['health'] === 'down') {
+                continue;
+            }
+            $roots = $cable['box_ids'];
+            $affectedBoxes = collect($boxes)->filter(fn ($b) => in_array($b['path'][0], $roots));
+            $covered = array_merge($covered, $affectedBoxes->pluck('id')->all());
+            $from = $nodes[$cable['from_node_id']]['name'] ?? '?';
+            $to = $nodes[$cable['to_node_id']]['name'] ?? '?';
+            $pons = $affectedBoxes->pluck('pon_port')->filter()->unique()->values();
+            $zoneNames = $affectedBoxes->pluck('router_id')->filter()->unique()->map(fn ($id) => $zones[$id] ?? $id)->values();
+            $power = $cable['downstream']['dying_gasp'] > $cable['downstream']['los'];
+            $incidents[] = [
+                'type' => $power ? 'power_outage' : 'trunk_cut',
+                'severity' => 'critical',
+                'nap_box_id' => null,
+                'cable_id' => $cable['id'],
+                'node_id' => null,
+                'olt_id' => $affectedBoxes->first()['olt_id'] ?? null,
+                'pon_port' => $pons->count() === 1 ? $pons->first() : null,
+                'affected' => $cable['downstream']['offline'],
+                'box_ids' => $affectedBoxes->pluck('id')->values()->all(),
+                'title' => ($power ? 'Sin energía bajo ' : 'Corte en troncal ') . ($cable['code'] ?: $cable['name']),
+                'detail' => "Tramo {$from} → {$to}: {$affectedBoxes->count()} cajas y {$cable['downstream']['offline']} ONUs caídas"
+                    . ($zoneNames->isNotEmpty() ? ' en ' . $zoneNames->implode(', ') : '')
+                    . ($pons->count() > 1 ? " ({$pons->count()} puertos PON)" : '')
+                    . ($power ? '. Predomina dying gasp: probable corte de energía' : ''),
+            ];
+        }
+        $covered = array_unique($covered);
 
         // Troncal PON caída: todas las cajas raíz de un mismo puerto PON están caídas
         $roots = collect($boxes)->whereNull('parent_nap_id')->filter(fn ($b) => $b['olt_id'] && $b['pon_port']);
         $ponDown = [];
         foreach ($roots->groupBy(fn ($b) => $b['olt_id'] . '|' . $b['pon_port']) as $key => $group) {
-            if ($group->count() < 2 || $group->contains(fn ($b) => $b['health'] !== 'down')) {
+            if ($group->count() < 2 || $group->contains(fn ($b) => $b['health'] !== 'down' || in_array($b['id'], $covered))) {
                 continue;
             }
             [$oltId, $pon] = explode('|', $key);
@@ -331,7 +488,7 @@ class FiberNetwork
 
         // Tramo caído: la caja está caída y su padre no (el corte está entre ambos)
         foreach ($boxes as $box) {
-            if ($box['health'] !== 'down' || in_array($box['id'], $ponDown)) {
+            if ($box['health'] !== 'down' || in_array($box['id'], $ponDown) || in_array($box['id'], $covered)) {
                 continue;
             }
             $parent = $box['parent_nap_id'] ? ($boxes[$box['parent_nap_id']] ?? null) : null;
@@ -358,6 +515,8 @@ class FiberNetwork
             $incidents[] = [
                 'type' => 'partial',
                 'severity' => 'warning',
+                'cable_id' => null,
+                'node_id' => null,
                 'nap_box_id' => $box['id'],
                 'olt_id' => $box['olt_id'],
                 'pon_port' => $box['pon_port'],
@@ -379,6 +538,8 @@ class FiberNetwork
                 $incidents[] = [
                     'type' => 'weak_signal',
                     'severity' => 'warning',
+                    'cable_id' => null,
+                    'node_id' => null,
                     'nap_box_id' => (int) $boxId,
                     'olt_id' => $box['olt_id'],
                     'pon_port' => $box['pon_port'],
@@ -393,6 +554,8 @@ class FiberNetwork
                 $incidents[] = [
                     'type' => 'port_mismatch',
                     'severity' => 'info',
+                    'cable_id' => null,
+                    'node_id' => null,
                     'nap_box_id' => (int) $boxId,
                     'olt_id' => $box['olt_id'],
                     'pon_port' => $box['pon_port'],
@@ -418,6 +581,8 @@ class FiberNetwork
         return [
             'type' => $power ? 'power_outage' : 'fiber_cut',
             'severity' => 'critical',
+            'cable_id' => null,
+            'node_id' => null,
             'nap_box_id' => $boxId,
             'olt_id' => $oltId,
             'pon_port' => $pon,

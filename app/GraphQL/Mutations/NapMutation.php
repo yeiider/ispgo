@@ -176,7 +176,7 @@ class NapMutation
     {
         return array_intersect_key($input, array_flip([
             'name','code','address','latitude','longitude','status','capacity','technology_type','installation_date','brand','model','distribution_order','parent_nap_id','router_id','fiber_color',
-            'olt_id','pon_port','splitter_ratio','route','cable_length_m',
+            'olt_id','pon_port','splitter_ratio','route','cable_length_m','fiber_node_id','fiber_cable_id','fiber_strand',
         ]));
     }
 
@@ -187,7 +187,7 @@ class NapMutation
     {
         $data = $this->onlyNapBoxFillable($input);
 
-        foreach (['parent_nap_id', 'olt_id', 'router_id'] as $key) {
+        foreach (['parent_nap_id', 'olt_id', 'router_id', 'fiber_node_id', 'fiber_cable_id', 'fiber_strand'] as $key) {
             if (array_key_exists($key, $data) && ($data[$key] === '' || $data[$key] === 0 || $data[$key] === '0')) {
                 $data[$key] = null;
             }
@@ -204,6 +204,19 @@ class NapMutation
 
         if (!empty($data['olt_id']) && !\App\Models\Olt::whereKey($data['olt_id'])->exists()) {
             throw ValidationException::withMessages(['olt_id' => ['La OLT no existe.']]);
+        }
+
+        if (!empty($data['fiber_node_id']) && !\App\Models\FiberNode::whereKey($data['fiber_node_id'])->exists()) {
+            throw ValidationException::withMessages(['fiber_node_id' => ['La mufla no existe.']]);
+        }
+        if (!empty($data['fiber_cable_id'])) {
+            $cable = \App\Models\FiberCable::find($data['fiber_cable_id']);
+            if (!$cable) {
+                throw ValidationException::withMessages(['fiber_cable_id' => ['El cable no existe.']]);
+            }
+            if (!empty($data['fiber_strand']) && $data['fiber_strand'] > $cable->fiber_count) {
+                throw ValidationException::withMessages(['fiber_strand' => ["El cable {$cable->name} tiene {$cable->fiber_count} hilos."]]);
+            }
         }
 
         if (array_key_exists('route', $data) && $data['route'] !== null) {

@@ -1030,6 +1030,13 @@ type NapBox {
   pon_port: String
   "Relación del splitter de la caja, ej. 1:8"
   splitter_ratio: String
+  "Mufla donde se empalma la caja con el troncal (solo cajas raíz)"
+  fiber_node_id: ID
+  fiber_node: FiberNode @belongsTo(relation: "fiberNode")
+  "Cable troncal y número de hilo que alimentan la caja"
+  fiber_cable_id: ID
+  fiber_cable: FiberCable @belongsTo(relation: "fiberCable")
+  fiber_strand: Int
   parent: NapBox @belongsTo(relation: "parentNap")
   fiber_color: String
   "Puntos [lat, lng] del tramo de fibra que llega a esta caja desde su padre o la OLT"
@@ -1102,6 +1109,9 @@ input CreateNapBoxInput {
   olt_id: ID
   pon_port: String
   splitter_ratio: String
+  fiber_node_id: ID
+  fiber_cable_id: ID
+  fiber_strand: Int
   fiber_color: String
   route: JSON
   cable_length_m: Int
@@ -1125,6 +1135,9 @@ input UpdateNapBoxInput {
   olt_id: ID
   pon_port: String
   splitter_ratio: String
+  fiber_node_id: ID
+  fiber_cable_id: ID
+  fiber_strand: Int
   fiber_color: String
   route: JSON
   cable_length_m: Int
@@ -1162,6 +1175,65 @@ input UpdateNapPortInput {
   technician_notes: String
   last_maintenance: String
   warranty_until: String
+}
+
+# --------------- Planta externa: nodos (central, mufla...) y cables troncales ---------------
+
+type FiberNode {
+  id: ID!
+  name: String!
+  code: String
+  type: String!
+  latitude: Float
+  longitude: Float
+  address: String
+  olt_id: ID
+  olt: Olt @belongsTo
+  notes: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type FiberCable {
+  id: ID!
+  name: String!
+  code: String
+  kind: String!
+  fiber_count: Int!
+  from_node_id: ID!
+  to_node_id: ID!
+  from_node: FiberNode @belongsTo(relation: "fromNode")
+  to_node: FiberNode @belongsTo(relation: "toNode")
+  route: JSON
+  length_m: Int
+  status: String
+  notes: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input FiberNodeInput {
+  name: String
+  code: String
+  type: String
+  latitude: Float
+  longitude: Float
+  address: String
+  olt_id: ID
+  notes: String
+}
+
+input FiberCableInput {
+  name: String
+  code: String
+  kind: String
+  fiber_count: Int
+  from_node_id: ID
+  to_node_id: ID
+  route: JSON
+  length_m: Int
+  status: String
+  notes: String
 }
 
 # --------------- Red de fibra: topología + estado de ONUs (OLTGO) ---------------
@@ -1214,6 +1286,12 @@ type NapNetworkBox {
   path: [ID!]!
   route: JSON
   cable_length_m: Int
+  fiber_node_id: ID
+  fiber_cable_id: ID
+  fiber_strand: Int
+  "Cables desde la central hasta la mufla de la caja raíz"
+  cable_path: [ID!]!
+  node_path: [ID!]!
   children_count: Int!
   "Clientes conectados directamente a la caja"
   direct: NapOnuCount!
@@ -1248,11 +1326,13 @@ type NapNetworkClient {
 }
 
 type NapIncident {
-  "fiber_cut, power_outage, partial, weak_signal, port_mismatch"
+  "trunk_cut, fiber_cut, power_outage, partial, weak_signal, port_mismatch"
   type: String!
   "critical, warning, info"
   severity: String!
   nap_box_id: ID
+  cable_id: ID
+  node_id: ID
   olt_id: ID
   pon_port: String
   affected: Int!
@@ -1261,18 +1341,66 @@ type NapIncident {
   detail: String!
 }
 
+"Hilo de un cable usado por una caja NAP"
+type NapStrand {
+  strand: Int!
+  nap_box_id: ID!
+}
+
+type NapNetworkNode {
+  id: ID!
+  name: String!
+  code: String
+  "central, mufla, reserva, poste, odf"
+  type: String!
+  latitude: Float
+  longitude: Float
+  address: String
+  "OLT de la central de la que viene la fibra"
+  olt_id: ID
+  own_olt_id: ID
+  notes: String
+  cable_path: [ID!]!
+  box_ids: [ID!]!
+  downstream: NapOnuCount!
+  health: String!
+}
+
+type NapNetworkCable {
+  id: ID!
+  name: String!
+  code: String
+  kind: String!
+  fiber_count: Int!
+  from_node_id: ID!
+  to_node_id: ID!
+  route: JSON
+  length_m: Int
+  status: String
+  notes: String
+  "Cajas raíz que se alimentan de este cable (directo o más abajo)"
+  box_ids: [ID!]!
+  strands: [NapStrand!]!
+  downstream: NapOnuCount!
+  health: String!
+}
+
 type NapNetwork {
   "true si el estado de las ONUs viene en vivo de OLTGO"
   live: Boolean!
   live_error: String
   checked_at: String!
   olts: [NapNetworkOlt!]!
+  nodes: [NapNetworkNode!]!
+  cables: [NapNetworkCable!]!
   boxes: [NapNetworkBox!]!
   clients: [NapNetworkClient!]!
   incidents: [NapIncident!]!
 }
 
 extend type Query {
+  fiberNodes: [FiberNode!]! @all(model: "App\\Models\\FiberNode") @guard
+  fiberCables: [FiberCable!]! @all(model: "App\\Models\\FiberCable") @guard
   "Red de fibra completa con estado de ONUs e incidentes detectados"
   napNetwork(router_id: ID): NapNetwork! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@network") @guard
   napBoxes(router_id: ID, first: Int = 15, page: Int): NapBoxPaginator @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxes")
@@ -1294,6 +1422,12 @@ extend type Mutation {
   assignServiceToNapPort(service_id: ID!, nap_port_id: ID!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@assignServiceToNapPort")
   releaseNapPort(nap_port_id: ID!): NapPort @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@releaseNapPort")
   assignRouterToNapBox(nap_box_id: ID!, router_id: ID!): NapBox @field(resolver: "App\\GraphQL\\Mutations\\NapMutation@assignRouterToNapBox")
+  createFiberNode(input: FiberNodeInput!): FiberNode! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@createNode") @guard
+  updateFiberNode(id: ID!, input: FiberNodeInput!): FiberNode! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@updateNode") @guard
+  deleteFiberNode(id: ID!): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@deleteNode") @guard
+  createFiberCable(input: FiberCableInput!): FiberCable! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@createCable") @guard
+  updateFiberCable(id: ID!, input: FiberCableInput!): FiberCable! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@updateCable") @guard
+  deleteFiberCable(id: ID!): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@deleteCable") @guard
 }
 
 type Permission {
