@@ -2,7 +2,9 @@
 
 namespace App\GraphQL\Queries;
 
+use App\Models\CoreConfigData;
 use App\Models\Olt;
+use App\Models\Router;
 use App\Services\Oltgo\OltgoClient;
 use App\Settings\Oltgo\ProviderOltgo;
 use App\Support\SmartOltGate;
@@ -56,6 +58,49 @@ class OltgoQuery
             Log::warning('OLTGO: ' . $e->getMessage());
             throw new Error('No se pudo consultar OLTGO: ' . $e->getMessage());
         }
+    }
+
+    public function onuHistory($root, array $args): ?array
+    {
+        try {
+            return $this->client->history($args['serial']);
+        } catch (Throwable $e) {
+            if (str_contains($e->getMessage(), 'no encontrada')) {
+                return null;
+            }
+            throw new Error('No se pudo consultar OLTGO: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * La configuración por defecto y cada zona, con el proveedor que usa.
+     */
+    public function zoneProviders($root, array $args): array
+    {
+        $hasOlts = Olt::where('is_active', true)->exists();
+        $ownScopes = CoreConfigData::where('scope_id', '>', 0)
+            ->where(fn ($q) => $q->where('path', 'like', 'smartolt/general/%')->orWhere('path', 'like', 'oltgo/general/%'))
+            ->whereNotNull('value')->where('value', '!=', '')
+            ->pluck('scope_id')->unique()->all();
+
+        $rows = [[
+            'router_id' => null,
+            'name' => 'Configuración por defecto',
+            'smartolt' => SmartOltGate::enabled(),
+            'oltgo' => $hasOlts && ProviderOltgo::enabled(),
+            'own_config' => true,
+        ]];
+        foreach (Router::orderBy('name')->get(['id', 'name']) as $router) {
+            $rows[] = [
+                'router_id' => $router->id,
+                'name' => $router->name,
+                'smartolt' => SmartOltGate::enabled($router->id),
+                'oltgo' => $hasOlts && ProviderOltgo::enabled($router->id),
+                'own_config' => in_array($router->id, $ownScopes),
+            ];
+        }
+
+        return $rows;
     }
 
     public function health($root, array $args): array

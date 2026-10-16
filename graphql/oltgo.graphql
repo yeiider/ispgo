@@ -63,6 +63,31 @@ type OltgoOnuLocation {
     onu: OltgoOnu!
 }
 
+"Muestra del historial de una ONU (cada 5 min, últimas 24 h)"
+type OltgoHistoryPoint {
+    at: String!
+    state: String!
+    rx_power_dbm: Float
+}
+
+type OltgoOnuHistory {
+    olt_id: ID!
+    olt_name: String
+    serial: String!
+    step_seconds: Int!
+    points: [OltgoHistoryPoint!]!
+}
+
+"Qué proveedor de OLT usa cada zona (router); router_id null = configuración por defecto"
+type OltZoneProvider {
+    router_id: ID
+    name: String!
+    smartolt: Boolean!
+    oltgo: Boolean!
+    "true si la zona tiene configuración propia de SmartOLT u OLTGO"
+    own_config: Boolean!
+}
+
 type OltgoHealth {
     enabled: Boolean!
     url: String!
@@ -208,6 +233,8 @@ extend type Query {
     "router_id: la zona del servicio; sin él, si algún proveedor se usa en alguna zona"
     oltProviderStatus(router_id: ID): OltProviderStatus! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@providers") @guard
     oltgoFindOnu(serial: String!): OltgoOnuLocation @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@findOnu") @guard
+    oltgoOnuHistory(serial: String!): OltgoOnuHistory @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@onuHistory") @guard
+    oltZoneProviders: [OltZoneProvider!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@zoneProviders") @guard
     oltgoHealth: OltgoHealth! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@health") @guard
     oltgoStatus: [OltgoOltStatus!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@status") @guard
     "refresh: true lee en vivo ignorando la caché de OLTGO"

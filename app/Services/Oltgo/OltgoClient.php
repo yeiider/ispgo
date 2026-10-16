@@ -69,6 +69,11 @@ class OltgoClient
         return $this->get('/api/onus/' . rawurlencode($serial));
     }
 
+    public function history(string $serial): array
+    {
+        return $this->get('/api/onus/' . rawurlencode($serial) . '/history');
+    }
+
     public function cards(int $oltId, bool $refresh = false): array
     {
         return $this->get("/api/olts/{$oltId}/cards", ['refresh' => $refresh ? 1 : null]);
