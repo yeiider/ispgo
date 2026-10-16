@@ -35,6 +35,10 @@ type Olt {
     host: String!
     "IP con la que OLTGO llega a la OLT (traducida si va por túnel)"
     effective_host: String!
+    "Ubicación de la OLT (nodo/cabecera) para dibujar las troncales"
+    latitude: Float
+    longitude: Float
+    address: String
     snmp_port: Int!
     snmp_version: String!
     snmp_v3_user: String
@@ -211,6 +215,9 @@ input OltInput {
     vendor: String @rules(apply: ["in:zte"])
     model: String @rules(apply: ["max:50"])
     host: String @rules(apply: ["ip"])
+    latitude: Float @rules(apply: ["nullable", "numeric", "between:-90,90"])
+    longitude: Float @rules(apply: ["nullable", "numeric", "between:-180,180"])
+    address: String @rules(apply: ["nullable", "max:255"])
     snmp_port: Int @rules(apply: ["integer", "min:1", "max:65535"])
     snmp_version: String @rules(apply: ["in:2c,3"])
     "Solo se envía para crearla o cambiarla; nunca se devuelve. Sin community la OLT queda pendiente"

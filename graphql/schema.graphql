@@ -1023,7 +1023,18 @@ type NapBox {
   distribution_order: Int
   parent_nap_id: ID
   router_id: ID
+  "OLT de la que sale la fibra (solo en la primera caja; las de cascada la heredan)"
+  olt_id: ID
+  olt: Olt @belongsTo(relation: "olt")
+  "Puerto PON de la OLT, ej. gpon_olt-1/1/1"
+  pon_port: String
+  "Relación del splitter de la caja, ej. 1:8"
+  splitter_ratio: String
+  parent: NapBox @belongsTo(relation: "parentNap")
   fiber_color: String
+  "Puntos [lat, lng] del tramo de fibra que llega a esta caja desde su padre o la OLT"
+  route: JSON
+  cable_length_m: Int
   ports: [NapPort!] @hasMany(relation: "ports")
   available_ports_count: Int
   # Servicios relacionados a esta caja (a través de sus puertos)
@@ -1083,7 +1094,12 @@ input CreateNapBoxInput {
   distribution_order: Int
   parent_nap_id: ID
   router_id: ID
+  olt_id: ID
+  pon_port: String
+  splitter_ratio: String
   fiber_color: String
+  route: JSON
+  cable_length_m: Int
 }
 
 input UpdateNapBoxInput {
@@ -1101,7 +1117,12 @@ input UpdateNapBoxInput {
   distribution_order: Int
   parent_nap_id: ID
   router_id: ID
+  olt_id: ID
+  pon_port: String
+  splitter_ratio: String
   fiber_color: String
+  route: JSON
+  cable_length_m: Int
 }
 
 input CreateNapPortInput {
@@ -1138,7 +1159,117 @@ input UpdateNapPortInput {
   warranty_until: String
 }
 
+# --------------- Red de fibra: topología + estado de ONUs (OLTGO) ---------------
+
+"Conteo de ONUs por estado. offline = conocidas y fuera de línea; unknown = sin dato de OLTGO"
+type NapOnuCount {
+  total: Int!
+  online: Int!
+  offline: Int!
+  los: Int!
+  dying_gasp: Int!
+  unknown: Int!
+  "En línea con potencia baja"
+  weak: Int!
+}
+
+type NapNetworkOlt {
+  id: ID!
+  name: String!
+  latitude: Float
+  longitude: Float
+  address: String
+  is_active: Boolean!
+}
+
+type NapNetworkBox {
+  id: ID!
+  name: String!
+  code: String
+  address: String
+  latitude: Float
+  longitude: Float
+  status: String
+  capacity: Int!
+  used_ports: Int!
+  splitter_ratio: String
+  fiber_color: String
+  technology_type: String
+  router_id: ID
+  "OLT y PON propios de la caja (null si los hereda del padre)"
+  own_olt_id: ID
+  own_pon_port: String
+  "OLT y PON resueltos por la cascada"
+  olt_id: ID
+  pon_port: String
+  parent_nap_id: ID
+  "0 = sale directo de la OLT"
+  depth: Int!
+  "Ids de cajas desde la raíz hasta esta"
+  path: [ID!]!
+  route: JSON
+  cable_length_m: Int
+  children_count: Int!
+  "Clientes conectados directamente a la caja"
+  direct: NapOnuCount!
+  "Clientes de la caja y de todas las que cuelgan de ella"
+  subtree: NapOnuCount!
+  "Estado de todo lo que cuelga de la caja: empty, unknown, ok, warning, critical, down"
+  health: String!
+  "Estado solo de los clientes conectados a la caja"
+  direct_health: String!
+}
+
+type NapNetworkClient {
+  service_id: ID!
+  customer_id: ID
+  customer_name: String
+  address: String
+  latitude: Float
+  longitude: Float
+  nap_box_id: ID!
+  nap_port_id: ID!
+  port_number: Int!
+  sn: String
+  service_status: String
+  "Estado de OLTGO (online, los, dying_gasp, offline...), not_found o unknown"
+  onu_state: String!
+  rx_power_dbm: Float
+  "Puerto PON donde la OLT ve la ONU"
+  onu_port: String
+  onu_olt_id: ID
+  "La ONU está en un PON distinto al de la caja"
+  port_mismatch: Boolean!
+}
+
+type NapIncident {
+  "fiber_cut, power_outage, partial, weak_signal, port_mismatch"
+  type: String!
+  "critical, warning, info"
+  severity: String!
+  nap_box_id: ID
+  olt_id: ID
+  pon_port: String
+  affected: Int!
+  box_ids: [ID!]!
+  title: String!
+  detail: String!
+}
+
+type NapNetwork {
+  "true si el estado de las ONUs viene en vivo de OLTGO"
+  live: Boolean!
+  live_error: String
+  checked_at: String!
+  olts: [NapNetworkOlt!]!
+  boxes: [NapNetworkBox!]!
+  clients: [NapNetworkClient!]!
+  incidents: [NapIncident!]!
+}
+
 extend type Query {
+  "Red de fibra completa con estado de ONUs e incidentes detectados"
+  napNetwork(router_id: ID): NapNetwork! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@network") @guard
   napBoxes(router_id: ID, first: Int = 15, page: Int): NapBoxPaginator @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxes")
   napBox(id: ID!): NapBox @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBox")
   napPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPorts")

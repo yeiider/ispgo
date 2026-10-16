@@ -16,7 +16,7 @@ class NapMutation
         return DB::transaction(function () use ($input) {
             // Create NAP box
             $napBox = new NapBox();
-            $napBox->fill($this->onlyNapBoxFillable($input));
+            $napBox->fill($this->validatedNapBox($input));
             $napBox->save();
             
             // Auto-create ports based on capacity
@@ -39,7 +39,7 @@ class NapMutation
     public function updateNapBox($root, array $args)
     {
         $napBox = NapBox::findOrFail($args['id']);
-        $napBox->fill($this->onlyNapBoxFillable($args['input']));
+        $napBox->fill($this->validatedNapBox($args['input'], $napBox));
         $napBox->save();
         return $napBox->fresh('ports');
     }
@@ -175,8 +175,55 @@ class NapMutation
     private function onlyNapBoxFillable(array $input): array
     {
         return array_intersect_key($input, array_flip([
-            'name','code','address','latitude','longitude','status','capacity','technology_type','installation_date','brand','model','distribution_order','parent_nap_id','router_id','fiber_color'
+            'name','code','address','latitude','longitude','status','capacity','technology_type','installation_date','brand','model','distribution_order','parent_nap_id','router_id','fiber_color',
+            'olt_id','pon_port','splitter_ratio','route','cable_length_m',
         ]));
+    }
+
+    /**
+     * Campos permitidos, con la cascada sin ciclos y el trazado como lista de [lat, lng].
+     */
+    private function validatedNapBox(array $input, ?NapBox $napBox = null): array
+    {
+        $data = $this->onlyNapBoxFillable($input);
+
+        foreach (['parent_nap_id', 'olt_id', 'router_id'] as $key) {
+            if (array_key_exists($key, $data) && ($data[$key] === '' || $data[$key] === 0 || $data[$key] === '0')) {
+                $data[$key] = null;
+            }
+        }
+
+        if (!empty($data['parent_nap_id'])) {
+            if (!NapBox::whereKey($data['parent_nap_id'])->exists()) {
+                throw ValidationException::withMessages(['parent_nap_id' => ['La caja padre no existe.']]);
+            }
+            if ($napBox && $napBox->isSelfOrDescendant((int) $data['parent_nap_id'])) {
+                throw ValidationException::withMessages(['parent_nap_id' => ['La caja padre no puede ser la misma caja ni una que cuelga de ella.']]);
+            }
+        }
+
+        if (!empty($data['olt_id']) && !\App\Models\Olt::whereKey($data['olt_id'])->exists()) {
+            throw ValidationException::withMessages(['olt_id' => ['La OLT no existe.']]);
+        }
+
+        if (array_key_exists('route', $data) && $data['route'] !== null) {
+            $route = is_string($data['route']) ? json_decode($data['route'], true) : $data['route'];
+            if (!is_array($route)) {
+                throw ValidationException::withMessages(['route' => ['El trazado debe ser una lista de puntos.']]);
+            }
+            $points = [];
+            foreach ($route as $point) {
+                $lat = $point[0] ?? $point['lat'] ?? null;
+                $lng = $point[1] ?? $point['lng'] ?? null;
+                if (!is_numeric($lat) || !is_numeric($lng) || abs($lat) > 90 || abs($lng) > 180) {
+                    throw ValidationException::withMessages(['route' => ['Punto inválido en el trazado.']]);
+                }
+                $points[] = [round((float) $lat, 7), round((float) $lng, 7)];
+            }
+            $data['route'] = $points ?: null;
+        }
+
+        return $data;
     }
 
     private function onlyNapPortFillable(array $input): array

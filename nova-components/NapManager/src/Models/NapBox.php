@@ -5,6 +5,7 @@ namespace Ispgo\NapManager\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Olt;
 use App\Models\Router;
 
 class NapBox extends Model
@@ -24,14 +25,21 @@ class NapBox extends Model
         'distribution_order',
         'parent_nap_id', // Para jerarquía de distribución
         'router_id',
+        'olt_id',
+        'pon_port',
+        'splitter_ratio',
         'fiber_color',
+        'route',
+        'cable_length_m',
     ];
 
     protected $casts = [
         'installation_date' => 'date',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
-        'distribution_order' => 'integer'
+        'distribution_order' => 'integer',
+        'route' => 'array',
+        'cable_length_m' => 'integer',
     ];
 
     protected $appends = ['available_ports_count'];
@@ -69,6 +77,47 @@ class NapBox extends Model
     public function router(): BelongsTo
     {
         return $this->belongsTo(Router::class, 'router_id');
+    }
+
+    public function olt(): BelongsTo
+    {
+        return $this->belongsTo(Olt::class, 'olt_id');
+    }
+
+    /**
+     * OLT de la que sale la fibra: la propia o, en cascada, la de la primera caja con OLT.
+     */
+    public function resolvedOltId(): ?int
+    {
+        $box = $this;
+        $seen = [];
+        while ($box && !in_array($box->id, $seen)) {
+            if ($box->olt_id) {
+                return (int) $box->olt_id;
+            }
+            $seen[] = $box->id;
+            $box = $box->parentNap;
+        }
+
+        return null;
+    }
+
+    /**
+     * true si $candidateId es esta caja o cuelga de ella (evita ciclos al cambiar el padre).
+     */
+    public function isSelfOrDescendant(int $candidateId): bool
+    {
+        $box = self::find($candidateId);
+        $seen = [];
+        while ($box && !in_array($box->id, $seen)) {
+            if ((int) $box->id === (int) $this->id) {
+                return true;
+            }
+            $seen[] = $box->id;
+            $box = $box->parentNap;
+        }
+
+        return false;
     }
 
     // Scopes

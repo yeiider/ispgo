@@ -2,11 +2,17 @@
 
 namespace App\GraphQL\Queries;
 
+use App\Services\Nap\FiberNetwork;
 use Ispgo\NapManager\Models\NapBox;
 use Ispgo\NapManager\Models\NapPort;
 
 class NapQuery
 {
+    public function network($root, array $args): array
+    {
+        return app(FiberNetwork::class)->build(!empty($args['router_id']) ? (int) $args['router_id'] : null);
+    }
+
     public function napBoxes($root, array $args)
     {
         $query = NapBox::query()->withCount([

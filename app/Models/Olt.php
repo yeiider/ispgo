@@ -18,6 +18,9 @@ class Olt extends Model
         'vendor',
         'model',
         'host',
+        'latitude',
+        'longitude',
+        'address',
         'snmp_port',
         'snmp_version',
         'snmp_community',
@@ -38,6 +41,8 @@ class Olt extends Model
         'snmp_v3_priv_pass' => OltgoEncrypted::class,
         'snmp_port' => 'integer',
         'is_active' => 'boolean',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     public function router(): BelongsTo
