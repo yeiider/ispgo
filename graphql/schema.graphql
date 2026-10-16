@@ -1035,6 +1035,11 @@ type NapBox {
   "Puntos [lat, lng] del tramo de fibra que llega a esta caja desde su padre o la OLT"
   route: JSON
   cable_length_m: Int
+  "Cajas desde la que sale de la OLT hasta esta (incluida)"
+  chain: [NapBox!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@chain")
+  "OLT y puerto PON heredados por la cascada"
+  resolved_olt: Olt @field(resolver: "App\\GraphQL\\Queries\\NapQuery@resolvedOlt")
+  resolved_pon_port: String @field(resolver: "App\\GraphQL\\Queries\\NapQuery@resolvedPonPort")
   ports: [NapPort!] @hasMany(relation: "ports")
   available_ports_count: Int
   # Servicios relacionados a esta caja (a través de sus puertos)

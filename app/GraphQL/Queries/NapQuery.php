@@ -13,6 +13,41 @@ class NapQuery
         return app(FiberNetwork::class)->build(!empty($args['router_id']) ? (int) $args['router_id'] : null);
     }
 
+    /**
+     * Cajas desde la raíz (la que sale de la OLT) hasta $root, incluida.
+     */
+    public function chain(NapBox $root): array
+    {
+        $chain = [];
+        $box = $root;
+        $seen = [];
+        while ($box && !in_array($box->id, $seen)) {
+            $seen[] = $box->id;
+            array_unshift($chain, $box);
+            $box = $box->parentNap;
+        }
+
+        return $chain;
+    }
+
+    public function resolvedOlt(NapBox $root): ?\App\Models\Olt
+    {
+        $oltId = $root->resolvedOltId();
+
+        return $oltId ? \App\Models\Olt::find($oltId) : null;
+    }
+
+    public function resolvedPonPort(NapBox $root): ?string
+    {
+        foreach (array_reverse($this->chain($root)) as $box) {
+            if ($box->pon_port) {
+                return $box->pon_port;
+            }
+        }
+
+        return null;
+    }
+
     public function napBoxes($root, array $args)
     {
         $query = NapBox::query()->withCount([
