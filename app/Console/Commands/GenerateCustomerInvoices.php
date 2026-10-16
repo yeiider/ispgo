@@ -77,6 +77,12 @@ class GenerateCustomerInvoices extends Command
         $generated = max(0, $invoicesAfter - $invoicesBefore);
 
         if ($generated > 0 || $errors > 0) {
+            \App\Services\Telegram\SystemNotifier::send(
+                $errors > 0 ? 'errors' : 'billing',
+                'Facturación ' . $period->format('m/Y'),
+                "{$generated} facturas generadas" . ($errors > 0 ? ", {$errors} clientes con error (ver logs)" : ''),
+                $errors > 0 ? 'warning' : 'success',
+            );
             Notify::notifySuccess(
                 "Facturación completada: {$generated} facturas generadas, {$errors} errores",
                 'Facturación',

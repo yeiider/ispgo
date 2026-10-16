@@ -1,0 +1,31 @@
+# --------------- Telegram: avisos de sistema para el equipo técnico ---------------
+# El token del bot nunca se devuelve.
+
+type TelegramStatus {
+    "Avisos activos: interruptor encendido, token y al menos un chat"
+    enabled: Boolean!
+    has_token: Boolean!
+    "Nombre del bot (@usuario) si el token es válido"
+    bot_username: String
+    chat_ids: [String!]!
+    error: String
+}
+
+"Chat que le escribió al bot o donde lo agregaron; sirve para encontrar su ID"
+type TelegramChat {
+    id: String!
+    title: String
+    "private, group, supergroup o channel"
+    type: String!
+}
+
+extend type Query {
+    telegramStatus: TelegramStatus! @field(resolver: "App\\GraphQL\\Queries\\TelegramQuery@status") @guard
+    "Chats recientes del bot. Escríbele al bot o agrégalo al grupo y consulta esto para ver el ID"
+    telegramRecentChats: [TelegramChat!]! @field(resolver: "App\\GraphQL\\Queries\\TelegramQuery@recentChats") @guard
+}
+
+extend type Mutation {
+    "Envía un mensaje de prueba ya mismo (sin cola) a un chat, o a todos los configurados"
+    telegramSendTest(chat_id: String): ActionResult! @field(resolver: "App\\GraphQL\\Queries\\TelegramQuery@sendTest") @guard
+}

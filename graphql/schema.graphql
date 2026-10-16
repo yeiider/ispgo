@@ -1306,3 +1306,4 @@ type ExportCsvResult {
 #import graphql_logs.graphql
 #import oltgo.graphql
 #import oltgo_metrics.graphql
+#import telegram.graphql

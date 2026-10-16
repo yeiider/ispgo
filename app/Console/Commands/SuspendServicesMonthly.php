@@ -95,6 +95,12 @@ class SuspendServicesMonthly extends Command
         $this->info("[EVERYDAY] Proceso de suspensión completado.");
 
         if ($suspended > 0) {
+            \App\Services\Telegram\SystemNotifier::send(
+                'suspensions',
+                'Cortes por mora',
+                "{$suspended} servicios suspendidos por facturas vencidas" . ($routerId ? " (zona " . (\App\Models\Router::find($routerId)?->name ?? $routerId) . ")" : ''),
+                'warning',
+            );
             \App\Helpers\Notify::notifyWarning(
                 "{$suspended} servicios suspendidos por facturas vencidas",
                 'Suspensiones de servicio',

@@ -646,6 +646,15 @@ return [
         "alerts" => \App\Settings\Oltgo\SettingOltgo::getAlertSettings(),
     ],
 
+    "telegram" => [
+        "setting" => [
+            "label" => "Telegram (avisos de sistema)",
+            "class" => "form-control",
+        ],
+        "general" => \App\Settings\Telegram\SettingTelegram::getGeneralSettings(),
+        "events" => \App\Settings\Telegram\SettingTelegram::getEventSettings(),
+    ],
+
     "siigo" => [
         "setting" => [
             "label" => "Siigo",

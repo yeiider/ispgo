@@ -6,6 +6,7 @@ use App\Helpers\ConfigHelper;
 use App\Helpers\Notify;
 use App\Models\Olt;
 use App\Services\Oltgo\OltgoMetricsClient;
+use App\Services\Telegram\SystemNotifier;
 use App\Settings\Oltgo\ProviderOltgo;
 use App\Settings\Oltgo\SettingOltgo;
 use Illuminate\Console\Command;
@@ -16,7 +17,7 @@ use Throwable;
 
 /**
  * Lee los eventos nuevos que detectó OLTGO y avisa al equipo: campana de
- * ISPGO y, si está configurado, WhatsApp. Corre cada minuto.
+ * ISPGO, Telegram y, si está configurado, WhatsApp. Corre cada minuto.
  */
 class OltgoAlerts extends Command
 {
@@ -46,7 +47,8 @@ class OltgoAlerts extends Command
     public function handle(OltgoMetricsClient $client): int
     {
         // Sin nada guardado, las alertas en la campana están activas.
-        if (!ProviderOltgo::enabled() || $this->setting('enabled') === '0') {
+        $inApp = $this->setting('enabled') !== '0';
+        if (!ProviderOltgo::enabled()) {
             return self::SUCCESS;
         }
 
@@ -68,13 +70,16 @@ class OltgoAlerts extends Command
             $olt = $olts[$e['olt_id']] ?? "OLT {$e['olt_id']}";
             $message = $this->message($e, $olt);
 
-            Notify::notifyAdmins($title, $message, $level, "/olts/{$e['olt_id']}/reports", [
-                'source' => 'oltgo',
-                'kind' => $e['kind'],
-                'olt_id' => $e['olt_id'],
-                'port' => $e['port'] ?? null,
-                'at' => $e['at'],
-            ]);
+            if ($inApp) {
+                Notify::notifyAdmins($title, $message, $level, "/olts/{$e['olt_id']}/reports", [
+                    'source' => 'oltgo',
+                    'kind' => $e['kind'],
+                    'olt_id' => $e['olt_id'],
+                    'port' => $e['port'] ?? null,
+                    'at' => $e['at'],
+                ]);
+            }
+            SystemNotifier::send('oltgo', $title, $message, $level, "/olts/{$e['olt_id']}/reports");
             if (in_array($e['severity'], ['warning', 'critical'], true)) {
                 $whatsapp[] = "*{$title}*\n{$message}";
             }
