@@ -18,21 +18,21 @@ use Throwable;
  */
 class OltgoAlertDispatcher
 {
-    /** Tipo de evento => [título, nivel]. Las caídas de ONUs sueltas no se avisan. */
+    /** Tipo de evento => [título, nivel, categoría de aviso]. Las caídas de ONUs sueltas no se avisan. */
     public const KINDS = [
-        'port_mass_los' => ['Corte masivo de fibra', 'danger'],
-        'mass_power_loss' => ['Corte de energía en la zona', 'warning'],
-        'interface_down' => ['Puerto caído', 'danger'],
-        'interface_up' => ['Puerto recuperado', 'success'],
-        'card_changed' => ['Cambio en una tarjeta de la OLT', 'warning'],
-        'olt_unreachable' => ['OLT sin respuesta', 'danger'],
-        'olt_reachable' => ['OLT responde de nuevo', 'success'],
-        'olt_rebooted' => ['OLT reiniciada', 'danger'],
-        'port_high_usage' => ['Puerto saturado', 'warning'],
-        'port_usage_normal' => ['Puerto sin saturación', 'success'],
-        'olt_high_temperature' => ['Temperatura alta en la OLT', 'danger'],
-        'olt_temperature_normal' => ['Temperatura de la OLT normal', 'success'],
-        'onus_signal_degrading' => ['ONUs perdiendo señal', 'warning'],
+        'port_mass_los' => ['Corte masivo de fibra', 'danger', 'oltgo'],
+        'mass_power_loss' => ['Corte de energía en la zona', 'warning', 'oltgo'],
+        'interface_down' => ['Puerto caído', 'danger', 'oltgo'],
+        'card_changed' => ['Cambio en una tarjeta de la OLT', 'warning', 'oltgo'],
+        'olt_unreachable' => ['OLT sin respuesta', 'danger', 'oltgo'],
+        'olt_rebooted' => ['OLT reiniciada', 'danger', 'oltgo'],
+        'olt_high_temperature' => ['Temperatura alta en la OLT', 'danger', 'oltgo'],
+        'port_high_usage' => ['Puerto saturado', 'warning', 'oltgo_capacity'],
+        'onus_signal_degrading' => ['ONUs perdiendo señal', 'warning', 'oltgo_signal'],
+        'interface_up' => ['Puerto recuperado', 'success', 'oltgo_recovery'],
+        'olt_reachable' => ['OLT responde de nuevo', 'success', 'oltgo_recovery'],
+        'port_usage_normal' => ['Puerto sin saturación', 'success', 'oltgo_recovery'],
+        'olt_temperature_normal' => ['Temperatura de la OLT normal', 'success', 'oltgo_recovery'],
     ];
 
     /**
@@ -47,14 +47,14 @@ class OltgoAlertDispatcher
 
         $inApp = $this->setting('enabled') !== '0';
         $olts = Olt::pluck('name', 'id');
-        $telegram = [];
+        $byCategory = [];
         $whatsapp = [];
-        $worst = 'success';
         foreach ($events as $e) {
-            [$title, $level] = self::KINDS[$e['kind']];
+            [$title, $level, $category] = self::KINDS[$e['kind']];
             $message = $this->message($e, $olts[$e['olt_id']] ?? "OLT {$e['olt_id']}");
 
-            if ($inApp) {
+            // Las recuperaciones no van a la campana: se ven en el informe de la OLT.
+            if ($inApp && $category !== 'oltgo_recovery') {
                 Notify::notifyAdmins($title, $message, $level, "/olts/{$e['olt_id']}/reports", [
                     'source' => 'oltgo',
                     'kind' => $e['kind'],
@@ -63,21 +63,24 @@ class OltgoAlertDispatcher
                     'at' => $e['at'],
                 ]);
             }
-            $telegram[] = "• {$title}: {$message}";
-            if (in_array($e['severity'] ?? '', ['warning', 'critical'], true)) {
+            $byCategory[$category][] = ['line' => "• {$title}: {$message}", 'level' => $level];
+            if ($category === 'oltgo' && in_array($e['severity'] ?? '', ['warning', 'critical'], true)) {
                 $whatsapp[] = "*{$title}*\n{$message}";
             }
-            $worst = $this->worse($worst, $level);
         }
 
-        // Un solo mensaje por lote aunque un corte genere muchos eventos a la vez.
-        $n = count($telegram);
-        SystemNotifier::send(
-            'oltgo',
-            $n === 1 ? 'Alerta de red' : "{$n} alertas de red",
-            implode("\n", array_slice($telegram, 0, 30)) . ($n > 30 ? "\n… y " . ($n - 30) . ' más' : ''),
-            $worst,
-        );
+        // Un solo mensaje por categoría y lote aunque un corte genere muchos eventos a la vez.
+        foreach ($byCategory as $category => $items) {
+            $n = count($items);
+            $lines = array_column($items, 'line');
+            $worst = array_reduce(array_column($items, 'level'), fn ($a, $b) => $this->worse($a, $b), 'success');
+            SystemNotifier::send(
+                $category,
+                $n === 1 ? 'Alerta de red' : "{$n} alertas de red",
+                implode("\n", array_slice($lines, 0, 30)) . ($n > 30 ? "\n… y " . ($n - 30) . ' más' : ''),
+                $worst,
+            );
+        }
 
         if ($whatsapp && $this->setting('whatsapp_enabled')) {
             $this->sendWhatsapp(implode("\n\n", $whatsapp));

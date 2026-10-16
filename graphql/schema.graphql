@@ -184,6 +184,8 @@ type Mutation @guard {
     # Notificaciones in-app
     markNotificationsRead(ids: [ID!]!): Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkNotificationsRead@resolve")
     markAllNotificationsRead: Boolean! @field(resolver: "App\\GraphQL\\Mutations\\MarkAllNotificationsRead@resolve")
+    "Borra notificaciones propias: las de ids, o con only_read todas las leídas. Devuelve cuántas borró"
+    deleteNotifications(ids: [ID!], only_read: Boolean): Int! @field(resolver: "App\\GraphQL\\Mutations\\DeleteNotifications@resolve")
 
     # Cotizaciones
     createCotizacion(

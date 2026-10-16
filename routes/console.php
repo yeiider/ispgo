@@ -38,6 +38,10 @@ Schedule::command('onepay:auto-create-charges')->daily();
 // Log de GraphQL: elimina a diario los registros con más de GRAPHQL_LOG_RETENTION_DAYS (4 por defecto)
 Schedule::command('model:prune', ['--model' => [\App\Models\GraphqlLog::class]])->dailyAt('02:15');
 
+// Las notificaciones leídas de hace más de 30 días se borran solas
+Schedule::call(fn () => \Illuminate\Notifications\DatabaseNotification::whereNotNull('read_at')
+    ->where('created_at', '<', now()->subDays(30))->delete())->dailyAt('03:45')->name('notifications:prune');
+
 Schedule::command('backup:run')->dailyAt('23:00');
 Schedule::command('backup:clean')->dailyAt('23:30');
 //Schedule::call(function () {
