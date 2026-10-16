@@ -4,7 +4,6 @@ namespace App\Services\Oltgo;
 
 use App\Settings\Oltgo\ProviderOltgo;
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 /**
@@ -18,9 +17,7 @@ class OltgoClient
             throw new RuntimeException('OLTGO está deshabilitado en Configuración');
         }
 
-        return Http::baseUrl(ProviderOltgo::url())
-            ->timeout(ProviderOltgo::timeout())
-            ->acceptJson();
+        return OltgoHttp::make();
     }
 
     private function get(string $path, array $query = []): mixed

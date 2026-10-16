@@ -3,7 +3,6 @@
 namespace App\Services\Oltgo;
 
 use App\Settings\Oltgo\ProviderOltgo;
-use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 /**
@@ -18,10 +17,7 @@ class OltgoMetricsClient
             throw new RuntimeException('OLTGO está deshabilitado en Configuración');
         }
         $query = array_filter($query, fn ($v) => $v !== null && $v !== '' && $v !== []);
-        $response = Http::baseUrl(ProviderOltgo::url())
-            ->timeout(max(ProviderOltgo::timeout(), 60))
-            ->acceptJson()
-            ->get($path, $query);
+        $response = OltgoHttp::make(max(ProviderOltgo::timeout(), 60))->get($path, $query);
 
         if ($response->failed()) {
             throw new RuntimeException($response->json('error') ?? "OLTGO respondió {$response->status()}");
