@@ -1,0 +1,183 @@
+# --------------- OLTGO: túneles y OLT (configuración en ISPGO) ---------------
+# Las credenciales (community SNMP, llave privada WireGuard) nunca se devuelven.
+
+type NetworkTunnel {
+    id: ID!
+    router_id: ID
+    router: Router @belongsTo
+    name: String!
+    type: String!
+    endpoint_host: String!
+    endpoint_port: Int!
+    remote_public_key: String!
+    remote_network: String
+    local_address: String!
+    local_public_key: String!
+    translated_network: String
+    is_active: Boolean!
+    "Comandos para pegar en la terminal del MikroTik de la zona"
+    mikrotik_script: String! @method(name: "mikrotikScript")
+    olts: [Olt!]! @hasMany
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Olt {
+    id: ID!
+    router_id: ID
+    router: Router @belongsTo
+    network_tunnel_id: ID
+    network_tunnel: NetworkTunnel @belongsTo(relation: "networkTunnel")
+    name: String!
+    vendor: String!
+    model: String!
+    "IP real de gestión de la OLT"
+    host: String!
+    "IP con la que OLTGO llega a la OLT (traducida si va por túnel)"
+    effective_host: String!
+    snmp_port: Int!
+    snmp_version: String!
+    snmp_v3_user: String
+    snmp_v3_level: String
+    snmp_v3_auth_proto: String
+    snmp_v3_priv_proto: String
+    is_active: Boolean!
+    "Si ya tiene community o usuario SNMPv3 guardado"
+    has_credentials: Boolean! @method(name: "hasCredentials")
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+# --------------- OLTGO: datos en vivo (ISPGO los pide a OLTGO) ---------------
+
+type OltgoSystem {
+    description: String
+    name: String
+    uptime_seconds: Int
+    latency_ms: Int
+}
+
+type OltgoOltStatus {
+    id: ID!
+    name: String
+    model: String
+    host: String
+    reachable: Boolean!
+    error: String
+    system: OltgoSystem
+}
+
+type OltgoPonPort {
+    index: Int!
+    name: String!
+}
+
+"Estado normalizado: online, los, dying_gasp, offline, logging, sync_mib, auth_failed, unknown"
+type OltgoOnu {
+    port: String
+    onu_id: Int
+    name: String
+    serial: String
+    type: String
+    state: String!
+    state_raw: Int
+    "null cuando la OLT no reporta potencia (ONU fuera de línea)"
+    rx_power_dbm: Float
+}
+
+type OltgoStateCount {
+    state: String!
+    count: Int!
+}
+
+type OltgoPortSummary {
+    name: String!
+    total: Int!
+    online: Int!
+}
+
+type OltgoOnuSummary {
+    total: Int!
+    by_state: [OltgoStateCount!]!
+    "Promedio de potencia de las ONUs en línea"
+    avg_rx_dbm: Float
+    "ONUs en línea con potencia menor a -27 dBm"
+    weak_signal: Int!
+    ports: [OltgoPortSummary!]!
+    updated_at: String
+}
+
+type OltgoOnuList {
+    total: Int!
+    onus: [OltgoOnu!]!
+}
+
+input NetworkTunnelInput {
+    router_id: ID @rules(apply: ["nullable", "exists:routers,id"])
+    name: String @rules(apply: ["max:255"])
+    endpoint_host: String @rules(apply: ["max:255"])
+    endpoint_port: Int @rules(apply: ["integer", "min:1", "max:65535"])
+    remote_public_key: String @rules(apply: ["max:64"])
+    remote_network: String @rules(apply: ["nullable", "max:43"])
+    local_address: String @rules(apply: ["max:43"])
+    translated_network: String @rules(apply: ["nullable", "max:43"])
+    "Opcional: importar la llave privada de un túnel que ya existe; si no, se genera una"
+    local_private_key: String
+    is_active: Boolean
+}
+
+input OltInput {
+    router_id: ID @rules(apply: ["nullable", "exists:routers,id"])
+    network_tunnel_id: ID @rules(apply: ["nullable", "exists:network_tunnels,id"])
+    name: String @rules(apply: ["max:255"])
+    vendor: String @rules(apply: ["in:zte"])
+    model: String @rules(apply: ["max:50"])
+    host: String @rules(apply: ["ip"])
+    snmp_port: Int @rules(apply: ["integer", "min:1", "max:65535"])
+    snmp_version: String @rules(apply: ["in:2c,3"])
+    "Solo se envía para crearla o cambiarla; nunca se devuelve. Sin community la OLT queda pendiente"
+    snmp_community: String
+    snmp_v3_user: String
+    snmp_v3_level: String @rules(apply: ["nullable", "in:noAuthNoPriv,authNoPriv,authPriv"])
+    snmp_v3_auth_proto: String @rules(apply: ["nullable", "in:MD5,SHA,SHA256,SHA512"])
+    snmp_v3_auth_pass: String
+    snmp_v3_priv_proto: String @rules(apply: ["nullable", "in:DES,AES,AES256"])
+    snmp_v3_priv_pass: String
+    is_active: Boolean
+}
+
+extend type Query {
+    networkTunnels: [NetworkTunnel!]! @all(model: "App\\Models\\NetworkTunnel") @guard
+    networkTunnel(id: ID! @eq): NetworkTunnel @find(model: "App\\Models\\NetworkTunnel") @guard
+    olts(router_id: ID @eq): [Olt!]! @all(model: "App\\Models\\Olt") @guard
+    olt(id: ID! @eq): Olt @find(model: "App\\Models\\Olt") @guard
+
+    oltgoStatus: [OltgoOltStatus!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@status") @guard
+    oltgoSummary(olt_id: ID!): OltgoOnuSummary! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@summary") @guard
+    oltgoPorts(olt_id: ID!): [OltgoPonPort!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@ports") @guard
+    oltgoOnus(olt_id: ID!, port: String, state: String): OltgoOnuList! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@onus") @guard
+    oltgoOnu(olt_id: ID!, serial: String!): OltgoOnu @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@onu") @guard
+}
+
+extend type Mutation {
+    "Crea el túnel y genera las llaves WireGuard del lado OLTGO"
+    createNetworkTunnel(
+        input: NetworkTunnelInput!
+    ): NetworkTunnel! @field(resolver: "App\\GraphQL\\Mutations\\OltgoMutation@createTunnel")
+    updateNetworkTunnel(
+        id: ID! @rules(apply: ["required", "exists:network_tunnels,id"])
+        input: NetworkTunnelInput!
+    ): NetworkTunnel! @field(resolver: "App\\GraphQL\\Mutations\\OltgoMutation@updateTunnel")
+    deleteNetworkTunnel(
+        id: ID! @rules(apply: ["required", "exists:network_tunnels,id"])
+    ): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\OltgoMutation@deleteTunnel")
+
+    createOlt(input: OltInput!): Olt! @field(resolver: "App\\GraphQL\\Mutations\\OltgoMutation@createOlt")
+    updateOlt(
+        id: ID! @rules(apply: ["required", "exists:olts,id"])
+        input: OltInput!
+    ): Olt! @field(resolver: "App\\GraphQL\\Mutations\\OltgoMutation@updateOlt")
+    deleteOlt(
+        id: ID! @rules(apply: ["required", "exists:olts,id"])
+    ): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\OltgoMutation@deleteOlt")
+}

@@ -1304,3 +1304,4 @@ type ExportCsvResult {
 #import iptv.graphql
 #import yane.graphql
 #import graphql_logs.graphql
+#import oltgo.graphql
