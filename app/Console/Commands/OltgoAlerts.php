@@ -65,6 +65,7 @@ class OltgoAlerts extends Command
 
         $olts = Olt::pluck('name', 'id');
         $whatsapp = [];
+        $telegram = [];
         foreach ($events as $e) {
             [$title, $level] = self::KINDS[$e['kind']] ?? [$e['kind'], 'info'];
             $olt = $olts[$e['olt_id']] ?? "OLT {$e['olt_id']}";
@@ -79,13 +80,20 @@ class OltgoAlerts extends Command
                     'at' => $e['at'],
                 ]);
             }
-            SystemNotifier::send('oltgo', $title, $message, $level, "/olts/{$e['olt_id']}/reports");
+            $telegram[] = "• {$title}: {$message}";
             if (in_array($e['severity'], ['warning', 'critical'], true)) {
                 $whatsapp[] = "*{$title}*\n{$message}";
             }
             $since = $e['at'];
         }
         Cache::forever(self::CURSOR, $since);
+
+        // Un solo mensaje por corrida aunque un corte genere muchos eventos a la vez.
+        if ($telegram) {
+            $n = count($telegram);
+            SystemNotifier::send('oltgo', $n === 1 ? 'Alerta de red' : "{$n} alertas de red", implode("\n", array_slice($telegram, 0, 30))
+                . ($n > 30 ? "\n… y " . ($n - 30) . ' más' : ''), 'warning');
+        }
 
         if ($whatsapp && $this->setting('whatsapp_enabled')) {
             $this->sendWhatsapp(implode("\n\n", $whatsapp));
