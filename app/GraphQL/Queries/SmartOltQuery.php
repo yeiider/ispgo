@@ -2,12 +2,16 @@
 
 namespace App\GraphQL\Queries;
 
+use App\Support\ResolvesRouterScope;
+use App\Support\SmartOltGate;
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Support\Facades\Log;
 use Ispgo\Smartolt\Settings\ProviderSmartOlt;
 
 class SmartOltQuery
 {
+    use ResolvesRouterScope;
+
     protected ApiManager $apiManager;
 
     public function __construct(ApiManager $apiManager)
@@ -15,15 +19,25 @@ class SmartOltQuery
         $this->apiManager = $apiManager;
     }
 
-    private function isConfigured(): bool
+    /**
+     * ¿SmartOLT está activo para la zona de esta consulta? Si lo está, deja el
+     * cliente apuntando a la cuenta de SmartOLT de esa zona (o a la de por defecto).
+     */
+    private function isConfigured(array $args = []): bool
     {
-        return ProviderSmartOlt::getEnabled() && !empty(ProviderSmartOlt::getUrl()) && !empty(ProviderSmartOlt::getToken());
+        $routerId = $this->routerFromArgs($args);
+        if (!SmartOltGate::enabled($routerId)) {
+            return false;
+        }
+        $this->apiManager = new ApiManager($routerId);
+
+        return true;
     }
 
     public function getOlts($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return [];
             }
             $response = $this->apiManager->getOlts();
@@ -38,7 +52,7 @@ class SmartOltQuery
     public function getOltCards($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return [];
             }
             $response = $this->apiManager->getOltCardsDetails($args['olt_id']);
@@ -53,7 +67,7 @@ class SmartOltQuery
     public function getOltPonPorts($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return [];
             }
             $response = $this->apiManager->getOltPonPortsDetails($args['olt_id']);
@@ -68,7 +82,7 @@ class SmartOltQuery
     public function getZones($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return [];
             }
             $response = $this->apiManager->getZones();
@@ -83,7 +97,7 @@ class SmartOltQuery
     public function getOdbs($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return [];
             }
             $response = $this->apiManager->getOdbs($args['zone_id']);
@@ -98,7 +112,7 @@ class SmartOltQuery
     public function getSpeedProfiles($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return [];
             }
             $response = $this->apiManager->getSpeedProfiles();
@@ -113,7 +127,7 @@ class SmartOltQuery
     public function getUnconfiguredOnus($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return [];
             }
             $response = $this->apiManager->getUnconfiguredOnusForOlt($args['olt_id']);
@@ -128,7 +142,7 @@ class SmartOltQuery
     public function getOltsUptime($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return [];
             }
             $response = $this->apiManager->getOltsUptimeAndEnvTemperature();
@@ -143,7 +157,7 @@ class SmartOltQuery
     public function getOnuDetails($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return null;
             }
             $response = $this->apiManager->getOnuDetailsByExternalId($args['sn']);
@@ -163,7 +177,7 @@ class SmartOltQuery
     public function getVlans($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return [];
             }
             $response = $this->apiManager->getVlansByOltId((int) $args['olt_id']);
@@ -178,7 +192,7 @@ class SmartOltQuery
     public function getInstallationFormData($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return null;
             }
             $sn = $args['sn'];
@@ -212,7 +226,7 @@ class SmartOltQuery
     public function getOnuTypeImage($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return null;
             }
             $response = $this->apiManager->getOnuTypeImage($args['onu_type_id']);
@@ -243,7 +257,7 @@ class SmartOltQuery
         ]);
 
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return null;
             }
             $response = $this->apiManager->getOnuTrafficGraphByExternalId($args['external_id'], $graphType);
@@ -301,7 +315,7 @@ class SmartOltQuery
     public function getCatvStatus($root, array $args)
     {
         try {
-            if (!$this->isConfigured()) {
+            if (!$this->isConfigured($args)) {
                 return [
                     'enabled' => false,
                     'message' => 'SmartOLT is not configured'

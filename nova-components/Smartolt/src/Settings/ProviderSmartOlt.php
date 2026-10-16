@@ -4,59 +4,74 @@ namespace Ispgo\Smartolt\Settings;
 
 use App\Helpers\ConfigHelper;
 
+/**
+ * Configuración de SmartOLT por zona (router). Cada valor se busca primero en
+ * la configuración del router (scope_id = router_id) y, si no está definido
+ * ahí, en la configuración por defecto (scope_id = 0). Sin router = default.
+ */
 class ProviderSmartOlt
 {
     const GENERAL_PATH = "smartolt/general/";
-
-    public static function getEnabled(): ?bool
-    {
-        return (bool)ConfigHelper::getConfigValue(self::GENERAL_PATH . 'enabled');
-    }
-
-    public static function getToken(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'token');
-    }
-
-    public static function getUrl(): ?string
-    {
-        return ConfigHelper::getConfigValue(self::GENERAL_PATH . 'url');
-    }
-    public static function getEnabledCustomer(): ?bool
-    {
-        return (bool)ConfigHelper::getConfigValue(self::GENERAL_PATH . 'customer_enabled');
-    }
-
     const ACTIVATION_PATH = "smartolt/activation/";
 
-    public static function getDefaultVlan(): int
+    public static function value(string $path, ?int $routerId = null): ?string
     {
-        return (int)(ConfigHelper::getConfigValue(self::ACTIVATION_PATH . 'default_vlan') ?? 700);
+        $scope = (int) ($routerId ?? 0);
+        $val = ConfigHelper::getConfigValue($path, $scope);
+        if (($val === null || $val === '') && $scope !== 0) {
+            $val = ConfigHelper::getConfigValue($path, 0);
+        }
+
+        return $val === '' ? null : $val;
     }
 
-    public static function getTr069Profile(): string
+    public static function getEnabled(?int $routerId = null): ?bool
     {
-        return ConfigHelper::getConfigValue(self::ACTIVATION_PATH . 'tr069_profile') ?? 'SmartOLT';
+        return (bool) self::value(self::GENERAL_PATH . 'enabled', $routerId);
     }
 
-    public static function getWanConfigurationMethod(): string
+    public static function getToken(?int $routerId = null): ?string
     {
-        return ConfigHelper::getConfigValue(self::ACTIVATION_PATH . 'wan_configuration_method') ?? 'TR069';
+        return self::value(self::GENERAL_PATH . 'token', $routerId);
     }
 
-    public static function getIpProtocol(): string
+    public static function getUrl(?int $routerId = null): ?string
     {
-        return ConfigHelper::getConfigValue(self::ACTIVATION_PATH . 'ip_protocol') ?? 'ipv4ipv6';
+        return self::value(self::GENERAL_PATH . 'url', $routerId);
     }
 
-    public static function getIpv6AddressMode(): string
+    public static function getEnabledCustomer(?int $routerId = null): ?bool
     {
-        return ConfigHelper::getConfigValue(self::ACTIVATION_PATH . 'ipv6_address_mode') ?? 'Auto';
+        return (bool) self::value(self::GENERAL_PATH . 'customer_enabled', $routerId);
     }
 
-    public static function getIpv6PrefixDelegationMode(): string
+    public static function getDefaultVlan(?int $routerId = null): int
     {
-        return ConfigHelper::getConfigValue(self::ACTIVATION_PATH . 'ipv6_prefix_delegation_mode') ?? 'DHCPv6-PD';
+        return (int) (self::value(self::ACTIVATION_PATH . 'default_vlan', $routerId) ?? 700);
     }
 
+    public static function getTr069Profile(?int $routerId = null): string
+    {
+        return self::value(self::ACTIVATION_PATH . 'tr069_profile', $routerId) ?? 'SmartOLT';
+    }
+
+    public static function getWanConfigurationMethod(?int $routerId = null): string
+    {
+        return self::value(self::ACTIVATION_PATH . 'wan_configuration_method', $routerId) ?? 'TR069';
+    }
+
+    public static function getIpProtocol(?int $routerId = null): string
+    {
+        return self::value(self::ACTIVATION_PATH . 'ip_protocol', $routerId) ?? 'ipv4ipv6';
+    }
+
+    public static function getIpv6AddressMode(?int $routerId = null): string
+    {
+        return self::value(self::ACTIVATION_PATH . 'ipv6_address_mode', $routerId) ?? 'Auto';
+    }
+
+    public static function getIpv6PrefixDelegationMode(?int $routerId = null): string
+    {
+        return self::value(self::ACTIVATION_PATH . 'ipv6_prefix_delegation_mode', $routerId) ?? 'DHCPv6-PD';
+    }
 }

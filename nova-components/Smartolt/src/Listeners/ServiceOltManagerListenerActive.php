@@ -37,12 +37,14 @@ class ServiceOltManagerListenerActive
      */
     public function handle(ServiceActive $event): void
     {
-        if (!ProviderSmartOlt::getEnabled()) {
-            Log::info("SmartOLT no está habilitado.");
+        $service = $event->service;
+        $routerId = \App\Support\RouterScope::fromService($service);
+
+        // Cada zona decide si usa SmartOLT; sin configuración propia usa la de por defecto.
+        if (!\App\Support\SmartOltGate::enabled($routerId)) {
+            Log::info("SmartOLT no está habilitado para la zona del servicio {$service->id}.");
             return;
         }
-
-        $service = $event->service;
 
         if (empty($service->sn)) {
             Log::warning("El servicio con ID {$service->id} no tiene un número de serie válido.");
@@ -56,7 +58,7 @@ class ServiceOltManagerListenerActive
         $externalId = $this->resolveExternalId($service);
 
         // ── Paso 1: Activar ONU inmediatamente ──────────────────────────────
-        $apiManager = new ApiManager();
+        $apiManager = new ApiManager(\App\Support\RouterScope::fromService($service));
         $apiManager->enableOnu($service->sn);
 
         Log::info("ServiceOltManagerListenerActive: ONU {$service->sn} activada. Programando reboot y toggle CATV.", [

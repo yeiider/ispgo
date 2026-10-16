@@ -29,16 +29,19 @@ class ServiceOltManagerListenerSuspend
     public function handle(ServiceSuspend $event)
     {
 
-        if (!ProviderSmartOlt::getEnabled()) {
-            Log::info("SmartOLT no está habilitado.");
+        $service = $event->service;
+        $routerId = \App\Support\RouterScope::fromService($service);
+
+        // Cada zona decide si usa SmartOLT; sin configuración propia usa la de por defecto.
+        if (!\App\Support\SmartOltGate::enabled($routerId)) {
+            Log::info("SmartOLT no está habilitado para la zona del servicio {$service->id}.");
             return;
         }
-        $service = $event->service;
         if (empty($service->sn)) {
             Log::warning("El servicio con ID {$service->id} no tiene un número de serie válido.");
             return;
         }
-        $apiManager = new ApiManager();
+        $apiManager = new ApiManager(\App\Support\RouterScope::fromService($service));
         if ($service->service_status === 'suspended'){
             $apiManager->disableOnu($service->sn);
             $externalId = $this->resolveExternalId($service);

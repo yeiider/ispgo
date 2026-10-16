@@ -29,13 +29,14 @@ class ServiceOltManagerListener
     public function handle(ServiceUpdateStatus $event)
     {
 
-        if (!ProviderSmartOlt::getEnabled()) {
-            Log::info("SmartOLT no está habilitado.");
+        $service = $event->service;
+        $routerId = \App\Support\RouterScope::fromService($service);
+
+        // Cada zona decide si usa SmartOLT; sin configuración propia usa la de por defecto.
+        if (!\App\Support\SmartOltGate::enabled($routerId)) {
+            Log::info("SmartOLT no está habilitado para la zona del servicio {$service->id}.");
             return;
         }
-
-
-        $service = $event->service;
 
         // Verificar que el servicio tenga un número de serie válido
         if (empty($service->sn)) {
@@ -63,7 +64,7 @@ class ServiceOltManagerListener
         }
 
         $externalId = $this->resolveExternalId($service);
-        $apiManager = new ApiManager();
+        $apiManager = new ApiManager(\App\Support\RouterScope::fromService($service));
         try {
             if ($action === 'enable') {
                 // Paso 1: Activar ONU inmediatamente

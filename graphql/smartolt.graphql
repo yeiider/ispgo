@@ -249,18 +249,18 @@ type SmartOltCatvStatus {
 }
 
 extend type Query {
-    smartOltOlts: [SmartOltOlt!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOlts")
-    smartOltOltCards(olt_id: ID!): [SmartOltOltCard!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltCards")
-    smartOltOltPonPorts(olt_id: ID!): [SmartOltPonPort!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltPonPorts")
-    smartOltZones: [SmartOltZone!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getZones")
-    smartOltOdbs(zone_id: ID!): [SmartOltOdb!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOdbs")
-    smartOltSpeedProfiles: [SmartOltSpeedProfile!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getSpeedProfiles")
-    smartOltUnconfiguredOnus(olt_id: ID!): [SmartOltOnu!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getUnconfiguredOnus")
-    smartOltOltsUptime: [SmartOltUptime!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltsUptime")
+    smartOltOlts(router_id: ID): [SmartOltOlt!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOlts")
+    smartOltOltCards(olt_id: ID!, router_id: ID): [SmartOltOltCard!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltCards")
+    smartOltOltPonPorts(olt_id: ID!, router_id: ID): [SmartOltPonPort!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltPonPorts")
+    smartOltZones(router_id: ID): [SmartOltZone!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getZones")
+    smartOltOdbs(zone_id: ID!, router_id: ID): [SmartOltOdb!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOdbs")
+    smartOltSpeedProfiles(router_id: ID): [SmartOltSpeedProfile!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getSpeedProfiles")
+    smartOltUnconfiguredOnus(olt_id: ID!, router_id: ID): [SmartOltOnu!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getUnconfiguredOnus")
+    smartOltOltsUptime(router_id: ID): [SmartOltUptime!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOltsUptime")
     smartOltOnuDetails(sn: String!): SmartOltOnuDetails @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuDetails")
     smartOltOnuTypeImage(onu_type_id: ID!): SmartOltOnuTypeImage @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuTypeImage")
     smartOltOnuTrafficGraph(external_id: String!, graph_type: String = "hourly"): SmartOltOnuTrafficGraph @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getOnuTrafficGraph")
-    smartOltVlans(olt_id: ID!): [SmartOltVlan!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getVlans")
+    smartOltVlans(olt_id: ID!, router_id: ID): [SmartOltVlan!]! @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getVlans")
     smartOltInstallationFormData(sn: String!): InstallationFormData @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getInstallationFormData")
     smartOltCatvStatus(external_id: String!): SmartOltCatvStatus @field(resolver: "App\\GraphQL\\Queries\\SmartOltQuery@getCatvStatus")
 }

@@ -32,7 +32,8 @@ class RebootOnuJob implements ShouldQueue
 
     public function handle(): void
     {
-        if (!ProviderSmartOlt::getEnabled()) {
+        $routerId = \App\Support\RouterScope::fromServiceId($this->serviceId);
+        if (!\App\Support\SmartOltGate::enabled($routerId)) {
             Log::info("RebootOnuJob: SmartOLT no está habilitado. Omitiendo reboot para external_id {$this->externalId}.");
             return;
         }
@@ -40,7 +41,7 @@ class RebootOnuJob implements ShouldQueue
         Log::info("RebootOnuJob: Reiniciando ONU external_id {$this->externalId} (servicio #{$this->serviceId}).");
 
         try {
-            $apiManager = new ApiManager();
+            $apiManager = new ApiManager($routerId);
             $response = $apiManager->rebootOnuByExternalId($this->externalId);
 
             if ($response->successful()) {

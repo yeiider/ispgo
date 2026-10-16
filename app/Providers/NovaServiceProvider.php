@@ -167,7 +167,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('panel.smart_olt'))
                     ->path('/smartolt/olts')
                     ->icon('cog')->canSee(function ($request) {
-                        return ProviderSmartOlt::getEnabled();
+                        return \App\Support\SmartOltGate::enabledAnywhere();
                     }),
                
 

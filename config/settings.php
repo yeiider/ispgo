@@ -637,6 +637,14 @@ return [
         "activation" => SettingSmartolt::getActivationSettings(),
     ],
 
+    "oltgo" => [
+        "setting" => [
+            "label" => "OLTGO (Red GPON)",
+            "class" => "form-control",
+        ],
+        "general" => \App\Settings\Oltgo\SettingOltgo::getGeneralSettings(),
+    ],
+
     "siigo" => [
         "setting" => [
             "label" => "Siigo",

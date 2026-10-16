@@ -50,11 +50,64 @@ type Olt {
 
 # --------------- OLTGO: datos en vivo (ISPGO los pide a OLTGO) ---------------
 
+"Qué proveedor de OLT está activo: SmartOLT (gestión) y/o OLTGO (lectura)"
+type OltProviderStatus {
+    smartolt: Boolean!
+    oltgo: Boolean!
+}
+
+"ONU encontrada por serial en cualquiera de las OLTs"
+type OltgoOnuLocation {
+    olt_id: ID!
+    olt_name: String
+    onu: OltgoOnu!
+}
+
+type OltgoHealth {
+    enabled: Boolean!
+    url: String!
+    reachable: Boolean!
+    error: String
+}
+
 type OltgoSystem {
     description: String
     name: String
     uptime_seconds: Int
     latency_ms: Int
+    "Temperatura del sistema en °C (null si el modelo no la reporta)"
+    temperature_c: Float
+}
+
+"Tarjeta del chasis"
+type OltgoCard {
+    slot: Int!
+    "Tipo ZTE: GFBT, SFUB, PRVR..."
+    type: String!
+    "pon, control, uplink, power, fan u other"
+    kind: String!
+    ports: Int!
+    status: String!
+    status_raw: Int
+    "active o standby en tarjetas de control"
+    role: String
+    uptime_seconds: Int
+    serial: String
+    software: String
+}
+
+"Puerto PON o uplink"
+type OltgoInterface {
+    index: String!
+    name: String!
+    "pon o uplink"
+    kind: String!
+    admin_up: Boolean!
+    oper_up: Boolean!
+    speed_mbps: Int
+    "Bytes acumulados desde que arrancó la OLT (texto: pueden superar el rango de Int)"
+    in_octets: String
+    out_octets: String
 }
 
 type OltgoOltStatus {
@@ -152,8 +205,18 @@ extend type Query {
     olts(router_id: ID @eq): [Olt!]! @all(model: "App\\Models\\Olt") @guard
     olt(id: ID! @eq): Olt @find(model: "App\\Models\\Olt") @guard
 
+    "router_id: la zona del servicio; sin él, si algún proveedor se usa en alguna zona"
+    oltProviderStatus(router_id: ID): OltProviderStatus! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@providers") @guard
+    oltgoFindOnu(serial: String!): OltgoOnuLocation @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@findOnu") @guard
+    oltgoHealth: OltgoHealth! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@health") @guard
     oltgoStatus: [OltgoOltStatus!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@status") @guard
-    oltgoSummary(olt_id: ID!): OltgoOnuSummary! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@summary") @guard
+    "refresh: true lee en vivo ignorando la caché de OLTGO"
+    oltgoSummary(olt_id: ID!, refresh: Boolean = false): OltgoOnuSummary! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@summary") @guard
+    "refresh: true lee en vivo ignorando la caché de OLTGO"
+    oltgoCards(olt_id: ID!, refresh: Boolean = false): [OltgoCard!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@cards") @guard
+    "refresh: true lee en vivo ignorando la caché de OLTGO"
+    oltgoInterfaces(olt_id: ID!, refresh: Boolean = false): [OltgoInterface!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@interfaces") @guard
+    oltgoSystem(olt_id: ID!): OltgoSystem @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@system") @guard
     oltgoPorts(olt_id: ID!): [OltgoPonPort!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@ports") @guard
     oltgoOnus(olt_id: ID!, port: String, state: String): OltgoOnuList! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@onus") @guard
     oltgoOnu(olt_id: ID!, serial: String!): OltgoOnu @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@onu") @guard

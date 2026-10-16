@@ -27,6 +27,14 @@ class CompleteOnuActivationJob implements ShouldQueue
     {
         Log::info("CompleteOnuActivationJob: iniciando para SN: {$this->sn}");
 
+        // SmartOLT de la zona del servicio dueño de la ONU (o la configuración por defecto)
+        $routerId = \App\Support\RouterScope::fromSn($this->sn);
+        if (!\App\Support\SmartOltGate::enabled($routerId)) {
+            Log::info("CompleteOnuActivationJob: SmartOLT deshabilitado para la zona de {$this->sn}");
+            return;
+        }
+        $apiManager = new ApiManager($routerId);
+
         // Paso 1: Configurar IP de gestión DHCP
         try {
             $response = $apiManager->setOnuManagementIpDhcpByExternalId($this->sn, $this->vlanMgmt);
@@ -48,7 +56,7 @@ class CompleteOnuActivationJob implements ShouldQueue
 
         // Paso 2: Habilitar TR069
         try {
-            $response = $apiManager->enableTr069($this->sn, ProviderSmartOlt::getTr069Profile());
+            $response = $apiManager->enableTr069($this->sn, ProviderSmartOlt::getTr069Profile($routerId));
             $data = $response->json();
             if (($data['status'] ?? false) !== true) {
                 Log::warning('CompleteOnuActivationJob: enable_tr069 falló', [

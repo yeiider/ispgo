@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use App\Support\SmartOltGate;
 use Ispgo\Smartolt\Services\ApiManager;
 
 class UpdateServiceIpMacJob implements ShouldQueue
@@ -49,6 +50,13 @@ class UpdateServiceIpMacJob implements ShouldQueue
                 Log::warning("Service {$this->service_id} has no SN assigned. Skipping.");
                 return;
             }
+
+            // SmartOLT de la zona del servicio (o la configuración por defecto)
+            $routerId = \App\Support\RouterScope::fromService($service);
+            if (!SmartOltGate::enabled($routerId)) {
+                return;
+            }
+            $apiManager = new ApiManager($routerId);
 
             // Fetch ONU details from SmartOLT
             $response = $apiManager->getOnuFullStatusByExternalId($service->sn);

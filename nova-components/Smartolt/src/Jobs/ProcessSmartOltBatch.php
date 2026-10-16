@@ -38,7 +38,21 @@ class ProcessSmartOltBatch implements ShouldQueue
      */
     public function handle()
     {
-        $apiManager = new ApiManager();
+        // Un lote puede mezclar ONUs de varias zonas: cada zona va con su propia cuenta de SmartOLT.
+        $byRouter = collect($this->snList)->groupBy(fn ($sn) => \App\Support\RouterScope::fromSn($sn) ?? 0);
+        if ($byRouter->count() > 1) {
+            foreach ($byRouter as $sns) {
+                dispatch(new self($sns->values()->all(), $this->action))->onQueue('redis');
+            }
+            return;
+        }
+
+        $routerId = ((int) $byRouter->keys()->first()) ?: null;
+        if (!\App\Support\SmartOltGate::enabled($routerId)) {
+            Log::info('ProcessSmartOltBatch: SmartOLT deshabilitado para la zona', ['router_id' => $routerId]);
+            return;
+        }
+        $apiManager = new ApiManager($routerId);
         $payload = ['onus_external_ids' => implode(',', $this->snList)];
         Log::info("procesando lote ". implode(',', $this->snList));
 

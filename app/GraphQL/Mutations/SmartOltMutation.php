@@ -7,9 +7,13 @@ use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\ProcessOnuAuthorization;
 use App\Jobs\CompleteOnuActivationJob;
+use App\Support\ResolvesRouterScope;
+use App\Support\SmartOltGate;
 
 class SmartOltMutation
 {
+    use ResolvesRouterScope;
+
     protected ApiManager $apiManager;
 
     public function __construct(ApiManager $apiManager)
@@ -19,6 +23,12 @@ class SmartOltMutation
 
     public function authorizeOnu($root, array $args)
     {
+        $routerId = $this->routerFromArgs($args);
+        if ($blocked = SmartOltGate::blocked($routerId)) {
+            return $blocked;
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             // Obtener el servicio
             $service = Service::with(['customer', 'plan'])->find($args['service_id']);
@@ -109,6 +119,12 @@ class SmartOltMutation
 
     public function rebootOnu($root, array $args)
     {
+        $routerId = $this->routerFromArgs($args);
+        if ($blocked = SmartOltGate::blocked($routerId)) {
+            return $blocked;
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             $response = $this->apiManager->rebootOnuByExternalId($args['external_id']);
             $data = $response->json();
@@ -134,6 +150,12 @@ class SmartOltMutation
 
     public function enableOnu($root, array $args)
     {
+        $routerId = $this->routerFromArgs($args);
+        if ($blocked = SmartOltGate::blocked($routerId)) {
+            return $blocked;
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             $response = $this->apiManager->enableOnu($args['sn']);
             $data = $response->json();
@@ -159,6 +181,12 @@ class SmartOltMutation
 
     public function disableOnu($root, array $args)
     {
+        $routerId = $this->routerFromArgs($args);
+        if ($blocked = SmartOltGate::blocked($routerId)) {
+            return $blocked;
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             $response = $this->apiManager->disableOnu($args['sn']);
             $data = $response->json();
@@ -184,6 +212,12 @@ class SmartOltMutation
 
     public function removeEquipment($root, array $args)
     {
+        $routerId = $this->routerFromArgs($args);
+        if ($blocked = SmartOltGate::blocked($routerId)) {
+            return $blocked;
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             // Buscar el servicio por SN
             $service = \App\Models\Services\Service::where('sn', $args['sn'])->first();
@@ -236,6 +270,12 @@ class SmartOltMutation
 
     public function enableCatv($root, array $args)
     {
+        $routerId = $this->routerFromArgs($args);
+        if ($blocked = SmartOltGate::blocked($routerId)) {
+            return $blocked;
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             $response = $this->apiManager->enableOnuCatvByExternalId($args['external_id']);
             $data = $response->json();
@@ -261,6 +301,12 @@ class SmartOltMutation
 
     public function disableCatv($root, array $args)
     {
+        $routerId = $this->routerFromArgs($args);
+        if ($blocked = SmartOltGate::blocked($routerId)) {
+            return $blocked;
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             $response = $this->apiManager->disableOnuCatvByExternalId($args['external_id']);
             $data = $response->json();

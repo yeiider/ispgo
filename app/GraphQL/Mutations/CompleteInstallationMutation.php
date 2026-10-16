@@ -5,6 +5,8 @@ namespace App\GraphQL\Mutations;
 use App\Jobs\CompleteOnuActivationJob;
 use App\Jobs\ProcessOnuAuthorization;
 use App\Models\Ticket;
+use App\Support\RouterScope;
+use App\Support\SmartOltGate;
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Support\Facades\Log;
 
@@ -43,6 +45,13 @@ class CompleteInstallationMutation
             if (!$customer) {
                 return ['success' => false, 'message' => 'No hay cliente asociado al servicio'];
             }
+
+            // SmartOLT se usa con la configuración de la zona del servicio (o la de por defecto).
+            $routerId = RouterScope::fromService($service);
+            if ($blocked = SmartOltGate::blocked($routerId)) {
+                return $blocked;
+            }
+            $this->apiManager = new ApiManager($routerId);
 
             // Obtener dirección / comentario para SmartOLT de forma 100% segura
             $rawAddress = $args['address_or_comment'] ?? null;

@@ -27,7 +27,7 @@ class LoadPlanSmartOlt extends Action implements ShouldQueue
      */
     public function handle(ActionFields $fields, Collection $models)
     {
-        if (!ProviderSmartOlt::getEnabled()) {
+        if (!\App\Support\SmartOltGate::enabledAnywhere()) {
             return Action::danger('SmartOLT no está habilitado en la configuración.');
         }
 
@@ -70,7 +70,7 @@ class LoadPlanSmartOlt extends Action implements ShouldQueue
                 continue;
             }
 
-            $api = new ApiManager();
+            $api = new ApiManager(\App\Support\RouterScope::fromSn($model->sn));
 
             try {
                 $response = $api->updatePlan($sn, $payload);

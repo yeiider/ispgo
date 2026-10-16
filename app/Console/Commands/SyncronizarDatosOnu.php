@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Customers\Customer;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use App\Support\SmartOltGate;
 use Ispgo\Smartolt\Services\ApiManager;
 use Symfony\Component\Console\Command\Command as CommandAlias;
 
@@ -15,7 +16,7 @@ class SyncronizarDatosOnu extends Command
      *
      * @var string
      */
-    protected $signature = 'app:syncronizar-datos-onu';
+    protected $signature = 'app:syncronizar-datos-onu {--router= : Zona cuya cuenta de SmartOLT se sincroniza (por defecto, la configuración general)}';
 
     /**
      * The console command description.
@@ -30,10 +31,17 @@ class SyncronizarDatosOnu extends Command
      */
     public function handle()
     {
+        $routerId = $this->option('router') ? (int) $this->option('router') : null;
+        if (!SmartOltGate::enabled($routerId)) {
+            $this->warn('SmartOLT está deshabilitado para esta zona; no hay nada que sincronizar.');
+
+            return self::SUCCESS;
+        }
+
         $this->info("Iniciando sincronización de datos ONUs...");
 
         // Instanciamos el gestor de la API
-        $apiManager = new ApiManager();
+        $apiManager = new ApiManager($routerId);
 
         try {
             $response = $apiManager->getAllOnus();

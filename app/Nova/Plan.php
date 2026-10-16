@@ -44,7 +44,7 @@ class Plan extends Resource
             $technicalPanel,
         ];
 
-        if (ProviderSmartOlt::getEnabled()) {
+        if (\App\Support\SmartOltGate::enabledAnywhere()) {
             $panels[] = new Panel(__('Smart OLT'), $this->attributesSmartOlt());
         }
 

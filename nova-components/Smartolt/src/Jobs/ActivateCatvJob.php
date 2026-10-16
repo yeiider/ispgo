@@ -31,7 +31,8 @@ class ActivateCatvJob implements ShouldQueue
 
     public function handle(): void
     {
-        if (!ProviderSmartOlt::getEnabled()) {
+        $routerId = \App\Support\RouterScope::fromServiceId($this->serviceId);
+        if (!\App\Support\SmartOltGate::enabled($routerId)) {
             Log::info("ActivateCatvJob: SmartOLT no está habilitado. Omitiendo CATV para external_id {$this->externalId}.");
             return;
         }
@@ -39,7 +40,7 @@ class ActivateCatvJob implements ShouldQueue
         Log::info("ActivateCatvJob: Activando CATV para external_id {$this->externalId} (servicio #{$this->serviceId}).");
 
         try {
-            $apiManager = new ApiManager();
+            $apiManager = new ApiManager($routerId);
             $response = $apiManager->enableOnuCatvByExternalId($this->externalId);
 
             if ($response->successful()) {

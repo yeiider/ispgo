@@ -52,6 +52,14 @@ class ProcessOnuAuthorization implements ShouldQueue
                 return;
             }
 
+            // SmartOLT de la zona del servicio (o la configuración por defecto)
+            $routerId = \App\Support\RouterScope::fromService($service);
+            if (!\App\Support\SmartOltGate::enabled($routerId)) {
+                Log::info("ProcessOnuAuthorization: SmartOLT deshabilitado para la zona del servicio {$this->service_id}");
+                return;
+            }
+            $apiManager = new ApiManager($routerId);
+
             // Fetch ONU details from SmartOLT
             $response = $apiManager->getOnuFullStatusByExternalId($this->sn);
             $data = $response->json();

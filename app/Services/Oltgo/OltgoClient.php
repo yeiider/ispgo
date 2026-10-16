@@ -2,6 +2,7 @@
 
 namespace App\Services\Oltgo;
 
+use App\Settings\Oltgo\ProviderOltgo;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -13,8 +14,12 @@ class OltgoClient
 {
     private function http(): PendingRequest
     {
-        return Http::baseUrl(rtrim((string) config('oltgo.url'), '/'))
-            ->timeout((int) config('oltgo.timeout', 20))
+        if (!ProviderOltgo::enabled()) {
+            throw new RuntimeException('OLTGO está deshabilitado en Configuración');
+        }
+
+        return Http::baseUrl(ProviderOltgo::url())
+            ->timeout(ProviderOltgo::timeout())
             ->acceptJson();
     }
 
@@ -29,6 +34,21 @@ class OltgoClient
         return $response->json();
     }
 
+    /**
+     * Estado de la conexión con OLTGO, para mostrar en el panel.
+     */
+    public function health(): array
+    {
+        $url = ProviderOltgo::url();
+        try {
+            $ok = $this->http()->timeout(5)->get('/health')->successful();
+
+            return ['enabled' => true, 'url' => $url, 'reachable' => $ok, 'error' => $ok ? null : 'OLTGO no respondió bien'];
+        } catch (\Throwable $e) {
+            return ['enabled' => ProviderOltgo::enabled(), 'url' => $url, 'reachable' => false, 'error' => $e->getMessage()];
+        }
+    }
+
     public function olts(): array
     {
         return $this->get('/api/olts');
@@ -39,9 +59,24 @@ class OltgoClient
         return $this->get("/api/olts/{$oltId}");
     }
 
-    public function summary(int $oltId): array
+    public function summary(int $oltId, bool $refresh = false): array
     {
-        return $this->get("/api/olts/{$oltId}/summary");
+        return $this->get("/api/olts/{$oltId}/summary", ['refresh' => $refresh ? 1 : null]);
+    }
+
+    public function findOnu(string $serial): array
+    {
+        return $this->get('/api/onus/' . rawurlencode($serial));
+    }
+
+    public function cards(int $oltId, bool $refresh = false): array
+    {
+        return $this->get("/api/olts/{$oltId}/cards", ['refresh' => $refresh ? 1 : null]);
+    }
+
+    public function interfaces(int $oltId, bool $refresh = false): array
+    {
+        return $this->get("/api/olts/{$oltId}/interfaces", ['refresh' => $refresh ? 1 : null]);
     }
 
     public function ports(int $oltId): array

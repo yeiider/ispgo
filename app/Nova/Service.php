@@ -60,7 +60,7 @@ class Service extends Resource
             new Panel(__('service.technical_information'), $this->technicalInformationFields()),
         ];
 
-        if (ProviderSmartOlt::getEnabled()) {
+        if (\App\Support\SmartOltGate::enabledAnywhere()) {
             $panels[] = new Panel(__('Smart OLT'), $this->attributesSmartOlt());
         }
 
@@ -170,7 +170,7 @@ class Service extends Resource
             new CreateActionsServiceUninstall(),
 
             (new LoadPlanSmartOlt())->canSee(function () {
-                return ProviderSmartOlt::getEnabled();
+                return \App\Support\SmartOltGate::enabledAnywhere();
             }),
             Action::openInNewTab('Ver estado de la Onu', function ($service) {
                 return route('smartolt.onu', $service->id);

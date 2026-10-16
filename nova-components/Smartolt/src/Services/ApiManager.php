@@ -12,11 +12,29 @@ class ApiManager
 {
     private string $baseUrl;
     private string $token;
+    private ?int $routerId;
 
-    public function __construct()
+    /**
+     * @param int|null $routerId Zona cuya configuración de SmartOLT se usa; null = por defecto.
+     */
+    public function __construct(?int $routerId = null)
     {
-        $this->baseUrl = ProviderSmartOlt::getUrl() ?? '';
-        $this->token = ProviderSmartOlt::getToken() ?? '';
+        $this->routerId = $routerId;
+        $this->baseUrl = ProviderSmartOlt::getUrl($routerId) ?? '';
+        $this->token = ProviderSmartOlt::getToken($routerId) ?? '';
+    }
+
+    public static function forRouter(?int $routerId): self
+    {
+        return new self($routerId);
+    }
+
+    /**
+     * Cliente con la configuración de la zona del servicio dueño de la ONU.
+     */
+    public static function forSn(?string $sn): self
+    {
+        return new self(\App\Support\RouterScope::fromSn($sn));
     }
 
     private function request(string $endpoint, array $payload = [], bool $asForm = false, string $method = 'post'): Response
@@ -485,12 +503,12 @@ class ApiManager
     {
         $this->validateExternalId($externalId);
         $payload = array_merge([
-            'configuration_method'         => ProviderSmartOlt::getWanConfigurationMethod(),
-            'ip_protocol'                  => ProviderSmartOlt::getIpProtocol(),
-            'ipv6_address_mode'            => ProviderSmartOlt::getIpv6AddressMode(),
+            'configuration_method'         => ProviderSmartOlt::getWanConfigurationMethod($this->routerId),
+            'ip_protocol'                  => ProviderSmartOlt::getIpProtocol($this->routerId),
+            'ipv6_address_mode'            => ProviderSmartOlt::getIpv6AddressMode($this->routerId),
             'ipv6_address'                 => '',
             'ipv6_gateway'                 => '',
-            'ipv6_prefix_delegation_mode'  => ProviderSmartOlt::getIpv6PrefixDelegationMode(),
+            'ipv6_prefix_delegation_mode'  => ProviderSmartOlt::getIpv6PrefixDelegationMode($this->routerId),
             'ipv6_prefix_address'          => '',
         ], $params);
         return $this->request('api/onu/set_onu_wan_mode_dhcp/' . $externalId, $payload, true);

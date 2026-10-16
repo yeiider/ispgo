@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Support\RouterScope;
+use App\Support\SmartOltGate;
 use Ispgo\Smartolt\Services\ApiManager;
 use Illuminate\Support\Facades\Log;
 
@@ -15,6 +17,7 @@ class SmartOltController extends Controller
     public function __construct(ApiManager $apiManager)
     {
         $this->apiManager = $apiManager;
+
     }
 
     /**
@@ -27,6 +30,12 @@ class SmartOltController extends Controller
      */
     public function getTrafficGraph(Request $request, string $externalId, ?string $graphType = null): Response
     {
+        $routerId = RouterScope::fromSn($externalId);
+        if (!SmartOltGate::enabled($routerId)) {
+            return response(json_encode(['success' => false, 'message' => SmartOltGate::DISABLED_MESSAGE]), 503, ['Content-Type' => 'application/json']);
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             $graphType = $graphType ?? $request->get('graph_type', 'hourly');
 
@@ -85,6 +94,12 @@ class SmartOltController extends Controller
      */
     public function getSignalGraph(Request $request, string $externalId): Response
     {
+        $routerId = RouterScope::fromSn($externalId);
+        if (!SmartOltGate::enabled($routerId)) {
+            return response(json_encode(['success' => false, 'message' => SmartOltGate::DISABLED_MESSAGE]), 503, ['Content-Type' => 'application/json']);
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             Log::info('SmartOLT API - Signal Graph Request', [
                 'external_id' => $externalId,
@@ -140,6 +155,12 @@ class SmartOltController extends Controller
      */
     public function getOnuDetails(Request $request, string $externalId): Response
     {
+        $routerId = RouterScope::fromSn($externalId);
+        if (!SmartOltGate::enabled($routerId)) {
+            return response(json_encode(['success' => false, 'message' => SmartOltGate::DISABLED_MESSAGE]), 503, ['Content-Type' => 'application/json']);
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             $response = $this->apiManager->getOnuDetailsByExternalId($externalId);
             $data = $response->json();
@@ -175,6 +196,12 @@ class SmartOltController extends Controller
      */
     public function getOnuStatus(Request $request, string $externalId): Response
     {
+        $routerId = RouterScope::fromSn($externalId);
+        if (!SmartOltGate::enabled($routerId)) {
+            return response(json_encode(['success' => false, 'message' => SmartOltGate::DISABLED_MESSAGE]), 503, ['Content-Type' => 'application/json']);
+        }
+        $this->apiManager = new ApiManager($routerId);
+
         try {
             $response = $this->apiManager->getOnuFullStatusByExternalId($externalId);
             $data = $response->json();

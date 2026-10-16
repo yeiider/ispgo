@@ -34,11 +34,21 @@ class SuspendServicesJob implements ShouldQueue
      */
     public function handle()
     {
-        // Construir el payload
-        $onusExternalIds = $this->services->pluck('sn')->implode(',');
-        $payload = ['onus_external_ids' => $onusExternalIds];
+        // Cada zona usa su propia cuenta de SmartOLT (o la de por defecto).
+        foreach ($this->services->groupBy(fn ($service) => \App\Support\RouterScope::fromService($service) ?? 0) as $routerId => $services) {
+            $routerId = $routerId ?: null;
+            if (!\App\Support\SmartOltGate::enabled($routerId)) {
+                Log::info('SuspendServicesJob: SmartOLT deshabilitado para la zona', ['router_id' => $routerId]);
+                continue;
+            }
+            $this->suspendGroup($services, new ApiManager($routerId));
+        }
+    }
 
-        $apiManager = new ApiManager();
+    private function suspendGroup(Collection $services, ApiManager $apiManager): void
+    {
+        $onusExternalIds = $services->pluck('sn')->implode(',');
+        $payload = ['onus_external_ids' => $onusExternalIds];
 
         try {
             $response = $apiManager->disableBulk($payload);
