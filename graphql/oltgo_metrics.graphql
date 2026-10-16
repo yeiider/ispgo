@@ -210,6 +210,44 @@ type OltgoOnuHistoryRange {
     points: [OltgoOnuHistoryRangePoint!]!
 }
 
+type OltgoOnuTrafficPoint {
+    at: String!
+    "Bajada: de la OLT hacia el cliente"
+    down_avg_bps: Float!
+    up_avg_bps: Float!
+    down_max_bps: Float!
+    up_max_bps: Float!
+}
+
+"Navegación de una ONU en el tiempo (una muestra cada 5 min, agrupada en rangos largos)"
+type OltgoOnuTraffic {
+    olt_id: ID!
+    olt_name: String
+    serial: String!
+    step_seconds: Int!
+    from: String
+    to: String
+    points: [OltgoOnuTrafficPoint!]!
+}
+
+"Lectura en vivo de una ONU. La OLT recalcula las tasas cada ~30 s"
+type OltgoOnuLive {
+    at: String!
+    olt_id: ID!
+    olt_name: String
+    serial: String!
+    name: String
+    port: String
+    state: String!
+    rx_power_dbm: Float
+    down_bps: Float!
+    up_bps: Float!
+    "Bytes acumulados (texto: pueden superar el rango de Int)"
+    down_octets: String
+    up_octets: String
+    updated_every_seconds: Int!
+}
+
 extend type Query {
     "Series de tráfico por puerto; total: true suma los puertos (ej. kind uplink = tráfico a internet)"
     oltgoTraffic(olt_id: ID!, range: OltgoRangeInput, kind: String, interfaces: [String!], total: Boolean = false): OltgoTrafficResult! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@traffic") @guard
@@ -225,4 +263,8 @@ extend type Query {
     oltgoReport(olt_id: ID!, range: OltgoRangeInput): OltgoReport! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@report") @guard
     "Historial de señal y estado de una ONU en cualquier rango"
     oltgoOnuHistoryRange(serial: String!, range: OltgoRangeInput): OltgoOnuHistoryRange @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@onuHistory") @guard
+    "Navegación (bajada y subida) de la ONU de un servicio en cualquier rango"
+    oltgoOnuTraffic(serial: String!, range: OltgoRangeInput): OltgoOnuTraffic @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@onuTraffic") @guard
+    "Tráfico de la ONU en este momento, leído de la OLT"
+    oltgoOnuTrafficLive(serial: String!): OltgoOnuLive @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@onuTrafficLive") @guard
 }

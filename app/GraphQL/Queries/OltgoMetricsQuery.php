@@ -93,6 +93,28 @@ class OltgoMetricsQuery
         }
     }
 
+    public function onuTraffic($root, array $args): ?array
+    {
+        return $this->nullIfMissing(fn () => $this->client->onuTraffic($args['serial'], $args['range'] ?? null));
+    }
+
+    public function onuTrafficLive($root, array $args): ?array
+    {
+        return $this->nullIfMissing(fn () => $this->client->onuTrafficLive($args['serial']));
+    }
+
+    private function nullIfMissing(callable $fn): ?array
+    {
+        try {
+            return $fn();
+        } catch (Throwable $e) {
+            if (str_contains($e->getMessage(), 'no encontrada')) {
+                return null;
+            }
+            throw new Error('No se pudo consultar OLTGO: ' . $e->getMessage());
+        }
+    }
+
     private function call(callable $fn): mixed
     {
         try {

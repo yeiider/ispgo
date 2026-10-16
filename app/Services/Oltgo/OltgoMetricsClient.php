@@ -92,4 +92,14 @@ class OltgoMetricsClient
     {
         return $this->get('/api/onus/' . rawurlencode($serial) . '/history', self::range($range));
     }
+
+    public function onuTraffic(string $serial, ?array $range): array
+    {
+        return $this->get('/api/onus/' . rawurlencode($serial) . '/traffic', self::range($range));
+    }
+
+    public function onuTrafficLive(string $serial): array
+    {
+        return $this->get('/api/onus/' . rawurlencode($serial) . '/traffic/live');
+    }
 }
