@@ -1305,3 +1305,4 @@ type ExportCsvResult {
 #import yane.graphql
 #import graphql_logs.graphql
 #import oltgo.graphql
+#import oltgo_metrics.graphql

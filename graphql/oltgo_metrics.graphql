@@ -1,0 +1,228 @@
+# --------------- OLTGO: históricos e informes (TimescaleDB en OLTGO) ---------------
+# Los bits por segundo son desde el punto de vista de la OLT: en un uplink "in"
+# es la bajada de los clientes; en un puerto PON la bajada es "out".
+
+"Rango de consulta: range relativo (6h, 24h, 7d, 30d, 90d...) o from/to en ISO 8601. Por defecto, las últimas 24 h"
+input OltgoRangeInput {
+    range: String
+    from: String
+    to: String
+}
+
+type OltgoTrafficPoint {
+    at: String!
+    in_avg_bps: Float!
+    out_avg_bps: Float!
+    in_max_bps: Float!
+    out_max_bps: Float!
+}
+
+type OltgoTrafficSeries {
+    "Nombre del puerto, o total si se pidió la suma"
+    interface: String!
+    kind: String
+    points: [OltgoTrafficPoint!]!
+}
+
+type OltgoTrafficResult {
+    step_seconds: Int!
+    series: [OltgoTrafficSeries!]!
+}
+
+"Resumen de tráfico de un puerto: promedio, pico, percentil 95 y volumen"
+type OltgoTrafficStat {
+    interface: String!
+    kind: String!
+    speed_mbps: Int
+    in_avg_bps: Float!
+    out_avg_bps: Float!
+    in_peak_bps: Float!
+    out_peak_bps: Float!
+    in_peak_at: String
+    out_peak_at: String
+    in_p95_bps: Float!
+    out_p95_bps: Float!
+    in_bytes: Float!
+    out_bytes: Float!
+}
+
+"Tráfico típico por día de la semana (0 = domingo) y hora, hora de Colombia"
+type OltgoHourProfile {
+    dow: Int!
+    hour: Int!
+    in_avg_bps: Float!
+    out_avg_bps: Float!
+    in_max_bps: Float!
+    out_max_bps: Float!
+}
+
+type OltgoHealthPoint {
+    at: String!
+    "Fracción del intervalo en que la OLT respondió (0 a 1)"
+    availability: Float!
+    latency_avg_ms: Float
+    latency_max_ms: Float
+    temperature_avg_c: Float
+    temperature_max_c: Float
+}
+
+type OltgoHealthResult {
+    step_seconds: Int!
+    points: [OltgoHealthPoint!]!
+}
+
+"Promedio de ONUs por estado en el intervalo (de un puerto o de toda la OLT)"
+type OltgoOnuStatsPoint {
+    at: String!
+    total: Float!
+    online: Float!
+    los: Float!
+    dying_gasp: Float!
+    offline: Float!
+    weak: Float!
+    avg_rx_dbm: Float
+    min_rx_dbm: Float
+}
+
+type OltgoOnuStatsResult {
+    port: String
+    step_seconds: Int!
+    points: [OltgoOnuStatsPoint!]!
+}
+
+type OltgoOnuRank {
+    serial: String!
+    name: String
+    port: String
+    "Veces que dejó de estar en línea"
+    drops: Int!
+    "Fracción del tiempo en línea (0 a 1)"
+    availability: Float
+    avg_rx_dbm: Float
+    first_rx_dbm: Float
+    last_rx_dbm: Float
+    "dB ganados (+) o perdidos (-) entre el primer y el último día del rango"
+    delta_rx_db: Float
+}
+
+"""
+Evento detectado por OLTGO. kind: onu_down, onu_up, port_mass_los (posible corte de fibra),
+mass_power_loss (posible apagón), interface_down, interface_up, card_changed,
+olt_unreachable, olt_reachable, olt_rebooted
+"""
+type OltgoEvent {
+    at: String!
+    kind: String!
+    "info, warning o critical"
+    severity: String!
+    port: String
+    serial: String
+    from_state: String
+    to_state: String
+    "ONUs afectadas en eventos masivos"
+    count: Int
+    detail: String
+}
+
+type OltgoEventCount {
+    kind: String!
+    count: Int!
+}
+
+"Tráfico de la OLT hacia internet (suma de uplinks)"
+type OltgoUplinkTotals {
+    download_avg_bps: Float!
+    download_peak_bps: Float!
+    download_peak_at: String
+    download_p95_bps: Float!
+    download_bytes: Float!
+    upload_avg_bps: Float!
+    upload_peak_bps: Float!
+    upload_peak_at: String
+    upload_p95_bps: Float!
+    upload_bytes: Float!
+    capacity_mbps: Int!
+}
+
+type OltgoOnuOverview {
+    current: OltgoOnuStatsPoint
+    avg_online: Float!
+    min_online: Float!
+    min_online_at: String
+    max_los: Float!
+    max_los_at: String
+    max_dying_gasp: Float!
+    avg_rx_dbm: Float
+}
+
+type OltgoHealthOverview {
+    availability: Float
+    latency_avg_ms: Float
+    latency_max_ms: Float
+    temperature_avg_c: Float
+    temperature_max_c: Float
+}
+
+type OltgoTopOnus {
+    drops: [OltgoOnuRank!]!
+    availability: [OltgoOnuRank!]!
+    degradation: [OltgoOnuRank!]!
+    weakest: [OltgoOnuRank!]!
+}
+
+"Informe de comportamiento de una OLT en un rango"
+type OltgoReport {
+    olt_id: ID!
+    olt_name: String
+    from: String!
+    to: String!
+    health: OltgoHealthOverview!
+    uplink: OltgoUplinkTotals!
+    interfaces: [OltgoTrafficStat!]!
+    "Las 5 horas de la semana con más bajada"
+    peak_hours: [OltgoHourProfile!]!
+    onus: OltgoOnuOverview!
+    event_counts: [OltgoEventCount!]!
+    "Eventos masivos y de equipo (cortes, puertos, tarjetas, OLT)"
+    incidents: [OltgoEvent!]!
+    top_onus: OltgoTopOnus!
+}
+
+"Punto del historial de una ONU; en rangos largos agrupa varias muestras"
+type OltgoOnuHistoryRangePoint {
+    at: String!
+    "Solo en puntos de una sola muestra"
+    state: String
+    rx_power_dbm: Float
+    "Solo en puntos agrupados: fracción del tiempo en línea"
+    online_ratio: Float
+    rx_min_dbm: Float
+    rx_max_dbm: Float
+}
+
+type OltgoOnuHistoryRange {
+    olt_id: ID!
+    olt_name: String
+    serial: String!
+    step_seconds: Int!
+    from: String
+    to: String
+    points: [OltgoOnuHistoryRangePoint!]!
+}
+
+extend type Query {
+    "Series de tráfico por puerto; total: true suma los puertos (ej. kind uplink = tráfico a internet)"
+    oltgoTraffic(olt_id: ID!, range: OltgoRangeInput, kind: String, interfaces: [String!], total: Boolean = false): OltgoTrafficResult! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@traffic") @guard
+    oltgoTrafficStats(olt_id: ID!, range: OltgoRangeInput, kind: String): [OltgoTrafficStat!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@trafficStats") @guard
+    "Mapa de horas pico: tráfico promedio por día de la semana y hora"
+    oltgoTrafficProfile(olt_id: ID!, range: OltgoRangeInput, kind: String = "uplink"): [OltgoHourProfile!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@trafficProfile") @guard
+    oltgoHealthHistory(olt_id: ID!, range: OltgoRangeInput): OltgoHealthResult! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@health") @guard
+    "ONUs por estado en el tiempo; sin port, toda la OLT"
+    oltgoOnuStats(olt_id: ID!, range: OltgoRangeInput, port: String): OltgoOnuStatsResult! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@onuStats") @guard
+    "by: drops, availability, degradation o weakest"
+    oltgoOnuRanking(olt_id: ID!, range: OltgoRangeInput, by: String = "drops", limit: Int = 20): [OltgoOnuRank!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@onuRanking") @guard
+    oltgoEvents(olt_id: ID!, range: OltgoRangeInput, kind: [String!], port: String, serial: String, limit: Int = 200): [OltgoEvent!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@events") @guard
+    oltgoReport(olt_id: ID!, range: OltgoRangeInput): OltgoReport! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@report") @guard
+    "Historial de señal y estado de una ONU en cualquier rango"
+    oltgoOnuHistoryRange(serial: String!, range: OltgoRangeInput): OltgoOnuHistoryRange @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@onuHistory") @guard
+}
