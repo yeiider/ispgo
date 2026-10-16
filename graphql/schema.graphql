@@ -1303,3 +1303,4 @@ type ExportCsvResult {
 #import tickets.graphql
 #import iptv.graphql
 #import yane.graphql
+#import graphql_logs.graphql

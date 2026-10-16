@@ -30,6 +30,8 @@ return [
             // Ensures the request is not vulnerable to cross-site request forgery.
             // Nuwave\Lighthouse\Http\Middleware\EnsureXHR::class,
             "auth:api",
+            // Registra cada consulta/mutación en graphql_logs (ver config/graphql_logs.php).
+            App\Http\Middleware\LogGraphQLRequests::class,
             // Always set the `Accept: application/json` header.
             Nuwave\Lighthouse\Http\Middleware\AcceptJson::class,
 

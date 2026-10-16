@@ -1,0 +1,61 @@
+# --------------- GraphQL request log ---------------
+
+"Petición GraphQL registrada (una fila por campo raíz llamado). Se conserva 4 días."
+type GraphqlLog {
+    id: ID!
+    user_id: ID
+    user_name: String
+    "query | mutation"
+    operation_type: String!
+    operation_name: String
+    "Campo raíz llamado, ej. updateInvoice"
+    field: String!
+    "view | create | update | delete | other"
+    action: String!
+    "Entidad afectada, ej. Invoice"
+    entity: String
+    target_id: String
+    "Descripción corta de lo que se hizo"
+    summary: String!
+    "Argumentos y cambios resumidos"
+    details: JSON
+    "success | error"
+    status: String!
+    error: String
+    ip_address: String
+    duration_ms: Int
+    created_at: DateTime
+}
+
+type GraphqlLogUser {
+    id: ID
+    name: String
+}
+
+extend type Query @guard {
+    graphqlLogs(
+        "Busca en el resumen, campo, entidad o usuario"
+        search: String
+        user_id: ID
+        "view | create | update | delete | other"
+        action: String
+        "Varias acciones a la vez, ej. [update, delete]"
+        actions: [String!]
+        operation_type: String
+        field: String
+        entity: String
+        target_id: String
+        status: String
+        date_from: Date
+        date_to: Date
+        sort_direction: String
+        first: Int = 25
+        page: Int
+    ): [GraphqlLog!]! @paginate(builder: "App\\GraphQL\\Queries\\GraphqlLogQuery@paginate", defaultCount: 25, maxCount: 200)
+
+    "Usuarios que aparecen en el log (para el filtro)"
+    graphqlLogUsers: [GraphqlLogUser!]! @field(resolver: "App\\GraphQL\\Queries\\GraphqlLogQuery@users")
+
+    "Campos raíz (acciones/mutaciones) que aparecen en el log, opcionalmente filtrados por acción"
+    graphqlLogFields(action: String): [String!]! @field(resolver: "App\\GraphQL\\Queries\\GraphqlLogQuery@fields")
+}

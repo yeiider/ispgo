@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-
+        $this->app->scoped(\App\GraphQL\Logging\GraphqlLogCollector::class);
     }
 
     /**
@@ -44,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->bootEvents();
+        $this->bootGraphqlLogListeners();
         Passport::enablePasswordGrant();
         Passport::tokensExpireIn(now()->addDays(15));
         Passport::refreshTokensExpireIn(now()->addDays(30));
@@ -104,5 +105,20 @@ class AppServiceProvider extends ServiceProvider
             ServiceUpdateStatus::class,
             [ServiceIptvManagerListener::class, 'handle']
         );
+    }
+
+    /**
+     * Adjunta al log de GraphQL los modelos creados/actualizados/eliminados durante la petición.
+     */
+    protected function bootGraphqlLogListeners(): void
+    {
+        foreach (['created', 'updated', 'deleted'] as $event) {
+            Event::listen("eloquent.{$event}: *", function (string $name, array $payload) use ($event) {
+                $collector = $this->app->make(\App\GraphQL\Logging\GraphqlLogCollector::class);
+                if ($collector->isActive() && ($payload[0] ?? null) instanceof \Illuminate\Database\Eloquent\Model) {
+                    $collector->record($event, $payload[0]);
+                }
+            });
+        }
     }
 }

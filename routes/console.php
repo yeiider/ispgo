@@ -34,6 +34,10 @@ Schedule::command('onepay:auto-create-charges')->daily();
 
 // Cierre automático de cajas
 //Schedule::command('ispgo:auto-close-cash-registers')->dailyAt(\App\Settings\FinanceProviderConfig::getAutoCloseTime());
+
+// Log de GraphQL: elimina a diario los registros con más de GRAPHQL_LOG_RETENTION_DAYS (4 por defecto)
+Schedule::command('model:prune', ['--model' => [\App\Models\GraphqlLog::class]])->dailyAt('02:15');
+
 Schedule::command('backup:run')->dailyAt('23:00');
 Schedule::command('backup:clean')->dailyAt('23:30');
 //Schedule::call(function () {
