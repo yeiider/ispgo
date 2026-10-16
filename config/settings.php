@@ -643,6 +643,7 @@ return [
             "class" => "form-control",
         ],
         "general" => \App\Settings\Oltgo\SettingOltgo::getGeneralSettings(),
+        "alerts" => \App\Settings\Oltgo\SettingOltgo::getAlertSettings(),
     ],
 
     "siigo" => [

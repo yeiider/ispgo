@@ -102,4 +102,17 @@ class OltgoMetricsClient
     {
         return $this->get('/api/onus/' . rawurlencode($serial) . '/traffic/live');
     }
+
+    public function diagnosis(string $serial): array
+    {
+        return $this->get('/api/onus/' . rawurlencode($serial) . '/diagnosis');
+    }
+
+    /**
+     * Eventos de todas las OLT posteriores a $since, del más viejo al más nuevo.
+     */
+    public function eventsSince(string $since, array $kinds, int $limit = 500): array
+    {
+        return $this->get('/api/events', ['since' => $since, 'kind' => implode(',', $kinds), 'limit' => $limit]);
+    }
 }

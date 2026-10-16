@@ -103,6 +103,11 @@ class OltgoMetricsQuery
         return $this->nullIfMissing(fn () => $this->client->onuTrafficLive($args['serial']));
     }
 
+    public function diagnose($root, array $args): array
+    {
+        return $this->call(fn () => $this->client->diagnosis($args['serial']));
+    }
+
     private function nullIfMissing(callable $fn): ?array
     {
         try {

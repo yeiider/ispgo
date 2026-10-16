@@ -248,6 +248,41 @@ type OltgoOnuLive {
     updated_every_seconds: Int!
 }
 
+type OltgoDiagnosisFinding {
+    code: String!
+    "ok, info, warning o critical"
+    severity: String!
+    title: String!
+    detail: String!
+    "Qué hacer"
+    action: String!
+}
+
+type OltgoDiagnosisCheck {
+    name: String!
+    ok: Boolean!
+    value: String
+}
+
+"Diagnóstico de un clic: por qué el cliente no tiene internet"
+type OltgoDiagnosis {
+    at: String!
+    serial: String!
+    name: String
+    olt_id: ID
+    olt_name: String
+    port: String
+    state: String
+    rx_power_dbm: Float
+    down_bps: Float
+    up_bps: Float
+    "La peor severidad de los hallazgos"
+    severity: String!
+    summary: String!
+    findings: [OltgoDiagnosisFinding!]!
+    checks: [OltgoDiagnosisCheck!]!
+}
+
 extend type Query {
     "Series de tráfico por puerto; total: true suma los puertos (ej. kind uplink = tráfico a internet)"
     oltgoTraffic(olt_id: ID!, range: OltgoRangeInput, kind: String, interfaces: [String!], total: Boolean = false): OltgoTrafficResult! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@traffic") @guard
@@ -267,4 +302,6 @@ extend type Query {
     oltgoOnuTraffic(serial: String!, range: OltgoRangeInput): OltgoOnuTraffic @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@onuTraffic") @guard
     "Tráfico de la ONU en este momento, leído de la OLT"
     oltgoOnuTrafficLive(serial: String!): OltgoOnuLive @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@onuTrafficLive") @guard
+    "Diagnóstico de un clic de la ONU de un servicio"
+    oltgoDiagnose(serial: String!): OltgoDiagnosis! @field(resolver: "App\\GraphQL\\Queries\\OltgoMetricsQuery@diagnose") @guard
 }

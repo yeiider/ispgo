@@ -9,6 +9,7 @@ namespace App\Settings\Oltgo;
 class SettingOltgo
 {
     public const GENERAL_PATH = 'oltgo/general/';
+    public const ALERTS_PATH = 'oltgo/alerts/';
 
     public static function getGeneralSettings(): array
     {
@@ -31,6 +32,34 @@ class SettingOltgo
                 'field' => 'number-field',
                 'label' => 'Tiempo máximo de respuesta (segundos)',
                 'placeholder' => '20',
+            ],
+        ];
+    }
+
+    /**
+     * Alertas de red: OLTGO detecta los eventos y ISPGO los avisa (comando oltgo:alerts, cada minuto).
+     */
+    public static function getAlertSettings(): array
+    {
+        return [
+            'setting' => [
+                'label' => 'Alertas de red',
+                'code' => 'alerts',
+            ],
+            'enabled' => [
+                'field' => 'boolean-field',
+                'label' => 'Avisar en ISPGO (campana) a administradores y técnicos',
+                'placeholder' => 'Enabled',
+            ],
+            'whatsapp_enabled' => [
+                'field' => 'boolean-field',
+                'label' => 'Enviar también por WhatsApp (Wiivo) las alertas de advertencia y críticas',
+                'placeholder' => 'Enabled',
+            ],
+            'whatsapp_numbers' => [
+                'field' => 'text-field',
+                'label' => 'Celulares para WhatsApp, separados por coma (ej. 3001234567, 3109876543)',
+                'placeholder' => '3001234567',
             ],
         ];
     }
