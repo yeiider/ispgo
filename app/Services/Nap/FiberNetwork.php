@@ -37,9 +37,22 @@ class FiberNetwork
 
     public function build(?int $routerId = null): array
     {
-        $key = 'nap-network:build:' . (auth()->id() ?? 0) . ':' . ($routerId ?? 'all');
+        $version = Cache::get('nap-network:version', 0);
+        $key = "nap-network:build:{$version}:" . (auth()->id() ?? 0) . ':' . ($routerId ?? 'all');
 
         return Cache::remember($key, self::NETWORK_CACHE_SECONDS, fn () => $this->compute($routerId));
+    }
+
+    /**
+     * Cualquier cambio en cajas, puertos o planta externa invalida la red en caché.
+     */
+    public static function flushOnChanges(): void
+    {
+        $flush = fn () => Cache::forever('nap-network:version', microtime(true));
+        foreach ([NapBox::class, NapPort::class, FiberNode::class, FiberCable::class, FiberStrand::class, FiberSplice::class, FiberThirdParty::class, Olt::class] as $model) {
+            $model::saved($flush);
+            $model::deleted($flush);
+        }
     }
 
     /**

@@ -45,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->bootEvents();
         $this->bootGraphqlLogListeners();
+        \App\Services\Nap\FiberNetwork::flushOnChanges();
         Passport::enablePasswordGrant();
         Passport::tokensExpireIn(now()->addDays(15));
         Passport::refreshTokensExpireIn(now()->addDays(30));
