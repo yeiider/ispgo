@@ -4,6 +4,9 @@ namespace App\Services\Nap;
 
 use App\Models\FiberCable;
 use App\Models\FiberNode;
+use App\Models\FiberSplice;
+use App\Models\FiberStrand;
+use App\Models\FiberThirdParty;
 use App\Models\Olt;
 use App\Models\Services\Service;
 use App\Services\Oltgo\OltgoClient;
@@ -155,6 +158,8 @@ class FiberNetwork
         $nodes = FiberNode::query()->get()->keyBy('id');
         $cables = FiberCable::query()->get()->keyBy('id');
         $nodePaths = $this->nodePaths($nodes, $cables);
+        $strandRows = FiberStrand::query()->get()->groupBy('fiber_cable_id');
+        $thirdParties = FiberThirdParty::query()->orderBy('name')->get();
 
         [$onus, $live, $liveError, $okOlts] = $this->onuStates($olts->where('is_active', true)->keys()->all());
 
@@ -249,12 +254,45 @@ class FiberNetwork
 
         // Lo que cuelga de cada cable y de cada nodo (sumando las cajas raíz)
         $roots = collect($boxRows)->where('depth', 0);
+        $boxesByCable = [];
+        foreach ($boxes as $b) {
+            if ($b->fiber_cable_id) {
+                $boxesByCable[$b->fiber_cable_id][] = $b;
+            }
+        }
         $cableRows = [];
         foreach ($cables as $cable) {
             $down = $roots->filter(fn ($b) => in_array($cable->id, $b['cable_path']));
             $counts = $down->reduce(fn ($acc, $b) => $this->addCounts($acc, $b['subtree']), $this->count(collect()));
-            $used = $down->filter(fn ($b) => $b['fiber_cable_id'] == $cable->id && $b['fiber_strand'])
-                ->map(fn ($b) => ['strand' => $b['fiber_strand'], 'nap_box_id' => $b['id']])->values()->all();
+            // Hilos ocupados: los que alimentan cajas NAP + los registrados (PON, enlaces, terceros, reservas, daños)
+            $used = [];
+            foreach ($boxesByCable[$cable->id] ?? [] as $b) {
+                if ($b->fiber_strand) {
+                    $used[$b->fiber_strand] = ['strand' => $b->fiber_strand, 'nap_box_id' => $b->id, 'status' => 'used', 'usage' => 'nap',
+                        'id' => null, 'third_party_id' => null, 'label' => $b->name, 'olt_id' => null, 'pon_port' => null, 'notes' => null];
+                }
+            }
+            foreach ($strandRows->get($cable->id, collect()) as $st) {
+                $used[$st->number] = [
+                    'strand' => $st->number,
+                    'nap_box_id' => $used[$st->number]['nap_box_id'] ?? null,
+                    'status' => $st->status,
+                    'usage' => $st->usage,
+                    'id' => $st->id,
+                    'third_party_id' => $st->third_party_id,
+                    'label' => $st->label ?? ($used[$st->number]['label'] ?? null),
+                    'olt_id' => $st->olt_id,
+                    'pon_port' => $st->pon_port,
+                    'notes' => $st->notes,
+                ];
+            }
+            ksort($used);
+            $used = array_values($used);
+            $occupancy = ['used' => 0, 'reserved' => 0, 'leased' => 0, 'damaged' => 0];
+            foreach ($used as $u) {
+                $occupancy[$u['status']] = ($occupancy[$u['status']] ?? 0) + 1;
+            }
+            $occupancy['free'] = max(0, $cable->fiber_count - count($used));
             $cableRows[$cable->id] = [
                 'id' => $cable->id,
                 'name' => $cable->name,
@@ -269,6 +307,7 @@ class FiberNetwork
                 'notes' => $cable->notes,
                 'box_ids' => $down->pluck('id')->values()->all(),
                 'strands' => $used,
+                'occupancy' => $occupancy,
                 'downstream' => $counts,
                 'health' => $this->health($counts),
             ];
@@ -322,6 +361,17 @@ class FiberNetwork
                 'is_active' => $o->is_active,
             ])->values()->all(),
             'nodes' => array_values($nodeRows),
+            'splices' => FiberSplice::query()->get(['id', 'fiber_node_id', 'in_cable_id', 'in_strand', 'out_cable_id', 'out_strand', 'notes'])->toArray(),
+            'third_parties' => $thirdParties->map(fn ($t) => [
+                'id' => $t->id,
+                'name' => $t->name,
+                'document' => $t->document,
+                'contact_name' => $t->contact_name,
+                'phone' => $t->phone,
+                'email' => $t->email,
+                'notes' => $t->notes,
+                'strands' => $strandRows->flatten()->where('third_party_id', $t->id)->count(),
+            ])->values()->all(),
             'cables' => array_values($cableRows),
             'boxes' => array_values($boxRows),
             // Con miles de clientes no se mandan todos: el mapa los pide por caja (clients()/search())

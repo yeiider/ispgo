@@ -1229,6 +1229,35 @@ input FiberNodeInput {
   notes: String
 }
 
+input FiberStrandInput {
+  "free borra el registro"
+  status: String!
+  usage: String
+  olt_id: ID
+  pon_port: String
+  third_party_id: ID
+  label: String
+  notes: String
+}
+
+input FiberSpliceInput {
+  fiber_node_id: ID!
+  in_cable_id: ID!
+  in_strand: Int!
+  out_cable_id: ID!
+  out_strand: Int!
+  notes: String
+}
+
+input FiberThirdPartyInput {
+  name: String
+  document: String
+  contact_name: String
+  phone: String
+  email: String
+  notes: String
+}
+
 input FiberCableInput {
   name: String
   code: String
@@ -1347,10 +1376,51 @@ type NapIncident {
   detail: String!
 }
 
-"Hilo de un cable usado por una caja NAP"
+"Hilo ocupado de un cable (los que no aparecen están libres)"
 type NapStrand {
   strand: Int!
-  nap_box_id: ID!
+  "Registro en fiber_strands (null si solo lo ocupa una caja NAP)"
+  id: ID
+  nap_box_id: ID
+  "used, reserved, leased, damaged"
+  status: String!
+  "nap, pon, link, third_party, other"
+  usage: String
+  third_party_id: ID
+  label: String
+  olt_id: ID
+  pon_port: String
+  notes: String
+}
+
+type NapCableOccupancy {
+  used: Int!
+  reserved: Int!
+  leased: Int!
+  damaged: Int!
+  free: Int!
+}
+
+type NapSplice {
+  id: ID!
+  fiber_node_id: ID!
+  in_cable_id: ID!
+  in_strand: Int!
+  out_cable_id: ID!
+  out_strand: Int!
+  notes: String
+}
+
+type NapThirdParty {
+  id: ID!
+  name: String!
+  document: String
+  contact_name: String
+  phone: String
+  email: String
+  notes: String
+  "Hilos vendidos o arrendados"
+  strands: Int!
 }
 
 type NapNetworkNode {
@@ -1393,6 +1463,7 @@ type NapNetworkCable {
   "Cajas raíz que se alimentan de este cable (directo o más abajo)"
   box_ids: [ID!]!
   strands: [NapStrand!]!
+  occupancy: NapCableOccupancy!
   downstream: NapOnuCount!
   health: String!
 }
@@ -1419,6 +1490,8 @@ type NapNetwork {
   olts: [NapNetworkOlt!]!
   nodes: [NapNetworkNode!]!
   cables: [NapNetworkCable!]!
+  splices: [NapSplice!]!
+  third_parties: [NapThirdParty!]!
   boxes: [NapNetworkBox!]!
   "Vacío: los clientes se piden con napBoxClients"
   clients: [NapNetworkClient!]!
@@ -1472,6 +1545,13 @@ extend type Mutation {
   createFiberCable(input: FiberCableInput!): FiberCable! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@createCable") @guard
   updateFiberCable(id: ID!, input: FiberCableInput!): FiberCable! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@updateCable") @guard
   deleteFiberCable(id: ID!): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@deleteCable") @guard
+  "Marca un hilo de un cable (usado, reservado, vendido a un tercero, dañado o libre)"
+  saveFiberStrand(fiber_cable_id: ID!, number: Int!, input: FiberStrandInput!): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@saveStrand") @guard
+  createFiberSplice(input: FiberSpliceInput!): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@createSplice") @guard
+  deleteFiberSplice(id: ID!): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@deleteSplice") @guard
+  createFiberThirdParty(input: FiberThirdPartyInput!): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@createThirdParty") @guard
+  updateFiberThirdParty(id: ID!, input: FiberThirdPartyInput!): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@updateThirdParty") @guard
+  deleteFiberThirdParty(id: ID!): ActionResult! @field(resolver: "App\\GraphQL\\Mutations\\FiberPlantMutation@deleteThirdParty") @guard
 }
 
 type Permission {

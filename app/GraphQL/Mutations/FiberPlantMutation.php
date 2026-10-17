@@ -4,6 +4,9 @@ namespace App\GraphQL\Mutations;
 
 use App\Models\FiberCable;
 use App\Models\FiberNode;
+use App\Models\FiberSplice;
+use App\Models\FiberStrand;
+use App\Models\FiberThirdParty;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -64,6 +67,101 @@ class FiberPlantMutation
         $cable->delete();
 
         return ['success' => true, 'message' => 'Cable eliminado'];
+    }
+
+    public function saveStrand($root, array $args): array
+    {
+        $cable = FiberCable::findOrFail($args['fiber_cable_id']);
+        $number = (int) $args['number'];
+        $input = array_map(fn ($v) => $v === '' ? null : $v, $args['input']);
+        if ($number < 1 || $number > $cable->fiber_count) {
+            throw ValidationException::withMessages(['number' => ["El cable tiene {$cable->fiber_count} hilos."]]);
+        }
+        if ($input['status'] === 'free') {
+            FiberStrand::where('fiber_cable_id', $cable->id)->where('number', $number)->delete();
+
+            return ['success' => true, 'message' => "Hilo {$number} libre"];
+        }
+        Validator::make($input, [
+            'status' => ['required', Rule::in(FiberStrand::STATUSES)],
+            'usage' => ['nullable', Rule::in(FiberStrand::USAGES)],
+            'olt_id' => ['nullable', 'exists:olts,id'],
+            'third_party_id' => ['nullable', 'exists:fiber_third_parties,id', Rule::requiredIf($input['status'] === 'leased')],
+        ], ['third_party_id.required' => 'Elige a qué tercero se vendió el hilo.'])->validate();
+
+        FiberStrand::updateOrCreate(
+            ['fiber_cable_id' => $cable->id, 'number' => $number],
+            array_intersect_key($input, array_flip(['status', 'usage', 'olt_id', 'pon_port', 'third_party_id', 'label', 'notes'])),
+        );
+
+        return ['success' => true, 'message' => "Hilo {$number} guardado"];
+    }
+
+    public function createSplice($root, array $args): array
+    {
+        $input = $args['input'];
+        $node = FiberNode::findOrFail($input['fiber_node_id']);
+        $in = FiberCable::findOrFail($input['in_cable_id']);
+        $out = FiberCable::findOrFail($input['out_cable_id']);
+        // Los dos cables deben pasar por la mufla
+        foreach ([$in, $out] as $c) {
+            if (!in_array($node->id, [$c->from_node_id, $c->to_node_id])) {
+                throw ValidationException::withMessages(['fiber_node_id' => ["El cable {$c->name} no pasa por {$node->name}."]]);
+            }
+        }
+        if ($input['in_strand'] < 1 || $input['in_strand'] > $in->fiber_count || $input['out_strand'] < 1 || $input['out_strand'] > $out->fiber_count) {
+            throw ValidationException::withMessages(['in_strand' => ['Número de hilo fuera del cable.']]);
+        }
+        if (FiberSplice::where('out_cable_id', $out->id)->where('out_strand', $input['out_strand'])->exists()) {
+            throw ValidationException::withMessages(['out_strand' => ["El hilo {$input['out_strand']} de {$out->name} ya está empalmado."]]);
+        }
+        FiberSplice::create(array_intersect_key($input, array_flip((new FiberSplice())->getFillable())));
+
+        return ['success' => true, 'message' => 'Empalme guardado'];
+    }
+
+    public function deleteSplice($root, array $args): array
+    {
+        FiberSplice::findOrFail($args['id'])->delete();
+
+        return ['success' => true, 'message' => 'Empalme eliminado'];
+    }
+
+    public function createThirdParty($root, array $args): array
+    {
+        $input = $this->validThirdParty($args['input'], true);
+        $t = FiberThirdParty::create($input);
+
+        return ['success' => true, 'message' => (string) $t->id];
+    }
+
+    public function updateThirdParty($root, array $args): array
+    {
+        FiberThirdParty::findOrFail($args['id'])->update($this->validThirdParty($args['input'], false));
+
+        return ['success' => true, 'message' => 'Tercero actualizado'];
+    }
+
+    public function deleteThirdParty($root, array $args): array
+    {
+        $t = FiberThirdParty::withCount('strands')->findOrFail($args['id']);
+        if ($t->strands_count > 0) {
+            return ['success' => false, 'message' => "{$t->name} tiene {$t->strands_count} hilo(s) asignados: libéralos primero."];
+        }
+        $t->delete();
+
+        return ['success' => true, 'message' => 'Tercero eliminado'];
+    }
+
+    private function validThirdParty(array $input, bool $creating): array
+    {
+        $input = array_map(fn ($v) => $v === '' ? null : $v, $input);
+        Validator::make($input, [
+            'name' => [$creating ? 'required' : 'sometimes', 'string', 'max:255'],
+            'email' => ['nullable', 'email'],
+        ])->validate();
+
+        return array_intersect_key($input, array_flip((new FiberThirdParty())->getFillable()));
     }
 
     private function validNode(array $input, ?FiberNode $node = null): array
