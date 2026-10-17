@@ -96,6 +96,24 @@ class OltgoClient
         return $this->get("/api/olts/{$oltId}/onus/" . rawurlencode($serial));
     }
 
+    /** ONUs conectadas a la OLT pero sin autorizar. */
+    public function unconfiguredOnus(int $oltId, bool $refresh = false): array
+    {
+        return $this->get("/api/olts/{$oltId}/onus/unconfigured", ['refresh' => $refresh ? 1 : null]);
+    }
+
+    /** ONUs sin autorizar de todas las OLT activas, agrupadas por OLT. */
+    public function allUnconfiguredOnus(bool $refresh = false): array
+    {
+        return $this->get('/api/unconfigured-onus', ['refresh' => $refresh ? 1 : null]);
+    }
+
+    /** Perfiles de tipo de ONU de la OLT, con sus puertos. */
+    public function onuTypes(int $oltId, bool $refresh = false): array
+    {
+        return $this->get("/api/olts/{$oltId}/onu-types", ['refresh' => $refresh ? 1 : null]);
+    }
+
     public function tunnels(): array
     {
         return $this->get('/api/tunnels');

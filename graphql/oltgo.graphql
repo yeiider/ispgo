@@ -165,6 +165,42 @@ type OltgoOnu {
     state_raw: Int
     "null cuando la OLT no reporta potencia (ONU fuera de línea)"
     rx_power_dbm: Float
+    "Si el tipo de ONU con que se autorizó tiene puerto CATV (RF)"
+    catv_supported: Boolean
+}
+
+"ONU conectada a un puerto PON pero sin autorizar"
+type OltgoUnconfiguredOnu {
+    port: String
+    serial: String!
+    loid: String
+    "Modelo (equipment ID) que reporta la ONU; a veces viene vacío"
+    model: String
+    "Tipo de ONU de la OLT con el mismo nombre que el modelo, si existe"
+    suggested_type: String
+    "Si el tipo sugerido tiene puerto CATV"
+    catv_supported: Boolean!
+    hw_version: String
+    sw_version: String
+    first_seen: String
+    last_seen: String
+}
+
+type OltgoOltUnconfigured {
+    olt_id: ID!
+    olt_name: String
+    error: String
+    onus: [OltgoUnconfiguredOnu!]!
+}
+
+"Perfil de tipo de ONU de la OLT: la OLT lo exige al autorizar y define los puertos de la ONU"
+type OltgoOnuType {
+    name: String!
+    description: String
+    eth_ports: Int!
+    pots_ports: Int!
+    catv_ports: Int!
+    wifi_ssids: Int!
 }
 
 type OltgoStateCount {
@@ -254,6 +290,12 @@ extend type Query {
     oltgoPorts(olt_id: ID!): [OltgoPonPort!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@ports") @guard
     oltgoOnus(olt_id: ID!, port: String, state: String): OltgoOnuList! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@onus") @guard
     oltgoOnu(olt_id: ID!, serial: String!): OltgoOnu @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@onu") @guard
+    "ONUs conectadas pero sin autorizar de una OLT; refresh: true lee en vivo"
+    oltgoUnconfiguredOnus(olt_id: ID!, refresh: Boolean = false): [OltgoUnconfiguredOnu!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@unconfiguredOnus") @guard
+    "ONUs sin autorizar de todas las OLT"
+    oltgoAllUnconfiguredOnus(refresh: Boolean = false): [OltgoOltUnconfigured!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@allUnconfiguredOnus") @guard
+    "Perfiles de tipo de ONU de la OLT"
+    oltgoOnuTypes(olt_id: ID!, refresh: Boolean = false): [OltgoOnuType!]! @field(resolver: "App\\GraphQL\\Queries\\OltgoQuery@onuTypes") @guard
 }
 
 extend type Mutation {

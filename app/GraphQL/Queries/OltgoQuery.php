@@ -167,6 +167,21 @@ class OltgoQuery
         return $this->call(fn () => $this->client->onu((int) $args['olt_id'], $args['serial']));
     }
 
+    public function unconfiguredOnus($root, array $args): array
+    {
+        return $this->call(fn () => $this->client->unconfiguredOnus((int) $args['olt_id'], (bool) ($args['refresh'] ?? false)));
+    }
+
+    public function allUnconfiguredOnus($root, array $args): array
+    {
+        return $this->call(fn () => $this->client->allUnconfiguredOnus((bool) ($args['refresh'] ?? false)));
+    }
+
+    public function onuTypes($root, array $args): array
+    {
+        return $this->call(fn () => $this->client->onuTypes((int) $args['olt_id'], (bool) ($args['refresh'] ?? false)));
+    }
+
     private function call(callable $fn): mixed
     {
         try {
