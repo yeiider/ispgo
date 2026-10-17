@@ -1189,6 +1189,9 @@ type FiberNode {
   address: String
   olt_id: ID
   olt: Olt @belongsTo
+  router_id: ID
+  provider: String
+  capacity_mbps: Int
   notes: String
   created_at: DateTime
   updated_at: DateTime
@@ -1220,6 +1223,9 @@ input FiberNodeInput {
   longitude: Float
   address: String
   olt_id: ID
+  router_id: ID
+  provider: String
+  capacity_mbps: Int
   notes: String
 }
 
@@ -1351,7 +1357,7 @@ type NapNetworkNode {
   id: ID!
   name: String!
   code: String
-  "central, mufla, reserva, poste, odf"
+  "datacenter, central (nodo de zona), mufla, reserva, poste, odf"
   type: String!
   latitude: Float
   longitude: Float
@@ -1359,6 +1365,12 @@ type NapNetworkNode {
   "OLT de la central de la que viene la fibra"
   olt_id: ID
   own_olt_id: ID
+  "Zona (router) que atiende el nodo, propia o heredada"
+  router_id: ID
+  own_router_id: ID
+  "Proveedor y capacidad que se recibe (datacenter / nodo de zona)"
+  provider: String
+  capacity_mbps: Int
   notes: String
   cable_path: [ID!]!
   box_ids: [ID!]!

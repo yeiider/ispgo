@@ -76,6 +76,8 @@ class FiberPlantMutation
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'olt_id' => ['nullable', 'exists:olts,id'],
+            'router_id' => ['nullable', 'exists:routers,id'],
+            'capacity_mbps' => ['nullable', 'integer', 'min:0'],
         ])->validate();
 
         return array_intersect_key($input, array_flip((new FiberNode())->getFillable()));

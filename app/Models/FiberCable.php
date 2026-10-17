@@ -12,7 +12,7 @@ use Ispgo\NapManager\Models\NapBox;
  */
 class FiberCable extends Model
 {
-    public const KINDS = ['troncal', 'distribucion'];
+    public const KINDS = ['transporte', 'troncal', 'distribucion'];
 
     protected $fillable = ['name', 'code', 'kind', 'fiber_count', 'from_node_id', 'to_node_id', 'route', 'length_m', 'status', 'notes'];
 

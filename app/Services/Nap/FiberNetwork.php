@@ -287,6 +287,10 @@ class FiberNetwork
                 'address' => $node->address,
                 'olt_id' => $nodePaths[$node->id]['olt_id'],
                 'own_olt_id' => $node->olt_id,
+                'router_id' => $nodePaths[$node->id]['router_id'],
+                'own_router_id' => $node->router_id,
+                'provider' => $node->provider,
+                'capacity_mbps' => $node->capacity_mbps,
                 'notes' => $node->notes,
                 'cable_path' => $nodePaths[$node->id]['cables'],
                 'box_ids' => $down->pluck('id')->values()->all(),
@@ -443,10 +447,12 @@ class FiberNetwork
         foreach ($nodes as $node) {
             $cablePath = [];
             $nodePath = [$node->id];
+            // Se sube hasta el origen (datacenter): la OLT y la zona son las más cercanas hacia arriba
             $oltId = $node->olt_id;
+            $routerId = $node->router_id;
             $current = $node;
             $seen = [$node->id];
-            while (!$oltId && ($cable = $incoming->get($current->id)?->first())) {
+            while ($cable = $incoming->get($current->id)?->first()) {
                 $from = $nodes->get($cable->from_node_id);
                 array_unshift($cablePath, $cable->id);
                 if (!$from || in_array($from->id, $seen)) {
@@ -454,10 +460,11 @@ class FiberNetwork
                 }
                 array_unshift($nodePath, $from->id);
                 $seen[] = $from->id;
-                $oltId = $from->olt_id;
+                $oltId ??= $from->olt_id;
+                $routerId ??= $from->router_id;
                 $current = $from;
             }
-            $paths[$node->id] = ['cables' => $cablePath, 'nodes' => $nodePath, 'olt_id' => $oltId];
+            $paths[$node->id] = ['cables' => $cablePath, 'nodes' => $nodePath, 'olt_id' => $oltId, 'router_id' => $routerId];
         }
 
         return $paths;

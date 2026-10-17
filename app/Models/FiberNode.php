@@ -13,18 +13,25 @@ use Ispgo\NapManager\Models\NapBox;
  */
 class FiberNode extends Model
 {
-    public const TYPES = ['central', 'mufla', 'reserva', 'poste', 'odf'];
+    public const TYPES = ['datacenter', 'central', 'mufla', 'reserva', 'poste', 'odf'];
 
-    protected $fillable = ['name', 'code', 'type', 'latitude', 'longitude', 'address', 'olt_id', 'notes'];
+    protected $fillable = ['name', 'code', 'type', 'latitude', 'longitude', 'address', 'olt_id', 'router_id', 'provider', 'capacity_mbps', 'notes'];
 
     protected $casts = [
         'latitude' => 'float',
         'longitude' => 'float',
+        'capacity_mbps' => 'integer',
     ];
 
     public function olt(): BelongsTo
     {
         return $this->belongsTo(Olt::class);
+    }
+
+    /** Zona (router) que atiende este nodo */
+    public function router(): BelongsTo
+    {
+        return $this->belongsTo(Router::class);
     }
 
     public function cablesOut(): HasMany
