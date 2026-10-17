@@ -29,13 +29,127 @@ class FiberNetwork
     {
     }
 
+    /** La red completa se recalcula como mucho cada tantos segundos (por usuario y zona). */
+    private const NETWORK_CACHE_SECONDS = 20;
+
     public function build(?int $routerId = null): array
     {
-        // Se arma la red completa (los troncales cruzan zonas) y al final se filtra por zona
+        $key = 'nap-network:build:' . (auth()->id() ?? 0) . ':' . ($routerId ?? 'all');
+
+        return Cache::remember($key, self::NETWORK_CACHE_SECONDS, fn () => $this->compute($routerId));
+    }
+
+    /**
+     * Clientes completos (nombre, dirección, coordenadas, estado ONU) de unas cajas.
+     * El mapa los pide solo para lo que está viendo, no para toda la red.
+     */
+    public function clients(array $boxIds): array
+    {
+        $boxIds = array_slice(array_values(array_unique(array_map('intval', $boxIds))), 0, 300);
+        if (!$boxIds) {
+            return [];
+        }
+        $boxes = NapBox::query()->get(['id', 'parent_nap_id', 'olt_id', 'pon_port', 'fiber_node_id', 'fiber_cable_id'])->keyBy('id');
+        $nodes = FiberNode::query()->get()->keyBy('id');
+        $cables = FiberCable::query()->get()->keyBy('id');
+        $nodePaths = $this->nodePaths($nodes, $cables);
+        [$onus, , , $okOlts] = $this->onuStates(Olt::where('is_active', true)->pluck('id')->all());
+
+        $ports = NapPort::whereIn('nap_box_id', $boxIds)->whereNotNull('service_id')->get();
+        $services = Service::with(['customer.addresses', 'address'])->whereIn('id', $ports->pluck('service_id'))->get()->keyBy('id');
+
+        $rows = [];
+        foreach ($ports as $port) {
+            $service = $services->get($port->service_id);
+            $box = $boxes->get($port->nap_box_id);
+            if (!$service || !$box) {
+                continue;
+            }
+            $resolved = $this->resolveChain($box, $boxes, $nodePaths);
+            [$lat, $lng, $address] = $this->serviceLocation($service);
+            $rows[] = $this->clientRow($service, $port->id, $port->nap_box_id, $port->port_number, $resolved, $onus, $okOlts) + [
+                'customer_id' => $service->customer_id,
+                'customer_name' => trim(($service->customer->first_name ?? '') . ' ' . ($service->customer->last_name ?? '')),
+                'address' => $address,
+                'latitude' => $lat,
+                'longitude' => $lng,
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Búsqueda de clientes (nombre, documento, serial ONU, dirección) y cajas, para ubicarlos en el mapa.
+     */
+    public function search(string $term, ?int $routerId = null): array
+    {
+        $term = trim($term);
+        if (mb_strlen($term) < 2) {
+            return ['boxes' => [], 'clients' => []];
+        }
+        $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $term) . '%';
+
         $boxes = NapBox::query()
-            ->with(['ports' => fn ($q) => $q->orderBy('port_number')])
-            ->get()
-            ->keyBy('id');
+            ->when($routerId, fn ($q) => $q->where('router_id', $routerId))
+            ->where(fn ($q) => $q->where('name', 'like', $like)->orWhere('code', 'like', $like)->orWhere('address', 'like', $like))
+            ->limit(10)
+            ->pluck('id')
+            ->all();
+
+        $serviceIds = Service::query()
+            ->join('nap_ports', 'nap_ports.service_id', '=', 'services.id')
+            ->leftJoin('customers', 'customers.id', '=', 'services.customer_id')
+            ->leftJoin('addresses', 'addresses.id', '=', 'services.service_location')
+            ->when($routerId, fn ($q) => $q->where('services.router_id', $routerId))
+            ->where(function ($q) use ($like) {
+                $q->where('services.sn', 'like', $like)
+                    ->orWhere('customers.identity_document', 'like', $like)
+                    ->orWhere('addresses.address', 'like', $like)
+                    ->orWhereRaw("CONCAT_WS(' ', customers.first_name, customers.last_name) LIKE ?", [$like]);
+            })
+            ->limit(30)
+            ->pluck('nap_ports.nap_box_id', 'services.id');
+
+        $clients = collect($this->clients($serviceIds->values()->all()))
+            ->whereIn('service_id', $serviceIds->keys()->all())
+            ->values()
+            ->all();
+
+        return ['boxes' => $boxes, 'clients' => $clients];
+    }
+
+    /** @param Service|object $service */
+    private function clientRow(object $service, int $portId, int $boxId, int $portNumber, array $resolved, array $onus, array $okOlts): array
+    {
+        $serial = strtoupper(trim((string) $service->sn));
+        $onu = $serial !== '' ? ($onus[$serial] ?? null) : null;
+        $expectedPon = $resolved['pon_port'];
+
+        return [
+            'service_id' => $service->id,
+            'nap_box_id' => $boxId,
+            'nap_port_id' => $portId,
+            'port_number' => $portNumber,
+            'sn' => $service->sn,
+            'service_status' => $service->service_status,
+            // "No está en la OLT" solo si se pudo leer la OLT de esa caja
+            'onu_state' => $onu['state'] ?? ($serial !== '' && in_array($resolved['olt_id'], $okOlts) ? 'not_found' : 'unknown'),
+            'rx_power_dbm' => $onu['rx_power_dbm'] ?? null,
+            'onu_port' => $onu['port'] ?? null,
+            'onu_olt_id' => $onu['olt_id'] ?? null,
+            'port_mismatch' => $onu && $expectedPon && $onu['port']
+                && $this->normalizePon($onu['port']) !== $this->normalizePon($expectedPon),
+        ];
+    }
+
+    private function compute(?int $routerId = null): array
+    {
+        // Se arma la red completa (los troncales cruzan zonas) y al final se filtra por zona.
+        // Para miles de cajas solo se leen columnas livianas: los clientes completos se piden aparte.
+        $boxes = NapBox::query()->get()->keyBy('id');
+        $usedPorts = NapPort::query()->whereNotNull('service_id')
+            ->selectRaw('nap_box_id, count(*) as used')->groupBy('nap_box_id')->pluck('used', 'nap_box_id');
 
         $olts = Olt::query()->get()->keyBy('id');
         $nodes = FiberNode::query()->get()->keyBy('id');
@@ -44,79 +158,59 @@ class FiberNetwork
 
         [$onus, $live, $liveError, $okOlts] = $this->onuStates($olts->where('is_active', true)->keys()->all());
 
-        $ports = $boxes->flatMap(fn (NapBox $b) => $b->ports)->filter(fn (NapPort $p) => $p->service_id);
-        $services = Service::with(['customer.addresses', 'address'])
-            ->whereIn('id', $ports->pluck('service_id')->unique())
-            ->get()
-            ->keyBy('id');
+        // Servicio + puerto en una sola consulta liviana (respeta el filtro de zonas del usuario)
+        $links = Service::query()
+            ->join('nap_ports', 'nap_ports.service_id', '=', 'services.id')
+            ->toBase()
+            ->get(['services.id', 'services.sn', 'services.service_status', 'nap_ports.id as port_id', 'nap_ports.nap_box_id', 'nap_ports.port_number']);
 
         // Datos de cada caja resueltos a partir de su cadena de padres
         $resolved = [];
         foreach ($boxes as $box) {
-            $resolved[$box->id] = $this->resolveChain($box, $boxes, $nodePaths);
+            $resolved[$box->id] = $this->resolveChain($box, $boxes, $nodePaths, $resolved);
         }
 
         $clients = [];
-        foreach ($ports as $port) {
-            $service = $services->get($port->service_id);
-            if (!$service) {
+        foreach ($links as $link) {
+            $box = $boxes->get($link->nap_box_id);
+            if (!$box) {
                 continue;
             }
-            $box = $boxes->get($port->nap_box_id);
-            $serial = strtoupper(trim((string) $service->sn));
-            $onu = $serial !== '' ? ($onus[$serial] ?? null) : null;
-            [$lat, $lng, $address] = $this->serviceLocation($service);
-            $expectedPon = $resolved[$box->id]['pon_port'];
-
-            $clients[] = [
-                'service_id' => $service->id,
-                'customer_id' => $service->customer_id,
-                'customer_name' => trim(($service->customer->first_name ?? '') . ' ' . ($service->customer->last_name ?? '')),
-                'address' => $address,
-                'latitude' => $lat,
-                'longitude' => $lng,
-                'nap_box_id' => $box->id,
-                'nap_port_id' => $port->id,
-                'port_number' => $port->port_number,
-                'sn' => $service->sn,
-                'service_status' => $service->service_status,
-                // "No está en la OLT" solo si se pudo leer la OLT de esa caja
-                'onu_state' => $onu['state'] ?? ($serial !== '' && in_array($resolved[$box->id]['olt_id'], $okOlts) ? 'not_found' : 'unknown'),
-                'rx_power_dbm' => $onu['rx_power_dbm'] ?? null,
-                'onu_port' => $onu['port'] ?? null,
-                'onu_olt_id' => $onu['olt_id'] ?? null,
-                'port_mismatch' => $onu && $expectedPon && $onu['port']
-                    && $this->normalizePon($onu['port']) !== $this->normalizePon($expectedPon),
-            ];
+            $clients[] = $this->clientRow($link, $link->port_id, $link->nap_box_id, $link->port_number, $resolved[$box->id], $onus, $okOlts);
         }
 
-        $byBox = collect($clients)->groupBy('nap_box_id');
-        $children = $boxes->groupBy(fn ($b) => $b->parent_nap_id && $boxes->has($b->parent_nap_id) ? $b->parent_nap_id : 0);
+        $byBox = [];
+        foreach ($clients as $client) {
+            $byBox[$client['nap_box_id']][] = $client;
+        }
+        $childrenCount = [];
+        foreach ($boxes as $box) {
+            if ($box->parent_nap_id && $boxes->has($box->parent_nap_id)) {
+                $childrenCount[$box->parent_nap_id] = ($childrenCount[$box->parent_nap_id] ?? 0) + 1;
+            }
+        }
 
         $direct = [];
         foreach ($boxes as $box) {
-            $direct[$box->id] = $this->count($byBox->get($box->id, collect()));
+            $direct[$box->id] = $this->count($byBox[$box->id] ?? []);
         }
-        $subtree = [];
-        $sum = function (int $id, array $seen = []) use (&$sum, &$subtree, $direct, $children) {
-            if (isset($subtree[$id])) {
-                return $subtree[$id];
+        // Suma aguas abajo en una pasada: de las cajas más profundas hacia la raíz
+        $subtree = $direct;
+        $byDepth = $boxes->sortByDesc(fn ($b) => $resolved[$b->id]['depth']);
+        foreach ($byDepth as $box) {
+            $path = $resolved[$box->id]['path'];
+            $parentId = count($path) > 1 ? $path[count($path) - 2] : null;
+            if ($parentId && isset($subtree[$parentId])) {
+                $subtree[$parentId] = $this->addCounts($subtree[$parentId], $subtree[$box->id]);
             }
-            $total = $direct[$id];
-            foreach ($children->get($id, collect()) as $child) {
-                if (in_array($child->id, $seen)) {
-                    continue;
-                }
-                $total = $this->addCounts($total, $sum($child->id, [...$seen, $id]));
-            }
-
-            return $subtree[$id] = $total;
-        };
+        }
 
         $boxRows = [];
-        foreach ($boxes as $box) {
-            $tree = $sum($box->id);
-            $used = $box->ports->whereNotNull('service_id')->count();
+        foreach ($boxes as $model) {
+            // Atributos crudos: los casts (decimal, json) por miles de cajas pesan
+            $box = (object) $model->getAttributes();
+            $tree = $subtree[$box->id];
+            $used = (int) ($usedPorts[$box->id] ?? 0);
             $boxRows[$box->id] = [
                 'id' => $box->id,
                 'name' => $box->name,
@@ -138,14 +232,14 @@ class FiberNetwork
                 'parent_nap_id' => $box->parent_nap_id && $boxes->has($box->parent_nap_id) ? $box->parent_nap_id : null,
                 'depth' => $resolved[$box->id]['depth'],
                 'path' => $resolved[$box->id]['path'],
-                'route' => $box->route,
+                'route' => $box->route ? json_decode($box->route, true) : null,
                 'cable_length_m' => $box->cable_length_m,
                 'fiber_node_id' => $box->fiber_node_id,
                 'fiber_cable_id' => $box->fiber_cable_id,
                 'fiber_strand' => $box->fiber_strand,
                 'cable_path' => $resolved[$box->id]['cable_path'],
                 'node_path' => $resolved[$box->id]['node_path'],
-                'children_count' => $children->get($box->id, collect())->count(),
+                'children_count' => $childrenCount[$box->id] ?? 0,
                 'direct' => $direct[$box->id],
                 'subtree' => $tree,
                 'health' => $this->health($tree),
@@ -226,7 +320,8 @@ class FiberNetwork
             'nodes' => array_values($nodeRows),
             'cables' => array_values($cableRows),
             'boxes' => array_values($boxRows),
-            'clients' => $clients,
+            // Con miles de clientes no se mandan todos: el mapa los pide por caja (clients()/search())
+            'clients' => [],
             'incidents' => $incidents,
         ];
     }
@@ -284,8 +379,23 @@ class FiberNetwork
     /**
      * OLT, puerto PON, profundidad y camino (ids desde la raíz) de una caja.
      */
-    private function resolveChain(NapBox $box, Collection $boxes, array $nodePaths): array
+    private function resolveChain(NapBox $box, Collection $boxes, array $nodePaths, array &$memo = []): array
     {
+        // Si el padre ya está resuelto, se hereda de él (miles de cajas en cascada)
+        $parent = $box->parent_nap_id ? $boxes->get($box->parent_nap_id) : null;
+        if ($parent && isset($memo[$parent->id]) && !in_array($box->id, $memo[$parent->id]['path'])) {
+            $p = $memo[$parent->id];
+
+            return [
+                'olt_id' => $box->olt_id ?: $p['olt_id'],
+                'pon_port' => $box->pon_port ?: $p['pon_port'],
+                'depth' => $p['depth'] + 1,
+                'path' => [...$p['path'], $box->id],
+                'cable_path' => $p['cable_path'],
+                'node_path' => $p['node_path'],
+            ];
+        }
+
         $path = [];
         $oltId = null;
         $pon = null;
@@ -376,7 +486,7 @@ class FiberNetwork
         return preg_match('#(\d+/\d+/\d+)#', $port, $m) ? $m[1] : strtolower($port);
     }
 
-    private function count(Collection $clients): array
+    private function count(iterable $clients): array
     {
         $c = ['total' => 0, 'online' => 0, 'offline' => 0, 'los' => 0, 'dying_gasp' => 0, 'unknown' => 0, 'weak' => 0];
         foreach ($clients as $client) {

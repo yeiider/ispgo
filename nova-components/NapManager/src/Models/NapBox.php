@@ -56,6 +56,14 @@ class NapBox extends Model
      */
     public function getAvailablePortsCountAttribute()
     {
+        // Si la consulta ya lo trajo con withCount no se hace otra consulta por caja
+        if (array_key_exists('available_ports_count', $this->attributes)) {
+            return (int) $this->attributes['available_ports_count'];
+        }
+        if ($this->relationLoaded('ports')) {
+            return $this->ports->where('status', NapPort::STATUS_AVAILABLE)->count();
+        }
+
         return $this->ports()->where('status', NapPort::STATUS_AVAILABLE)->count();
     }
 

@@ -48,18 +48,71 @@ class NapQuery
         return null;
     }
 
+    public function boxClients($root, array $args): array
+    {
+        return app(FiberNetwork::class)->clients($args['nap_box_ids']);
+    }
+
+    public function networkSearch($root, array $args): array
+    {
+        return app(FiberNetwork::class)->search($args['search'], !empty($args['router_id']) ? (int) $args['router_id'] : null);
+    }
+
+    public function stats($root, array $args): array
+    {
+        $router = $args['router_id'] ?? null;
+        $ports = NapPort::query()
+            ->when($router, fn ($q) => $q->whereIn('nap_box_id', NapBox::where('router_id', $router)->select('id')))
+            ->selectRaw('status, count(*) as c')->groupBy('status')->pluck('c', 'status');
+
+        return [
+            'boxes' => NapBox::when($router, fn ($q) => $q->where('router_id', $router))->count(),
+            'ports' => (int) $ports->sum(),
+            'available' => (int) ($ports['available'] ?? 0),
+            'occupied' => (int) ($ports['occupied'] ?? 0),
+            'problem' => (int) (($ports['damaged'] ?? 0) + ($ports['maintenance'] ?? 0)),
+        ];
+    }
+
+    public function napBoxSearch($root, array $args)
+    {
+        $term = trim($args['search'] ?? '');
+
+        return NapBox::query()
+            ->when(!empty($args['router_id']), fn ($q) => $q->where('router_id', $args['router_id']))
+            ->when($term !== '', fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', "%{$term}%")->orWhere('code', 'like', "%{$term}%")))
+            ->orderBy('name')
+            ->limit(min((int) ($args['limit'] ?? 20), 30))
+            ->get();
+    }
+
     public function napBoxes($root, array $args)
     {
         $query = NapBox::query()->withCount([
             'ports as available_ports_count' => function ($q) { $q->where('status', 'available'); },
-        ])->with(['ports.service']);
+        ])->with(['ports.service.customer']);
 
         if (isset($args['router_id'])) {
             $query->where('router_id', $args['router_id']);
         }
+        if (!empty($args['status'])) {
+            $query->where('status', $args['status']);
+        }
+        if (!empty($args['olt_id'])) {
+            $query->where('olt_id', $args['olt_id']);
+        }
+        if (!empty($args['fiber_node_id'])) {
+            $query->where('fiber_node_id', $args['fiber_node_id']);
+        }
+        if (($term = trim($args['search'] ?? '')) !== '') {
+            $query->where(fn ($q) => $q->where('name', 'like', "%{$term}%")
+                ->orWhere('code', 'like', "%{$term}%")
+                ->orWhere('address', 'like', "%{$term}%"));
+        }
+        $query->orderBy('name');
 
         // Paginación
-        $first = $args['first'] ?? 15;
+        $first = min((int) ($args['first'] ?? 15), 1000);
         $page = $args['page'] ?? 1;
         $paginator = $query->paginate($first, ['*'], 'page', $page);
 

@@ -1385,6 +1385,20 @@ type NapNetworkCable {
   health: String!
 }
 
+type NapBoxStats {
+  boxes: Int!
+  ports: Int!
+  available: Int!
+  occupied: Int!
+  problem: Int!
+}
+
+type NapNetworkSearch {
+  "Ids de cajas que coinciden"
+  boxes: [ID!]!
+  clients: [NapNetworkClient!]!
+}
+
 type NapNetwork {
   "true si el estado de las ONUs viene en vivo de OLTGO"
   live: Boolean!
@@ -1394,6 +1408,7 @@ type NapNetwork {
   nodes: [NapNetworkNode!]!
   cables: [NapNetworkCable!]!
   boxes: [NapNetworkBox!]!
+  "Vacío: los clientes se piden con napBoxClients"
   clients: [NapNetworkClient!]!
   incidents: [NapIncident!]!
 }
@@ -1403,7 +1418,24 @@ extend type Query {
   fiberCables: [FiberCable!]! @all(model: "App\\Models\\FiberCable") @guard
   "Red de fibra completa con estado de ONUs e incidentes detectados"
   napNetwork(router_id: ID): NapNetwork! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@network") @guard
-  napBoxes(router_id: ID, first: Int = 15, page: Int): NapBoxPaginator @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxes")
+  "Lista paginada; search busca en nombre, código y dirección"
+  napBoxes(
+    router_id: ID
+    search: String
+    status: String
+    olt_id: ID
+    fiber_node_id: ID
+    first: Int = 15
+    page: Int
+  ): NapBoxPaginator @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxes")
+  "Totales de cajas y puertos (para los indicadores de la lista)"
+  napBoxStats(router_id: ID): NapBoxStats! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@stats") @guard
+  "Buscador rápido de cajas para selectores (máx. 30)"
+  napBoxSearch(search: String, router_id: ID, limit: Int = 20): [NapBox!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBoxSearch") @guard
+  "Clientes completos (nombre, dirección, coordenadas, estado ONU) de unas cajas"
+  napBoxClients(nap_box_ids: [ID!]!): [NapNetworkClient!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@boxClients") @guard
+  "Busca clientes y cajas para ubicarlos en el mapa de red"
+  napNetworkSearch(search: String!, router_id: ID): NapNetworkSearch! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@networkSearch") @guard
   napBox(id: ID!): NapBox @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napBox")
   napPorts(nap_box_id: ID!): [NapPort!]! @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPorts")
   napPort(id: ID!): NapPort @field(resolver: "App\\GraphQL\\Queries\\NapQuery@napPort")
